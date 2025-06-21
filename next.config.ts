@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Remove standalone for development
-  // output: 'standalone',
+  // Enable standalone for production deployments
+  output: 'standalone',
   images: {
     unoptimized: true,
     remotePatterns: [

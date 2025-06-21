@@ -48,4 +48,17 @@ api-keys.json
 # sensitive data
 /form-data
 /registrations
-/exports
+/exports# Node modules
+node_modules/
+*/node_modules/
+*/*/node_modules/
+
+# Build directories
+*/.next/
+*/*/next/
+
+# Large directories from subdirectories
+kfar-marketplace-voice/
+kfar-shop-clean/
+kfar-shop-clean-repo/
+kfar-shop-vercel-ready/
