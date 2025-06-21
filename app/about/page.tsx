@@ -568,17 +568,17 @@ const AboutPage = () => {
                   <h3 className="text-3xl font-bold mb-4 text-gray-800">Our Community Story</h3>
                   <p className="text-gray-600 mb-4">
                     The Village of Peace (Kfar Shalom) was established in 1967 when African Hebrew Israelites, led by Ben Ammi Ben-Israel, 
-                    made their spiritual journey from America to the Holy Land. Our community represents a unique blend of African heritage, 
-                    Hebrew culture, and modern Israeli life.
+                    made their historic migration from America to Israel. Our community represents a unique blend of African heritage, 
+                    Hebrew culture, and modern Israeli entrepreneurship.
                   </p>
                   <p className="text-gray-600 mb-4">
-                    For over 50 years, we have built a thriving community based on principles of health, peace, and spiritual growth. 
-                    Our vegan lifestyle, sustainable practices, and commitment to education have made us pioneers in healthy living and 
-                    environmental consciousness.
+                    For over 50 years, we have built a thriving community based on principles of health, peace, and sustainable business. 
+                    Our vegan lifestyle, eco-friendly practices, and commitment to quality have made us pioneers in plant-based products and 
+                    sustainable commerce.
                   </p>
                   <p className="text-gray-600">
-                    Today, our community is home to over 3,000 residents and continues to welcome visitors from around the world who 
-                    come to learn about our unique way of life and spiritual practices.
+                    Today, our community is home to over 3,000 residents and continues to welcome customers from around the world who 
+                    come to enjoy our authentic products and experience our sustainable business model.
                   </p>
                 </div>
                 <div>
@@ -594,9 +594,9 @@ const AboutPage = () => {
                 <div className="bg-white rounded-xl p-6 border-l-4 hover:shadow-md transition-all duration-300 hover:translate-x-2" style={{ borderColor: '#478c0b' }}>
                   <div className="flex items-center mb-2">
                     <span className="text-2xl font-bold mr-4" style={{ color: '#478c0b' }}>1967</span>
-                    <h4 className="text-xl font-bold">The Great Journey Begins</h4>
+                    <h4 className="text-xl font-bold">Community Founded</h4>
                   </div>
-                  <p className="text-gray-600">African Hebrew Israelites begin their spiritual exodus from America to the Holy Land, establishing the foundation of our community.</p>
+                  <p className="text-gray-600">African Hebrew Israelites arrive in Israel, establishing the foundation for what would become a thriving business community.</p>
                 </div>
 
                 <div className="bg-white rounded-xl p-6 border-l-4 hover:shadow-md transition-all duration-300 hover:translate-x-2" style={{ borderColor: '#478c0b' }}>
@@ -649,8 +649,8 @@ const AboutPage = () => {
                   <div className="text-5xl mb-4" style={{ color: '#478c0b' }}>
                     <i className="fas fa-leaf"></i>
                   </div>
-                  <h4 className="text-xl font-bold mb-3">Healthy Living</h4>
-                  <p className="text-gray-600">Complete vegan lifestyle, natural foods, and holistic health practices for optimal well-being.</p>
+                  <h4 className="text-xl font-bold mb-3">Healthy Products</h4>
+                  <p className="text-gray-600">100% vegan products, natural ingredients, and quality assurance for customer well-being.</p>
                 </div>
 
                 <div className="text-center">
@@ -665,8 +665,8 @@ const AboutPage = () => {
                   <div className="text-5xl mb-4" style={{ color: '#478c0b' }}>
                     <i className="fas fa-book"></i>
                   </div>
-                  <h4 className="text-xl font-bold mb-3">Spiritual Growth</h4>
-                  <p className="text-gray-600">Continuous learning, spiritual development, and connection to our Hebrew heritage and identity.</p>
+                  <h4 className="text-xl font-bold mb-3">Cultural Heritage</h4>
+                  <p className="text-gray-600">Preserving traditions, sharing culture, and maintaining our unique Hebrew African identity.</p>
                 </div>
 
                 <div className="text-center">

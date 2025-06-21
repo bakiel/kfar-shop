@@ -40,13 +40,13 @@ export default function VendorCTA() {
                       transition={{ delay: 0.2 }}
                     >
                       <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                        Join Our Restoration Model
+                        Start Selling Today
                       </h2>
                       <p className="text-xl mb-6 text-gray-700">
-                        Self-Sustaining • 100% Vegan • Community First
+                        No Setup Fees • Quick & Easy • Full Support
                       </p>
                       <p className="text-lg mb-8 text-gray-600">
-                        Be part of our 50+ year success story. Support the Village of Peace economy while mastering the art of living through clean commerce.
+                        Join our thriving marketplace. Start selling online in 30 minutes with our AI-powered tools and dedicated support team.
                       </p>
                       
                       {/* CTA Button - High contrast */}
@@ -79,10 +79,10 @@ export default function VendorCTA() {
                           <Sparkles className="w-6 h-6 text-white" />
                         </div>
                         <h3 className="font-semibold mb-1" style={{ color: '#478c0b' }}>
-                          AI Assistant
+                          Save Hours
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Auto-generate product descriptions
+                          AI creates your listings
                         </p>
                       </div>
                       
@@ -95,10 +95,10 @@ export default function VendorCTA() {
                           <TrendingUp className="w-6 h-6 text-white" />
                         </div>
                         <h3 className="font-semibold mb-1" style={{ color: '#f6af0d' }}>
-                          40% Growth
+                          Grow Fast
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Average revenue increase
+                          Reach more customers
                         </p>
                       </div>
                       
@@ -111,10 +111,10 @@ export default function VendorCTA() {
                           <Store className="w-6 h-6 text-white" />
                         </div>
                         <h3 className="font-semibold mb-1" style={{ color: '#c23c09' }}>
-                          30 Minutes
+                          Quick Setup
                         </h3>
                         <p className="text-sm text-gray-600">
-                          To launch your store
+                          30 minutes to launch
                         </p>
                       </div>
                       
@@ -127,10 +127,10 @@ export default function VendorCTA() {
                           <Users className="w-6 h-6 text-white" />
                         </div>
                         <h3 className="font-semibold mb-1" style={{ color: '#478c0b' }}>
-                          Community
+                          Full Support
                         </h3>
                         <p className="text-sm text-gray-600">
-                          Join successful vendors
+                          We help you succeed
                         </p>
                       </div>
                     </motion.div>

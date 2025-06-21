@@ -13,29 +13,29 @@ const HeroSection = () => {
     {
       id: 1,
       image: "/images/hero/13.jpg",
-      badge: "Restoration Model",
-      title: "Mastering the Art",
-      highlight: "of Living",
-      subtitle: "Join our 50+ year journey of holistic health, vegan nutrition, and eternal life",
-      stats: { businesses: "6", products: "100+", years: "50+" }
+      badge: "Voice Shopping",
+      title: "Shop Smarter",
+      highlight: "With AI",
+      subtitle: "Order with your voice, track with QR codes, enjoy same-day delivery",
+      stats: { businesses: "30+", products: "1000+", delivery: "Same Day" }
     },
     {
       id: 2,
       image: "/images/hero/21.jpg",
-      badge: "Urban Kibbutz",
-      title: "Village of Peace",
-      highlight: "Kfar Hashalom",
-      subtitle: "A self-sustaining community proving eternal life through clean body, soul & mind",
-      stats: { families: "3,000+", countries: "25", impact: "Global" }
+      badge: "Local Marketplace",
+      title: "Support Your",
+      highlight: "Community",
+      subtitle: "Shop from trusted local vendors with authentic products and great prices",
+      stats: { vendors: "30+", savings: "20%+", reviews: "5 Stars" }
     },
     {
       id: 3,
       image: "/images/hero/19.jpg",
-      badge: "100% Plant-Based",
-      title: "Preventative Health",
-      highlight: "Through Food",
-      subtitle: "Pioneering vegan cuisine in Israel - the Dimona Model now spreading worldwide",
-      stats: { recipes: "200+", satisfied: "10K+", organic: "100%" }
+      badge: "100% Secure",
+      title: "Safe & Easy",
+      highlight: "Shopping",
+      subtitle: "SSL encrypted checkout, multiple payment options, satisfaction guaranteed",
+      stats: { secure: "100%", support: "24/7", returns: "30 Days" }
     }
   ];
 
@@ -197,7 +197,7 @@ const HeroSection = () => {
                             </div>
                             <div>
                               <p className="font-semibold text-xs sm:text-sm" style={{ color: '#3a3a1d' }}>100% Vegan</p>
-                              <p className="text-xs" style={{ color: '#6b7280' }}>Since 1967</p>
+                              <p className="text-xs" style={{ color: '#6b7280' }}>Fresh Daily</p>
                             </div>
                           </div>
                         </div>
@@ -208,8 +208,8 @@ const HeroSection = () => {
                               <i className="fas fa-store text-lg sm:text-xl" style={{ color: '#f6af0d' }}></i>
                             </div>
                             <div>
-                              <p className="font-semibold text-xs sm:text-sm" style={{ color: '#3a3a1d' }}>6 Businesses</p>
-                              <p className="text-xs" style={{ color: '#6b7280' }}>Growing daily</p>
+                              <p className="font-semibold text-xs sm:text-sm" style={{ color: '#3a3a1d' }}>30+ Vendors</p>
+                              <p className="text-xs" style={{ color: '#6b7280' }}>Quality verified</p>
                             </div>
                           </div>
                         </div>

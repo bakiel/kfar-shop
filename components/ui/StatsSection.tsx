@@ -19,50 +19,50 @@ const StatsSection = () => {
   const primaryStats: Stat[] = [
     {
       number: '50+',
-      label: 'Years Mastering',
-      sublabel: 'The Art of Living',
-      icon: 'fa-heart',
+      label: 'Years in Business',
+      sublabel: 'Established 1973',
+      icon: 'fa-store',
       color: '#478c0b',
       background: 'linear-gradient(135deg, #478c0b, #3a7209)'
     },
     {
       number: '3,000+',
-      label: 'Urban Kibbutz',
-      sublabel: 'Self-Sustaining Community',
+      label: 'Happy Customers',
+      sublabel: 'Growing Daily',
       icon: 'fa-users',
       color: '#f6af0d',
       background: 'linear-gradient(135deg, #f6af0d, #e09b00)'
     },
     {
       number: '100%',
-      label: 'Plant-Based',
-      sublabel: 'Preventative Health Model',
-      icon: 'fa-leaf',
+      label: 'Customer Satisfaction',
+      sublabel: 'Quality Guaranteed',
+      icon: 'fa-star',
       color: '#c23c09',
       background: 'linear-gradient(135deg, #c23c09, #a82f07)'
     },
     {
-      number: '1,150+',
-      label: 'Babies Born',
-      sublabel: 'House of Life',
-      icon: 'fa-baby',
+      number: '24/7',
+      label: 'Support Available',
+      sublabel: 'Always Here for You',
+      icon: 'fa-headset',
       color: '#478c0b',
       background: 'linear-gradient(135deg, #478c0b, #3a7209)'
     }
   ];
 
   const businessHighlights = [
-    { icon: 'fa-seedling', value: 'Ghana', label: 'Model Exported', business: 'Ministry of Health Partnership' },
-    { icon: 'fa-globe-africa', value: 'AU', label: 'African Union', business: 'Recommended Model' },
-    { icon: 'fa-briefcase', value: '80%', label: 'Community Employment', business: 'Self-Sustaining Economy' },
-    { icon: 'fa-infinity', value: 'Eternal', label: 'Life Philosophy', business: 'Clean Body, Soul & Mind' }
+    { icon: 'fa-truck', value: 'Same Day', label: 'Fast Delivery', business: 'Local Orders Before 2PM' },
+    { icon: 'fa-shield-alt', value: '100%', label: 'Secure Payment', business: 'SSL Encrypted Checkout' },
+    { icon: 'fa-handshake', value: '30+', label: 'Trusted Vendors', business: 'Quality Verified Partners' },
+    { icon: 'fa-mobile-alt', value: 'Voice', label: 'Shopping Available', business: 'Order Hands-Free' }
   ];
 
   const milestones = [
-    { year: '1969', event: 'Urban Kibbutz Established', detail: 'Self-sustaining community model' },
-    { year: '1973', event: 'Vegan Revolution', detail: 'World\'s first 100% plant-based community' },
-    { year: '1983', event: 'Economic Independence', detail: 'Teva Deli vegan manufacturing' },
-    { year: '2020s', event: 'Global Impact', detail: 'Dimona Model spreads to Africa' }
+    { year: '1973', event: 'First Store Opens', detail: 'Community marketplace begins' },
+    { year: '1983', event: 'Manufacturing Starts', detail: 'Teva Deli plant-based foods' },
+    { year: '2020', event: 'Online Expansion', detail: 'Digital marketplace launches' },
+    { year: '2024', event: 'Voice Commerce', detail: 'AI-powered shopping arrives' }
   ];
 
   useEffect(() => {
@@ -150,11 +150,11 @@ const StatsSection = () => {
           </div>
           
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6" style={{ color: '#3a3a1d' }}>
-            Our Living Legacy
+            Trusted by Thousands
           </h2>
           <p className="text-base sm:text-lg md:text-xl max-w-3xl mx-auto leading-relaxed" style={{ color: '#4b5563' }}>
-            From a vision in Chicago to a thriving community in Israel's Negev Desert, 
-            our journey of sustainable living continues to inspire globally.
+            Your one-stop marketplace for authentic products, fast delivery, 
+            and exceptional customer service powered by cutting-edge technology.
           </p>
         </div>
 
@@ -216,7 +216,7 @@ const StatsSection = () => {
         {/* Business Highlights - Horizontal Scroll */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-12 sm:mb-16">
           <h3 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-center" style={{ color: '#3a3a1d' }}>
-            Business Excellence
+            Why Shop With Us
           </h3>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
@@ -323,11 +323,11 @@ const StatsSection = () => {
         {/* Call to Action */}
         <div className="text-center mt-16">
           <p className="text-lg mb-6" style={{ color: '#4b5563' }}>
-            Join a legacy of sustainable living and community excellence
+            Experience the future of shopping with voice commerce and same-day delivery
           </p>
           <button className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300" style={{ backgroundColor: '#478c0b' }}>
-            <i className="fas fa-chart-line mr-2"></i>
-            View Full Impact Report
+            <i className="fas fa-shopping-cart mr-2"></i>
+            Start Shopping Now
           </button>
         </div>
       </div>
