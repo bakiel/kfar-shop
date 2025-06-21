@@ -1,0 +1,37 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Light background -->
+  <rect width="400" height="400" fill="#fef9ef"/>
+  
+  <!-- Border frame -->
+  <rect x="20" y="20" width="360" height="360" rx="20" fill="none" stroke="#478c0b" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Central icon group -->
+  <g transform="translate(200, 180)">
+    <!-- Leaf icon -->
+    <path d="M -30,-40 Q -35,-50 -25,-55 Q -15,-60 -5,-55 Q 5,-50 10,-40 L 10,-20 Q 10,0 0,10 Q -10,0 -10,-20 Z" 
+          fill="#478c0b" opacity="0.2" transform="rotate(-15)"/>
+    
+    <!-- Shopping bag outline -->
+    <path d="M -40,0 L -35,60 Q -35,70 -25,70 L 25,70 Q 35,70 35,60 L 40,0 Z" 
+          fill="none" stroke="#3a3a1d" stroke-width="3" opacity="0.4"/>
+    
+    <!-- Bag handles -->
+    <path d="M -20,0 Q -20,-20 0,-20 Q 20,-20 20,0" 
+          fill="none" stroke="#3a3a1d" stroke-width="3" opacity="0.4"/>
+  </g>
+  
+  <!-- KFAR text -->
+  <text x="200" y="280" font-family="Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="middle" fill="#478c0b">
+    KFAR
+  </text>
+  
+  <!-- Marketplace text -->
+  <text x="200" y="310" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#3a3a1d">
+    marketplace
+  </text>
+  
+  <!-- Image pending text -->
+  <text x="200" y="340" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#999">
+    Image coming soon
+  </text>
+</svg>

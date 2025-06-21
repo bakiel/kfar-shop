@@ -1,0 +1,20 @@
+{
+  "heroTemplates": {
+    "default": {
+      "height": "h-[60vh] md:h-[70vh]",
+      "overlayOpacity": "opacity-30",
+      "contentAlignment": "justify-center",
+      "logoSize": "w-20 h-20 md:w-28 md:h-28",
+      "titleSize": "text-4xl md:text-6xl",
+      "descriptionSize": "text-xl md:text-2xl"
+    }
+  },
+  "vendorDescriptions": {
+    "teva-deli": "Premium plant-based protein products crafted with traditional Israeli recipes and modern vegan techniques.",
+    "queens-cuisine": "Artisanal vegan meat alternatives and gourmet prepared meals for the conscious food lover.",
+    "garden-of-light": "Organic vegan deli specialties, spreads, and cheeses made with love and fresh ingredients.",
+    "people-store": "Your community marketplace for bulk foods, organic produce, and specialty vegan products.",
+    "vop-shop": "Official Village of Peace merchandise and heritage items celebrating 50+ years of community.",
+    "gahn-delight": "Handcrafted vegan ice creams and frozen desserts with natural ingredients and creative flavors."
+  }
+}

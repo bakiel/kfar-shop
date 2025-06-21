@@ -1,0 +1,39 @@
+<svg width="1200" height="400" viewBox="0 0 1200 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#478c0b;stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:#f6af0d;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#c23c09;stop-opacity:0.1" />
+    </linearGradient>
+    <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#478c0b" opacity="0.1"/>
+      <circle cx="22" cy="22" r="1" fill="#f6af0d" opacity="0.1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="400" fill="#fef9ef"/>
+  <rect width="1200" height="400" fill="url(#bgGradient)"/>
+  <rect width="1200" height="400" fill="url(#pattern)"/>
+  
+  <!-- Center design -->
+  <g transform="translate(600, 200)">
+    <!-- Decorative circles -->
+    <circle cx="0" cy="0" r="120" fill="#478c0b" opacity="0.05"/>
+    <circle cx="0" cy="0" r="90" fill="#f6af0d" opacity="0.05"/>
+    <circle cx="0" cy="0" r="60" fill="#c23c09" opacity="0.05"/>
+    
+    <!-- Text -->
+    <text x="0" y="-20" text-anchor="middle" font-family="Poppins, sans-serif" font-size="36" font-weight="600" fill="#3a3a1d">
+      Welcome to Our Store
+    </text>
+    <text x="0" y="20" text-anchor="middle" font-family="Poppins, sans-serif" font-size="18" fill="#6b7280">
+      Quality Vegan Products from Village of Peace
+    </text>
+  </g>
+  
+  <!-- Corner decorations -->
+  <path d="M0,100 Q50,50 100,0 L0,0 Z" fill="#478c0b" opacity="0.1"/>
+  <path d="M1200,300 Q1150,350 1100,400 L1200,400 Z" fill="#f6af0d" opacity="0.1"/>
+</svg>

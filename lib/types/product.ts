@@ -1,0 +1,60 @@
+// Product type definitions for KFAR Marketplace
+export interface Product {
+  id: string;
+  name: string;
+  nameHe?: string;
+  nameHebrew?: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category: string;
+  subcategory?: string;
+  image: string;
+  images?: string[];
+  kashrut?: string;
+  vegan?: boolean;
+  isVegan?: boolean;
+  organic?: boolean;
+  isOrganic?: boolean;
+  glutenFree?: boolean;
+  isGlutenFree?: boolean;
+  unit?: string;
+  minimumOrder?: number;
+  inStock: boolean;
+  rating?: number;
+  reviewCount?: number;
+  reviews?: number;
+  specifications?: Array<{ label: string; value: string }>;
+  culturalSignificance?: string;
+  isFeatured?: boolean;
+  featured?: boolean;
+  badge?: string;
+  vendorId: string;
+  vendorName: string;
+  vendor?: string;
+  vendorLogo?: string;
+  tags?: string[];
+  isKosher?: boolean;
+  ingredients?: string[];
+  nutritionInfo?: {
+    calories?: number;
+    protein?: string;
+    carbs?: string;
+    fat?: string;
+    fiber?: string;
+    sodium?: string;
+  };
+  allergens?: string[];
+  certifications?: string[];
+  preparationTime?: string;
+  servingSize?: string;
+  storageInstructions?: string;
+  shelfLife?: string;
+  isRaw?: boolean;
+  isSeasonal?: boolean;
+  seasonalMonths?: number[];
+  bulkPricing?: {
+    quantity: number;
+    price: number;
+  }[];
+}

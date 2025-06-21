@@ -1,0 +1,426 @@
+/* Mobile Responsiveness Fixes for KFAR Marketplace */
+
+/* ===== Global Mobile Fixes ===== */
+
+/* Prevent horizontal scroll */
+html,
+body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure minimum touch target sizes */
+button,
+a,
+select,
+input,
+textarea,
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Better tap highlight */
+* {
+  -webkit-tap-highlight-color: rgba(71, 140, 11, 0.1);
+}
+
+/* Improve form inputs on iOS */
+input,
+textarea,
+select {
+  font-size: 16px !important; /* Prevents zoom on iOS */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* ===== Container Adjustments ===== */
+.container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* ===== Responsive Text Sizing ===== */
+@media (max-width: 640px) {
+  /* Headlines */
+  .text-6xl { font-size: 2.5rem !important; }
+  .text-5xl { font-size: 2rem !important; }
+  .text-4xl { font-size: 1.75rem !important; }
+  .text-3xl { font-size: 1.5rem !important; }
+  .text-2xl { font-size: 1.25rem !important; }
+  .text-xl { font-size: 1.125rem !important; }
+  
+  /* Ensure minimum readable sizes */
+  .text-sm { font-size: 0.875rem !important; }
+  .text-xs { font-size: 0.75rem !important; }
+  
+  /* Line height adjustments */
+  .leading-tight { line-height: 1.25 !important; }
+  .leading-relaxed { line-height: 1.75 !important; }
+}
+
+/* ===== Grid and Flex Fixes ===== */
+@media (max-width: 640px) {
+  /* Force single column on mobile */
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  .grid-cols-5,
+  .grid-cols-6 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  
+  /* Allow 2 columns for specific components */
+  .mobile\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  /* Stack flex items */
+  .flex-row {
+    flex-direction: column !important;
+  }
+  
+  .mobile\:flex-row {
+    flex-direction: row !important;
+  }
+}
+
+/* ===== Touch-Friendly Interactions ===== */
+/* Remove hover effects on touch devices */
+@media (hover: hover) and (pointer: fine) {
+  /* Only apply hover effects on devices that support it */
+}
+
+/* Touch device specific styles */
+.touch-device .hover\:scale-105:active {
+  transform: scale(0.98);
+}
+
+.touch-device button:active,
+.touch-device a:active {
+  opacity: 0.8;
+}
+
+/* ===== Mobile Menu Styles ===== */
+.mobile-menu {
+  /* Smooth iOS scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent background scroll when menu is open */
+body.mobile-menu-open {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ===== Carousel and Slider Fixes ===== */
+@media (max-width: 768px) {
+  /* Enable horizontal scrolling for carousels */
+  .carousel-container {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .carousel-item {
+    scroll-snap-align: start;
+  }
+}
+
+/* ===== Image Optimization ===== */
+@media (max-width: 640px) {
+  /* Responsive image heights */
+  .h-\[600px\] { height: 400px !important; }
+  .h-\[500px\] { height: 350px !important; }
+  .h-\[400px\] { height: 300px !important; }
+  .min-h-\[600px\] { min-height: 400px !important; }
+  .min-h-\[500px\] { min-height: 350px !important; }
+  .min-h-\[400px\] { min-height: 300px !important; }
+}
+
+/* ===== Form Elements ===== */
+@media (max-width: 640px) {
+  /* Full width forms on mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  textarea,
+  select {
+    width: 100% !important;
+  }
+  
+  /* Stack form elements */
+  .form-inline {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+/* ===== Card and Panel Adjustments ===== */
+@media (max-width: 640px) {
+  /* Reduce padding on mobile */
+  .p-8 { padding: 1.5rem !important; }
+  .p-6 { padding: 1.25rem !important; }
+  .px-8 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+  .py-8 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+  
+  /* Reduce margins */
+  .gap-12 { gap: 2rem !important; }
+  .gap-10 { gap: 1.5rem !important; }
+  .gap-8 { gap: 1.25rem !important; }
+}
+
+/* ===== Button Improvements ===== */
+@media (max-width: 640px) {
+  /* Make buttons full width on mobile */
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn-group > button,
+  .btn-group > a {
+    width: 100% !important;
+  }
+}
+
+/* ===== Navigation Fixes ===== */
+@media (max-width: 640px) {
+  /* Hide desktop navigation */
+  .desktop-nav {
+    display: none !important;
+  }
+  
+  /* Floating navigation adjustments */
+  .floating-nav {
+    bottom: 1rem !important;
+    transform: scale(0.9);
+  }
+}
+
+/* ===== Modal and Overlay Improvements ===== */
+@media (max-width: 640px) {
+  /* Full screen modals on mobile */
+  .modal {
+    margin: 0 !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+  }
+  
+  .modal-content {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ===== Performance Optimizations ===== */
+@media (max-width: 640px) {
+  /* Reduce animations on mobile */
+  .animate-pulse {
+    animation-duration: 3s !important;
+  }
+  
+  /* Disable complex animations */
+  .animate-bounce,
+  .animate-spin {
+    animation: none !important;
+  }
+  
+  /* Reduce transition durations */
+  .transition-all {
+    transition-duration: 200ms !important;
+  }
+}
+
+/* ===== Specific Component Fixes ===== */
+
+/* Header Mobile Fixes */
+@media (max-width: 640px) {
+  header {
+    height: 64px;
+  }
+  
+  .logo-text {
+    display: none;
+  }
+}
+
+/* Hero Section Mobile Fixes */
+@media (max-width: 640px) {
+  .hero-split {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .hero-image {
+    height: 300px !important;
+    order: 1 !important;
+  }
+  
+  .hero-content {
+    order: 2 !important;
+    padding: 1.5rem !important;
+  }
+}
+
+/* Product Grid Mobile Fixes */
+@media (max-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  
+  .product-card {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Stats Section Mobile Fixes */
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .stat-number {
+    font-size: 1.875rem !important;
+  }
+}
+
+/* Footer Mobile Fixes */
+@media (max-width: 640px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .footer-section {
+    margin-bottom: 2rem;
+  }
+  
+  .social-icons {
+    justify-content: center;
+    gap: 1rem;
+  }
+}
+
+/* ===== Utility Classes ===== */
+@media (max-width: 640px) {
+  /* Hide on mobile */
+  .mobile\:hidden {
+    display: none !important;
+  }
+  
+  /* Show on mobile */
+  .mobile\:block {
+    display: block !important;
+  }
+  
+  .mobile\:flex {
+    display: flex !important;
+  }
+  
+  /* Text alignment */
+  .mobile\:text-center {
+    text-align: center !important;
+  }
+  
+  .mobile\:text-left {
+    text-align: left !important;
+  }
+  
+  /* Spacing */
+  .mobile\:mt-4 {
+    margin-top: 1rem !important;
+  }
+  
+  .mobile\:mb-4 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .mobile\:px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+/* ===== iOS Specific Fixes ===== */
+@supports (-webkit-touch-callout: none) {
+  /* iOS only styles */
+  input,
+  textarea,
+  select {
+    -webkit-user-select: text;
+  }
+  
+  /* Fix iOS button styling */
+  button {
+    -webkit-appearance: none;
+  }
+  
+  /* Fix iOS scroll bounce */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ===== Android Specific Fixes ===== */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  /* Android only styles */
+  select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1.2em;
+  }
+}
+
+/* ===== Accessibility Improvements ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== Dark Mode Support ===== */
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode mobile optimizations here if needed */
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  .no-print,
+  .mobile-menu,
+  .floating-nav,
+  header,
+  footer {
+    display: none !important;
+  }
+}

@@ -1,0 +1,163 @@
+// Enhanced MarketplaceAssistant with OpenRouter integration
+import { openRouterClient } from './openrouter-client';
+import { marketplaceDB } from './marketplace-database';
+import { VOP_RECIPE_GUIDELINES, PRODUCT_KNOWLEDGE } from './vop-dietary-rules';
+
+export interface AgentQuery {
+  query: string;
+  language?: 'en' | 'he' | 'ar';
+  userId?: string;
+  context?: any;
+  assistantName?: string;
+  gender?: 'male' | 'female';
+  enableVoice?: boolean;
+  conversationHistory?: string[];
+}
+
+export interface AgentResponse {
+  response: string;
+  audioUrl?: string;
+  suggestions?: string[];
+  products?: any[];
+  vendors?: any[];
+  metadata?: {
+    intent: string;
+    confidence: number;
+    language: string;
+  };
+}
+
+export class MarketplaceAssistant {
+  private client = openRouterClient;
+  
+  async processQuery(query: AgentQuery): Promise<AgentResponse> {
+    try {
+      const assistantName = query.assistantName || 'Akh Yaakov';
+      const conversationHistory = query.conversationHistory || [];
+      
+      // Fetch real data from database
+      const [vendors, stats] = await Promise.all([
+        marketplaceDB.getVendors(),
+        marketplaceDB.getMarketplaceStats()
+      ]);
+      
+      // Search for relevant products based on query
+      let relevantProducts = [];
+      let mentionedVendors = [];
+      
+      // Extract potential search terms from query
+      const queryLower = query.query.toLowerCase();
+      const searchTerms = this.extractSearchTerms(queryLower);
+      
+      // Search for products if query seems product-related
+      if (searchTerms.length > 0) {
+        relevantProducts = await marketplaceDB.searchProducts(searchTerms.join(' '), 5);
+      }
+      
+      // Check if specific vendor is mentioned
+      for (const vendor of vendors) {
+        if (queryLower.includes(vendor.name.toLowerCase()) || 
+            queryLower.includes(vendor.slug.toLowerCase())) {
+          mentionedVendors.push(vendor);
+          const vendorProducts = await marketplaceDB.getVendorProducts(vendor.id);
+          relevantProducts.push(...vendorProducts.slice(0, 3));
+        }
+      }
+      
+      // Build context with real data
+      const marketplaceContext = this.buildMarketplaceContext(
+        vendors, 
+        relevantProducts, 
+        stats,
+        mentionedVendors
+      );
+      
+      // Check if this is first interaction
+      const hasGreetedBefore = conversationHistory.some(msg => {
+        const lowerMsg = msg.toLowerCase();
+        return (
+          lowerMsg.includes('shalom shalom') || 
+          lowerMsg.includes('welcome to k\'far') ||
+          lowerMsg.includes('welcome to kfar')
+        );
+      });
+      
+      // Build conversation context
+      const conversationContext = conversationHistory.length > 0 
+        ? `Previous conversation:\n${conversationHistory.slice(-6).join('\n')}\n\n`
+        : '';
+      
+      const systemPrompt = `You are ${assistantName}, a warm and knowledgeable assistant for K'far Vegan Marketplace in Dimona, Israel.
+
+${!hasGreetedBefore && conversationHistory.length === 0 ? 
+  `Start with: "Shalom Shalom! Welcome to K'far Marketplace. I'm ${assistantName}."` : 
+  'Continue the conversation naturally. DO NOT repeat greetings or introductions.'}
+
+REAL MARKETPLACE DATA:
+${marketplaceContext}
+
+RESPONSE GUIDELINES:
+1. Use the REAL vendor and product data provided above - these are the actual items in our marketplace
+2. When mentioning products, include real prices in ILS (₪)
+3. If a vendor has no products listed, mention they're updating their catalog
+4. Be specific with product names and vendor information from the database
+5. If asked about something not in the data, politely explain what IS available
+6. Use community expressions naturally:
+   - "Todaraba" (thank you)
+   - "Baruch Yah" (blessed be Yah)
+   - "Kol Tov" (all good)
+7. Keep responses helpful and focused on what's actually available
+
+${conversationContext}
+
+Current query: ${query.query}
+Language preference: ${query.language || 'en'}`;
+      
+      // Generate response using OpenRouter
+      const response = await this.client.chat(query.query, {
+        systemPrompt,
+        conversationHistory
+      });
+      
+      let text = response.choices[0].message.content;
+      
+      // Clean up response for ongoing conversations
+      if (hasGreetedBefore && conversationHistory.length > 0) {
+        text = text.replace(/Shalom Shalom[!.]?\s*/gi, '');
+        text = text.replace(/Welcome to K'?far.*?\.\s*/gi, '');
+        text = text.replace(/I'm (Akh|Akhot)\w* \w+\.\s*/gi, '');
+        text = text.trim();
+      }
+      
+      // Generate contextual suggestions based on real data
+      const suggestions = this.generateDataDrivenSuggestions(
+        vendors,
+        relevantProducts,
+        queryLower
+      );
+      
+      return {
+        response: text,
+        suggestions,
+        products: relevantProducts.slice(0, 3),
+        vendors: mentionedVendors,
+        metadata: {
+          intent: this.detectIntent(queryLower),
+          confidence: 0.9,
+          language: query.language || 'en'
+        }
+      };
+      
+    } catch (error: any) {
+      console.error('Assistant error:', error);
+      return {
+        response: "I apologize, I'm having technical difficulties. Please try again.",
+        suggestions: ['Browse marketplace', 'View vendors', 'Contact support'],
+        metadata: {
+          intent: 'error',
+          confidence: 0,
+          language: query.language || 'en'
+        }
+      };
+    }
+  }

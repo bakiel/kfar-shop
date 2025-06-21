@@ -1,0 +1,38 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sweet pink background -->
+  <rect width="400" height="400" fill="#FCE4EC"/>
+  
+  <!-- Border with Gahn Delight color -->
+  <rect x="20" y="20" width="360" height="360" rx="20" fill="none" stroke="#E91E63" stroke-width="3" opacity="0.4"/>
+  
+  <!-- Ice cream cone icon -->
+  <g transform="translate(200, 160)">
+    <!-- Cone -->
+    <path d="M -30,40 L 0,-20 L 30,40 Z" fill="#D7A35D" opacity="0.5"/>
+    <pattern id="waffle" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="10" y2="10" stroke="#B8935A" stroke-width="1" opacity="0.3"/>
+      <line x1="10" y1="0" x2="0" y2="10" stroke="#B8935A" stroke-width="1" opacity="0.3"/>
+    </pattern>
+    <path d="M -30,40 L 0,-20 L 30,40 Z" fill="url(#waffle)"/>
+    
+    <!-- Ice cream scoops -->
+    <circle cx="0" cy="-25" r="25" fill="#F8BBD0" opacity="0.6"/>
+    <circle cx="-10" cy="-40" r="20" fill="#E91E63" opacity="0.4"/>
+    <circle cx="10" cy="-45" r="18" fill="#FF80AB" opacity="0.5"/>
+  </g>
+  
+  <!-- Brand name -->
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#E91E63">
+    Gahn Delight
+  </text>
+  
+  <!-- Tagline -->
+  <text x="200" y="280" font-family="Arial, sans-serif" font-size="14" font-style="italic" text-anchor="middle" fill="#EC407A">
+    Artisan Ice Cream
+  </text>
+  
+  <!-- Status text -->
+  <text x="200" y="340" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#999">
+    Image coming soon
+  </text>
+</svg>

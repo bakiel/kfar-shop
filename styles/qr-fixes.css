@@ -1,0 +1,72 @@
+/* QR Code Layout Fixes */
+
+/* Ensure QR containers are properly bounded */
+.qr-container {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+/* Fix for SmartQRGeneratorCompact layout */
+.qr-container > div {
+  position: relative;
+  z-index: 1;
+}
+
+/* Prevent QR code overflow */
+.qr-payment-container {
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Fix floating buttons positioning */
+.qr-container .absolute {
+  z-index: 10;
+}
+
+/* Ensure proper spacing between QR elements */
+.qr-container + .qr-container {
+  margin-top: 2rem;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 640px) {
+  .qr-container {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .qr-payment-container {
+    padding: 0 1rem;
+  }
+}
+
+/* Fix for overlapping QR codes in checkout */
+#checkout-qr-payment {
+  isolation: isolate;
+  position: relative;
+  z-index: 1;
+}
+
+#checkout-order-qr {
+  isolation: isolate;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure SmartQRGeneratorCompact respects boundaries */
+.bg-white.rounded-xl.shadow-lg {
+  contain: layout;
+  overflow: hidden;
+}
+
+/* Fix timer badge positioning */
+.qr-timer-badge {
+  position: absolute;
+  top: -0.75rem;
+  right: -0.75rem;
+  z-index: 20;
+}
