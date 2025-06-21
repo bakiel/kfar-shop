@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, 
@@ -21,8 +21,11 @@ import {
   Languages,
   Package
 } from 'lucide-react';
-import InteractiveAIDemo from '@/components/vendor/InteractiveAIDemo';
-import CostSavingsCalculator from '@/components/vendor/CostSavingsCalculator';
+
+// Dynamic imports to prevent SSR issues
+const Link = dynamic(() => import('next/link').then(mod => mod.default), { ssr: false });
+const InteractiveAIDemo = dynamic(() => import('@/components/vendor/InteractiveAIDemo'), { ssr: false });
+const CostSavingsCalculator = dynamic(() => import('@/components/vendor/CostSavingsCalculator'), { ssr: false });
 
 export default function BecomeAVendorPage() {
   const [savingsCalculator, setSavingsCalculator] = useState({
@@ -137,14 +140,16 @@ export default function BecomeAVendorPage() {
               Transform your store with intelligent product management, automated marketing, and a supportive community of over 50 successful vendors.
             </p>
             
-            <Link
-              href="/vendor/onboarding"
-              className="inline-flex items-center gap-3 px-8 py-4 text-white text-lg font-semibold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              style={{ backgroundColor: '#c23c09' }}
-            >
-              Start Your Store Today
-              <ChevronRight className="w-5 h-5" />
-            </Link>
+            {Link && (
+              <Link
+                href="/vendor/onboarding"
+                className="inline-flex items-center gap-3 px-8 py-4 text-white text-lg font-semibold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                style={{ backgroundColor: '#c23c09' }}
+              >
+                Start Your Store Today
+                <ChevronRight className="w-5 h-5" />
+              </Link>
+            )}
             
             <div className="mt-8 flex flex-wrap gap-6 justify-center text-sm text-gray-600">
               <span className="flex items-center gap-2">
@@ -173,7 +178,7 @@ export default function BecomeAVendorPage() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
             >
-              <InteractiveAIDemo />
+              {InteractiveAIDemo && <InteractiveAIDemo />}
             </motion.div>
           </div>
         </div>
@@ -188,7 +193,7 @@ export default function BecomeAVendorPage() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
             >
-              <CostSavingsCalculator />
+              {CostSavingsCalculator && <CostSavingsCalculator />}
             </motion.div>
           </div>
         </div>
@@ -395,14 +400,16 @@ export default function BecomeAVendorPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link
-              href="/vendor/onboarding"
-              className="inline-flex items-center gap-3 px-8 py-4 text-white text-lg font-semibold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              style={{ backgroundColor: '#c23c09' }}
-            >
-              Begin Onboarding
-              <ChevronRight className="w-5 h-5" />
-            </Link>
+            {Link && (
+              <Link
+                href="/vendor/onboarding"
+                className="inline-flex items-center gap-3 px-8 py-4 text-white text-lg font-semibold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                style={{ backgroundColor: '#c23c09' }}
+              >
+                Begin Onboarding
+                <ChevronRight className="w-5 h-5" />
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -537,14 +544,16 @@ export default function BecomeAVendorPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/vendor/onboarding"
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-lg font-semibold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                style={{ color: '#478c0b' }}
-              >
-                Begin Onboarding
-                <Zap className="w-5 h-5" />
-              </Link>
+              {Link && (
+                <Link
+                  href="/vendor/onboarding"
+                  className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-lg font-semibold rounded-xl hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  style={{ color: '#478c0b' }}
+                >
+                  Begin Onboarding
+                  <Zap className="w-5 h-5" />
+                </Link>
+              )}
               
               <button
                 className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/20 backdrop-blur text-white text-lg font-semibold rounded-xl hover:bg-white/30 transition-all duration-300"
