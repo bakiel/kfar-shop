@@ -612,7 +612,7 @@ const AboutPage = () => {
                     <span className="text-2xl font-bold mr-4" style={{ color: '#478c0b' }}>1983</span>
                     <h4 className="text-xl font-bold">Teva Deli Founded</h4>
                   </div>
-                  <p className="text-gray-600">Launch of Israel\'s first vegan food manufacturing company, pioneering the plant-based food industry in the country.</p>
+                  <p className="text-gray-600">Launch of Israel's first vegan food manufacturing company, pioneering the plant-based food industry in the country.</p>
                 </div>
 
                 <div className="bg-white rounded-xl p-6 border-l-4 hover:shadow-md transition-all duration-300 hover:translate-x-2" style={{ borderColor: '#478c0b' }}>
@@ -628,7 +628,7 @@ const AboutPage = () => {
                     <span className="text-2xl font-bold mr-4" style={{ color: '#478c0b' }}>2003</span>
                     <h4 className="text-xl font-bold">Official Recognition</h4>
                   </div>
-                  <p className="text-gray-600">Israeli government grants permanent residency status, officially recognizing the community\'s place in Israeli society.</p>
+                  <p className="text-gray-600">Israeli government grants permanent residency status, officially recognizing the community's place in Israeli society.</p>
                 </div>
 
                 <div className="bg-white rounded-xl p-6 border-l-4 hover:shadow-md transition-all duration-300 hover:translate-x-2" style={{ borderColor: '#478c0b' }}>

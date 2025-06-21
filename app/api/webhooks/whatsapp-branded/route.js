@@ -172,7 +172,7 @@ async function handleOrderRequest(from, message, profileName) {
     console.error('Order request error:', error);
     await whatsappService.sendBrandedMessage(
       from,
-      'Sorry, I couldn\\'t process your order. Please try again or contact support.'
+      "Sorry, I couldn't process your order. Please try again or contact support."
     );
   }
 }
@@ -216,7 +216,7 @@ async function handleStatusRequest(from, profileName) {
     console.error('Status request error:', error);
     await whatsappService.sendBrandedMessage(
       from,
-      'Sorry, I couldn\\'t check your order status. Please try again.'
+      "Sorry, I couldn't check your order status. Please try again."
     );
   }
 }
@@ -243,7 +243,7 @@ async function handleVendorsRequest(from) {
     console.error('Vendors request error:', error);
     await whatsappService.sendBrandedMessage(
       from,
-      'Sorry, I couldn\\'t load vendor information. Please try again.'
+      "Sorry, I couldn't load vendor information. Please try again."
     );
   }
 }
@@ -256,7 +256,7 @@ async function handleSearchRequest(from, message) {
     if (!searchTerm) {
       await whatsappService.sendBrandedMessage(
         from,
-        'Please specify what you\\'re looking for.\\n\\nExample: *SEARCH tomatoes*'
+        "Please specify what you're looking for.\\n\\nExample: *SEARCH tomatoes*"
       );
       return;
     }
