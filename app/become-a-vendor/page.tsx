@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { 
@@ -23,7 +24,6 @@ import {
 } from 'lucide-react';
 
 // Dynamic imports to prevent SSR issues
-const Link = dynamic(() => import('next/link').then(mod => mod.default), { ssr: false });
 const InteractiveAIDemo = dynamic(() => import('@/components/vendor/InteractiveAIDemo'), { ssr: false });
 const CostSavingsCalculator = dynamic(() => import('@/components/vendor/CostSavingsCalculator'), { ssr: false });
 
