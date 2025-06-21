@@ -156,7 +156,6 @@ export default async function StorePage({ params }: PageProps) {
   // First, try to get from static catalog
   let vendorStore = completeProductCatalog[vendorId];
   let vendorData: any = null;
-  let products: Product[] = [];
   
   // If not in static catalog, check if it's a dynamic vendor (from onboarding)
   if (!vendorStore) {

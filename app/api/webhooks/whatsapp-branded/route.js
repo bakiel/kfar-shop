@@ -130,7 +130,7 @@ async function handleMenuRequest(from, profileName) {
     console.error('Menu request error:', error);
     await whatsappService.sendBrandedMessage(
       from, 
-      'Sorry, I couldn\\'t load the menu right now. Please try again later.'
+      "Sorry, I couldn't load the menu right now. Please try again later."
     );
   }
 }

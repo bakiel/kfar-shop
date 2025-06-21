@@ -63,19 +63,19 @@ export const vendorDb = {
     verified?: boolean;
   }): Promise<Vendor[]> {
     const client = getClient();
-    let query = client.from('vendors').select('*');
+    let dbQuery = client.from('vendors').select('*');
     
     if (filters?.status) {
-      query = query.eq('status', filters.status);
+      dbQuery = dbQuery.eq('status', filters.status);
     }
     if (filters?.featured !== undefined) {
-      query = query.eq('featured', filters.featured);
+      dbQuery = dbQuery.eq('featured', filters.featured);
     }
     if (filters?.verified !== undefined) {
-      query = query.eq('verified', filters.verified);
+      dbQuery = dbQuery.eq('verified', filters.verified);
     }
     
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await dbQuery.order('created_at', { ascending: false });
     
     if (error) {
       console.error('Error fetching vendors:', error);
@@ -218,25 +218,25 @@ export const productDb = {
     search?: string;
   }): Promise<Product[]> {
     const client = getClient();
-    let query = client.from('products').select('*');
+    let dbQuery = client.from('products').select('*');
     
     if (filters?.vendorId) {
-      query = query.eq('vendor_id', filters.vendorId);
+      dbQuery = dbQuery.eq('vendor_id', filters.vendorId);
     }
     if (filters?.category) {
-      query = query.eq('category', filters.category);
+      dbQuery = dbQuery.eq('category', filters.category);
     }
     if (filters?.status) {
-      query = query.eq('status', filters.status);
+      dbQuery = dbQuery.eq('status', filters.status);
     }
     if (filters?.inStock !== undefined) {
-      query = query.eq('in_stock', filters.inStock);
+      dbQuery = dbQuery.eq('in_stock', filters.inStock);
     }
     if (filters?.search) {
-      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      dbQuery = dbQuery.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
     }
     
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await dbQuery.order('created_at', { ascending: false });
     
     if (error) {
       console.error('Error fetching products:', error);
