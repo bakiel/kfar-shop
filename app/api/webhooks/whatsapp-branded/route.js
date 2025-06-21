@@ -1,3 +1,4 @@
+// Force rebuild - fixed escape sequences
 import { NextResponse } from 'next/server';
 import BrandedWhatsAppService from '@/services/brandedWhatsAppService';
 import { db } from '@/lib/db';
@@ -129,7 +130,7 @@ async function handleMenuRequest(from, profileName) {
   } catch (error) {
     console.error('Menu request error:', error);
     await whatsappService.sendBrandedMessage(
-      from, 
+      from,
       "Sorry, I couldn't load the menu right now. Please try again later."
     );
   }
