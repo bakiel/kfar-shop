@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Sparkles, Loader2, Check, Camera, RefreshCw, Eye } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface AnalysisResult {
   productName: string;
