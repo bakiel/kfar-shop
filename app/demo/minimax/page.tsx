@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowLeft, XCircle, CheckCircle, TrendingUp, Play, Brain, Target, BarChart3, Rocket } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { toast } from '@/components/ui/use-toast';
 import { AI_PROVIDERS } from '@/lib/config/ai-providers';
@@ -71,22 +72,22 @@ export default function MiniMaxDemo() {
 
   const features = [
     {
-      icon: '🧠',
+      icon: <Brain className="w-8 h-8 stroke-[1.5]" />,
       title: '1M Token Context',
       description: 'Process entire product catalogs, annual reports, and comprehensive data'
     },
     {
-      icon: '🎯',
+      icon: <Target className="w-8 h-8 stroke-[1.5]" />,
       title: 'Advanced Reasoning',
       description: 'Complex pattern recognition and strategic analysis capabilities'
     },
     {
-      icon: '📊',
+      icon: <BarChart3 className="w-8 h-8 stroke-[1.5]" />,
       title: 'Deep Analytics',
       description: 'Generate insights from massive datasets with nuanced understanding'
     },
     {
-      icon: '🚀',
+      icon: <Rocket className="w-8 h-8 stroke-[1.5]" />,
       title: 'Strategic Planning',
       description: 'Create detailed business strategies and growth recommendations'
     }
@@ -137,7 +138,7 @@ export default function MiniMaxDemo() {
               href="/demo"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
               Back to Demos
             </Link>
             
@@ -269,21 +270,21 @@ export default function MiniMaxDemo() {
                     <h3 className="text-lg font-semibold mb-4">Traditional Models</h3>
                     <ul className="space-y-3">
                       <li className="flex items-start gap-3">
-                        <i className="fas fa-times-circle text-red-500 mt-1" />
+                        <XCircle className="w-5 h-5 stroke-[1.5] text-red-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Limited Context:</strong> 128K tokens max
                           <p className="text-sm text-gray-600">Can only analyze partial data</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-3">
-                        <i className="fas fa-times-circle text-red-500 mt-1" />
+                        <XCircle className="w-5 h-5 stroke-[1.5] text-red-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Simple Analysis:</strong> Basic patterns
                           <p className="text-sm text-gray-600">Surface-level insights</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-3">
-                        <i className="fas fa-times-circle text-red-500 mt-1" />
+                        <XCircle className="w-5 h-5 stroke-[1.5] text-red-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Fragmented Processing:</strong> Multiple calls needed
                           <p className="text-sm text-gray-600">Loss of context between calls</p>
@@ -296,21 +297,21 @@ export default function MiniMaxDemo() {
                     <h3 className="text-lg font-semibold mb-4">MiniMax M1</h3>
                     <ul className="space-y-3">
                       <li className="flex items-start gap-3">
-                        <i className="fas fa-check-circle text-green-500 mt-1" />
+                        <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Massive Context:</strong> 1M tokens
                           <p className="text-sm text-gray-600">Analyze entire marketplace at once</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-3">
-                        <i className="fas fa-check-circle text-green-500 mt-1" />
+                        <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Deep Reasoning:</strong> Complex patterns
                           <p className="text-sm text-gray-600">Strategic insights and predictions</p>
                         </div>
                       </li>
                       <li className="flex items-start gap-3">
-                        <i className="fas fa-check-circle text-green-500 mt-1" />
+                        <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Holistic Analysis:</strong> Single comprehensive call
                           <p className="text-sm text-gray-600">Full context preservation</p>
@@ -331,7 +332,7 @@ export default function MiniMaxDemo() {
                     transition={{ delay: index * 0.1 }}
                     className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow"
                   >
-                    <div className="text-4xl mb-4">{feature.icon}</div>
+                    <div className="mb-4" style={{ color: '#3a3a1d' }}>{feature.icon}</div>
                     <h3 className="text-lg font-bold mb-2" style={{ color: '#3a3a1d' }}>
                       {feature.title}
                     </h3>
@@ -512,7 +513,7 @@ const strategy = await miniMaxReasoning.generateVendorStrategy('teva-deli');
                     <h3 className="text-lg font-semibold mb-4">Best Practices</h3>
                     <div className="space-y-3">
                       <div className="flex items-start gap-3">
-                        <i className="fas fa-check-circle text-green-500 mt-1" />
+                        <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Use for Complex Tasks:</strong>
                           <p className="text-sm text-gray-600">
@@ -521,7 +522,7 @@ const strategy = await miniMaxReasoning.generateVendorStrategy('teva-deli');
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <i className="fas fa-check-circle text-green-500 mt-1" />
+                        <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Batch Data Processing:</strong>
                           <p className="text-sm text-gray-600">
@@ -530,7 +531,7 @@ const strategy = await miniMaxReasoning.generateVendorStrategy('teva-deli');
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <i className="fas fa-check-circle text-green-500 mt-1" />
+                        <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                         <div>
                           <strong>Structured Prompts:</strong>
                           <p className="text-sm text-gray-600">
@@ -562,14 +563,14 @@ const strategy = await miniMaxReasoning.generateVendorStrategy('teva-deli');
                   href="/admin/dashboard"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-600 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
-                  <i className="fas fa-chart-line" />
+                  <TrendingUp className="w-5 h-5 stroke-[1.5]" />
                   View Analytics Dashboard
                 </Link>
                 <Link
                   href="/demo"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-all"
                 >
-                  <i className="fas fa-play" />
+                  <Play className="w-5 h-5 stroke-[1.5]" />
                   More Demos
                 </Link>
               </div>

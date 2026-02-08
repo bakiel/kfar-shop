@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, MapPin, Clock, Store, TrendingUp, Award, Users } from 'lucide-react';
+import { Search, Filter, MapPin, Clock, Store, TrendingUp, Award, Users, Loader2 } from 'lucide-react';
 import VendorBrowseCard from '@/components/marketplace/VendorBrowseCard';
 import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import Link from 'next/link';
@@ -225,7 +225,7 @@ export default function MarketplaceStoresPage() {
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <div className="text-center">
-              <i className="fas fa-spinner fa-spin text-4xl mb-4" style={{ color: '#478c0b' }}></i>
+              <Loader2 className="w-10 h-10 stroke-[1.5] animate-spin mb-4 mx-auto" style={{ color: '#478c0b' }} />
               <p className="text-gray-600">Loading vendors...</p>
             </div>
           </div>

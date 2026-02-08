@@ -126,7 +126,7 @@ export class SelfDiagnostic {
       // Test with a simple command
       const testResponse = await fetch('https://openrouter.ai/api/v1/models', {
         headers: {
-          'Authorization': 'Bearer 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'
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`
         },
         signal: AbortSignal.timeout(5000)
       });

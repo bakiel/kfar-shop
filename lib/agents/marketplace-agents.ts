@@ -1,12 +1,14 @@
 // KFAR Marketplace AI Agents System
 // Practical automated assistants for marketplace operations
 
+import { LucideIcon, Store, Headset, Truck, Wand2, Coins, Users, FileText, TrendingUp, Plus, Package, MessageCircle, AlertCircle, Search, Hash, QrCode, History, Map, Leaf, CheckCircle, MapPin, Tag } from 'lucide-react';
+
 export interface Agent {
   id: string;
   name: string;
   nameHe: string;
   description: string;
-  icon: string;
+  icon: LucideIcon;
   color: string;
   capabilities: string[];
   isActive: boolean;
@@ -18,7 +20,7 @@ export const MARKETPLACE_AGENTS: Agent[] = [
     name: 'Vendor Support Agent',
     nameHe: 'סוכן תמיכה לספקים',
     description: 'Helps vendors with onboarding, product management, and sales',
-    icon: 'fa-store',
+    icon: Store,
     color: '#478c0b',
     capabilities: [
       'Vendor onboarding assistance',
@@ -34,7 +36,7 @@ export const MARKETPLACE_AGENTS: Agent[] = [
     name: 'Customer Service Bot',
     nameHe: 'בוט שירות לקוחות',
     description: 'Assists customers with orders, payments, and general inquiries',
-    icon: 'fa-headset',
+    icon: Headset,
     color: '#f6af0d',
     capabilities: [
       'Order status tracking',
@@ -50,7 +52,7 @@ export const MARKETPLACE_AGENTS: Agent[] = [
     name: 'Order Tracking Assistant',
     nameHe: 'עוזר מעקב הזמנות',
     description: 'Provides real-time order status and delivery updates',
-    icon: 'fa-truck',
+    icon: Truck,
     color: '#c23c09',
     capabilities: [
       'Real-time order status',
@@ -66,7 +68,7 @@ export const MARKETPLACE_AGENTS: Agent[] = [
     name: 'Product Recommendation Agent',
     nameHe: 'יועץ מוצרים',
     description: 'Suggests products based on preferences and VOP dietary requirements',
-    icon: 'fa-magic',
+    icon: Wand2,
     color: '#3a3a1d',
     capabilities: [
       'Personalized recommendations',
@@ -82,7 +84,7 @@ export const MARKETPLACE_AGENTS: Agent[] = [
     name: 'Payment Assistant',
     nameHe: 'עוזר תשלומים',
     description: 'Guides through payment options including Braysheet tokens',
-    icon: 'fa-coins',
+    icon: Coins,
     color: '#cfe7c1',
     capabilities: [
       'Braysheet token guidance',
@@ -98,7 +100,7 @@ export const MARKETPLACE_AGENTS: Agent[] = [
     name: 'Community Coordinator',
     nameHe: 'רכז קהילה',
     description: 'Connects VOP community members and facilitates group orders',
-    icon: 'fa-users',
+    icon: Users,
     color: '#478c0b',
     capabilities: [
       'Group order coordination',
@@ -228,29 +230,29 @@ export class AgentActionHandler {
 }
 
 // Quick action buttons for each agent
-export const AGENT_QUICK_ACTIONS = {
+export const AGENT_QUICK_ACTIONS: Record<string, { label: string; icon: LucideIcon; action: string }[]> = {
   'vendor-support': [
-    { label: 'Generate Invoice', icon: 'fa-file-invoice', action: 'generate_invoice' },
-    { label: 'View Analytics', icon: 'fa-chart-line', action: 'view_analytics' },
-    { label: 'Add Product', icon: 'fa-plus', action: 'add_product' },
-    { label: 'Manage Orders', icon: 'fa-box', action: 'manage_orders' }
+    { label: 'Generate Invoice', icon: FileText, action: 'generate_invoice' },
+    { label: 'View Analytics', icon: TrendingUp, action: 'view_analytics' },
+    { label: 'Add Product', icon: Plus, action: 'add_product' },
+    { label: 'Manage Orders', icon: Package, action: 'manage_orders' }
   ],
   'customer-service': [
-    { label: 'Track Order', icon: 'fa-truck', action: 'track_order' },
-    { label: 'Contact Vendor', icon: 'fa-whatsapp', action: 'contact_vendor' },
-    { label: 'Report Issue', icon: 'fa-exclamation-circle', action: 'report_issue' },
-    { label: 'Find Product', icon: 'fa-search', action: 'find_product' }
+    { label: 'Track Order', icon: Truck, action: 'track_order' },
+    { label: 'Contact Vendor', icon: MessageCircle, action: 'contact_vendor' },
+    { label: 'Report Issue', icon: AlertCircle, action: 'report_issue' },
+    { label: 'Find Product', icon: Search, action: 'find_product' }
   ],
   'order-tracker': [
-    { label: 'Enter Order #', icon: 'fa-hashtag', action: 'enter_order' },
-    { label: 'Scan QR Code', icon: 'fa-qrcode', action: 'scan_qr' },
-    { label: 'Recent Orders', icon: 'fa-history', action: 'recent_orders' },
-    { label: 'Delivery Map', icon: 'fa-map', action: 'delivery_map' }
+    { label: 'Enter Order #', icon: Hash, action: 'enter_order' },
+    { label: 'Scan QR Code', icon: QrCode, action: 'scan_qr' },
+    { label: 'Recent Orders', icon: History, action: 'recent_orders' },
+    { label: 'Delivery Map', icon: Map, action: 'delivery_map' }
   ],
   'product-advisor': [
-    { label: 'Vegan Only', icon: 'fa-leaf', action: 'filter_vegan' },
-    { label: 'Kosher', icon: 'fa-check-circle', action: 'filter_kosher' },
-    { label: 'Local Vendors', icon: 'fa-map-marker', action: 'filter_local' },
-    { label: 'On Sale', icon: 'fa-tag', action: 'filter_sale' }
+    { label: 'Vegan Only', icon: Leaf, action: 'filter_vegan' },
+    { label: 'Kosher', icon: CheckCircle, action: 'filter_kosher' },
+    { label: 'Local Vendors', icon: MapPin, action: 'filter_local' },
+    { label: 'On Sale', icon: Tag, action: 'filter_sale' }
   ]
 };

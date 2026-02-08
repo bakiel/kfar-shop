@@ -7,6 +7,20 @@ import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
 import Layout from '@/components/layout/Layout';
 import CustomerQRCode from '@/components/customer/CustomerQRCode';
+import {
+  ArrowLeft, Crown, QrCode, Database, Star, Heart, Clock,
+  Banknote, Gift, UserCheck, TrendingUp, CheckCircle, Shield,
+  Settings, X, Info, User, Bell
+} from 'lucide-react';
+
+const featureIconMap: Record<string, React.ReactNode> = {
+  qrcode: <QrCode className="w-10 h-10 stroke-[1.5]" style={{ color: '#478c0b' }} />,
+  crown: <Crown className="w-10 h-10 stroke-[1.5]" style={{ color: '#f6af0d' }} />,
+  settings: <Settings className="w-10 h-10 stroke-[1.5]" style={{ color: '#c23c09' }} />,
+  trending: <TrendingUp className="w-10 h-10 stroke-[1.5]" style={{ color: '#478c0b' }} />,
+  star: <Star className="w-10 h-10 stroke-[1.5]" style={{ color: '#f6af0d' }} />,
+  bell: <Bell className="w-10 h-10 stroke-[1.5]" style={{ color: '#c23c09' }} />,
+};
 
 export default function CustomerProfilesDemo() {
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'integration'>('overview');
@@ -73,32 +87,32 @@ export default function CustomerProfilesDemo() {
 
   const features = [
     {
-      icon: '🆔',
+      icon: 'qrcode',
       title: 'Unique QR Codes',
       description: 'Each customer gets a personal QR code with embedded profile data'
     },
     {
-      icon: '🏆',
+      icon: 'crown',
       title: 'Loyalty Tiers',
       description: 'Bronze, Silver, Gold, and Platinum tiers with progressive benefits'
     },
     {
-      icon: '🎯',
+      icon: 'settings',
       title: 'Smart Preferences',
       description: 'Track dietary restrictions, shopping habits, and favorite categories'
     },
     {
-      icon: '📊',
+      icon: 'trending',
       title: 'Points System',
       description: 'Earn points for purchases, reviews, and engagement activities'
     },
     {
-      icon: '🤖',
+      icon: 'star',
       title: 'AI-Powered Insights',
       description: 'Vision AI analyzes profile images to enhance personalization'
     },
     {
-      icon: '🔔',
+      icon: 'bell',
       title: 'Smart Notifications',
       description: 'Personalized alerts based on preferences and shopping behavior'
     }
@@ -141,7 +155,7 @@ export default function CustomerProfilesDemo() {
               href="/demo"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
               Back to Demos
             </Link>
             
@@ -212,7 +226,7 @@ export default function CustomerProfilesDemo() {
                               className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
                               style={{ backgroundColor: tierBenefits[customer.loyaltyTier as keyof typeof tierBenefits].color }}
                             >
-                              <i className="fas fa-crown text-xs" />
+                              <Crown className="w-3 h-3 stroke-[1.5]" />
                               {customer.loyaltyTier.charAt(0).toUpperCase() + customer.loyaltyTier.slice(1)}
                             </div>
                           </div>
@@ -254,7 +268,7 @@ export default function CustomerProfilesDemo() {
                         </div>
 
                         <button className="w-full mt-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all">
-                          <i className="fas fa-qrcode mr-2" />
+                          <QrCode className="w-4 h-4 stroke-[1.5] mr-2" />
                           View QR Code
                         </button>
                       </div>
@@ -277,7 +291,7 @@ export default function CustomerProfilesDemo() {
                       transition={{ delay: index * 0.1 }}
                       className="text-center"
                     >
-                      <div className="text-4xl mb-3">{feature.icon}</div>
+                      <div className="mb-3 flex justify-center">{featureIconMap[feature.icon]}</div>
                       <h3 className="font-semibold mb-2">{feature.title}</h3>
                       <p className="text-sm text-gray-600">{feature.description}</p>
                     </motion.div>
@@ -312,7 +326,7 @@ export default function CustomerProfilesDemo() {
                             className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                             style={{ backgroundColor: info.color }}
                           >
-                            <i className="fas fa-crown" />
+                            <Crown className="w-5 h-5 stroke-[1.5]" />
                           </div>
                           <div>
                             <h3 className="font-bold text-lg capitalize">{tier} Tier</h3>
@@ -326,7 +340,7 @@ export default function CustomerProfilesDemo() {
                       <div className="grid md:grid-cols-2 gap-2">
                         {info.benefits.map((benefit, idx) => (
                           <div key={idx} className="flex items-center gap-2 text-sm">
-                            <i className="fas fa-check-circle text-green-500" />
+                            <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 flex-shrink-0" />
                             <span>{benefit}</span>
                           </div>
                         ))}
@@ -347,19 +361,19 @@ export default function CustomerProfilesDemo() {
                     <h3 className="font-semibold mb-3">Embedded Data</h3>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-database text-green-500 mt-0.5" />
+                        <Database className="w-4 h-4 stroke-[1.5] text-green-500 mt-0.5 flex-shrink-0" />
                         <span>Customer ID and basic profile info</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-star text-yellow-500 mt-0.5" />
+                        <Star className="w-4 h-4 stroke-[1.5] text-yellow-500 mt-0.5 flex-shrink-0" />
                         <span>Current loyalty tier and points balance</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-heart text-red-500 mt-0.5" />
+                        <Heart className="w-4 h-4 stroke-[1.5] text-red-500 mt-0.5 flex-shrink-0" />
                         <span>Dietary preferences and restrictions</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-clock text-blue-500 mt-0.5" />
+                        <Clock className="w-4 h-4 stroke-[1.5] text-blue-500 mt-0.5 flex-shrink-0" />
                         <span>Real-time timestamp for security</span>
                       </li>
                     </ul>
@@ -369,19 +383,19 @@ export default function CustomerProfilesDemo() {
                     <h3 className="font-semibold mb-3">Use Cases</h3>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-cash-register text-purple-500 mt-0.5" />
+                        <Banknote className="w-4 h-4 stroke-[1.5] text-purple-500 mt-0.5 flex-shrink-0" />
                         <span>Quick checkout with loyalty points</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-gift text-pink-500 mt-0.5" />
+                        <Gift className="w-4 h-4 stroke-[1.5] text-pink-500 mt-0.5 flex-shrink-0" />
                         <span>Instant reward redemption</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-user-check text-indigo-500 mt-0.5" />
+                        <UserCheck className="w-4 h-4 stroke-[1.5] text-indigo-500 mt-0.5 flex-shrink-0" />
                         <span>Vendor customer verification</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <i className="fas fa-chart-line text-orange-500 mt-0.5" />
+                        <TrendingUp className="w-4 h-4 stroke-[1.5] text-orange-500 mt-0.5 flex-shrink-0" />
                         <span>Analytics and behavior tracking</span>
                       </li>
                     </ul>
@@ -454,7 +468,7 @@ export default function CustomerProfilesDemo() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <i className="fas fa-database text-green-500" />
+                      <Database className="w-5 h-5 stroke-[1.5] text-green-500" />
                       Customer Tables
                     </h3>
                     <div className="bg-gray-50 rounded-lg p-4 font-mono text-sm">
@@ -489,7 +503,7 @@ export default function CustomerProfilesDemo() {
 
                   <div>
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <i className="fas fa-shield-alt text-blue-500" />
+                      <Shield className="w-5 h-5 stroke-[1.5] text-blue-500" />
                       Security Features
                     </h3>
                     <div className="grid md:grid-cols-2 gap-4">
@@ -510,7 +524,7 @@ export default function CustomerProfilesDemo() {
 
                   <div>
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <i className="fas fa-cogs text-purple-500" />
+                      <Settings className="w-5 h-5 stroke-[1.5] text-purple-500" />
                       API Endpoints
                     </h3>
                     <div className="space-y-2 font-mono text-sm">
@@ -594,7 +608,7 @@ export default function CustomerProfilesDemo() {
                     onClick={() => setShowQRModal(false)}
                     className="text-gray-400 hover:text-gray-600"
                   >
-                    <i className="fas fa-times text-xl" />
+                    <X className="w-5 h-5 stroke-[1.5]" />
                   </button>
                 </div>
                 
@@ -624,7 +638,7 @@ export default function CustomerProfilesDemo() {
                     }}
                     className="mt-4 w-full py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
                   >
-                    <i className="fas fa-info-circle mr-2" />
+                    <Info className="w-4 h-4 stroke-[1.5] mr-2" />
                     How It Works
                   </button>
                 </div>
@@ -649,14 +663,14 @@ export default function CustomerProfilesDemo() {
                   href="/customer/dashboard"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-600 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
-                  <i className="fas fa-user-circle" />
+                  <User className="w-5 h-5 stroke-[1.5]" />
                   Customer Dashboard
                 </Link>
                 <Link
                   href="/demo/qr-scanner"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-all"
                 >
-                  <i className="fas fa-qrcode" />
+                  <QrCode className="w-5 h-5 stroke-[1.5]" />
                   Try QR Scanner
                 </Link>
               </div>

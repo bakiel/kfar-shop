@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { QrCode, Users, TrendingUp, Trophy, Eye, FileSpreadsheet, FileText } from 'lucide-react';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -145,7 +146,7 @@ export default function QRTrackingDashboard({ vendorId }: QRTrackingDashboardPro
                   {analytics.totalScans.toLocaleString()}
                 </p>
               </div>
-              <i className="fas fa-qrcode text-3xl opacity-20" style={{ color: '#478c0b' }}></i>
+              <QrCode className="w-8 h-8 opacity-20 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
           </div>
 
@@ -157,7 +158,7 @@ export default function QRTrackingDashboard({ vendorId }: QRTrackingDashboardPro
                   {analytics.uniqueUsers.toLocaleString()}
                 </p>
               </div>
-              <i className="fas fa-users text-3xl opacity-20" style={{ color: '#f6af0d' }}></i>
+              <Users className="w-8 h-8 opacity-20 stroke-[1.5]" style={{ color: '#f6af0d' }} />
             </div>
           </div>
 
@@ -171,7 +172,7 @@ export default function QRTrackingDashboard({ vendorId }: QRTrackingDashboardPro
                     : 0}/day
                 </p>
               </div>
-              <i className="fas fa-chart-line text-3xl opacity-20" style={{ color: '#c23c09' }}></i>
+              <TrendingUp className="w-8 h-8 opacity-20 stroke-[1.5]" style={{ color: '#c23c09' }} />
             </div>
           </div>
 
@@ -183,7 +184,7 @@ export default function QRTrackingDashboard({ vendorId }: QRTrackingDashboardPro
                   {analytics.topProducts[0]?.productName || 'N/A'}
                 </p>
               </div>
-              <i className="fas fa-trophy text-3xl opacity-20 text-purple-600"></i>
+              <Trophy className="w-8 h-8 opacity-20 stroke-[1.5] text-purple-600" />
             </div>
           </div>
         </div>
@@ -293,7 +294,7 @@ export default function QRTrackingDashboard({ vendorId }: QRTrackingDashboardPro
                 <td className="px-4 py-3 text-sm">Guest User</td>
                 <td className="px-4 py-3 text-sm">
                   <button className="text-blue-600 hover:text-blue-800">
-                    <i className="fas fa-eye"></i>
+                    <Eye className="w-5 h-5 stroke-[1.5]" />
                   </button>
                 </td>
               </tr>
@@ -309,12 +310,12 @@ export default function QRTrackingDashboard({ vendorId }: QRTrackingDashboardPro
           Export QR Data
         </h3>
         <div className="flex gap-4">
-          <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-            <i className="fas fa-file-csv mr-2"></i>
+          <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 stroke-[1.5]" />
             Export to CSV
           </button>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <i className="fas fa-file-pdf mr-2"></i>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+            <FileText className="w-5 h-5 stroke-[1.5]" />
             Generate Report
           </button>
         </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Star, Calendar, Tag, Award, Store, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 
 interface Enterprise {
@@ -223,8 +224,8 @@ const VillageEnterprises = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-6">
-            <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg" style={{ backgroundColor: '#f6af0d' }}>
-              <i className="fas fa-star mr-2"></i>
+            <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg inline-flex items-center gap-2" style={{ backgroundColor: '#f6af0d' }}>
+              <Star className="w-4 h-4 stroke-[1.5]" />
               {t('The Founding Six')}
             </span>
           </div>
@@ -265,13 +266,13 @@ const VillageEnterprises = () => {
                     {currentEnterprise.tagline}
                   </p>
                   <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-xs sm:text-sm" style={{ color: '#6b7280' }}>
-                    <span>
-                      <i className="fas fa-calendar mr-1"></i>
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 stroke-[1.5]" />
                       {t('Est.')} {currentEnterprise.yearFounded}
                     </span>
                     <span className="hidden sm:inline">|</span>
-                    <span>
-                      <i className="fas fa-tag mr-1"></i>
+                    <span className="inline-flex items-center gap-1">
+                      <Tag className="w-3.5 h-3.5 stroke-[1.5]" />
                       {currentEnterprise.category}
                     </span>
                   </div>
@@ -285,7 +286,7 @@ const VillageEnterprises = () => {
               
               {/* Specialty Badge */}
               <div className="mt-4 sm:mt-6 inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full mx-auto sm:mx-0" style={{ backgroundColor: `${currentEnterprise.color}20` }}>
-                <i className="fas fa-award text-sm" style={{ color: currentEnterprise.color }}></i>
+                <Award className="w-4 h-4 stroke-[1.5]" style={{ color: currentEnterprise.color }} />
                 <span className="font-semibold text-sm sm:text-base" style={{ color: currentEnterprise.color }}>
                   {t('Specialty')}: {currentEnterprise.specialty}
                 </span>
@@ -393,9 +394,9 @@ const VillageEnterprises = () => {
                   className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3"
                   style={{ backgroundColor: currentEnterprise.color }}
                 >
-                  <i className="fas fa-store"></i>
+                  <Store className="w-5 h-5 stroke-[1.5]" />
                   {t('Shop')} {currentEnterprise.name} {t('Products')}
-                  <i className="fas fa-arrow-right"></i>
+                  <ArrowRight className="w-5 h-5 stroke-[1.5]" />
                 </button>
               </Link>
             </div>

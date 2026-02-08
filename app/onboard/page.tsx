@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowLeft, Lock } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import OnboardingFlow from '@/components/customer/OnboardingFlow';
 import { useRouter } from 'next/navigation';
@@ -34,7 +35,7 @@ export default function OnboardingPage() {
               href="/"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
               Back to Home
             </Link>
             
@@ -93,8 +94,8 @@ export default function OnboardingPage() {
             transition={{ delay: 0.5 }}
             className="max-w-2xl mx-auto mt-8 text-center"
           >
-            <div className="bg-gray-100 rounded-lg p-4 inline-block">
-              <i className="fas fa-lock text-gray-600 mr-2" />
+            <div className="bg-gray-100 rounded-lg p-4 inline-flex items-center gap-2">
+              <Lock className="w-5 h-5 stroke-[1.5] text-gray-600" />
               <span className="text-sm text-gray-600">
                 Your data is secure and will only be used to enhance your shopping experience
               </span>

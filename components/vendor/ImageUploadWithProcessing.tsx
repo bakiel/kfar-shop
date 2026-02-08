@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { Info, Pencil, Trash2, Loader2, CloudUpload, AlertCircle } from 'lucide-react';
 import ImageCropper from './ImageCropper';
 import ImageGuidelines from './ImageGuidelines';
 import {
@@ -119,7 +120,7 @@ export default function ImageUploadWithProcessing({
           onClick={() => setShowGuidelines(true)}
           className="text-sm text-[#478c0b] hover:text-[#3a7209] flex items-center gap-1"
         >
-          <i className="fas fa-info-circle"></i>
+          <Info className="w-4 h-4 stroke-[1.5]" />
           Photo Guidelines
         </button>
       </div>
@@ -137,17 +138,17 @@ export default function ImageUploadWithProcessing({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-white transition-colors"
+                className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-white transition-colors inline-flex items-center gap-1"
               >
-                <i className="fas fa-edit mr-1"></i>
+                <Pencil className="w-4 h-4 stroke-[1.5]" />
                 Change
               </button>
               <button
                 type="button"
                 onClick={handleRemoveImage}
-                className="bg-red-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
+                className="bg-red-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-600 transition-colors inline-flex items-center gap-1"
               >
-                <i className="fas fa-trash mr-1"></i>
+                <Trash2 className="w-4 h-4 stroke-[1.5]" />
                 Remove
               </button>
             </div>
@@ -159,12 +160,12 @@ export default function ImageUploadWithProcessing({
           >
             {processing ? (
               <div className="space-y-3">
-                <i className="fas fa-spinner fa-spin text-4xl text-[#478c0b]"></i>
+                <Loader2 className="w-10 h-10 stroke-[1.5] text-[#478c0b] animate-spin mx-auto" />
                 <p className="text-gray-600">Processing image...</p>
               </div>
             ) : (
               <div className="space-y-3">
-                <i className="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                <CloudUpload className="w-10 h-10 stroke-[1.5] text-gray-400 mx-auto" />
                 <p className="text-gray-600">
                   Click to upload or drag and drop
                 </p>
@@ -188,8 +189,8 @@ export default function ImageUploadWithProcessing({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
-          <i className="fas fa-exclamation-circle mr-2"></i>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 stroke-[1.5] flex-shrink-0" />
           {error}
         </div>
       )}

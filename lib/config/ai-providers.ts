@@ -6,7 +6,7 @@
 export const AI_PROVIDERS = {
   // OpenRouter - Primary vision and chat provider
   openRouter: {
-    apiKey: process.env.OPENROUTER_API_KEY || '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',
+    apiKey: process.env.OPENROUTER_API_KEY || '',
     baseUrl: 'https://openrouter.ai/api/v1/chat/completions',
     models: {
       // Primary models
@@ -34,7 +34,7 @@ export const AI_PROVIDERS = {
 
   // DeepSeek - Alternative text generation
   deepSeek: {
-    apiKey: process.env.DEEPSEEK_API_KEY || 'sk-0a29625742c94132a5df711c5ac65f15',
+    apiKey: process.env.DEEPSEEK_API_KEY || '',
     baseUrl: 'https://api.deepseek.com/v1/chat/completions',
     models: {
       chat: 'deepseek-chat',
@@ -44,7 +44,7 @@ export const AI_PROVIDERS = {
 
   // OpenWriter - Future integration
   openWriter: {
-    apiKey: process.env.OPENWRITER_API_KEY || 'sk-0a29625742c94132a5df711c5ac65f15',
+    apiKey: process.env.OPENWRITER_API_KEY || '',
     baseUrl: 'https://api.openwriter.ai/v1/completions',
     models: {
       default: 'openwriter-default'
@@ -53,7 +53,7 @@ export const AI_PROVIDERS = {
 
   // ElevenLabs - Voice synthesis
   elevenLabs: {
-    apiKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || 'sk_62cbaf98a9ac9ee38ae4d0f7cd0c933ad0147cdbe017b173',
+    apiKey: process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY || '',
     baseUrl: 'https://api.elevenlabs.io/v1',
     voices: {
       kfar: 'TxGEqnHWrfWFTfGW9XjX',

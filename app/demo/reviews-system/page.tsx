@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
-import { Star, Camera, Gift, BarChart3, Shield } from 'lucide-react';
+import { Star, Camera, Gift, BarChart3, Shield, ArrowLeft, Coins, Trophy, Users, TrendingUp, MessageSquare, Award, Check, X, ShoppingBag, User } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 
 export default function ReviewsSystemDemo() {
@@ -78,7 +78,7 @@ export default function ReviewsSystemDemo() {
               href="/demo"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
               Back to Demos
             </Link>
             
@@ -227,7 +227,24 @@ export default function ReviewsSystemDemo() {
                       onError={(e) => {
                         const div = document.createElement('div');
                         div.className = 'bg-gradient-to-br from-green-100 to-yellow-100 rounded-lg p-12 text-center';
-                        div.innerHTML = '<i class="fas fa-star text-6xl text-yellow-400 mb-4"></i><p class="text-gray-600">Review System Preview</p>';
+                        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        svg.setAttribute('width', '48');
+                        svg.setAttribute('height', '48');
+                        svg.setAttribute('viewBox', '0 0 24 24');
+                        svg.setAttribute('fill', 'none');
+                        svg.setAttribute('stroke', '#facc15');
+                        svg.setAttribute('stroke-width', '1.5');
+                        svg.setAttribute('stroke-linecap', 'round');
+                        svg.setAttribute('stroke-linejoin', 'round');
+                        svg.setAttribute('class', 'mb-4 mx-auto');
+                        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        polygon.setAttribute('points', '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2');
+                        svg.appendChild(polygon);
+                        div.appendChild(svg);
+                        const p = document.createElement('p');
+                        p.className = 'text-gray-600';
+                        p.textContent = 'Review System Preview';
+                        div.appendChild(p);
                         e.currentTarget.parentNode?.replaceChild(div, e.currentTarget);
                       }}
                     />
@@ -285,7 +302,7 @@ export default function ReviewsSystemDemo() {
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-coins text-yellow-500 mt-1" />
+                    <Coins className="w-5 h-5 stroke-[1.5] text-yellow-500 mt-1 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold">Earn Valuable Points</h4>
                       <p className="text-sm text-gray-600">
@@ -294,7 +311,7 @@ export default function ReviewsSystemDemo() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-trophy text-purple-500 mt-1" />
+                    <Trophy className="w-5 h-5 stroke-[1.5] text-purple-500 mt-1 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold">Build Reputation</h4>
                       <p className="text-sm text-gray-600">
@@ -303,7 +320,7 @@ export default function ReviewsSystemDemo() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-users text-blue-500 mt-1" />
+                    <Users className="w-5 h-5 stroke-[1.5] text-blue-500 mt-1 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold">Help Community</h4>
                       <p className="text-sm text-gray-600">
@@ -312,7 +329,7 @@ export default function ReviewsSystemDemo() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-chart-line text-green-500 mt-1" />
+                    <TrendingUp className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold">Track Impact</h4>
                       <p className="text-sm text-gray-600">
@@ -338,11 +355,11 @@ export default function ReviewsSystemDemo() {
                     <span>Build trust with verified purchase reviews</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <i className="fas fa-comments text-purple-500 text-xl" />
+                    <MessageSquare className="w-5 h-5 stroke-[1.5] text-purple-500" />
                     <span>Direct feedback channel from customers</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <i className="fas fa-award text-yellow-500 text-xl" />
+                    <Award className="w-5 h-5 stroke-[1.5] text-yellow-500" />
                     <span>Showcase high ratings to attract new customers</span>
                   </div>
                 </div>
@@ -375,11 +392,10 @@ export default function ReviewsSystemDemo() {
                               : 'bg-gray-100'
                           }`}
                         >
-                          <i 
-                            className={`fas fa-${point.connected ? 'check' : 'times'} ${
-                              point.connected ? 'text-green-600' : 'text-gray-400'
-                            }`} 
-                          />
+                            {point.connected
+                            ? <Check className="w-5 h-5 stroke-[1.5] text-green-600" />
+                            : <X className="w-5 h-5 stroke-[1.5] text-gray-400" />
+                          }
                         </div>
                         <div>
                           <h4 className="font-semibold">{point.component}</h4>
@@ -473,14 +489,14 @@ export default function ReviewsSystemDemo() {
                   href="/product/vegan-shawarma"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-600 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
-                  <i className="fas fa-shopping-bag" />
+                  <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
                   View Product with Reviews
                 </Link>
                 <Link
                   href="/customer/dashboard"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-all"
                 >
-                  <i className="fas fa-user" />
+                  <User className="w-5 h-5 stroke-[1.5]" />
                   Customer Dashboard
                 </Link>
               </div>

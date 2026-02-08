@@ -2,13 +2,8 @@ import { VisionAnalysis } from './vision-ai-service';
 
 // OpenRouter API configuration
 // Updated to use the latest API key
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 
-  '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';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
-
-// Alternative API keys for future use:
-// OpenWriter: sk-0a29625742c94132a5df711c5ac65f15
-// DeepSeek: Available in deepseek-service.ts
 
 export class OpenRouterVisionService {
   private static headers = {

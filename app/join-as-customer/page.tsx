@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Star, QrCode, Mic, Bot, UserPlus, SlidersHorizontal, ShoppingCart } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { useMobileDetect } from '@/hooks/useMobileDetect';
 
@@ -13,25 +14,25 @@ export default function JoinAsCustomerPage() {
 
   const benefits = [
     {
-      icon: 'fa-qrcode',
+      icon: QrCode,
       title: 'Personal QR Code',
       description: 'Get your unique QR code for seamless shopping and exclusive deals',
       color: '#478c0b'
     },
     {
-      icon: 'fa-microphone',
+      icon: Mic,
       title: 'Voice Shopping',
       description: 'Order with voice commands in multiple languages',
       color: '#f6af0d'
     },
     {
-      icon: 'fa-star',
+      icon: Star,
       title: 'Rewards Program',
       description: 'Earn points with every purchase and unlock special benefits',
       color: '#c23c09'
     },
     {
-      icon: 'fa-robot',
+      icon: Bot,
       title: 'AI Personalization',
       description: 'Get recommendations tailored to your preferences',
       color: '#3a3a1d'
@@ -43,25 +44,25 @@ export default function JoinAsCustomerPage() {
       number: '1',
       title: 'Sign Up',
       description: 'Quick registration with just basic information',
-      icon: 'fa-user-plus'
+      icon: UserPlus
     },
     {
       number: '2',
       title: 'Personalize',
       description: 'Set your preferences and upload your photo',
-      icon: 'fa-sliders-h'
+      icon: SlidersHorizontal
     },
     {
       number: '3',
       title: 'Get QR Code',
       description: 'Receive your unique QR code instantly',
-      icon: 'fa-qrcode'
+      icon: QrCode
     },
     {
       number: '4',
       title: 'Start Shopping',
       description: 'Enjoy exclusive benefits and rewards',
-      icon: 'fa-shopping-cart'
+      icon: ShoppingCart
     }
   ];
 
@@ -195,7 +196,7 @@ export default function JoinAsCustomerPage() {
                   className="w-16 h-16 rounded-full flex items-center justify-center text-white mb-4"
                   style={{ backgroundColor: benefit.color }}
                 >
-                  <i className={`fas ${benefit.icon} text-2xl`} />
+                  <benefit.icon className="w-7 h-7 stroke-[1.5]" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2" style={{ color: '#3a3a1d' }}>
                   {benefit.title}
@@ -239,7 +240,7 @@ export default function JoinAsCustomerPage() {
                     className="w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg"
                     style={{ backgroundColor: '#478c0b' }}
                   >
-                    <i className={`fas ${step.icon} text-2xl`} />
+                    <step.icon className="w-7 h-7 stroke-[1.5]" />
                   </div>
                   {!isMobile && index < steps.length - 1 && (
                     <div
@@ -291,7 +292,7 @@ export default function JoinAsCustomerPage() {
                     </div>
                     <div className="flex gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <i key={i} className="fas fa-star text-yellow-500" />
+                        <Star key={i} className="w-5 h-5 stroke-[1.5] text-yellow-500 fill-yellow-500" />
                       ))}
                     </div>
                     <p className="text-lg text-gray-700 mb-4 italic">

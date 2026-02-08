@@ -7,7 +7,7 @@ import { vendorStores, getAllProducts, getProductsByVendor } from '@/lib/data/wo
 import { marketplaceDB } from './marketplace-database';
 import { AI_PROVIDERS } from '@/lib/config/ai-providers';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
 export interface OpenRouterMessage {

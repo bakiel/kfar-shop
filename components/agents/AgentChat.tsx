@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { X, MessageCircle, MoreVertical, Send } from 'lucide-react';
 import { MARKETPLACE_AGENTS, AGENT_RESPONSES, AGENT_QUICK_ACTIONS, AgentActionHandler } from '@/lib/agents/marketplace-agents';
 
 interface Message {
@@ -150,9 +151,9 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-leaf-green to-sun-gold rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
       >
         {isOpen ? (
-          <i className="fas fa-times text-white text-xl"></i>
+          <X className="w-6 h-6 stroke-[1.5] text-white" />
         ) : (
-          <i className="fas fa-comment-dots text-white text-xl"></i>
+          <MessageCircle className="w-6 h-6 stroke-[1.5] text-white" />
         )}
       </button>
       
@@ -166,7 +167,7 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
                 {currentAgent && (
                   <>
                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <i className={`fas ${currentAgent.icon} text-leaf-green`}></i>
+                      <currentAgent.icon className="w-5 h-5 stroke-[1.5] text-leaf-green" />
                     </div>
                     <div>
                       <h3 className="text-white font-semibold">
@@ -181,7 +182,7 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
                 onClick={() => setShowAgentSelector(!showAgentSelector)}
                 className="text-white hover:text-white/80"
               >
-                <i className="fas fa-ellipsis-v"></i>
+                <MoreVertical className="w-5 h-5 stroke-[1.5]" />
               </button>
             </div>
           </div>
@@ -205,7 +206,7 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
                         : 'bg-white hover:bg-gray-100'
                     }`}
                   >
-                    <i className={`fas ${agent.icon}`}></i>
+                    <agent.icon className="w-4 h-4 stroke-[1.5]" />
                     <span className="truncate">{agent.name}</span>
                   </button>
                 ))}
@@ -260,7 +261,7 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
                     onClick={() => handleQuickAction(action.action)}
                     className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs hover:bg-gray-100 whitespace-nowrap"
                   >
-                    <i className={`fas ${action.icon} text-leaf-green`}></i>
+                    <action.icon className="w-4 h-4 stroke-[1.5] text-leaf-green" />
                     <span>{action.label}</span>
                   </button>
                 ))}
@@ -281,9 +282,9 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
               />
               <button
                 onClick={handleSendMessage}
-                className="w-10 h-10 bg-leaf-green text-white rounded-full hover:bg-green-600 transition-colors"
+                className="w-10 h-10 bg-leaf-green text-white rounded-full hover:bg-green-600 transition-colors flex items-center justify-center"
               >
-                <i className="fas fa-paper-plane"></i>
+                <Send className="w-5 h-5 stroke-[1.5]" />
               </button>
             </div>
           </div>

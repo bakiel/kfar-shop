@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowLeft, CheckCircle, QrCode, Database, Brain, Wand2, UserPlus, Play } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import PersonalizedShopping from '@/components/customer/PersonalizedShopping';
 import CustomerQRCode from '@/components/customer/CustomerQRCode';
@@ -130,7 +131,7 @@ export default function AIPersonalizationDemo() {
               href="/demo"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
               Back to Demos
             </Link>
             
@@ -188,7 +189,7 @@ export default function AIPersonalizationDemo() {
                     <ul className="space-y-2">
                       {feature.details.map((detail, idx) => (
                         <li key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                          <i className="fas fa-check-circle text-green-500" />
+                          <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 flex-shrink-0" />
                           {detail}
                         </li>
                       ))}
@@ -206,37 +207,37 @@ export default function AIPersonalizationDemo() {
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="fas fa-qrcode text-green-600 text-2xl" />
+                      <QrCode className="w-7 h-7 stroke-[1.5] text-green-600" />
                     </div>
                     <h4 className="font-semibold mb-2">1. QR Scan</h4>
                     <p className="text-sm text-gray-600">
                       Customer scans QR code at vendor location
                     </p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="fas fa-database text-blue-600 text-2xl" />
+                      <Database className="w-7 h-7 stroke-[1.5] text-blue-600" />
                     </div>
                     <h4 className="font-semibold mb-2">2. Data Collection</h4>
                     <p className="text-sm text-gray-600">
                       System captures location, time, and context
                     </p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="fas fa-brain text-purple-600 text-2xl" />
+                      <Brain className="w-7 h-7 stroke-[1.5] text-purple-600" />
                     </div>
                     <h4 className="font-semibold mb-2">3. AI Analysis</h4>
                     <p className="text-sm text-gray-600">
                       Machine learning processes patterns
                     </p>
                   </div>
-                  
+
                   <div className="text-center">
                     <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <i className="fas fa-magic text-orange-600 text-2xl" />
+                      <Wand2 className="w-7 h-7 stroke-[1.5] text-orange-600" />
                     </div>
                     <h4 className="font-semibold mb-2">4. Personalization</h4>
                     <p className="text-sm text-gray-600">
@@ -312,7 +313,7 @@ export default function AIPersonalizationDemo() {
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-qrcode" />
+                        <QrCode className="w-5 h-5 stroke-[1.5]" />
                         Simulate Vendor Scan
                       </>
                     )}
@@ -549,14 +550,14 @@ export default function AIPersonalizationDemo() {
                   href="/onboard"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-600 rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
-                  <i className="fas fa-user-plus" />
+                  <UserPlus className="w-5 h-5 stroke-[1.5]" />
                   Create Your Profile
                 </Link>
                 <Link
                   href="/demo"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30 transition-all"
                 >
-                  <i className="fas fa-play" />
+                  <Play className="w-5 h-5 stroke-[1.5]" />
                   More Demos
                 </Link>
               </div>

@@ -17,8 +17,8 @@ let aiServiceInstance: UnifiedAIService | null = null;
 
 export function getAIService(): UnifiedAIService {
   if (!aiServiceInstance) {
-    const deepseekKey = process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY || 'sk-c1c819391f674040967955a41b469f89';
-    const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyA7dxzalb_kWQFludH0XMIAA9U1H_OROGs';
+    const deepseekKey = process.env.NEXT_PUBLIC_DEEPSEEK_API_KEY || '';
+    const geminiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
     
     aiServiceInstance = new UnifiedAIService(deepseekKey, geminiKey);
   }

@@ -3,7 +3,7 @@
  * Alternative AI provider for text generation and analysis
  */
 
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || 'sk-0a29625742c94132a5df711c5ac65f15';
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
 export interface DeepSeekResponse {

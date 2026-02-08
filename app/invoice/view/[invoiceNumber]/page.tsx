@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Script from 'next/script';
+import { Loader2, AlertTriangle, Download } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -102,7 +103,7 @@ export default function InvoiceViewPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-3xl text-green-600 mb-4"></i>
+          <Loader2 className="w-8 h-8 stroke-[1.5] text-green-600 mb-4 animate-spin mx-auto" />
           <p>Loading invoice...</p>
         </div>
       </div>
@@ -113,7 +114,7 @@ export default function InvoiceViewPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <i className="fas fa-exclamation-triangle text-3xl text-red-500 mb-4"></i>
+          <AlertTriangle className="w-8 h-8 stroke-[1.5] text-red-500 mb-4 mx-auto" />
           <p className="text-red-600">{error}</p>
         </div>
       </div>
@@ -138,7 +139,7 @@ export default function InvoiceViewPage() {
               disabled={!scriptLoaded}
               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
             >
-              <i className="fas fa-download"></i>
+              <Download className="w-5 h-5 stroke-[1.5]" />
               {scriptLoaded ? 'Download PDF' : 'Loading...'}
             </button>
           </div>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowLeft, Check, Rocket, Shield, Wand2, Gift, PlayCircle, X } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import OnboardingFlow from '@/components/customer/OnboardingFlow';
 import CustomerQRCode from '@/components/customer/CustomerQRCode';
@@ -81,7 +82,7 @@ export default function CustomerOnboardingDemo() {
               href="/demo"
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
               Back to Demos
             </Link>
             
@@ -129,7 +130,7 @@ export default function CustomerOnboardingDemo() {
                         <ul className="space-y-1">
                           {feature.details.map((detail, idx) => (
                             <li key={idx} className="text-xs text-gray-500 flex items-start gap-1">
-                              <i className="fas fa-check text-green-500 mt-0.5" />
+                              <Check className="w-3 h-3 stroke-[1.5] text-green-500 mt-0.5 flex-shrink-0" />
                               <span>{detail}</span>
                             </li>
                           ))}
@@ -150,7 +151,7 @@ export default function CustomerOnboardingDemo() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i className="fas fa-rocket text-green-600 text-xl" />
+                        <Rocket className="w-5 h-5 stroke-[1.5] text-green-600" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-2">Quick & Easy</h4>
@@ -162,7 +163,7 @@ export default function CustomerOnboardingDemo() {
                     
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i className="fas fa-shield-alt text-blue-600 text-xl" />
+                        <Shield className="w-5 h-5 stroke-[1.5] text-blue-600" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-2">Secure & Private</h4>
@@ -174,7 +175,7 @@ export default function CustomerOnboardingDemo() {
                     
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i className="fas fa-magic text-purple-600 text-xl" />
+                        <Wand2 className="w-5 h-5 stroke-[1.5] text-purple-600" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-2">AI-Enhanced</h4>
@@ -186,7 +187,7 @@ export default function CustomerOnboardingDemo() {
                     
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i className="fas fa-gift text-orange-600 text-xl" />
+                        <Gift className="w-5 h-5 stroke-[1.5] text-orange-600" />
                       </div>
                       <div>
                         <h4 className="font-semibold mb-2">Instant Rewards</h4>
@@ -210,7 +211,7 @@ export default function CustomerOnboardingDemo() {
                   onClick={() => setShowFlow(true)}
                   className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-lg hover:shadow-xl transition-all"
                 >
-                  <i className="fas fa-play-circle text-2xl" />
+                  <PlayCircle className="w-6 h-6 stroke-[1.5]" />
                   Try the Onboarding Flow
                 </button>
                 
@@ -237,7 +238,7 @@ export default function CustomerOnboardingDemo() {
                   onClick={() => setShowFlow(false)}
                   className="text-gray-600 hover:text-gray-800"
                 >
-                  <i className="fas fa-times mr-2" />
+                  <X className="w-4 h-4 stroke-[1.5] mr-2 inline-block" />
                   Cancel Demo
                 </button>
               </div>

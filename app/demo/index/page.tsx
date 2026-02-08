@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { ArrowRight, Brain, QrCode, Mic, TrendingUp, Shield, Users, Play } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 
 export default function DemoIndexPage() {
@@ -91,7 +92,7 @@ export default function DemoIndexPage() {
                       </p>
                       <div className="mt-4 flex items-center text-green-600 font-semibold">
                         <span>Try Demo</span>
-                        <i className="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform" />
+                        <ArrowRight className="w-4 h-4 stroke-[1.5] ml-2 group-hover:translate-x-2 transition-transform" />
                       </div>
                     </div>
                   </div>
@@ -113,7 +114,7 @@ export default function DemoIndexPage() {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <i className="fas fa-brain text-green-500 mt-1" />
+                  <Brain className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">AI Vision Analysis</h4>
                     <p className="text-sm text-gray-600">
@@ -122,7 +123,7 @@ export default function DemoIndexPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <i className="fas fa-qrcode text-blue-500 mt-1" />
+                  <QrCode className="w-5 h-5 stroke-[1.5] text-blue-500 mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">Smart QR Integration</h4>
                     <p className="text-sm text-gray-600">
@@ -131,7 +132,7 @@ export default function DemoIndexPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <i className="fas fa-microphone text-orange-500 mt-1" />
+                  <Mic className="w-5 h-5 stroke-[1.5] text-orange-500 mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">Voice-First Shopping</h4>
                     <p className="text-sm text-gray-600">
@@ -142,7 +143,7 @@ export default function DemoIndexPage() {
               </div>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <i className="fas fa-chart-line text-purple-500 mt-1" />
+                  <TrendingUp className="w-5 h-5 stroke-[1.5] text-purple-500 mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">Real-Time Analytics</h4>
                     <p className="text-sm text-gray-600">
@@ -151,7 +152,7 @@ export default function DemoIndexPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <i className="fas fa-shield-alt text-red-500 mt-1" />
+                  <Shield className="w-5 h-5 stroke-[1.5] text-red-500 mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">Secure & Private</h4>
                     <p className="text-sm text-gray-600">
@@ -160,7 +161,7 @@ export default function DemoIndexPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <i className="fas fa-users text-yellow-500 mt-1" />
+                  <Users className="w-5 h-5 stroke-[1.5] text-yellow-500 mt-1 flex-shrink-0" />
                   <div>
                     <h4 className="font-semibold">Community Driven</h4>
                     <p className="text-sm text-gray-600">
@@ -186,7 +187,7 @@ export default function DemoIndexPage() {
               href="/demo"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
             >
-              <i className="fas fa-play" />
+              <Play className="w-5 h-5 stroke-[1.5]" />
               Start Main Demo
             </Link>
           </motion.div>

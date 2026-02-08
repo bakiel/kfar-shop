@@ -4,6 +4,10 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
 import '@/styles/kfar-style-system.css';
+import {
+  Globe, Check, Star, BookOpen, MapPin, Plane, Bus, Car,
+  Utensils, Shirt, Calendar, Sun, CalendarCheck, Phone
+} from 'lucide-react';
 
 export default function TourismPage() {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -227,7 +231,7 @@ export default function TourismPage() {
             <div className="bg-gradient-to-br from-green-50 to-yellow-50 rounded-2xl p-8">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 mx-auto"
                    style={{ backgroundColor: '#478c0b' }}>
-                <i className="fas fa-globe-africa text-3xl text-white"></i>
+                <Globe className="w-8 h-8 stroke-[1.5] text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4 text-center">Heritage Connection</h3>
               <p className="text-gray-700 mb-6 text-center">
@@ -235,19 +239,19 @@ export default function TourismPage() {
               </p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#478c0b' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <span>10-day immersion programs</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#478c0b' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <span>Birthright alternative (18-30)</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#478c0b' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <span>Family roots exploration</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#478c0b' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <span>Travel support available</span>
                 </li>
               </ul>
@@ -261,7 +265,7 @@ export default function TourismPage() {
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 mx-auto"
                    style={{ backgroundColor: '#f6af0d' }}>
-                <i className="fas fa-star-of-david text-3xl text-white"></i>
+                <Star className="w-8 h-8 stroke-[1.5] text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4 text-center">שכנים ישראלים</h3>
               <p className="text-gray-700 mb-6 text-center" dir="rtl">
@@ -269,19 +273,19 @@ export default function TourismPage() {
               </p>
               <ul className="space-y-2 mb-6" dir="rtl">
                 <li className="flex items-center">
-                  <i className="fas fa-check ml-3" style={{ color: '#f6af0d' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] ml-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <span>סיורים בעברית</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check ml-3" style={{ color: '#f6af0d' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] ml-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <span>סדנאות בישול טבעוני</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check ml-3" style={{ color: '#f6af0d' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] ml-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <span>הרצאות על אורח חיים בריא</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check ml-3" style={{ color: '#f6af0d' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] ml-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <span>הנחות לקבוצות</span>
                 </li>
               </ul>
@@ -295,7 +299,7 @@ export default function TourismPage() {
             <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl p-8">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 mx-auto"
                    style={{ backgroundColor: '#c23c09' }}>
-                <i className="fas fa-passport text-3xl text-white"></i>
+                <BookOpen className="w-8 h-8 stroke-[1.5] text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-4 text-center">Cultural Exchange</h3>
               <p className="text-gray-700 mb-6 text-center">
@@ -303,19 +307,19 @@ export default function TourismPage() {
               </p>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#c23c09' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#c23c09' }} />
                   <span>1-4 week programs</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#c23c09' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#c23c09' }} />
                   <span>Work-study opportunities</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#c23c09' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#c23c09' }} />
                   <span>Hebrew language courses</span>
                 </li>
                 <li className="flex items-center">
-                  <i className="fas fa-check mr-3" style={{ color: '#c23c09' }}></i>
+                  <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#c23c09' }} />
                   <span>Certificate programs</span>
                 </li>
               </ul>
@@ -354,7 +358,7 @@ export default function TourismPage() {
                   <ul className="space-y-2 mb-4">
                     {option.features.map((feature, idx) => (
                       <li key={idx} className="flex items-center text-sm text-gray-600">
-                        <i className="fas fa-check mr-2" style={{ color: '#478c0b' }}></i>
+                        <Check className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                         {feature}
                       </li>
                     ))}
@@ -385,28 +389,28 @@ export default function TourismPage() {
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <i className="fas fa-map-marker-alt mt-1 mr-4" style={{ color: '#478c0b' }}></i>
+                  <MapPin className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <div>
                     <p className="font-semibold">Address</p>
                     <p className="text-gray-600">Village of Peace, Dimona 8600000, Israel</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <i className="fas fa-plane mt-1 mr-4" style={{ color: '#478c0b' }}></i>
+                  <Plane className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <div>
                     <p className="font-semibold">From Ben Gurion Airport</p>
                     <p className="text-gray-600">2 hours by car/bus via Beer Sheva</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <i className="fas fa-bus mt-1 mr-4" style={{ color: '#478c0b' }}></i>
+                  <Bus className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <div>
                     <p className="font-semibold">Public Transport</p>
                     <p className="text-gray-600">Bus from Beer Sheva Central Station</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <i className="fas fa-car mt-1 mr-4" style={{ color: '#478c0b' }}></i>
+                  <Car className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                   <div>
                     <p className="font-semibold">By Car</p>
                     <p className="text-gray-600">Route 25 from Beer Sheva (40 min)</p>
@@ -422,28 +426,28 @@ export default function TourismPage() {
               </h3>
               <div className="space-y-4">
                 <div className="flex items-start">
-                  <i className="fas fa-utensils mt-1 mr-4" style={{ color: '#f6af0d' }}></i>
+                  <Utensils className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <div>
                     <p className="font-semibold">Dietary</p>
                     <p className="text-gray-600">100% vegan community - no animal products</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <i className="fas fa-tshirt mt-1 mr-4" style={{ color: '#f6af0d' }}></i>
+                  <Shirt className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <div>
                     <p className="font-semibold">Dress Code</p>
                     <p className="text-gray-600">Modest clothing recommended</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <i className="fas fa-calendar mt-1 mr-4" style={{ color: '#f6af0d' }}></i>
+                  <Calendar className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <div>
                     <p className="font-semibold">Sabbath</p>
                     <p className="text-gray-600">Friday sunset to Saturday sunset</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <i className="fas fa-sun mt-1 mr-4" style={{ color: '#f6af0d' }}></i>
+                  <Sun className="w-5 h-5 stroke-[1.5] mt-1 mr-4 flex-shrink-0" style={{ color: '#f6af0d' }} />
                   <div>
                     <p className="font-semibold">Best Time</p>
                     <p className="text-gray-600">Spring (Mar-May) & Fall (Sep-Nov)</p>
@@ -466,11 +470,11 @@ export default function TourismPage() {
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             <button className="px-8 py-4 bg-white rounded-full font-semibold hover:shadow-lg transition-all"
                     style={{ color: '#478c0b' }}>
-              <i className="fas fa-calendar-check mr-2"></i>
+              <span className="inline-flex items-center"><CalendarCheck className="w-5 h-5 stroke-[1.5] mr-2" /></span>
               Book Your Visit
             </button>
             <button className="px-8 py-4 bg-transparent border-2 border-white rounded-full font-semibold hover:bg-white hover:text-green-800 transition-all">
-              <i className="fas fa-phone mr-2"></i>
+              <span className="inline-flex items-center"><Phone className="w-5 h-5 stroke-[1.5] mr-2" /></span>
               Contact Us
             </button>
           </div>
@@ -494,7 +498,7 @@ export default function TourismPage() {
               <ul className="space-y-2">
                 {tourPackages[selectedPackage as keyof typeof tourPackages].includes.map((item, idx) => (
                   <li key={idx} className="flex items-center">
-                    <i className="fas fa-check mr-3" style={{ color: '#478c0b' }}></i>
+                    <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                     {item}
                   </li>
                 ))}

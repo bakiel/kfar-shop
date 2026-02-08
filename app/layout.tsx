@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     siteName: 'KFAR Marketplace',
     images: [
       {
-        url: 'https://kfar-final.vercel.app/images/logos/kfar_logo_africa_heritage.png',
+        url: '/images/logos/kfar_logo_africa_heritage.png',
         width: 1200,
         height: 630,
         alt: 'KFAR Marketplace - Village of Peace',
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "KFAR Marketplace - Village of Peace",
     description: "Authentic vegan products and services from the Village of Peace community",
-    images: ['https://kfar-final.vercel.app/images/logos/kfar_logo_africa_heritage.png'],
+    images: ['/images/logos/kfar_logo_africa_heritage.png'],
   },
 };
 
@@ -79,8 +79,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <FaviconMeta />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-        <script src="/suppress-extension-errors-enhanced.js" defer></script>
       </head>
       <body
         className={`${fraunces.variable} ${inter.variable} ${rubik.variable} ${spaceGrotesk.variable} antialiased`}

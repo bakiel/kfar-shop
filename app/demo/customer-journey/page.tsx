@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ArrowLeft, ArrowRight, Brain, QrCode, ShoppingBasket, Percent, CheckCircle, Star, Shield, AlertTriangle, Check, Coins, History, RotateCw } from 'lucide-react';
 import CustomerQRCode from '@/components/customer/CustomerQRCode';
 import CustomerQRScanner from '@/components/vendor/CustomerQRScanner';
 import { ANALYZED_CUSTOMER_PROFILES } from '@/lib/services/customer-avatar-analyzer';
@@ -31,22 +32,22 @@ export default function CustomerJourneyDemo() {
     {
       title: 'AI Profile Analysis',
       description: 'Customer avatar is analyzed using Vision AI to create personalized profile',
-      icon: 'fa-brain'
+      icon: <Brain className="w-7 h-7 stroke-[1.5]" />
     },
     {
       title: 'QR Code Generation',
       description: 'Unique QR code created with embedded profile data and preferences',
-      icon: 'fa-qrcode'
+      icon: <QrCode className="w-7 h-7 stroke-[1.5]" />
     },
     {
       title: 'Shopping Experience',
       description: 'Customer shops at KFAR marketplace with personalized recommendations',
-      icon: 'fa-shopping-basket'
+      icon: <ShoppingBasket className="w-7 h-7 stroke-[1.5]" />
     },
     {
       title: 'Vendor Scan & Benefits',
       description: 'Vendor scans QR to apply discounts and see customer preferences',
-      icon: 'fa-percentage'
+      icon: <Percent className="w-7 h-7 stroke-[1.5]" />
     }
   ];
 
@@ -70,7 +71,7 @@ export default function CustomerJourneyDemo() {
             href="/demo"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
-            <i className="fas fa-arrow-left" />
+            <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
             Back to Demos
           </Link>
           
@@ -104,7 +105,7 @@ export default function CustomerJourneyDemo() {
                         : 'bg-gray-200 text-gray-500'
                     }`}
                   >
-                    <i className={`fas ${step.icon} text-2xl`} />
+                    {step.icon}
                   </div>
                   <p className="text-sm font-semibold">{step.title}</p>
                 </motion.div>
@@ -225,7 +226,7 @@ export default function CustomerJourneyDemo() {
                     className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
                   >
                     Generate QR Code
-                    <i className="fas fa-arrow-right ml-2" />
+                    <ArrowRight className="w-4 h-4 stroke-[1.5] ml-2 inline-block" />
                   </button>
                 </div>
               </div>
@@ -272,15 +273,15 @@ export default function CustomerJourneyDemo() {
                     
                     <div className="mt-6 space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        <i className="fas fa-check-circle text-green-500" />
+                        <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500" />
                         <span>Encrypted for security</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        <i className="fas fa-check-circle text-green-500" />
+                        <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500" />
                         <span>Works offline</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        <i className="fas fa-check-circle text-green-500" />
+                        <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500" />
                         <span>Updates in real-time</span>
                       </div>
                     </div>
@@ -293,7 +294,7 @@ export default function CustomerJourneyDemo() {
                     className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
                   >
                     Start Shopping
-                    <i className="fas fa-arrow-right ml-2" />
+                    <ArrowRight className="w-4 h-4 stroke-[1.5] ml-2 inline-block" />
                   </button>
                 </div>
               </div>
@@ -316,7 +317,7 @@ export default function CustomerJourneyDemo() {
                 
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
                   <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6">
-                    <i className="fas fa-star text-3xl mb-3" style={{ color: '#f6af0d' }} />
+                    <Star className="w-8 h-8 stroke-[1.5] mb-3" style={{ color: '#f6af0d' }} />
                     <h3 className="font-semibold mb-2">Personalized Recommendations</h3>
                     <p className="text-sm text-gray-600">
                       Based on {customerProfile.name}'s preferences for{' '}
@@ -325,7 +326,7 @@ export default function CustomerJourneyDemo() {
                   </div>
                   
                   <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6">
-                    <i className="fas fa-percentage text-3xl mb-3" style={{ color: '#c23c09' }} />
+                    <Percent className="w-8 h-8 stroke-[1.5] mb-3" style={{ color: '#c23c09' }} />
                     <h3 className="font-semibold mb-2">Automatic Discounts</h3>
                     <p className="text-sm text-gray-600">
                       {customerProfile.loyaltyTier === 'platinum' ? '20%' :
@@ -336,7 +337,7 @@ export default function CustomerJourneyDemo() {
                   </div>
                   
                   <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6">
-                    <i className="fas fa-shield-alt text-3xl mb-3" style={{ color: '#7c3aed' }} />
+                    <Shield className="w-8 h-8 stroke-[1.5] mb-3" style={{ color: '#7c3aed' }} />
                     <h3 className="font-semibold mb-2">Allergy Protection</h3>
                     <p className="text-sm text-gray-600">
                       {customerProfile.preferences.allergies.length > 0
@@ -367,7 +368,7 @@ export default function CustomerJourneyDemo() {
                       onClick={handleMockScan}
                       className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
                     >
-                      <i className="fas fa-qrcode mr-2" />
+                      <QrCode className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                       Present QR Code
                     </button>
                   </div>
@@ -396,7 +397,7 @@ export default function CustomerJourneyDemo() {
                     <div className="bg-gray-50 rounded-xl p-6">
                       <div className="flex items-center gap-4 mb-4">
                         <div className="w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl">
-                          <i className="fas fa-check" />
+                          <Check className="w-7 h-7 stroke-[1.5]" />
                         </div>
                         <div>
                           <p className="font-semibold text-lg">Customer Identified</p>
@@ -408,7 +409,7 @@ export default function CustomerJourneyDemo() {
                       {(customerProfile.preferences.dietary.length > 0 || customerProfile.preferences.allergies.length > 0) && (
                         <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-4">
                           <h4 className="font-semibold text-yellow-800 mb-2">
-                            <i className="fas fa-exclamation-triangle mr-2" />
+                            <AlertTriangle className="w-4 h-4 stroke-[1.5] mr-2 inline-block" />
                             Customer Preferences
                           </h4>
                           {customerProfile.preferences.dietary.length > 0 && (
@@ -454,7 +455,7 @@ export default function CustomerJourneyDemo() {
                     <h3 className="text-lg font-semibold mb-4">Benefits Applied</h3>
                     <div className="space-y-4">
                       <div className="bg-green-50 rounded-lg p-4">
-                        <i className="fas fa-check-circle text-green-500 text-xl mb-2" />
+                        <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mb-2" />
                         <h4 className="font-semibold">Loyalty Discount Applied</h4>
                         <p className="text-sm text-gray-600">
                           {customerProfile.loyaltyTier === 'platinum' ? '20%' :
@@ -465,7 +466,7 @@ export default function CustomerJourneyDemo() {
                       </div>
                       
                       <div className="bg-blue-50 rounded-lg p-4">
-                        <i className="fas fa-coins text-blue-500 text-xl mb-2" />
+                        <Coins className="w-5 h-5 stroke-[1.5] text-blue-500 mb-2" />
                         <h4 className="font-semibold">Points Earned</h4>
                         <p className="text-sm text-gray-600">
                           +{Math.floor(125 * 0.85)} points added to account
@@ -473,7 +474,7 @@ export default function CustomerJourneyDemo() {
                       </div>
                       
                       <div className="bg-purple-50 rounded-lg p-4">
-                        <i className="fas fa-history text-purple-500 text-xl mb-2" />
+                        <History className="w-5 h-5 stroke-[1.5] text-purple-500 mb-2" />
                         <h4 className="font-semibold">Purchase History Updated</h4>
                         <p className="text-sm text-gray-600">
                           Transaction recorded for future recommendations
@@ -486,7 +487,7 @@ export default function CustomerJourneyDemo() {
                         onClick={() => setCurrentStep(0)}
                         className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-all"
                       >
-                        <i className="fas fa-redo mr-2" />
+                        <RotateCw className="w-4 h-4 stroke-[1.5] mr-2 inline-block" />
                         Start Over
                       </button>
                     </div>

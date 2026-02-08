@@ -3,6 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
+import {
+  Headphones, HelpCircle, Truck, Shield, MapPin, Phone, Mail, Clock,
+  QrCode, Send, Check, Search, ShoppingCart, CreditCard, Users,
+  ChevronDown, Home, Globe, Star, UserCheck
+} from 'lucide-react';
 
 const SupportPage = () => {
   const [activeSection, setActiveSection] = useState('contact');
@@ -65,7 +70,7 @@ const SupportPage = () => {
                 }`}
                 onClick={() => showSection('contact')}
               >
-                <i className="fas fa-headset"></i>
+                <Headphones className="w-5 h-5 stroke-[1.5]" />
                 Contact & Support
               </button>
               <button 
@@ -76,7 +81,7 @@ const SupportPage = () => {
                 }`}
                 onClick={() => showSection('faq')}
               >
-                <i className="fas fa-question-circle"></i>
+                <HelpCircle className="w-5 h-5 stroke-[1.5]" />
                 FAQ & Help
               </button>
               <button 
@@ -87,7 +92,7 @@ const SupportPage = () => {
                 }`}
                 onClick={() => showSection('shipping')}
               >
-                <i className="fas fa-shipping-fast"></i>
+                <Truck className="w-5 h-5 stroke-[1.5]" />
                 Shipping & Returns
               </button>
               <button 
@@ -98,7 +103,7 @@ const SupportPage = () => {
                 }`}
                 onClick={() => showSection('privacy')}
               >
-                <i className="fas fa-shield-alt"></i>
+                <Shield className="w-5 h-5 stroke-[1.5]" />
                 Privacy & Terms
               </button>
             </div>
@@ -120,7 +125,7 @@ const SupportPage = () => {
                 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                    <i className="fas fa-map-marker-alt text-2xl mr-4" style={{ color: '#478c0b' }}></i>
+                    <MapPin className="w-6 h-6 stroke-[1.5] mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                     <div>
                       <h4 className="font-semibold">Visit Us</h4>
                       <p className="text-gray-600">Village of Peace, Dimona, Israel</p>
@@ -128,7 +133,7 @@ const SupportPage = () => {
                   </div>
                   
                   <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                    <i className="fas fa-phone text-2xl mr-4" style={{ color: '#478c0b' }}></i>
+                    <Phone className="w-6 h-6 stroke-[1.5] mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                     <div>
                       <h4 className="font-semibold">Call Us</h4>
                       <p className="text-gray-600">+972-8-6567788</p>
@@ -136,7 +141,7 @@ const SupportPage = () => {
                   </div>
                   
                   <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                    <i className="fas fa-envelope text-2xl mr-4" style={{ color: '#478c0b' }}></i>
+                    <Mail className="w-6 h-6 stroke-[1.5] mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                     <div>
                       <h4 className="font-semibold">Email Support</h4>
                       <p className="text-gray-600">support@kfar.org</p>
@@ -144,7 +149,7 @@ const SupportPage = () => {
                   </div>
                   
                   <div className="flex items-center p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                    <i className="fas fa-clock text-2xl mr-4" style={{ color: '#478c0b' }}></i>
+                    <Clock className="w-6 h-6 stroke-[1.5] mr-4 flex-shrink-0" style={{ color: '#478c0b' }} />
                     <div>
                       <h4 className="font-semibold">Support Hours</h4>
                       <p className="text-gray-600">Sunday-Thursday: 8:00-18:00</p>
@@ -156,7 +161,7 @@ const SupportPage = () => {
                 <div className="bg-gray-50 rounded-xl p-6 text-center">
                   <h4 className="font-semibold mb-4">Quick Support QR</h4>
                   <div className="w-32 h-32 bg-gray-200 mx-auto mb-4 flex items-center justify-center rounded-lg">
-                    <i className="fas fa-qrcode text-4xl text-gray-400"></i>
+                    <QrCode className="w-10 h-10 stroke-[1.5] text-gray-400" />
                   </div>
                   <p className="text-sm text-gray-600">Scan for instant support access</p>
                 </div>
@@ -170,7 +175,7 @@ const SupportPage = () => {
                   e.preventDefault();
                   const button = e.currentTarget.querySelector('button[type="submit"]') as HTMLButtonElement;
                   const originalText = button.innerHTML;
-                  button.innerHTML = '<span class="flex items-center justify-center gap-2"><i class="fas fa-check"></i>Message Sent!</span>';
+                  button.textContent = 'Message Sent!';
                   button.style.backgroundColor = '#22c55e';
                   
                   setTimeout(() => {
@@ -217,7 +222,7 @@ const SupportPage = () => {
                     className="w-full py-3 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
                     style={{ backgroundColor: '#478c0b' }}
                   >
-                    <i className="fas fa-paper-plane"></i>
+                    <Send className="w-5 h-5 stroke-[1.5]" />
                     Send Message
                   </button>
                 </form>
@@ -232,19 +237,19 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4" style={{ color: '#478c0b' }}>Cultural Respect</h4>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Honor AHIC values and traditions
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Respectful communication with community members
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Appropriate language and behavior
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Cultural sensitivity in all interactions
                     </li>
                   </ul>
@@ -253,19 +258,19 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4" style={{ color: '#478c0b' }}>Marketplace Ethics</h4>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Honest reviews and feedback
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Fair dealing with vendors
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Respectful dispute resolution
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Community-first approach
                     </li>
                   </ul>
@@ -291,26 +296,26 @@ const SupportPage = () => {
                   className="w-full p-4 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 transition-colors" 
                   placeholder="Search for help topics..."
                 />
-                <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <Search className="w-5 h-5 stroke-[1.5] absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>
             </div>
 
             {/* FAQ Categories */}
             <div className="grid md:grid-cols-3 gap-8 mb-12">
               <div className="bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1" style={{ borderLeft: '4px solid #cfe7c1' }}>
-                <i className="fas fa-shopping-cart text-4xl mb-4" style={{ color: '#478c0b' }}></i>
+                <ShoppingCart className="w-10 h-10 stroke-[1.5] mb-4" style={{ color: '#478c0b' }} />
                 <h3 className="text-xl font-semibold mb-2">Shopping & Orders</h3>
                 <p className="text-gray-600">Questions about purchasing, cart, and order management</p>
               </div>
               
               <div className="bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1" style={{ borderLeft: '4px solid #cfe7c1' }}>
-                <i className="fas fa-credit-card text-4xl mb-4" style={{ color: '#f6af0d' }}></i>
+                <CreditCard className="w-10 h-10 stroke-[1.5] mb-4" style={{ color: '#f6af0d' }} />
                 <h3 className="text-xl font-semibold mb-2">Payments & QR</h3>
                 <p className="text-gray-600">Payment methods, QR codes, and billing questions</p>
               </div>
               
               <div className="bg-white rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1" style={{ borderLeft: '4px solid #cfe7c1' }}>
-                <i className="fas fa-users text-4xl mb-4" style={{ color: '#c23c09' }}></i>
+                <Users className="w-10 h-10 stroke-[1.5] mb-4" style={{ color: '#c23c09' }} />
                 <h3 className="text-xl font-semibold mb-2">Community & Culture</h3>
                 <p className="text-gray-600">Questions about VOP community and AHIC values</p>
               </div>
@@ -325,7 +330,7 @@ const SupportPage = () => {
                 >
                   <div className="flex justify-between items-center">
                     <h4 className="text-lg font-semibold">How do I use QR codes for payment?</h4>
-                    <i className={`fas fa-chevron-down transition-transform duration-300 ${activeFAQ === 0 ? 'rotate-180' : ''}`}></i>
+                    <ChevronDown className={`w-5 h-5 stroke-[1.5] transition-transform duration-300 ${activeFAQ === 0 ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${activeFAQ === 0 ? 'max-h-96' : 'max-h-0'}`}>
@@ -353,7 +358,7 @@ const SupportPage = () => {
                 >
                   <div className="flex justify-between items-center">
                     <h4 className="text-lg font-semibold">What makes KiFar Marketplace special?</h4>
-                    <i className={`fas fa-chevron-down transition-transform duration-300 ${activeFAQ === 1 ? 'rotate-180' : ''}`}></i>
+                    <ChevronDown className={`w-5 h-5 stroke-[1.5] transition-transform duration-300 ${activeFAQ === 1 ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${activeFAQ === 1 ? 'max-h-96' : 'max-h-0'}`}>
@@ -378,7 +383,7 @@ const SupportPage = () => {
                 >
                   <div className="flex justify-between items-center">
                     <h4 className="text-lg font-semibold">How do I become a vendor on KiFar Marketplace?</h4>
-                    <i className={`fas fa-chevron-down transition-transform duration-300 ${activeFAQ === 2 ? 'rotate-180' : ''}`}></i>
+                    <ChevronDown className={`w-5 h-5 stroke-[1.5] transition-transform duration-300 ${activeFAQ === 2 ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${activeFAQ === 2 ? 'max-h-[600px]' : 'max-h-0'}`}>
@@ -418,7 +423,7 @@ const SupportPage = () => {
                 >
                   <div className="flex justify-between items-center">
                     <h4 className="text-lg font-semibold">Can tourists and visitors use KiFar Marketplace?</h4>
-                    <i className={`fas fa-chevron-down transition-transform duration-300 ${activeFAQ === 3 ? 'rotate-180' : ''}`}></i>
+                    <ChevronDown className={`w-5 h-5 stroke-[1.5] transition-transform duration-300 ${activeFAQ === 3 ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${activeFAQ === 3 ? 'max-h-[600px]' : 'max-h-0'}`}>
@@ -459,7 +464,7 @@ const SupportPage = () => {
                 >
                   <div className="flex justify-between items-center">
                     <h4 className="text-lg font-semibold">What if I have problems with my order?</h4>
-                    <i className={`fas fa-chevron-down transition-transform duration-300 ${activeFAQ === 4 ? 'rotate-180' : ''}`}></i>
+                    <ChevronDown className={`w-5 h-5 stroke-[1.5] transition-transform duration-300 ${activeFAQ === 4 ? 'rotate-180' : ''}`} />
                   </div>
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${activeFAQ === 4 ? 'max-h-96' : 'max-h-0'}`}>
@@ -503,28 +508,28 @@ const SupportPage = () => {
               
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white rounded-xl p-6 text-center shadow-md hover:shadow-xl transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                  <i className="fas fa-home text-3xl mb-4" style={{ color: '#478c0b' }}></i>
+                  <Home className="w-8 h-8 stroke-[1.5] mb-4" style={{ color: '#478c0b' }} />
                   <h4 className="font-semibold mb-2">Local Pickup</h4>
                   <p className="text-gray-600 text-sm">Collect from VOP vendors</p>
                   <p className="font-semibold mt-2" style={{ color: '#478c0b' }}>Free</p>
                 </div>
                 
                 <div className="bg-white rounded-xl p-6 text-center shadow-md hover:shadow-xl transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                  <i className="fas fa-truck text-3xl mb-4 text-blue-600"></i>
+                  <Truck className="w-8 h-8 stroke-[1.5] mb-4 text-blue-600" />
                   <h4 className="font-semibold mb-2">Local Delivery</h4>
                   <p className="text-gray-600 text-sm">Dimona & surrounding areas</p>
                   <p className="text-blue-600 font-semibold mt-2">₪25-50</p>
                 </div>
                 
                 <div className="bg-white rounded-xl p-6 text-center shadow-md hover:shadow-xl transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                  <i className="fas fa-shipping-fast text-3xl mb-4" style={{ color: '#f6af0d' }}></i>
+                  <Truck className="w-8 h-8 stroke-[1.5] mb-4" style={{ color: '#f6af0d' }} />
                   <h4 className="font-semibold mb-2">National Shipping</h4>
                   <p className="text-gray-600 text-sm">Throughout Israel</p>
                   <p className="font-semibold mt-2" style={{ color: '#f6af0d' }}>₪15-35</p>
                 </div>
                 
                 <div className="bg-white rounded-xl p-6 text-center shadow-md hover:shadow-xl transition-all duration-300" style={{ border: '2px solid transparent' }}>
-                  <i className="fas fa-globe text-3xl mb-4" style={{ color: '#c23c09' }}></i>
+                  <Globe className="w-8 h-8 stroke-[1.5] mb-4" style={{ color: '#c23c09' }} />
                   <h4 className="font-semibold mb-2">International</h4>
                   <p className="text-gray-600 text-sm">Global diaspora delivery</p>
                   <p className="font-semibold mt-2" style={{ color: '#c23c09' }}>$15-85</p>
@@ -535,19 +540,19 @@ const SupportPage = () => {
                 <h4 className="font-semibold mb-3">Community Member Benefits</h4>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-center">
-                    <i className="fas fa-star mr-2" style={{ color: '#f6af0d' }}></i>
+                    <Star className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#f6af0d' }} />
                     VOP residents: Free local delivery
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-star mr-2" style={{ color: '#f6af0d' }}></i>
+                    <Star className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#f6af0d' }} />
                     Community members: 50% off national shipping
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-star mr-2" style={{ color: '#f6af0d' }}></i>
+                    <Star className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#f6af0d' }} />
                     Diaspora members: Special international rates
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-star mr-2" style={{ color: '#f6af0d' }}></i>
+                    <Star className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#f6af0d' }} />
                     Bulk orders: Additional shipping discounts
                   </li>
                 </ul>
@@ -563,19 +568,19 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4" style={{ color: '#478c0b' }}>Order Processing</h4>
                   <ul className="space-y-3 text-gray-600">
                     <li className="flex items-center">
-                      <i className="fas fa-clock mr-2" style={{ color: '#478c0b' }}></i>
+                      <Clock className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <strong>Standard Orders:</strong> 1-2 business days
                     </li>
                     <li className="flex items-center">
-                      <i className="fas fa-clock mr-2" style={{ color: '#478c0b' }}></i>
+                      <Clock className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <strong>Custom Products:</strong> 3-7 business days
                     </li>
                     <li className="flex items-center">
-                      <i className="fas fa-clock mr-2" style={{ color: '#478c0b' }}></i>
+                      <Clock className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <strong>Bulk Orders:</strong> 2-5 business days
                     </li>
                     <li className="flex items-center">
-                      <i className="fas fa-clock mr-2" style={{ color: '#478c0b' }}></i>
+                      <Clock className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <strong>Holiday Items:</strong> 1-3 business days
                     </li>
                   </ul>
@@ -585,19 +590,19 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4 text-blue-600">Delivery Estimates</h4>
                   <ul className="space-y-3 text-gray-600">
                     <li className="flex items-center">
-                      <i className="fas fa-truck mr-2 text-blue-500"></i>
+                      <Truck className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0 text-blue-500" />
                       <strong>Local (Dimona):</strong> Same day or next day
                     </li>
                     <li className="flex items-center">
-                      <i className="fas fa-truck mr-2 text-blue-500"></i>
+                      <Truck className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0 text-blue-500" />
                       <strong>Israel:</strong> 1-3 business days
                     </li>
                     <li className="flex items-center">
-                      <i className="fas fa-truck mr-2 text-blue-500"></i>
+                      <Truck className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0 text-blue-500" />
                       <strong>International:</strong> 5-14 business days
                     </li>
                     <li className="flex items-center">
-                      <i className="fas fa-truck mr-2 text-blue-500"></i>
+                      <Truck className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0 text-blue-500" />
                       <strong>Express:</strong> 1-2 business days (additional cost)
                     </li>
                   </ul>
@@ -614,19 +619,19 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4" style={{ color: '#478c0b' }}>Return Window</h4>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       30 days for most products
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       7 days for perishable items
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       14 days for custom orders
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       No time limit for defective items
                     </li>
                   </ul>
@@ -636,19 +641,19 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4 text-blue-600">Return Conditions</h4>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2 text-blue-500"></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Items in original packaging
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2 text-blue-500"></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Unused and in original condition
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2 text-blue-500"></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Include order receipt or QR code
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2 text-blue-500"></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Contact vendor before returning
                     </li>
                   </ul>
@@ -673,21 +678,21 @@ const SupportPage = () => {
               
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <i className="fas fa-globe-americas text-4xl mb-4" style={{ color: '#478c0b' }}></i>
+                  <Globe className="w-10 h-10 stroke-[1.5] mb-4" style={{ color: '#478c0b' }} />
                   <h4 className="font-semibold mb-2">Americas</h4>
                   <p className="text-gray-600 text-sm mb-2">USA, Canada, South America</p>
                   <p className="font-semibold" style={{ color: '#478c0b' }}>7-14 days</p>
                 </div>
                 
                 <div className="text-center">
-                  <i className="fas fa-globe-europe text-4xl mb-4 text-blue-600"></i>
+                  <Globe className="w-10 h-10 stroke-[1.5] mb-4 text-blue-600" />
                   <h4 className="font-semibold mb-2">Europe</h4>
                   <p className="text-gray-600 text-sm mb-2">EU, UK, Scandinavia</p>
                   <p className="text-blue-600 font-semibold">5-10 days</p>
                 </div>
                 
                 <div className="text-center">
-                  <i className="fas fa-globe-asia text-4xl mb-4" style={{ color: '#f6af0d' }}></i>
+                  <Globe className="w-10 h-10 stroke-[1.5] mb-4" style={{ color: '#f6af0d' }} />
                   <h4 className="font-semibold mb-2">Asia & Australia</h4>
                   <p className="text-gray-600 text-sm mb-2">Asia-Pacific region</p>
                   <p className="font-semibold" style={{ color: '#f6af0d' }}>10-21 days</p>
@@ -799,27 +804,27 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4" style={{ color: '#478c0b' }}>Your Rights</h4>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Access and update your personal information
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Delete your account and data
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Opt out of marketing communications
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Request data portability
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Fair treatment and dispute resolution
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-check mt-1 mr-2" style={{ color: '#478c0b' }}></i>
+                      <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                       Cultural respect and sensitivity
                     </li>
                   </ul>
@@ -829,27 +834,27 @@ const SupportPage = () => {
                   <h4 className="text-lg font-semibold mb-4 text-blue-600">Your Responsibilities</h4>
                   <ul className="space-y-2 text-gray-600">
                     <li className="flex items-start">
-                      <i className="fas fa-user-check mt-1 mr-2 text-blue-500"></i>
+                      <UserCheck className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Provide accurate account information
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-user-check mt-1 mr-2 text-blue-500"></i>
+                      <UserCheck className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Respect community values and guidelines
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-user-check mt-1 mr-2 text-blue-500"></i>
+                      <UserCheck className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Honor payment commitments
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-user-check mt-1 mr-2 text-blue-500"></i>
+                      <UserCheck className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Use platform responsibly
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-user-check mt-1 mr-2 text-blue-500"></i>
+                      <UserCheck className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Report problems or concerns
                     </li>
                     <li className="flex items-start">
-                      <i className="fas fa-user-check mt-1 mr-2 text-blue-500"></i>
+                      <UserCheck className="w-4 h-4 stroke-[1.5] mt-1 mr-2 flex-shrink-0 text-blue-500" />
                       Maintain cultural sensitivity
                     </li>
                   </ul>
