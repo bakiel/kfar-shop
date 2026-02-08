@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NFC } from '@/lib/services/nfc-service';
-import { FaMobileAlt, FaWifi, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
+import { Smartphone, Wifi, AlertTriangle, CheckCircle } from 'lucide-react';
 import { SmartQRScanner } from '../qr/SmartQRScanner';
 
 interface NFCReaderProps {
@@ -126,7 +126,7 @@ export const NFCReader: React.FC<NFCReaderProps> = ({
       case 'reading':
         return (
           <div className="relative">
-            <FaMobileAlt className="text-6xl text-blue-500" />
+            <Smartphone className="w-16 h-16 stroke-[1.5] text-blue-500" />
             {/* Animated NFC waves */}
             <div className="absolute inset-0 flex items-center justify-center">
               {[0, 1, 2].map((i) => (
@@ -146,11 +146,11 @@ export const NFCReader: React.FC<NFCReaderProps> = ({
           </div>
         );
       case 'success':
-        return <FaCheckCircle className="text-6xl text-green-500 animate-bounce" />;
+        return <CheckCircle className="w-16 h-16 stroke-[1.5] text-green-500 animate-bounce" />;
       case 'error':
-        return <FaExclamationTriangle className="text-6xl text-red-500" />;
+        return <AlertTriangle className="w-16 h-16 stroke-[1.5] text-red-500" />;
       default:
-        return <FaWifi className="text-6xl text-gray-400" />;
+        return <Wifi className="w-16 h-16 stroke-[1.5] text-gray-400" />;
     }
   };
 
@@ -202,7 +202,7 @@ export const NFCReader: React.FC<NFCReaderProps> = ({
                 onClick={startReading}
                 className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
               >
-                <FaWifi />
+                <Wifi className="w-4 h-4 stroke-[1.5]" />
                 {nfcSupported ? 'Start Reading' : 'Use QR Instead'}
               </button>
               
@@ -229,7 +229,7 @@ export const NFCReader: React.FC<NFCReaderProps> = ({
         {!nfcSupported && (
           <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
             <p className="text-sm text-yellow-800">
-              <FaExclamationTriangle className="inline mr-2" />
+              <AlertTriangle className="inline w-4 h-4 stroke-[1.5] mr-2" />
               NFC requires Chrome on Android. Please use QR code scanning as an alternative.
             </p>
           </div>

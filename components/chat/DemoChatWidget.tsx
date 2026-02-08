@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMicrophone, FaUser, FaRobot, FaPaperPlane, FaTimes } from 'react-icons/fa';
+import { Mic, User, Bot, Send, X } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -177,10 +177,10 @@ export default function DemoChatWidget() {
         aria-label="Open KFAR AI Assistant"
       >
         {isOpen ? (
-          <FaTimes className="text-white text-xl" />
+          <X className="w-5 h-5 stroke-[1.5] text-white" />
         ) : (
           <div className="relative">
-            <FaRobot className="text-white text-xl" />
+            <Bot className="w-5 h-5 stroke-[1.5] text-white" />
             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
           </div>
         )}
@@ -207,7 +207,7 @@ export default function DemoChatWidget() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <FaRobot className="text-green-600 text-lg" />
+                      <Bot className="w-5 h-5 stroke-[1.5] text-green-600" />
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">KFAR AI Assistant</h3>
@@ -228,7 +228,7 @@ export default function DemoChatWidget() {
                 <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
                     <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                      <FaRobot className="text-green-600 text-sm" />
+                      <Bot className="w-3.5 h-3.5 stroke-[1.5] text-green-600" />
                     </div>
                   )}
                   
@@ -286,7 +286,7 @@ export default function DemoChatWidget() {
 
                   {msg.role === 'user' && (
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                      <FaUser className="text-blue-600 text-sm" />
+                      <User className="w-3.5 h-3.5 stroke-[1.5] text-blue-600" />
                     </div>
                   )}
                 </div>
@@ -329,7 +329,7 @@ export default function DemoChatWidget() {
                   disabled={!message.trim() || isLoading}
                   className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  <FaPaperPlane className="text-sm" />
+                  <Send className="w-3.5 h-3.5 stroke-[1.5]" />
                 </button>
               </div>
 

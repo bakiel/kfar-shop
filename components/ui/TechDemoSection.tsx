@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import QRNFCAnimation from './QRNFCAnimation';
-import { FaArrowRight, FaInfoCircle } from 'react-icons/fa';
+import { ArrowRight, Info } from 'lucide-react';
 
 export default function TechDemoSection() {
   return (
@@ -58,9 +58,9 @@ export default function TechDemoSection() {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                 style={{ backgroundColor: '#478c0b' }}
               >
-                <FaInfoCircle className="text-lg" />
+                <Info className="w-5 h-5 stroke-[1.5]" />
                 Learn More About QR & NFC
-                <FaArrowRight className="text-sm" />
+                <ArrowRight className="w-3.5 h-3.5 stroke-[1.5]" />
               </Link>
               
               <Link 
@@ -73,7 +73,7 @@ export default function TechDemoSection() {
                 }}
               >
                 Try It In The Marketplace
-                <FaArrowRight className="text-sm" style={{ color: '#f6af0d' }} />
+                <ArrowRight className="w-3.5 h-3.5 stroke-[1.5]" style={{ color: '#f6af0d' }} />
               </Link>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function TechDemoSection() {
                 className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
                 <span>Launch Demo Center</span>
-                <FaArrowRight className="text-sm" />
+                <ArrowRight className="w-3.5 h-3.5 stroke-[1.5]" />
               </Link>
             </div>
           </div>

@@ -1191,7 +1191,7 @@ Contact: 052-KFAR-MKT`;
                 transition={{ duration: 0.2 }}
                 className="max-w-4xl mx-auto mb-4 md:mb-6"
               >
-                <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 md:p-4 flex items-center gap-3">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-3 md:p-4 flex items-center gap-3">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
@@ -1212,80 +1212,83 @@ Contact: 052-KFAR-MKT`;
               </motion.div>
             )}
           </AnimatePresence>
-          
-          {/* Progress Indicator - Mobile Optimized */}
+
+          {/* Premium Progress Indicator */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="max-w-4xl mx-auto mb-6 md:mb-8"
+            className="max-w-4xl mx-auto mb-6 md:mb-10"
           >
-            <div className="flex items-center justify-center overflow-x-auto scrollbar-hide md:overflow-visible progress-indicator">
-              <div className="flex items-center px-4 md:px-0">
-                {steps.map((step, index) => {
-                  const StepIcon = step.id === 1 ? User : step.id === 2 ? Truck : step.id === 3 ? CreditCard : CheckCircle;
-                  return (
-                    <div key={step.id} className="flex items-center">
-                      <div className="flex flex-col items-center progress-step">
-                        <motion.div
-                          initial={false}
-                          animate={
-                            currentStep > step.id
-                              ? { scale: [1, 1.2, 1], backgroundColor: '#478c0b' }
-                              : currentStep === step.id
-                              ? { scale: 1, backgroundColor: '#478c0b', boxShadow: '0 0 0 4px rgba(71, 140, 11, 0.2)' }
-                              : { scale: 1, backgroundColor: '#e5e7eb' }
-                          }
-                          transition={{ duration: 0.3 }}
-                          className={`w-10 h-10 md:w-14 md:h-14 min-w-[40px] min-h-[40px] md:min-w-[56px] md:min-h-[56px] rounded-full flex items-center justify-center progress-step-icon ${
-                            currentStep >= step.id ? 'text-white' : 'text-gray-500'
-                          }`}
-                        >
-                          <AnimatePresence mode="wait">
-                            {currentStep > step.id ? (
-                              <motion.div
-                                key="check"
-                                initial={{ scale: 0, rotate: -180 }}
-                                animate={{ scale: 1, rotate: 0 }}
-                                exit={{ scale: 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <CheckCircle className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5]" />
-                              </motion.div>
-                            ) : (
-                              <motion.div
-                                key="icon"
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                exit={{ scale: 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                <StepIcon className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5]" />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </motion.div>
-                        <span className={`mt-1 md:mt-2 text-[10px] md:text-sm font-medium whitespace-nowrap progress-step-title ${
-                          currentStep >= step.id ? 'text-[#478c0b]' : 'text-gray-500'
-                        }`}>
-                          {language === 'he'
-                            ? (step.id === 1 ? 'פרטים' : step.id === 2 ? 'משלוח' : step.id === 3 ? 'תשלום' : 'אישור')
-                            : step.title}
-                        </span>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+              <div className="flex items-center justify-center overflow-x-auto scrollbar-hide md:overflow-visible progress-indicator">
+                <div className="flex items-center px-4 md:px-0">
+                  {steps.map((step, index) => {
+                    const StepIcon = step.id === 1 ? User : step.id === 2 ? Truck : step.id === 3 ? CreditCard : CheckCircle;
+                    return (
+                      <div key={step.id} className="flex items-center">
+                        <div className="flex flex-col items-center progress-step">
+                          <motion.div
+                            initial={false}
+                            animate={
+                              currentStep > step.id
+                                ? { scale: [1, 1.15, 1], backgroundColor: '#478c0b' }
+                                : currentStep === step.id
+                                ? { scale: 1, backgroundColor: '#478c0b', boxShadow: '0 0 0 4px rgba(71, 140, 11, 0.15)' }
+                                : { scale: 1, backgroundColor: '#f3f4f6' }
+                            }
+                            transition={{ duration: 0.3 }}
+                            className={`w-11 h-11 md:w-14 md:h-14 min-w-[44px] min-h-[44px] md:min-w-[56px] md:min-h-[56px] rounded-xl flex items-center justify-center progress-step-icon ${
+                              currentStep >= step.id ? 'text-white' : 'text-gray-400'
+                            }`}
+                          >
+                            <AnimatePresence mode="wait">
+                              {currentStep > step.id ? (
+                                <motion.div
+                                  key="check"
+                                  initial={{ scale: 0, rotate: -180 }}
+                                  animate={{ scale: 1, rotate: 0 }}
+                                  exit={{ scale: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5]" />
+                                </motion.div>
+                              ) : (
+                                <motion.div
+                                  key="icon"
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  exit={{ scale: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <StepIcon className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5]" />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                          <span className={`mt-2 text-[10px] md:text-xs font-semibold whitespace-nowrap progress-step-title uppercase tracking-wider ${
+                            currentStep >= step.id ? 'text-[#478c0b]' : 'text-gray-400'
+                          }`}>
+                            {language === 'he'
+                              ? (step.id === 1 ? 'פרטים' : step.id === 2 ? 'משלוח' : step.id === 3 ? 'תשלום' : 'אישור')
+                              : step.title}
+                          </span>
+                        </div>
+                        {index < steps.length - 1 && (
+                          <div className="relative w-8 md:w-20 h-0.5 mx-1 md:mx-3">
+                            <div className="absolute inset-0 bg-gray-100 rounded-full" />
+                            <motion.div
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: currentStep > step.id ? 1 : 0 }}
+                              transition={{ duration: 0.4, ease: 'easeOut' }}
+                              className="absolute inset-0 bg-[#478c0b] rounded-full origin-left"
+                            />
+                          </div>
+                        )}
                       </div>
-                      {index < steps.length - 1 && (
-                        <motion.div
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: currentStep > step.id ? 1 : 0.3 }}
-                          transition={{ duration: 0.3 }}
-                          className={`w-6 md:w-16 h-0.5 mx-1 md:mx-2 progress-connector origin-left ${
-                            currentStep > step.id ? 'bg-[#478c0b]' : 'bg-gray-200'
-                          }`}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -1418,10 +1421,18 @@ Contact: 052-KFAR-MKT`;
           <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Main Content */}
             <div className="lg:col-span-2 order-2 lg:order-1">
-              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8 transition-all duration-300 checkout-card">
-                <div className={`transition-opacity duration-300 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
-                  {steps[currentStep - 1].component}
-                </div>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-8 transition-all duration-300 checkout-card">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentStep}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  >
+                    {steps[currentStep - 1].component}
+                  </motion.div>
+                </AnimatePresence>
 
                 {/* Smart Suggestions - show on info and delivery steps */}
                 {currentStep <= 2 && items.length > 0 && (
@@ -1437,30 +1448,31 @@ Contact: 052-KFAR-MKT`;
 
                 {/* Navigation */}
                 {currentStep < 4 && (
-                  <div className="flex justify-between mt-6 md:mt-8 checkout-navigation">
+                  <div className="flex justify-between mt-8 md:mt-10 pt-6 border-t border-gray-100 checkout-navigation">
                     {currentStep > 1 && (
                       <motion.button
-                        whileHover={{ scale: 1.02, x: -2 }}
+                        whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={prevStep}
-                        className="px-4 md:px-6 py-2 md:py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm md:text-base touchable flex items-center gap-2 cursor-pointer"
+                        className="px-5 md:px-7 py-3 md:py-3.5 border-2 border-gray-200 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-sm md:text-base touchable flex items-center gap-2 cursor-pointer text-gray-600"
                       >
                         <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
                         {language === 'he' ? 'הקודם' : 'Previous'}
                       </motion.button>
                     )}
                     <motion.button
-                      whileHover={{ scale: 1.02, x: 2 }}
+                      whileHover={{ scale: 1.02, boxShadow: '0 10px 30px rgba(71, 140, 11, 0.25)' }}
                       whileTap={{ scale: 0.98 }}
                       onClick={nextStep}
-                      className="px-4 md:px-6 py-2 md:py-3 bg-[#478c0b] text-white rounded-lg font-semibold hover:bg-[#3a6d08] transition-colors ml-auto text-sm md:text-base touchable flex items-center gap-2 cursor-pointer"
+                      className="px-6 md:px-8 py-3 md:py-3.5 text-white rounded-xl font-semibold ml-auto text-sm md:text-base touchable flex items-center gap-2 cursor-pointer transition-all"
+                      style={{ background: 'linear-gradient(135deg, #478c0b, #2D5A27)' }}
                     >
                       {currentStep === 3
-                        ? (language === 'he' ? 'השלם הזמנה' : 'Complete Order')
-                        : (language === 'he' ? 'המשך' : 'Continue')}
+                        ? (language === 'he' ? 'השלימו הזמנה' : 'Complete Order')
+                        : (language === 'he' ? 'המשיכו' : 'Continue')}
                       <motion.div
-                        animate={{ x: [0, 4, 0] }}
-                        transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
+                        animate={{ x: [0, 3, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                       >
                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
                       </motion.div>
@@ -1478,9 +1490,9 @@ Contact: 052-KFAR-MKT`;
                 transition={{ duration: 0.4, delay: 0.2 }}
                 className="lg:col-span-1 order-1 lg:order-2"
               >
-                <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-                    <ShoppingCart className="w-6 h-6 stroke-[1.5] text-[#478c0b]" />
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-8">
+                  <h3 className="text-lg font-bold mb-5 flex items-center gap-2" style={{ color: '#3a3a1d' }}>
+                    <ShoppingCart className="w-5 h-5 stroke-[1.5] text-[#478c0b]" />
                     {language === 'he' ? 'סיכום הזמנה' : 'Order Summary'}
                   </h3>
 

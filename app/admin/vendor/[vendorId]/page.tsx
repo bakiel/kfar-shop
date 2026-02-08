@@ -6,10 +6,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-  FaStore, FaBox, FaEdit, FaSave, FaTrash, FaPlus,
-  FaEye, FaEyeSlash, FaStar, FaDollarSign, FaArrowLeft,
-  FaCheckCircle, FaExclamationCircle, FaImage
-} from 'react-icons/fa';
+  Store, Package, Pencil, Save, Trash2, Plus,
+  Eye, EyeOff, Star, DollarSign, ArrowLeft,
+  CheckCircle, AlertCircle, ImageIcon
+} from 'lucide-react';
 import { vendorStores, getVendorStore, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
 import { vendorDataService, productDataService } from '@/lib/services/vendor-data-service';
 
@@ -205,7 +205,7 @@ export default function VendorAdminDashboard() {
               href="/admin"
               className="p-2 rounded-lg hover:bg-gray-100 transition-all"
             >
-              <FaArrowLeft className="text-gray-600" />
+              <ArrowLeft className="w-5 h-5 stroke-[1.5] text-gray-600" />
             </Link>
             <div className="flex items-center gap-4">
               <Image
@@ -239,7 +239,7 @@ export default function VendorAdminDashboard() {
             className="bg-white rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center justify-between mb-2">
-              <FaBox className="text-2xl" style={{ color: '#478c0b' }} />
+              <Package className="w-6 h-6 stroke-[1.5]" style={{ color: '#478c0b' }} />
               <span className="text-sm text-gray-500">Total</span>
             </div>
             <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>{analytics.totalProducts}</p>
@@ -256,7 +256,7 @@ export default function VendorAdminDashboard() {
             className="bg-white rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center justify-between mb-2">
-              <FaDollarSign className="text-2xl" style={{ color: '#f6af0d' }} />
+              <DollarSign className="w-6 h-6 stroke-[1.5]" style={{ color: '#f6af0d' }} />
               <span className="text-sm text-gray-500">Monthly</span>
             </div>
             <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>
@@ -272,7 +272,7 @@ export default function VendorAdminDashboard() {
             className="bg-white rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center justify-between mb-2">
-              <FaStar className="text-2xl" style={{ color: '#c23c09' }} />
+              <Star className="w-6 h-6 stroke-[1.5]" style={{ color: '#c23c09' }} />
               <span className="text-sm text-gray-500">Average</span>
             </div>
             <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>
@@ -288,7 +288,7 @@ export default function VendorAdminDashboard() {
             className="bg-white rounded-xl shadow-lg p-6"
           >
             <div className="flex items-center justify-between mb-2">
-              <FaEye className="text-2xl" style={{ color: '#478c0b' }} />
+              <Eye className="w-6 h-6 stroke-[1.5]" style={{ color: '#478c0b' }} />
               <span className="text-sm text-gray-500">Total</span>
             </div>
             <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>
@@ -396,7 +396,7 @@ export default function VendorAdminDashboard() {
                     className="px-4 py-2 rounded-lg flex items-center gap-2 text-white transition-all hover:scale-105"
                     style={{ backgroundColor: '#478c0b' }}
                   >
-                    <FaPlus />
+                    <Plus className="w-4 h-4 stroke-[1.5]" />
                     Add Product
                   </button>
                 </div>
@@ -533,7 +533,7 @@ export default function VendorAdminDashboard() {
                               className="px-4 py-2 rounded-lg text-white flex items-center gap-2"
                               style={{ backgroundColor: '#478c0b' }}
                             >
-                              <FaSave />
+                              <Save className="w-4 h-4 stroke-[1.5]" />
                               Save All Changes
                             </button>
                             <button
@@ -575,13 +575,13 @@ export default function VendorAdminDashboard() {
                                 product.inStock ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'
                               }`}
                             >
-                              {product.inStock ? <FaEye /> : <FaEyeSlash />}
+                              {product.inStock ? <Eye className="w-4 h-4 stroke-[1.5]" /> : <EyeOff className="w-4 h-4 stroke-[1.5]" />}
                             </button>
                             <button
                               onClick={() => handleProductEdit(product)}
                               className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
                             >
-                              <FaEdit />
+                              <Pencil className="w-4 h-4 stroke-[1.5]" />
                             </button>
                           </div>
                         </div>
@@ -652,7 +652,7 @@ export default function VendorAdminDashboard() {
                   className="px-6 py-2 rounded-lg text-white flex items-center gap-2"
                   style={{ backgroundColor: '#478c0b' }}
                 >
-                  <FaSave />
+                  <Save className="w-4 h-4 stroke-[1.5]" />
                   Save Changes
                 </button>
               </div>

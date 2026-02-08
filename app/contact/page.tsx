@@ -1,723 +1,596 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
-import { FaQrcode, FaTags, FaHeadset, FaShieldAlt, FaRobot, FaBell, FaIdCard, FaHistory, FaStar } from 'react-icons/fa';
-import { SiNfc } from 'react-icons/si';
+import { useLanguage } from '@/lib/context/LanguageContext';
+import {
+  Phone, Mail, MapPin, Clock, Send, MessageCircle, ChevronRight,
+  CheckCircle, Headphones, Users, Shield, Star, ArrowRight,
+  Upload, Tag, AlertTriangle, Info, AlertCircle, X
+} from 'lucide-react';
 
-interface SupportTicket {
-  id: string;
-  title: string;
-  category: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'open' | 'in-progress' | 'resolved' | 'closed';
-  tags: string[];
-  assignedTo?: string;
-  createdAt: Date;
-  lastUpdated: Date;
-  messages: Message[];
-  qrCode: string;
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.2 }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+};
+
+interface ContactCard {
+  icon: React.ElementType;
+  titleEn: string;
+  titleHe: string;
+  descriptionEn: string;
+  descriptionHe: string;
+  valueEn: string;
+  valueHe: string;
+  color: string;
+  bgColor: string;
 }
 
-interface Message {
-  id: string;
-  sender: string;
-  content: string;
-  timestamp: Date;
-  attachments?: string[];
-}
+const contactCards: ContactCard[] = [
+  {
+    icon: Phone,
+    titleEn: 'Call Us',
+    titleHe: 'התקשרו אלינו',
+    descriptionEn: 'Speak with our community support team',
+    descriptionHe: 'דברו עם צוות התמיכה הקהילתי שלנו',
+    valueEn: '+972-8-655-7700',
+    valueHe: '08-655-7700',
+    color: '#478c0b',
+    bgColor: '#478c0b10'
+  },
+  {
+    icon: Mail,
+    titleEn: 'Email Us',
+    titleHe: 'שלחו אימייל',
+    descriptionEn: 'We reply within 24 hours',
+    descriptionHe: 'נשיב תוך 24 שעות',
+    valueEn: 'support@kfrmarketplace.com',
+    valueHe: 'support@kfrmarketplace.com',
+    color: '#f6af0d',
+    bgColor: '#f6af0d10'
+  },
+  {
+    icon: MapPin,
+    titleEn: 'Visit Us',
+    titleHe: 'בקרו אותנו',
+    descriptionEn: 'Village of Peace, Dimona',
+    descriptionHe: 'כפר השלום, דימונה',
+    valueEn: 'Village of Peace, Dimona, Israel',
+    valueHe: 'כפר השלום, דימונה, ישראל',
+    color: '#c23c09',
+    bgColor: '#c23c0910'
+  }
+];
 
 interface Tag {
   id: string;
   name: string;
   color: string;
-  category: 'product' | 'vendor' | 'customer' | 'support' | 'community';
-  count: number;
 }
 
+const supportTags: Tag[] = [
+  { id: 'urgent', name: 'Urgent', color: '#c23c09' },
+  { id: 'payment', name: 'Payment Issue', color: '#f6af0d' },
+  { id: 'vendor', name: 'Vendor Inquiry', color: '#478c0b' },
+  { id: 'shipping', name: 'Shipping', color: '#3a3a1d' },
+  { id: 'technical', name: 'Technical', color: '#6366f1' },
+  { id: 'feedback', name: 'Feedback', color: '#8b5cf6' }
+];
+
 export default function ContactPage() {
-  const [activeTab, setActiveTab] = useState('contact');
-  const [showQRScanner, setShowQRScanner] = useState(false);
+  const { language, isRTL } = useLanguage();
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    category: '',
+    message: ''
+  });
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [contactMethod, setContactMethod] = useState<'qr' | 'form' | 'chat' | 'voice'>('form');
-  const [language, setLanguage] = useState<'en' | 'he'>('en');
+  const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
 
-  // Sample tags data
-  const sampleTags: Tag[] = [
-    { id: '1', name: 'urgent', color: '#c23c09', category: 'support', count: 5 },
-    { id: '2', name: 'payment-issue', color: '#f6af0d', category: 'support', count: 12 },
-    { id: '3', name: 'vendor-inquiry', color: '#478c0b', category: 'vendor', count: 8 },
-    { id: '4', name: 'shipping', color: '#3a3a1d', category: 'support', count: 23 },
-    { id: '5', name: 'community-member', color: '#478c0b', category: 'customer', count: 156 },
-    { id: '6', name: 'vip', color: '#f6af0d', category: 'customer', count: 34 },
-    { id: '7', name: 'technical', color: '#c23c09', category: 'support', count: 18 },
-    { id: '8', name: 'feedback', color: '#cfe7c1', category: 'support', count: 67 }
-  ];
+  const heroRef = useRef(null);
+  const cardsRef = useRef(null);
+  const formRef = useRef(null);
+  const infoRef = useRef(null);
+  const isCardsInView = useInView(cardsRef, { once: true, margin: '-80px' });
+  const isFormInView = useInView(formRef, { once: true, margin: '-80px' });
+  const isInfoInView = useInView(infoRef, { once: true, margin: '-80px' });
 
-  const generateQRCode = (data: any) => {
-    // In production, use a real QR code library
-    return `QR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleTagSelect = (tagId: string) => {
+  const handleTagToggle = (tagId: string) => {
     setSelectedTags(prev =>
-      prev.includes(tagId) 
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
     );
   };
 
-  const createTicket = (formData: any) => {
-    const newTicket: SupportTicket = {
-      id: `TICKET-${Date.now()}`,
-      title: formData.subject,
-      category: formData.category,
-      priority: determinePriority(formData.tags),
-      status: 'open',
-      tags: formData.tags,
-      createdAt: new Date(),
-      lastUpdated: new Date(),
-      messages: [{
-        id: '1',
-        sender: formData.email,
-        content: formData.message,
-        timestamp: new Date()
-      }],
-      qrCode: generateQRCode(formData)
-    };
-    
-    setTickets([...tickets, newTicket]);
-    return newTicket;
+  const getPriority = (): { level: string; color: string; time: string } => {
+    if (selectedTags.includes('urgent')) return { level: 'Urgent', color: '#c23c09', time: '< 1 hour' };
+    if (selectedTags.includes('payment')) return { level: 'High', color: '#f6af0d', time: '2-4 hours' };
+    if (selectedTags.includes('technical')) return { level: 'Medium', color: '#478c0b', time: '24 hours' };
+    return { level: 'Standard', color: '#6b7280', time: '48 hours' };
   };
 
-  const determinePriority = (tags: string[]): 'low' | 'medium' | 'high' | 'urgent' => {
-    if (tags.includes('urgent')) return 'urgent';
-    if (tags.includes('payment-issue')) return 'high';
-    if (tags.includes('technical')) return 'medium';
-    return 'low';
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormStatus('submitting');
+    setTimeout(() => {
+      setFormStatus('success');
+      setTimeout(() => setFormStatus('idle'), 4000);
+    }, 1500);
   };
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[var(--cream-base)]">
+      <div className="min-h-screen bg-[#fef9ef]" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[var(--leaf-green)] via-[var(--sun-gold)] to-[var(--earth-flame)] text-white py-20">
+        <section
+          ref={heroRef}
+          className="relative py-24 md:py-32 overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #478c0b 0%, #2D5A27 50%, #1a3a10 100%)' }}
+        >
+          {/* Decorative circles */}
+          <div className="absolute top-10 right-10 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-[#f6af0d]/10 blur-2xl" />
+
+          <motion.div
+            className="container mx-auto px-4 text-center relative z-10"
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
+            <motion.div variants={item} className="inline-flex items-center justify-center w-18 h-18 rounded-2xl bg-white/10 backdrop-blur-sm p-4 mb-6">
+              <Headphones className="w-10 h-10 stroke-[1.5] text-[#f6af0d]" />
+            </motion.div>
+            <motion.h1 variants={item} className="text-4xl md:text-6xl font-bold text-white mb-5">
+              {language === 'he' ? 'צרו קשר' : 'Get in Touch'}
+            </motion.h1>
+            <motion.p variants={item} className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-8">
+              {language === 'he'
+                ? 'צוות התמיכה הקהילתי שלנו כאן בשבילכם. שלחו שאלה, דווחו על בעיה, או סתם אמרו שלום.'
+                : 'Our community support team is here for you. Ask a question, report an issue, or just say hello.'}
+            </motion.p>
+            <motion.div variants={item} className="flex items-center justify-center gap-3 text-white/60 text-sm">
+              <Clock className="w-4 h-4 stroke-[1.5]" />
+              <span>{language === 'he' ? 'ראשון-חמישי 8:00-20:00 | שישי 8:00-14:00' : 'Sun-Thu 8:00-20:00 | Fri 8:00-14:00'}</span>
+            </motion.div>
+          </motion.div>
+        </section>
+
+        {/* Contact Method Cards */}
+        <section className="py-16 md:py-20" ref={cardsRef}>
           <div className="container mx-auto px-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center max-w-4xl mx-auto"
+              className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto -mt-24 relative z-20"
+              variants={container}
+              initial="hidden"
+              animate={isCardsInView ? 'show' : 'hidden'}
             >
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                Smart Support Center
-              </h1>
-              <p className="text-xl md:text-2xl mb-8 opacity-90">
-                AI-Powered, QR-Enabled, Community-Focused Support
-              </p>
-              
-              {/* Contact Method Selection */}
-              <div className="flex flex-wrap justify-center gap-4 mb-8">
-                <button
-                  onClick={() => setContactMethod('qr')}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                    contactMethod === 'qr' 
-                      ? 'bg-white text-[var(--leaf-green)]' 
-                      : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
-                  }`}
-                >
-                  <FaQrcode className="inline mr-2" />
-                  QR/NFC Support
-                </button>
-                <button
-                  onClick={() => setContactMethod('form')}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                    contactMethod === 'form' 
-                      ? 'bg-white text-[var(--leaf-green)]' 
-                      : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
-                  }`}
-                >
-                  <FaTags className="inline mr-2" />
-                  Tagged Form
-                </button>
-                <button
-                  onClick={() => setContactMethod('chat')}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                    contactMethod === 'chat' 
-                      ? 'bg-white text-[var(--leaf-green)]' 
-                      : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
-                  }`}
-                >
-                  <FaRobot className="inline mr-2" />
-                  AI Chat
-                </button>
-                <button
-                  onClick={() => setContactMethod('voice')}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                    contactMethod === 'voice' 
-                      ? 'bg-white text-[var(--leaf-green)]' 
-                      : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
-                  }`}
-                >
-                  <FaHeadset className="inline mr-2" />
-                  Voice Support
-                </button>
-              </div>
-
-              {/* Language Toggle */}
-              <button
-                onClick={() => setLanguage(language === 'en' ? 'he' : 'en')}
-                className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium hover:bg-white/30 transition-all"
-              >
-                {language === 'en' ? 'עב / EN' : 'EN / עב'}
-              </button>
+              {contactCards.map((card, i) => {
+                const Icon = card.icon;
+                return (
+                  <motion.div
+                    key={i}
+                    variants={item}
+                    whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.12)' }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 cursor-pointer group"
+                  >
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-200"
+                      style={{ backgroundColor: card.bgColor }}
+                    >
+                      <Icon className="w-7 h-7 stroke-[1.5]" style={{ color: card.color }} />
+                    </div>
+                    <h3 className="text-xl font-bold text-[#3a3a1d] mb-2">
+                      {language === 'he' ? card.titleHe : card.titleEn}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      {language === 'he' ? card.descriptionHe : card.descriptionEn}
+                    </p>
+                    <p className="font-semibold text-[#3a3a1d] text-sm flex items-center gap-2">
+                      {language === 'he' ? card.valueHe : card.valueEn}
+                      <ArrowRight className="w-4 h-4 stroke-[1.5] opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: card.color }} />
+                    </p>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left Column - Contact Methods */}
-            <div className="lg:col-span-2">
-              {/* QR/NFC Support */}
-              {contactMethod === 'qr' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="bg-white rounded-2xl shadow-xl p-8"
-                >
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: '#3a3a1d' }}>
-                    <FaQrcode style={{ color: '#478c0b' }} />
-                    QR & NFC Quick Support
+        {/* Contact Form + Info */}
+        <section className="pb-20 md:pb-28">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-5 gap-10 max-w-6xl mx-auto">
+              {/* Contact Form */}
+              <motion.div
+                ref={formRef}
+                className="lg:col-span-3"
+                initial={{ opacity: 0, y: 40 }}
+                animate={isFormInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
+                  <h2 className="text-2xl md:text-3xl font-bold text-[#3a3a1d] mb-2">
+                    {language === 'he' ? 'שלחו לנו הודעה' : 'Send Us a Message'}
                   </h2>
+                  <p className="text-gray-500 mb-8">
+                    {language === 'he' ? 'מלאו את הטופס ונחזור אליכם בהקדם' : 'Fill out the form and we will get back to you soon'}
+                  </p>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* QR Code Scanner */}
-                    <div className="text-center">
-                      <div className="bg-gray-100 rounded-xl p-8 mb-4 relative overflow-hidden group cursor-pointer"
-                           onClick={() => setShowQRScanner(true)}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-[var(--leaf-green)] to-[var(--sun-gold)] opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                        <FaQrcode className="text-6xl mx-auto mb-4 text-gray-400 group-hover:text-[var(--leaf-green)] transition-colors" />
-                        <p className="font-semibold">Scan QR Code</p>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Point your camera at any KFAR QR code
-                        </p>
-                      </div>
-                      
-                      <div className="flex gap-2 justify-center">
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                          <i className="fas fa-check mr-1"></i>Orders
-                        </span>
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                          <i className="fas fa-check mr-1"></i>Products
-                        </span>
-                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
-                          <i className="fas fa-check mr-1"></i>Support
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* NFC Reader */}
-                    <div className="text-center">
-                      <div className="bg-gray-100 rounded-xl p-8 mb-4 relative overflow-hidden group cursor-pointer">
-                        <div className="absolute inset-0 bg-gradient-to-br from-[var(--sun-gold)] to-[var(--earth-flame)] opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                        <SiNfc className="text-6xl mx-auto mb-4 text-gray-400 group-hover:text-[var(--sun-gold)] transition-colors" />
-                        <p className="font-semibold">Tap NFC Tag</p>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Hold your device near any KFAR NFC tag
-                        </p>
-                      </div>
-                      
-                      <div className="flex gap-2 justify-center">
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                          <i className="fas fa-check mr-1"></i>ID Cards
-                        </span>
-                        <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
-                          <i className="fas fa-check mr-1"></i>Vendors
-                        </span>
-                        <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
-                          <i className="fas fa-check mr-1"></i>Access
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* QR Use Cases */}
-                  <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors cursor-pointer">
-                      <i className="fas fa-box text-2xl mb-2" style={{ color: '#478c0b' }}></i>
-                      <p className="text-sm font-medium">Track Order</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors cursor-pointer">
-                      <i className="fas fa-undo text-2xl mb-2" style={{ color: '#f6af0d' }}></i>
-                      <p className="text-sm font-medium">Return Item</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors cursor-pointer">
-                      <i className="fas fa-store text-2xl mb-2" style={{ color: '#c23c09' }}></i>
-                      <p className="text-sm font-medium">Vendor Info</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors cursor-pointer">
-                      <i className="fas fa-question-circle text-2xl mb-2" style={{ color: '#3a3a1d' }}></i>
-                      <p className="text-sm font-medium">Get Help</p>
-                    </div>
-                  </div>
-
-                  {/* Community ID Card Preview */}
-                  <div className="mt-8 bg-gradient-to-br from-[var(--leaf-green)] to-[var(--sun-gold)] rounded-xl p-6 text-white">
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                      <FaIdCard />
-                      Digital Community ID
-                    </h3>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Name Fields */}
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm opacity-80 mb-1">Member Since</p>
-                        <p className="font-semibold">2021</p>
+                        <label className="block text-sm font-semibold text-[#3a3a1d] mb-2">
+                          {language === 'he' ? 'שם פרטי' : 'First Name'}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.firstName}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#478c0b] transition-colors duration-200 text-base"
+                          style={{ fontSize: '16px' }}
+                          placeholder={language === 'he' ? 'השם שלך' : 'Your first name'}
+                          required
+                        />
                       </div>
                       <div>
-                        <p className="text-sm opacity-80 mb-1">Status</p>
-                        <p className="font-semibold">Active Community Member</p>
+                        <label className="block text-sm font-semibold text-[#3a3a1d] mb-2">
+                          {language === 'he' ? 'שם משפחה' : 'Last Name'}
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.lastName}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#478c0b] transition-colors duration-200 text-base"
+                          style={{ fontSize: '16px' }}
+                          placeholder={language === 'he' ? 'שם המשפחה' : 'Your last name'}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email and Phone */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-[#3a3a1d] mb-2">
+                          {language === 'he' ? 'אימייל' : 'Email'}
+                        </label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 stroke-[1.5] text-gray-400" />
+                          <input
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => handleInputChange('email', e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#478c0b] transition-colors duration-200 text-base"
+                            style={{ fontSize: '16px' }}
+                            placeholder="you@example.com"
+                            required
+                          />
+                        </div>
                       </div>
                       <div>
-                        <p className="text-sm opacity-80 mb-1">Benefits</p>
-                        <p className="font-semibold">VIP Support, Free Delivery</p>
-                      </div>
-                      <div className="flex items-center justify-center">
-                        <div className="bg-white p-3 rounded-lg">
-                          <FaQrcode className="text-4xl text-gray-800" />
+                        <label className="block text-sm font-semibold text-[#3a3a1d] mb-2">
+                          {language === 'he' ? 'טלפון' : 'Phone'}
+                        </label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 stroke-[1.5] text-gray-400" />
+                          <input
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => handleInputChange('phone', e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#478c0b] transition-colors duration-200 text-base"
+                            style={{ fontSize: '16px' }}
+                            placeholder="+972-XX-XXX-XXXX"
+                          />
                         </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              )}
 
-              {/* Tagged Form Support */}
-              {contactMethod === 'form' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="bg-white rounded-2xl shadow-xl p-8"
-                >
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: '#3a3a1d' }}>
-                    <FaTags style={{ color: '#478c0b' }} />
-                    Smart Tagged Support Form
-                  </h2>
-
-                  <form className="space-y-6">
-                    {/* Contact Info */}
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          First Name
-                        </label>
-                        <input 
-                          type="text" 
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[var(--leaf-green)] transition-colors"
-                          placeholder="Your first name"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Last Name
-                        </label>
-                        <input 
-                          type="text" 
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[var(--leaf-green)] transition-colors"
-                          placeholder="Your last name"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Email
-                        </label>
-                        <input 
-                          type="email" 
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[var(--leaf-green)] transition-colors"
-                          placeholder="your.email@example.com"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Phone
-                        </label>
-                        <input 
-                          type="tel" 
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[var(--leaf-green)] transition-colors"
-                          placeholder="+972-XX-XXX-XXXX"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Smart Tags Selection */}
+                    {/* Category */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Select Relevant Tags (helps us route your request faster)
+                      <label className="block text-sm font-semibold text-[#3a3a1d] mb-2">
+                        {language === 'he' ? 'קטגוריה' : 'Category'}
                       </label>
-                      <div className="flex flex-wrap gap-2">
-                        {sampleTags.map(tag => (
-                          <button
-                            key={tag.id}
-                            type="button"
-                            onClick={() => handleTagSelect(tag.id)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                              selectedTags.includes(tag.id)
-                                ? 'text-white shadow-lg transform scale-105'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                            style={{
-                              backgroundColor: selectedTags.includes(tag.id) ? tag.color : undefined
-                            }}
-                          >
-                            <FaTags className="inline mr-1 text-xs" />
-                            {tag.name}
-                            <span className="ml-2 text-xs opacity-75">({tag.count})</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Category Selection */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Category
-                      </label>
-                      <select className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[var(--leaf-green)] transition-colors">
-                        <option>General Inquiry</option>
-                        <option>Order Support</option>
-                        <option>Payment Issue</option>
-                        <option>Technical Problem</option>
-                        <option>Vendor Application</option>
-                        <option>Community Question</option>
-                        <option>Tourism Information</option>
-                        <option>Product Return</option>
-                        <option>Feedback/Suggestion</option>
+                      <select
+                        value={formData.category}
+                        onChange={(e) => handleInputChange('category', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#478c0b] transition-colors duration-200 text-base bg-white cursor-pointer"
+                        style={{ fontSize: '16px' }}
+                      >
+                        <option value="">{language === 'he' ? 'בחר קטגוריה...' : 'Select category...'}</option>
+                        <option>{language === 'he' ? 'שאלה כללית' : 'General Inquiry'}</option>
+                        <option>{language === 'he' ? 'תמיכת הזמנות' : 'Order Support'}</option>
+                        <option>{language === 'he' ? 'בעיית תשלום' : 'Payment Issue'}</option>
+                        <option>{language === 'he' ? 'בעיה טכנית' : 'Technical Problem'}</option>
+                        <option>{language === 'he' ? 'הצטרפות כספק' : 'Vendor Application'}</option>
+                        <option>{language === 'he' ? 'שאלה קהילתית' : 'Community Question'}</option>
+                        <option>{language === 'he' ? 'החזרת מוצר' : 'Product Return'}</option>
+                        <option>{language === 'he' ? 'משוב/הצעה' : 'Feedback / Suggestion'}</option>
                       </select>
                     </div>
 
-                    {/* Priority Indicator */}
-                    {selectedTags.length > 0 && (
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <p className="text-sm font-medium text-gray-700 mb-2">
-                          Estimated Priority Level:
-                        </p>
-                        <div className="flex items-center gap-2">
-                          {determinePriority(selectedTags) === 'urgent' && (
-                            <span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm font-semibold">
-                              <i className="fas fa-exclamation-triangle mr-1"></i>Urgent
-                            </span>
-                          )}
-                          {determinePriority(selectedTags) === 'high' && (
-                            <span className="px-3 py-1 bg-orange-500 text-white rounded-full text-sm font-semibold">
-                              <i className="fas fa-exclamation-circle mr-1"></i>High
-                            </span>
-                          )}
-                          {determinePriority(selectedTags) === 'medium' && (
-                            <span className="px-3 py-1 bg-yellow-500 text-white rounded-full text-sm font-semibold">
-                              <i className="fas fa-info-circle mr-1"></i>Medium
-                            </span>
-                          )}
-                          {determinePriority(selectedTags) === 'low' && (
-                            <span className="px-3 py-1 bg-green-500 text-white rounded-full text-sm font-semibold">
-                              <i className="fas fa-check-circle mr-1"></i>Low
-                            </span>
-                          )}
-                          <span className="text-sm text-gray-600">
-                            Response time: {
-                              determinePriority(selectedTags) === 'urgent' ? '< 1 hour' :
-                              determinePriority(selectedTags) === 'high' ? '2-4 hours' :
-                              determinePriority(selectedTags) === 'medium' ? '24 hours' :
-                              '48 hours'
-                            }
-                          </span>
-                        </div>
+                    {/* Smart Tags */}
+                    <div>
+                      <label className="block text-sm font-semibold text-[#3a3a1d] mb-3">
+                        {language === 'he' ? 'תגיות (עוזרות לנו לנתב מהר יותר)' : 'Tags (help us route faster)'}
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {supportTags.map(tag => (
+                          <motion.button
+                            key={tag.id}
+                            type="button"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleTagToggle(tag.id)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                              selectedTags.includes(tag.id)
+                                ? 'text-white shadow-md'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                            style={selectedTags.includes(tag.id) ? { backgroundColor: tag.color } : {}}
+                          >
+                            <Tag className="w-3.5 h-3.5 stroke-[1.5]" />
+                            {tag.name}
+                          </motion.button>
+                        ))}
                       </div>
-                    )}
+
+                      {/* Priority Indicator */}
+                      <AnimatePresence>
+                        {selectedTags.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-3 overflow-hidden"
+                          >
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: getPriority().color }}
+                              />
+                              <span className="text-sm font-medium text-[#3a3a1d]">
+                                {language === 'he' ? 'רמת עדיפות:' : 'Priority:'} {getPriority().level}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {language === 'he' ? 'זמן תגובה:' : 'Response:'} {getPriority().time}
+                              </span>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
                     {/* Message */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message
+                      <label className="block text-sm font-semibold text-[#3a3a1d] mb-2">
+                        {language === 'he' ? 'הודעה' : 'Message'}
                       </label>
-                      <textarea 
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[var(--leaf-green)] transition-colors h-32"
-                        placeholder="Please describe your issue or question in detail..."
+                      <textarea
+                        value={formData.message}
+                        onChange={(e) => handleInputChange('message', e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#478c0b] transition-colors duration-200 text-base resize-none"
+                        style={{ fontSize: '16px' }}
+                        rows={5}
+                        placeholder={language === 'he' ? 'תארו את השאלה או הבעיה שלכם בפירוט...' : 'Describe your question or issue in detail...'}
+                        required
                       />
                     </div>
 
-                    {/* File Attachments */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Attachments (optional)
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[var(--leaf-green)] transition-colors cursor-pointer">
-                        <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                        <p className="text-sm text-gray-600">
-                          Drag & drop files here or click to browse
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Supports: Images, PDFs, Documents (Max 10MB)
-                        </p>
-                      </div>
+                    {/* Attachment Area */}
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-[#478c0b]/40 transition-colors duration-200 cursor-pointer group">
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-300 group-hover:text-[#478c0b] transition-colors stroke-[1.5]" />
+                      <p className="text-sm text-gray-500">
+                        {language === 'he' ? 'גררו קבצים לכאן או לחצו לבחירה' : 'Drag & drop files or click to browse'}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {language === 'he' ? 'תמונות, PDF, מסמכים (עד 10MB)' : 'Images, PDFs, Documents (max 10MB)'}
+                      </p>
                     </div>
 
                     {/* Submit Button */}
-                    <button
+                    <motion.button
                       type="submit"
-                      className="w-full py-4 bg-gradient-to-r from-[var(--leaf-green)] to-[#3a7209] text-white rounded-lg font-semibold text-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3"
+                      whileHover={{ scale: 1.01, boxShadow: '0 10px 30px rgba(71, 140, 11, 0.25)' }}
+                      whileTap={{ scale: 0.98 }}
+                      disabled={formStatus === 'submitting'}
+                      className="w-full py-4 rounded-xl font-semibold text-lg text-white transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-70"
+                      style={{ background: 'linear-gradient(135deg, #478c0b, #2D5A27)' }}
                     >
-                      <i className="fas fa-paper-plane"></i>
-                      Submit Support Request
-                      <i className="fas fa-arrow-right"></i>
-                    </button>
+                      {formStatus === 'submitting' ? (
+                        <>
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          >
+                            <Send className="w-5 h-5 stroke-[1.5]" />
+                          </motion.div>
+                          {language === 'he' ? 'שולח...' : 'Sending...'}
+                        </>
+                      ) : formStatus === 'success' ? (
+                        <>
+                          <CheckCircle className="w-5 h-5 stroke-[1.5]" />
+                          {language === 'he' ? 'נשלח בהצלחה!' : 'Message Sent!'}
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5 stroke-[1.5]" />
+                          {language === 'he' ? 'שלח הודעה' : 'Send Message'}
+                        </>
+                      )}
+                    </motion.button>
                   </form>
-                </motion.div>
-              )}
-
-              {/* AI Chat Support */}
-              {contactMethod === 'chat' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="bg-white rounded-2xl shadow-xl p-8"
-                >
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: '#3a3a1d' }}>
-                    <FaRobot style={{ color: '#478c0b' }} />
-                    AI-Powered Support Chat
-                  </h2>
-
-                  <div className="bg-gray-50 rounded-xl p-6 mb-6">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-[var(--leaf-green)] to-[var(--sun-gold)] rounded-full flex items-center justify-center">
-                        <FaRobot className="text-white text-xl" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">KFAR AI Assistant</h3>
-                        <p className="text-sm text-gray-600">Powered by Community Knowledge</p>
-                      </div>
-                      <span className="ml-auto px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                        <i className="fas fa-circle text-xs mr-1"></i>Online
-                      </span>
-                    </div>
-
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
-                      {/* Sample Chat Messages */}
-                      <div className="flex gap-3">
-                        <div className="w-8 h-8 bg-gray-300 rounded-full flex-shrink-0"></div>
-                        <div className="bg-white rounded-lg p-3 max-w-md">
-                          <p className="text-sm">Hello! I&apos;m your KFAR AI assistant. I can help you with:</p>
-                          <ul className="text-sm mt-2 space-y-1">
-                            <li>• Order tracking and support</li>
-                            <li>• Product recommendations</li>
-                            <li>• Vendor information</li>
-                            <li>• Community questions</li>
-                            <li>• Technical assistance</li>
-                          </ul>
-                          <p className="text-sm mt-2">What can I help you with today?</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                    <button className="p-3 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                      Track Order
-                    </button>
-                    <button className="p-3 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                      Return Item
-                    </button>
-                    <button className="p-3 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                      Find Product
-                    </button>
-                    <button className="p-3 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                      Contact Vendor
-                    </button>
-                  </div>
-
-                  {/* Chat Input */}
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-[var(--leaf-green)] transition-colors"
-                      placeholder="Type your message..."
-                    />
-                    <button className="px-6 py-3 bg-[var(--leaf-green)] text-white rounded-lg font-medium hover:bg-opacity-90 transition-all">
-                      <i className="fas fa-paper-plane"></i>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Voice Support */}
-              {contactMethod === 'voice' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="bg-white rounded-2xl shadow-xl p-8"
-                >
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: '#3a3a1d' }}>
-                    <FaHeadset style={{ color: '#478c0b' }} />
-                    Voice & Video Support
-                  </h2>
-
-                  <div className="text-center py-12">
-                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-[var(--leaf-green)] to-[var(--sun-gold)] rounded-full mb-6 animate-pulse">
-                      <FaHeadset className="text-white text-5xl" />
-                    </div>
-                    
-                    <h3 className="text-xl font-semibold mb-4">Connect with Community Support</h3>
-                    <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                      Speak directly with our community support team members who understand your needs
-                    </p>
-
-                    <div className="grid md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                      <button className="p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group">
-                        <i className="fas fa-phone text-3xl mb-3 text-gray-400 group-hover:text-[var(--leaf-green)] transition-colors"></i>
-                        <p className="font-semibold">Voice Call</p>
-                        <p className="text-sm text-gray-600 mt-1">Instant connection</p>
-                      </button>
-                      
-                      <button className="p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group">
-                        <i className="fas fa-video text-3xl mb-3 text-gray-400 group-hover:text-[var(--sun-gold)] transition-colors"></i>
-                        <p className="font-semibold">Video Call</p>
-                        <p className="text-sm text-gray-600 mt-1">Face-to-face support</p>
-                      </button>
-                      
-                      <button className="p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group">
-                        <i className="fas fa-calendar-alt text-3xl mb-3 text-gray-400 group-hover:text-[var(--earth-flame)] transition-colors"></i>
-                        <p className="font-semibold">Schedule Call</p>
-                        <p className="text-sm text-gray-600 mt-1">Book appointment</p>
-                      </button>
-                    </div>
-
-                    <div className="mt-8 p-4 bg-green-50 rounded-lg inline-flex items-center gap-3">
-                      <i className="fas fa-clock text-green-600"></i>
-                      <span className="text-sm font-medium text-green-800">
-                        Available: Sunday-Thursday 8:00-18:00 | Friday 8:00-14:00
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Right Column - Support Dashboard */}
-            <div className="space-y-6">
-              {/* Quick Stats */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-xl p-6"
-              >
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-                  <FaHistory style={{ color: '#478c0b' }} />
-                  Your Support History
-                </h3>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Open Tickets</span>
-                    <span className="font-semibold">2</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Resolved This Month</span>
-                    <span className="font-semibold text-green-600">8</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Average Response</span>
-                    <span className="font-semibold">2.5 hours</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Satisfaction</span>
-                    <span className="font-semibold flex items-center gap-1">
-                      <FaStar className="text-yellow-500" />
-                      4.8/5
-                    </span>
-                  </div>
-                </div>
-
-                <button className="w-full mt-4 py-2 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors">
-                  View All Tickets
-                </button>
-              </motion.div>
-
-              {/* Recent Notifications */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="bg-white rounded-2xl shadow-xl p-6"
-              >
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-                  <FaBell style={{ color: '#f6af0d' }} />
-                  Recent Updates
-                </h3>
-
-                <div className="space-y-3">
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="text-sm font-medium text-green-800">Order #1234 Delivered</p>
-                    <p className="text-xs text-green-600 mt-1">2 hours ago</p>
-                  </div>
-                  <div className="p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm font-medium text-blue-800">Support ticket resolved</p>
-                    <p className="text-xs text-blue-600 mt-1">Yesterday</p>
-                  </div>
-                  <div className="p-3 bg-yellow-50 rounded-lg">
-                    <p className="text-sm font-medium text-yellow-800">New vendor response</p>
-                    <p className="text-xs text-yellow-600 mt-1">3 days ago</p>
-                  </div>
                 </div>
               </motion.div>
 
-              {/* Community Benefits */}
+              {/* Sidebar Info */}
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="bg-gradient-to-br from-[var(--leaf-green)] to-[var(--sun-gold)] rounded-2xl shadow-xl p-6 text-white"
+                ref={infoRef}
+                className="lg:col-span-2 space-y-6"
+                initial={{ opacity: 0, x: 30 }}
+                animate={isInfoInView ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <FaShieldAlt />
-                  Your Community Benefits
-                </h3>
+                {/* WhatsApp CTA */}
+                <motion.a
+                  href="https://wa.me/97286557700"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(37, 211, 102, 0.2)' }}
+                  className="block bg-[#25D366] text-white rounded-2xl p-6 cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 stroke-[1.5]" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">
+                        {language === 'he' ? 'שלחו וואטסאפ' : 'Chat on WhatsApp'}
+                      </h3>
+                      <p className="text-white/80 text-sm">
+                        {language === 'he' ? 'תגובה מהירה תוך דקות' : 'Quick response in minutes'}
+                      </p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 stroke-[1.5] ml-auto" />
+                  </div>
+                </motion.a>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <i className="fas fa-check-circle"></i>
-                    <span className="text-sm">Priority Support Queue</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <i className="fas fa-check-circle"></i>
-                    <span className="text-sm">Free Return Shipping</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <i className="fas fa-check-circle"></i>
-                    <span className="text-sm">Extended Warranty</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <i className="fas fa-check-circle"></i>
-                    <span className="text-sm">VIP Event Access</span>
+                {/* Support Hours */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                  <h3 className="font-bold text-lg text-[#3a3a1d] mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5 stroke-[1.5] text-[#478c0b]" />
+                    {language === 'he' ? 'שעות פעילות' : 'Support Hours'}
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { dayEn: 'Sunday - Thursday', dayHe: 'ראשון - חמישי', time: '8:00 - 20:00' },
+                      { dayEn: 'Friday', dayHe: 'שישי', time: '8:00 - 14:00' },
+                      { dayEn: 'Saturday (Shabbat)', dayHe: 'שבת', time: language === 'he' ? 'סגור' : 'Closed' }
+                    ].map((schedule, i) => (
+                      <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                        <span className="text-sm text-gray-600">
+                          {language === 'he' ? schedule.dayHe : schedule.dayEn}
+                        </span>
+                        <span className="text-sm font-semibold text-[#3a3a1d]">{schedule.time}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <button className="w-full mt-4 py-2 bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium hover:bg-white/30 transition-all">
-                  Upgrade Membership
-                </button>
+                {/* Quick Stats */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                  <h3 className="font-bold text-lg text-[#3a3a1d] mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 stroke-[1.5] text-[#f6af0d]" />
+                    {language === 'he' ? 'סטטיסטיקות תמיכה' : 'Support Stats'}
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { labelEn: 'Average Response', labelHe: 'זמן תגובה ממוצע', value: '2.5h' },
+                      { labelEn: 'Satisfaction', labelHe: 'שביעות רצון', value: '4.8/5' },
+                      { labelEn: 'Resolved This Month', labelHe: 'פתרונות החודש', value: '156' },
+                    ].map((stat, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">{language === 'he' ? stat.labelHe : stat.labelEn}</span>
+                        <span className="font-bold text-[#478c0b]">{stat.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Community Benefits */}
+                <div
+                  className="rounded-2xl p-6 text-white"
+                  style={{ background: 'linear-gradient(135deg, #478c0b 0%, #2D5A27 100%)' }}
+                >
+                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                    <Shield className="w-5 h-5 stroke-[1.5]" />
+                    {language === 'he' ? 'הטבות קהילה' : 'Community Benefits'}
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      language === 'he' ? 'תור עדיפות לתמיכה' : 'Priority Support Queue',
+                      language === 'he' ? 'משלוח החזרות חינם' : 'Free Return Shipping',
+                      language === 'he' ? 'אחריות מורחבת' : 'Extended Warranty',
+                      language === 'he' ? 'גישה לאירועי VIP' : 'VIP Event Access'
+                    ].map((benefit, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <CheckCircle className="w-4 h-4 stroke-[1.5] text-[#f6af0d] shrink-0" />
+                        <span className="text-sm text-white/90">{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </motion.div>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Map Placeholder */}
+        <section className="pb-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="bg-gradient-to-br from-[#478c0b]/5 to-[#f6af0d]/5 rounded-2xl p-8 md:p-12 border border-[#478c0b]/10"
+              >
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  <div className="flex-1">
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#3a3a1d] mb-4">
+                      {language === 'he' ? 'בואו לבקר אותנו' : 'Come Visit Us'}
+                    </h2>
+                    <p className="text-gray-600 mb-6">
+                      {language === 'he'
+                        ? 'כפר השלום, דימונה, ישראל. חוו את הקהילה, טעמו את האוכל, הכירו את האנשים.'
+                        : 'Village of Peace, Dimona, Israel. Experience the community, taste the food, meet the people.'}
+                    </p>
+                    <div className="space-y-3">
+                      {[
+                        { icon: MapPin, textEn: 'Village of Peace, Dimona, Israel', textHe: 'כפר השלום, דימונה, ישראל' },
+                        { icon: Phone, textEn: '+972-8-655-7700', textHe: '08-655-7700' },
+                        { icon: Mail, textEn: 'support@kfrmarketplace.com', textHe: 'support@kfrmarketplace.com' }
+                      ].map((info, i) => {
+                        const InfoIcon = info.icon;
+                        return (
+                          <div key={i} className="flex items-center gap-3">
+                            <InfoIcon className="w-5 h-5 stroke-[1.5] text-[#478c0b] shrink-0" />
+                            <span className="text-[#3a3a1d]">{language === 'he' ? info.textHe : info.textEn}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 h-64 bg-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                    <div className="text-center text-gray-400">
+                      <MapPin className="w-12 h-12 mx-auto mb-3 stroke-[1.5]" />
+                      <p className="font-medium">{language === 'he' ? 'מפה בקרוב' : 'Map Coming Soon'}</p>
+                      <p className="text-sm">{language === 'he' ? 'דימונה, ישראל' : 'Dimona, Israel'}</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
       </div>
     </Layout>
   );

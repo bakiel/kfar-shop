@@ -5,24 +5,32 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   DollarSign, ShoppingCart, Store, Package,
-  ArrowRight, Tag, Clock
+  ArrowRight, Tag, Clock, AlertTriangle
 } from 'lucide-react';
 import { PageHeader, StatCard, DataTable, StatusBadge, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { vendorStores, getAllProducts } from '@/lib/data/wordpress-style-data-layer';
 
-interface MockOrder {
+interface DashboardOrder {
   id: string;
   customer: string;
-  customerHe: string;
   vendor: string;
-  vendorHe: string;
   items: number;
   total: number;
   date: string;
   status: 'pending' | 'processing' | 'shipped' | 'delivered';
   [key: string]: unknown;
+}
+
+interface DashboardData {
+  totalRevenue: number;
+  activeOrders: number;
+  activeVendors: number;
+  totalProducts: number;
+  totalCustomers: number;
+  pendingOrders: number;
+  recentOrders: DashboardOrder[];
+  vendorStats: { id: string; name: string; products: number; revenue: number; rating: string }[];
 }
 
 const container = {
@@ -38,51 +46,85 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-const mockOrders: MockOrder[] = [
-  { id: 'KF-1001', customer: 'Sarah Cohen', customerHe: 'שרה כהן', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 3, total: 145, date: '2025-02-07', status: 'pending' },
-  { id: 'KF-1002', customer: 'David Levi', customerHe: 'דוד לוי', vendor: 'Garden of Light', vendorHe: 'גן האור', items: 5, total: 230, date: '2025-02-07', status: 'processing' },
-  { id: 'KF-1003', customer: 'Miriam Yosef', customerHe: 'מרים יוסף', vendor: "Queen's Cuisine", vendorHe: 'המטבח של המלכה', items: 2, total: 89, date: '2025-02-06', status: 'shipped' },
-  { id: 'KF-1004', customer: 'Avi Ben-Israel', customerHe: 'אבי בן-ישראל', vendor: 'Gahn Delight', vendorHe: 'גן תענוג', items: 4, total: 178, date: '2025-02-06', status: 'delivered' },
-  { id: 'KF-1005', customer: 'Rivka Amar', customerHe: 'רבקה עמר', vendor: 'People Store', vendorHe: 'חנות העם', items: 1, total: 52, date: '2025-02-05', status: 'pending' },
-];
+// --- Mock fallback data (kept for reference) ---
+// const mockOrders = [
+//   { id: 'KF-1001', customer: 'Sarah Cohen', customerHe: 'שרה כהן', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 3, total: 145, date: '2025-02-07', status: 'pending' },
+//   { id: 'KF-1002', customer: 'David Levi', customerHe: 'דוד לוי', vendor: 'Garden of Light', vendorHe: 'גן האור', items: 5, total: 230, date: '2025-02-07', status: 'processing' },
+//   { id: 'KF-1003', customer: 'Miriam Yosef', customerHe: 'מרים יוסף', vendor: "Queen's Cuisine", vendorHe: 'המטבח של המלכה', items: 2, total: 89, date: '2025-02-06', status: 'shipped' },
+//   { id: 'KF-1004', customer: 'Avi Ben-Israel', customerHe: 'אבי בן-ישראל', vendor: 'Gahn Delight', vendorHe: 'גן תענוג', items: 4, total: 178, date: '2025-02-06', status: 'delivered' },
+//   { id: 'KF-1005', customer: 'Rivka Amar', customerHe: 'רבקה עמר', vendor: 'People Store', vendorHe: 'חנות העם', items: 1, total: 52, date: '2025-02-05', status: 'pending' },
+// ];
 
 export default function AdminDashboard() {
   const { language, t, isRTL } = useLanguage();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ revenue: 0, orders: 0, vendors: 0, products: 0 });
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    const vendors = Object.values(vendorStores);
-    const products = getAllProducts();
-    setStats({
-      revenue: 87450,
-      orders: 24,
-      vendors: vendors.length,
-      products: products.length,
-    });
-    setLoading(false);
+    fetch('/api/admin/dashboard')
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Dashboard fetch error:', err);
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
     return <LoadingState type="page" />;
   }
 
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500 stroke-[1.5] mb-3" />
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+          {isRTL ? 'שגיאה בטעינת הנתונים' : 'Failed to load dashboard'}
+        </h2>
+        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <button
+          onClick={() => { setLoading(true); setError(null); location.reload(); }}
+          className="px-4 py-2 text-sm font-medium text-white bg-[#2D5A27] rounded-lg hover:bg-[#234A1F] transition-colors cursor-pointer"
+        >
+          {isRTL ? 'נסה שוב' : 'Retry'}
+        </button>
+      </div>
+    );
+  }
+
+  const stats = {
+    revenue: data.totalRevenue,
+    orders: data.activeOrders,
+    vendors: data.activeVendors,
+    products: data.totalProducts,
+  };
+
+  const recentOrders: DashboardOrder[] = data.recentOrders;
+
   const today = new Date();
   const dateString = isRTL
     ? today.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     : today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  const orderColumns: Column<MockOrder>[] = [
+  const orderColumns: Column<DashboardOrder>[] = [
     { key: 'id', header: isRTL ? 'מזהה הזמנה' : 'Order ID', sortable: true },
     {
       key: 'customer',
       header: t('Customer'),
-      render: (row) => <span className="font-medium text-gray-900">{isRTL ? row.customerHe : row.customer}</span>,
+      render: (row) => <span className="font-medium text-gray-900">{row.customer}</span>,
     },
     {
       key: 'vendor',
       header: t('Vendor'),
-      render: (row) => <span>{isRTL ? row.vendorHe : row.vendor}</span>,
+      render: (row) => <span>{row.vendor}</span>,
     },
     { key: 'items', header: t('Items'), sortable: true },
     {
@@ -192,9 +234,9 @@ export default function AdminDashboard() {
             <ArrowRight className={`w-4 h-4 stroke-[1.5] ${isRTL ? 'rotate-180' : ''}`} />
           </Link>
         </div>
-        <DataTable<MockOrder>
+        <DataTable<DashboardOrder>
           columns={orderColumns}
-          data={mockOrders}
+          data={recentOrders}
           searchable={false}
           pageSize={5}
           emptyTitle={isRTL ? 'אין הזמנות עדיין' : 'No orders yet'}

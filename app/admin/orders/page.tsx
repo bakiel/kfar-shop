@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  ShoppingCart, Eye, RefreshCw
+  ShoppingCart, Eye, RefreshCw, AlertTriangle
 } from 'lucide-react';
-import { PageHeader, DataTable, StatusBadge } from '@/components/portal';
+import { PageHeader, DataTable, StatusBadge, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 
@@ -13,15 +13,36 @@ type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancell
 
 interface Order {
   id: string;
+  orderNumber?: string;
+  customer: string | { name: string; email?: string };
+  vendorName?: string;
+  vendor?: string;
+  items: number | any[];
+  total: number;
+  date?: string;
+  createdAt?: string;
+  status: OrderStatus;
+  [key: string]: unknown;
+}
+
+interface NormalizedOrder {
+  id: string;
   customer: string;
-  customerHe: string;
   vendor: string;
-  vendorHe: string;
   items: number;
   total: number;
   date: string;
   status: OrderStatus;
   [key: string]: unknown;
+}
+
+interface OrdersSummary {
+  total: number;
+  pending: number;
+  processing: number;
+  shipped: number;
+  delivered: number;
+  cancelled: number;
 }
 
 const container = {
@@ -33,45 +54,103 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-const mockOrders: Order[] = [
-  { id: 'KF-1001', customer: 'Sarah Cohen', customerHe: 'שרה כהן', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 3, total: 145, date: '2025-02-07', status: 'pending' },
-  { id: 'KF-1002', customer: 'David Levi', customerHe: 'דוד לוי', vendor: 'Garden of Light', vendorHe: 'גן האור', items: 5, total: 230, date: '2025-02-07', status: 'processing' },
-  { id: 'KF-1003', customer: 'Miriam Yosef', customerHe: 'מרים יוסף', vendor: "Queen's Cuisine", vendorHe: 'המטבח של המלכה', items: 2, total: 89, date: '2025-02-06', status: 'shipped' },
-  { id: 'KF-1004', customer: 'Avi Ben-Israel', customerHe: 'אבי בן-ישראל', vendor: 'Gahn Delight', vendorHe: 'גן תענוג', items: 4, total: 178, date: '2025-02-06', status: 'delivered' },
-  { id: 'KF-1005', customer: 'Rivka Amar', customerHe: 'רבקה עמר', vendor: 'People Store', vendorHe: 'חנות העם', items: 1, total: 52, date: '2025-02-05', status: 'pending' },
-  { id: 'KF-1006', customer: 'Yonatan Dayan', customerHe: 'יונתן דיין', vendor: 'VOP Shop', vendorHe: 'חנות כפר השלום', items: 7, total: 320, date: '2025-02-05', status: 'processing' },
-  { id: 'KF-1007', customer: 'Naomi Ben-Ami', customerHe: 'נעמי בן-עמי', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 2, total: 75, date: '2025-02-04', status: 'delivered' },
-  { id: 'KF-1008', customer: 'Moshe Peretz', customerHe: 'משה פרץ', vendor: 'Garden of Light', vendorHe: 'גן האור', items: 3, total: 134, date: '2025-02-04', status: 'shipped' },
-  { id: 'KF-1009', customer: 'Esther Friedman', customerHe: 'אסתר פרידמן', vendor: "Queen's Cuisine", vendorHe: 'המטבח של המלכה', items: 1, total: 48, date: '2025-02-03', status: 'cancelled' },
-  { id: 'KF-1010', customer: 'Benny Chaim', customerHe: 'בני חיים', vendor: 'Gahn Delight', vendorHe: 'גן תענוג', items: 6, total: 267, date: '2025-02-03', status: 'delivered' },
-  { id: 'KF-1011', customer: 'Tamar Shalom', customerHe: 'תמר שלום', vendor: 'People Store', vendorHe: 'חנות העם', items: 4, total: 198, date: '2025-02-02', status: 'pending' },
-  { id: 'KF-1012', customer: 'Yair Rosen', customerHe: 'יאיר רוזן', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 2, total: 94, date: '2025-02-02', status: 'processing' },
-  { id: 'KF-1013', customer: 'Leah Mizrachi', customerHe: 'לאה מזרחי', vendor: 'VOP Shop', vendorHe: 'חנות כפר השלום', items: 3, total: 156, date: '2025-02-01', status: 'delivered' },
-  { id: 'KF-1014', customer: 'Ori Dagan', customerHe: 'אורי דגן', vendor: 'Garden of Light', vendorHe: 'גן האור', items: 5, total: 245, date: '2025-02-01', status: 'shipped' },
-  { id: 'KF-1015', customer: 'Shira Katz', customerHe: 'שירה כץ', vendor: 'Gahn Delight', vendorHe: 'גן תענוג', items: 1, total: 42, date: '2025-01-31', status: 'cancelled' },
-];
+// --- Mock fallback data (kept for reference) ---
+// const mockOrders: Order[] = [
+//   { id: 'KF-1001', customer: 'Sarah Cohen', customerHe: 'שרה כהן', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 3, total: 145, date: '2025-02-07', status: 'pending' },
+//   ... (15 entries)
+// ];
+
+function normalizeOrder(o: Order): NormalizedOrder {
+  const customerName = typeof o.customer === 'object' ? o.customer.name : (o.customer || '');
+  const vendorName = o.vendorName || o.vendor || '';
+  const itemsCount = Array.isArray(o.items) ? o.items.length : (o.items || 0);
+  const date = o.date || (o.createdAt ? o.createdAt.split('T')[0] : '');
+  return {
+    id: o.orderNumber || o.id,
+    customer: customerName,
+    vendor: vendorName,
+    items: itemsCount,
+    total: o.total,
+    date,
+    status: o.status,
+  };
+}
 
 type FilterStatus = 'all' | OrderStatus;
 
 export default function OrdersPage() {
   const { language, t, isRTL } = useLanguage();
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
+  const [orders, setOrders] = useState<NormalizedOrder[]>([]);
+  const [summary, setSummary] = useState<OrdersSummary>({ total: 0, pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState<string | null>(null);
 
-  const filteredOrders = useMemo(() => {
-    if (statusFilter === 'all') return mockOrders;
-    return mockOrders.filter((o) => o.status === statusFilter);
-  }, [statusFilter]);
+  const fetchOrders = useCallback((status: FilterStatus) => {
+    setLoading(true);
+    setError(null);
+    const params = new URLSearchParams();
+    if (status !== 'all') params.set('status', status);
+    fetch(`/api/admin/orders?${params.toString()}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((json) => {
+        const normalized = (json.orders || []).map(normalizeOrder);
+        setOrders(normalized);
+        if (json.summary) setSummary(json.summary);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Orders fetch error:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    // Always fetch 'all' initially so we get full summary counts
+    fetchOrders('all');
+  }, [fetchOrders]);
+
+  const handleFilterChange = (newFilter: FilterStatus) => {
+    setStatusFilter(newFilter);
+    fetchOrders(newFilter);
+  };
+
+  const handleStatusUpdate = useCallback((orderId: string, newStatus: OrderStatus) => {
+    setUpdating(orderId);
+    fetch('/api/admin/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, status: newStatus }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(() => {
+        // Re-fetch the current view
+        fetchOrders(statusFilter);
+      })
+      .catch((err) => console.error('Status update error:', err))
+      .finally(() => setUpdating(null));
+  }, [statusFilter, fetchOrders]);
+
+  const filteredOrders = orders;
 
   const filters: { id: FilterStatus; label: string; labelHe: string; count: number }[] = [
-    { id: 'all', label: 'All', labelHe: 'הכל', count: mockOrders.length },
-    { id: 'pending', label: 'Pending', labelHe: 'ממתין', count: mockOrders.filter((o) => o.status === 'pending').length },
-    { id: 'processing', label: 'Processing', labelHe: 'בעיבוד', count: mockOrders.filter((o) => o.status === 'processing').length },
-    { id: 'shipped', label: 'Shipped', labelHe: 'נשלח', count: mockOrders.filter((o) => o.status === 'shipped').length },
-    { id: 'delivered', label: 'Delivered', labelHe: 'נמסר', count: mockOrders.filter((o) => o.status === 'delivered').length },
-    { id: 'cancelled', label: 'Cancelled', labelHe: 'בוטל', count: mockOrders.filter((o) => o.status === 'cancelled').length },
+    { id: 'all', label: 'All', labelHe: 'הכל', count: summary.total },
+    { id: 'pending', label: 'Pending', labelHe: 'ממתין', count: summary.pending },
+    { id: 'processing', label: 'Processing', labelHe: 'בעיבוד', count: summary.processing },
+    { id: 'shipped', label: 'Shipped', labelHe: 'נשלח', count: summary.shipped },
+    { id: 'delivered', label: 'Delivered', labelHe: 'נמסר', count: summary.delivered },
+    { id: 'cancelled', label: 'Cancelled', labelHe: 'בוטל', count: summary.cancelled },
   ];
 
-  const columns: Column<Order>[] = [
+  const columns: Column<NormalizedOrder>[] = [
     {
       key: 'id',
       header: t('Order ID'),
@@ -82,12 +161,12 @@ export default function OrdersPage() {
       key: 'customer',
       header: t('Customer'),
       sortable: true,
-      render: (row) => <span className="font-medium text-gray-900">{isRTL ? row.customerHe : row.customer}</span>,
+      render: (row) => <span className="font-medium text-gray-900">{row.customer}</span>,
     },
     {
       key: 'vendor',
       header: t('Vendor'),
-      render: (row) => <span className="text-gray-700">{isRTL ? row.vendorHe : row.vendor}</span>,
+      render: (row) => <span className="text-gray-700">{row.vendor}</span>,
     },
     {
       key: 'items',
@@ -114,12 +193,34 @@ export default function OrdersPage() {
     },
   ];
 
+  if (loading) {
+    return <LoadingState type="page" />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500 stroke-[1.5] mb-3" />
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+          {isRTL ? 'שגיאה בטעינת הזמנות' : 'Failed to load orders'}
+        </h2>
+        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <button
+          onClick={() => fetchOrders(statusFilter)}
+          className="px-4 py-2 text-sm font-medium text-white bg-[#2D5A27] rounded-lg hover:bg-[#234A1F] transition-colors cursor-pointer"
+        >
+          {isRTL ? 'נסה שוב' : 'Retry'}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <motion.div variants={container} initial="hidden" animate="show">
       <motion.div variants={item}>
         <PageHeader
           title={t('Orders')}
-          subtitle={isRTL ? `${mockOrders.length} הזמנות` : `${mockOrders.length} orders total`}
+          subtitle={isRTL ? `${summary.total} הזמנות` : `${summary.total} orders total`}
           isRTL={isRTL}
         />
       </motion.div>
@@ -131,7 +232,7 @@ export default function OrdersPage() {
             key={filter.id}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setStatusFilter(filter.id)}
+            onClick={() => handleFilterChange(filter.id)}
             className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer border ${
               statusFilter === filter.id
                 ? 'bg-[#2D5A27] text-white border-[#2D5A27]'
@@ -155,7 +256,7 @@ export default function OrdersPage() {
 
       {/* Orders Table */}
       <motion.div variants={item}>
-        <DataTable<Order>
+        <DataTable<NormalizedOrder>
           columns={columns}
           data={filteredOrders}
           searchable
@@ -167,7 +268,18 @@ export default function OrdersPage() {
           isRTL={isRTL}
           rowActions={(row) => [
             { label: t('View Details'), onClick: () => {} },
-            { label: isRTL ? 'עדכן סטטוס' : 'Update Status', onClick: () => {} },
+            {
+              label: isRTL ? 'סמן כבעיבוד' : 'Mark Processing',
+              onClick: () => handleStatusUpdate(row.id, 'processing'),
+            },
+            {
+              label: isRTL ? 'סמן כנשלח' : 'Mark Shipped',
+              onClick: () => handleStatusUpdate(row.id, 'shipped'),
+            },
+            {
+              label: isRTL ? 'סמן כנמסר' : 'Mark Delivered',
+              onClick: () => handleStatusUpdate(row.id, 'delivered'),
+            },
           ]}
         />
       </motion.div>

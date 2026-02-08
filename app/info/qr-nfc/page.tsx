@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
 import QRNFCAnimation from '@/components/ui/QRNFCAnimation';
-import { FaQrcode, FaWifi, FaMobileAlt, FaShieldAlt, FaRocket, FaUsers, FaLightbulb, FaChevronDown } from 'react-icons/fa';
+import { QrCode, Wifi, Smartphone, Shield, Rocket, Users, Lightbulb, ChevronDown } from 'lucide-react';
 
 export default function QRNFCInfoPage() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -39,8 +39,8 @@ export default function QRNFCInfoPage() {
                 {/* Icon Badge */}
                 <div className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 mx-auto shadow-xl" 
                      style={{ backgroundColor: '#478c0b' }}>
-                  <FaQrcode className="text-4xl text-white" />
-                  <FaWifi className="text-4xl text-white -ml-2" />
+                  <QrCode className="w-10 h-10 stroke-[1.5] text-white" />
+                  <Wifi className="w-10 h-10 stroke-[1.5] text-white -ml-2" />
                 </div>
 
                 <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: '#3a3a1d' }}>
@@ -57,7 +57,7 @@ export default function QRNFCInfoPage() {
                     className="px-8 py-4 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                     style={{ backgroundColor: '#478c0b' }}
                   >
-                    <FaRocket className="inline mr-2" />
+                    <Rocket className="inline w-5 h-5 stroke-[1.5] mr-2" />
                     Try Live Demo
                   </Link>
                   <Link 
@@ -65,7 +65,7 @@ export default function QRNFCInfoPage() {
                     className="px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
                     style={{ backgroundColor: '#f6af0d', color: 'white' }}
                   >
-                    <FaLightbulb className="inline mr-2" />
+                    <Lightbulb className="inline w-5 h-5 stroke-[1.5] mr-2" />
                     Learn How It Works
                   </Link>
                 </div>
@@ -87,7 +87,7 @@ export default function QRNFCInfoPage() {
                 <div className="bg-gradient-to-br from-[#cfe7c1]/20 to-[#478c0b]/10 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all">
                   <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-md"
                        style={{ backgroundColor: '#478c0b' }}>
-                    <FaQrcode className="text-2xl text-white" />
+                    <QrCode className="w-6 h-6 stroke-[1.5] text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-3" style={{ color: '#3a3a1d' }}>QR Codes</h3>
                   <p className="text-gray-600 mb-4">
@@ -114,7 +114,7 @@ export default function QRNFCInfoPage() {
                 <div className="bg-gradient-to-br from-[#f6af0d]/20 to-[#c23c09]/10 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all">
                   <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-md"
                        style={{ backgroundColor: '#f6af0d' }}>
-                    <FaWifi className="text-2xl text-white" />
+                    <Wifi className="w-6 h-6 stroke-[1.5] text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-3" style={{ color: '#3a3a1d' }}>NFC Tags</h3>
                   <p className="text-gray-600 mb-4">
@@ -141,7 +141,7 @@ export default function QRNFCInfoPage() {
                 <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all">
                   <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-md"
                        style={{ backgroundColor: '#c23c09' }}>
-                    <FaLightbulb className="text-2xl text-white" />
+                    <Lightbulb className="w-6 h-6 stroke-[1.5] text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-3" style={{ color: '#3a3a1d' }}>AI Enhanced</h3>
                   <p className="text-gray-600 mb-4">
@@ -192,11 +192,11 @@ export default function QRNFCInfoPage() {
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="text-2xl font-bold flex items-center gap-3" style={{ color: '#478c0b' }}>
-                      <FaQrcode />
+                      <QrCode className="w-6 h-6 stroke-[1.5]" />
                       QR Code Applications
                     </h3>
-                    <FaChevronDown 
-                      className={`text-xl transition-transform ${activeSection === 'qr-uses' ? 'rotate-180' : ''}`}
+                    <ChevronDown
+                      className={`w-5 h-5 stroke-[1.5] transition-transform ${activeSection === 'qr-uses' ? 'rotate-180' : ''}`}
                       style={{ color: '#478c0b' }}
                     />
                   </div>
@@ -254,11 +254,11 @@ export default function QRNFCInfoPage() {
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="text-2xl font-bold flex items-center gap-3" style={{ color: '#f6af0d' }}>
-                      <FaWifi />
+                      <Wifi className="w-6 h-6 stroke-[1.5]" />
                       NFC Tag Features
                     </h3>
-                    <FaChevronDown 
-                      className={`text-xl transition-transform ${activeSection === 'nfc-uses' ? 'rotate-180' : ''}`}
+                    <ChevronDown
+                      className={`w-5 h-5 stroke-[1.5] transition-transform ${activeSection === 'nfc-uses' ? 'rotate-180' : ''}`}
                       style={{ color: '#f6af0d' }}
                     />
                   </div>
@@ -318,11 +318,11 @@ export default function QRNFCInfoPage() {
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="text-2xl font-bold flex items-center gap-3" style={{ color: '#c23c09' }}>
-                      <FaShieldAlt />
+                      <Shield className="w-6 h-6 stroke-[1.5]" />
                       Security & Privacy
                     </h3>
-                    <FaChevronDown 
-                      className={`text-xl transition-transform ${activeSection === 'security' ? 'rotate-180' : ''}`}
+                    <ChevronDown
+                      className={`w-5 h-5 stroke-[1.5] transition-transform ${activeSection === 'security' ? 'rotate-180' : ''}`}
                       style={{ color: '#c23c09' }}
                     />
                   </div>
@@ -368,7 +368,7 @@ export default function QRNFCInfoPage() {
                 <div className="text-center">
                   <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
                        style={{ backgroundColor: '#478c0b' }}>
-                    <FaMobileAlt className="text-3xl text-white" />
+                    <Smartphone className="w-8 h-8 stroke-[1.5] text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-3" style={{ color: '#3a3a1d' }}>For Customers</h3>
                   <ul className="text-left space-y-2 text-gray-600">
@@ -384,7 +384,7 @@ export default function QRNFCInfoPage() {
                 <div className="text-center">
                   <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
                        style={{ backgroundColor: '#f6af0d' }}>
-                    <FaRocket className="text-3xl text-white" />
+                    <Rocket className="w-8 h-8 stroke-[1.5] text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-3" style={{ color: '#3a3a1d' }}>For Vendors</h3>
                   <ul className="text-left space-y-2 text-gray-600">
@@ -400,7 +400,7 @@ export default function QRNFCInfoPage() {
                 <div className="text-center">
                   <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
                        style={{ backgroundColor: '#c23c09' }}>
-                    <FaUsers className="text-3xl text-white" />
+                    <Users className="w-8 h-8 stroke-[1.5] text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-3" style={{ color: '#3a3a1d' }}>For Community</h3>
                   <ul className="text-left space-y-2 text-gray-600">

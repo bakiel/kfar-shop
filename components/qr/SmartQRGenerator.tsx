@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { AI } from '@/lib/services/ai';
 import { SmartQRContent } from '@/lib/services/ai/types';
-import { FaQrcode, FaDownload, FaCopy, FaShare } from 'react-icons/fa';
+import { QrCode, Download, Copy, Share2 } from 'lucide-react';
 
 interface SmartQRGeneratorProps {
   type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
@@ -277,7 +277,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
           disabled={loading || !!error}
           className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors disabled:opacity-50"
         >
-          <FaDownload className="inline mr-2" />
+          <Download className="inline w-4 h-4 stroke-[1.5] mr-2" />
           Download
         </button>
         
@@ -286,7 +286,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
           disabled={loading || !!error}
           className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors disabled:opacity-50"
         >
-          <FaCopy className="inline mr-2" />
+          <Copy className="inline w-4 h-4 stroke-[1.5] mr-2" />
           Copy Link
         </button>
         
@@ -296,7 +296,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
             disabled={loading || !!error}
             className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium text-gray-700 transition-colors disabled:opacity-50"
           >
-            <FaShare className="inline mr-2" />
+            <Share2 className="inline w-4 h-4 stroke-[1.5] mr-2" />
             Share
           </button>
         )}

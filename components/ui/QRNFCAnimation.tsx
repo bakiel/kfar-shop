@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FaQrcode, FaWifi, FaMobileAlt, FaCheckCircle, FaShoppingCart, FaBox, FaCreditCard } from 'react-icons/fa';
+import { QrCode, Wifi, Smartphone, CheckCircle, ShoppingCart, Package, CreditCard } from 'lucide-react';
 
 export default function QRNFCAnimation() {
   const [activeDemo, setActiveDemo] = useState<'qr-payment' | 'qr-product' | 'nfc-tap' | 'nfc-locker'>('qr-payment');
@@ -57,7 +57,7 @@ export default function QRNFCAnimation() {
                     <div className={`transition-all duration-500 ${animationStep >= 1 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
                       <div className="w-20 h-20 bg-gray-100 rounded-lg p-1 mx-auto">
                         <div className="w-full h-full bg-white rounded flex items-center justify-center">
-                          <FaQrcode className="text-2xl animate-pulse" style={{ color: '#478c0b' }} />
+                          <QrCode className="w-6 h-6 stroke-[1.5] animate-pulse" style={{ color: '#478c0b' }} />
                         </div>
                       </div>
                       <p className="text-xs text-center mt-1 text-gray-600">Scan to Pay</p>
@@ -65,7 +65,7 @@ export default function QRNFCAnimation() {
                   )}
                   {animationStep >= 3 && (
                     <div className={`mt-2 transition-all duration-500 ${animationStep >= 3 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
-                      <FaCheckCircle className="text-3xl text-green-500 mx-auto" />
+                      <CheckCircle className="w-8 h-8 stroke-[1.5] text-green-500 mx-auto" />
                       <p className="text-xs text-center font-bold text-green-600">Payment Success!</p>
                     </div>
                   )}
@@ -98,7 +98,7 @@ export default function QRNFCAnimation() {
                   <div className={`transition-all duration-500 ${animationStep >= 1 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
                     <div className="w-32 h-32 bg-gray-100 rounded-lg p-2 mx-auto">
                       <div className="w-full h-full bg-white rounded flex items-center justify-center">
-                        <FaQrcode className="text-5xl animate-pulse" style={{ color: '#478c0b' }} />
+                        <QrCode className="w-12 h-12 stroke-[1.5] animate-pulse" style={{ color: '#478c0b' }} />
                       </div>
                     </div>
                     <p className="text-xs text-center mt-2 text-gray-600">Scan to Pay</p>
@@ -146,7 +146,7 @@ export default function QRNFCAnimation() {
               animationStep >= 4 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
             }`}>
               <div className="bg-green-500 rounded-full p-8 animate-bounce">
-                <FaCheckCircle className="text-6xl text-white" />
+                <CheckCircle className="w-16 h-16 stroke-[1.5] text-white" />
               </div>
             </div>
           )}
@@ -181,7 +181,7 @@ export default function QRNFCAnimation() {
             }`}>
               <div className="bg-white rounded-lg shadow-lg p-3 w-40">
                 <div className="w-full h-20 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-lg mb-2 flex items-center justify-center">
-                  <FaBox className="text-2xl text-orange-600" />
+                  <Package className="w-6 h-6 stroke-[1.5] text-orange-600" />
                 </div>
                 <h3 className="font-bold text-xs mb-1">Organic Tahini</h3>
                 {animationStep >= 1 && (
@@ -190,7 +190,7 @@ export default function QRNFCAnimation() {
                   }`}>
                     <div className="w-full h-full bg-gray-100 rounded p-1">
                       <div className="w-full h-full bg-white rounded flex items-center justify-center">
-                        <FaQrcode className="text-xl" style={{ color: '#f6af0d' }} />
+                        <QrCode className="w-5 h-5 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                       </div>
                     </div>
                   </div>
@@ -204,7 +204,7 @@ export default function QRNFCAnimation() {
                 animationStep >= 3 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}>
                 <div className="bg-green-500 rounded-full p-2">
-                  <FaShoppingCart className="text-xl text-white" />
+                  <ShoppingCart className="w-5 h-5 stroke-[1.5] text-white" />
                 </div>
                 <p className="text-xs font-bold text-green-600 mt-1">Added to Cart!</p>
               </div>
@@ -224,7 +224,7 @@ export default function QRNFCAnimation() {
           }`}>
             <div className="bg-white rounded-xl shadow-xl p-4 w-48">
               <div className="w-full h-32 bg-gradient-to-br from-yellow-200 to-orange-200 rounded-lg mb-3 flex items-center justify-center">
-                <FaBox className="text-4xl text-orange-600" />
+                <Package className="w-10 h-10 stroke-[1.5] text-orange-600" />
               </div>
               <h3 className="font-bold text-sm mb-1">Organic Tahini</h3>
               <p className="text-xs text-gray-600 mb-2">Premium quality</p>
@@ -234,7 +234,7 @@ export default function QRNFCAnimation() {
                 }`}>
                   <div className="w-full h-full bg-gray-100 rounded p-1">
                     <div className="w-full h-full bg-white rounded flex items-center justify-center">
-                      <FaQrcode className="text-3xl" style={{ color: '#f6af0d' }} />
+                      <QrCode className="w-8 h-8 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                     </div>
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export default function QRNFCAnimation() {
                       </div>
                     </div>
                     <button className="w-full mt-4 py-2 rounded-lg text-white text-sm" style={{ backgroundColor: '#478c0b' }}>
-                      <FaShoppingCart className="inline mr-2" />
+                      <ShoppingCart className="inline w-4 h-4 stroke-[1.5] mr-2" />
                       Add to Cart
                     </button>
                   </div>
@@ -290,7 +290,7 @@ export default function QRNFCAnimation() {
               animationStep >= 4 ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-180 opacity-0'
             }`}>
               <div className="bg-green-500 rounded-full p-4">
-                <FaShoppingCart className="text-3xl text-white" />
+                <ShoppingCart className="w-8 h-8 stroke-[1.5] text-white" />
               </div>
             </div>
           )}
@@ -310,7 +310,7 @@ export default function QRNFCAnimation() {
               animationStep >= 0 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
             }`}>
               <div className="w-32 h-20 bg-gray-800 rounded-lg shadow-lg flex items-center justify-center">
-                <FaWifi className="text-2xl text-white" />
+                <Wifi className="w-6 h-6 stroke-[1.5] text-white" />
               </div>
               <p className="text-xs font-semibold mt-1">Payment Terminal</p>
             </div>
@@ -322,7 +322,7 @@ export default function QRNFCAnimation() {
               } ${animationStep >= 1 ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="w-20 h-32 bg-gray-800 rounded-xl p-1 shadow-lg">
                   <div className="w-full h-full bg-white rounded-lg flex items-center justify-center">
-                    <FaMobileAlt className="text-xl text-gray-600" />
+                    <Smartphone className="w-5 h-5 stroke-[1.5] text-gray-600" />
                   </div>
                 </div>
               </div>
@@ -334,7 +334,7 @@ export default function QRNFCAnimation() {
                 animationStep >= 3 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}>
                 <div className="bg-green-500 rounded-full p-4 shadow-lg">
-                  <FaCheckCircle className="text-3xl text-white" />
+                  <CheckCircle className="w-8 h-8 stroke-[1.5] text-white" />
                 </div>
               </div>
             )}
@@ -353,7 +353,7 @@ export default function QRNFCAnimation() {
           }`}>
             <div className="w-48 h-32 bg-gray-800 rounded-xl shadow-2xl flex items-center justify-center">
               <div className="w-40 h-24 bg-gray-700 rounded-lg flex items-center justify-center">
-                <FaWifi className="text-4xl text-white" />
+                <Wifi className="w-10 h-10 stroke-[1.5] text-white" />
               </div>
             </div>
             <p className="text-center mt-2 text-sm font-semibold">Payment Terminal</p>
@@ -366,7 +366,7 @@ export default function QRNFCAnimation() {
             } ${animationStep >= 1 ? 'opacity-100' : 'opacity-0'}`}>
               <div className="w-32 h-56 bg-gray-800 rounded-2xl p-1 shadow-xl">
                 <div className="w-full h-full bg-white rounded-2xl flex items-center justify-center">
-                  <FaMobileAlt className="text-3xl text-gray-600" />
+                  <Smartphone className="w-8 h-8 stroke-[1.5] text-gray-600" />
                 </div>
               </div>
             </div>
@@ -387,7 +387,7 @@ export default function QRNFCAnimation() {
               animationStep >= 3 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
             }`}>
               <div className="bg-green-500 rounded-full p-8 shadow-2xl animate-bounce">
-                <FaCheckCircle className="text-6xl text-white" />
+                <CheckCircle className="w-16 h-16 stroke-[1.5] text-white" />
               </div>
               <p className="mt-4 text-lg font-bold" style={{ color: '#478c0b' }}>
                 Payment Complete!
@@ -426,10 +426,10 @@ export default function QRNFCAnimation() {
                     }`}
                   >
                     {i === 4 && animationStep >= 1 && (
-                      <FaWifi className="text-xs text-white" />
+                      <Wifi className="w-3 h-3 stroke-[1.5] text-white" />
                     )}
                     {i === 4 && animationStep >= 3 && (
-                      <FaBox className="text-xs text-white animate-bounce" />
+                      <Package className="w-3 h-3 stroke-[1.5] text-white animate-bounce" />
                     )}
                   </div>
                 ))}
@@ -444,7 +444,7 @@ export default function QRNFCAnimation() {
               } ${animationStep >= 1 ? 'opacity-100' : 'opacity-0'}`}>
                 <div className="w-16 h-28 bg-gray-800 rounded-xl p-0.5 shadow-lg">
                   <div className="w-full h-full bg-white rounded-lg flex items-center justify-center">
-                    <FaMobileAlt className="text-lg text-gray-600" />
+                    <Smartphone className="w-5 h-5 stroke-[1.5] text-gray-600" />
                   </div>
                 </div>
               </div>
@@ -456,7 +456,7 @@ export default function QRNFCAnimation() {
                 animationStep >= 3 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}>
                 <div className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg text-xs">
-                  <FaCheckCircle className="inline mr-1" />
+                  <CheckCircle className="inline w-3.5 h-3.5 stroke-[1.5] mr-1" />
                   Locker #5 Opened!
                 </div>
               </div>
@@ -483,11 +483,11 @@ export default function QRNFCAnimation() {
                   }`}
                 >
                   {i === 4 && animationStep >= 1 && (
-                    <FaWifi className="text-2xl text-white" />
+                    <Wifi className="w-6 h-6 stroke-[1.5] text-white" />
                   )}
                   {i === 4 && animationStep >= 3 && (
                     <div className="absolute animate-bounce">
-                      <FaBox className="text-2xl text-white" />
+                      <Package className="w-6 h-6 stroke-[1.5] text-white" />
                     </div>
                   )}
                 </div>
@@ -503,7 +503,7 @@ export default function QRNFCAnimation() {
             } ${animationStep >= 1 ? 'opacity-100' : 'opacity-0'}`}>
               <div className="w-32 h-56 bg-gray-800 rounded-2xl p-1 shadow-xl">
                 <div className="w-full h-full bg-white rounded-2xl flex items-center justify-center">
-                  <FaMobileAlt className="text-3xl text-gray-600" />
+                  <Smartphone className="w-8 h-8 stroke-[1.5] text-gray-600" />
                 </div>
               </div>
             </div>
@@ -522,7 +522,7 @@ export default function QRNFCAnimation() {
               animationStep >= 3 ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
             }`}>
               <div className="inline-block bg-green-500 text-white px-6 py-3 rounded-full shadow-lg">
-                <FaCheckCircle className="inline mr-2" />
+                <CheckCircle className="inline w-4 h-4 stroke-[1.5] mr-2" />
                 Locker #5 Opened - Collect Your Order!
               </div>
             </div>
@@ -537,28 +537,28 @@ export default function QRNFCAnimation() {
       id: 'qr-payment' as const,
       title: 'QR Payment',
       description: 'Scan QR code at checkout for instant payment',
-      icon: FaCreditCard,
+      icon: CreditCard,
       color: '#478c0b'
     },
     {
       id: 'qr-product' as const,
       title: 'Product Info',
       description: 'Scan product QR for details and quick add to cart',
-      icon: FaBox,
+      icon: Package,
       color: '#f6af0d'
     },
     {
       id: 'nfc-tap' as const,
       title: 'NFC Tap & Pay',
       description: 'Tap your phone for contactless payment',
-      icon: FaWifi,
+      icon: Wifi,
       color: '#c23c09'
     },
     {
       id: 'nfc-locker' as const,
       title: 'Smart Lockers',
       description: 'Tap to open your collection locker instantly',
-      icon: FaBox,
+      icon: Package,
       color: '#478c0b'
     }
   ];
@@ -628,7 +628,7 @@ export default function QRNFCAnimation() {
                   color: activeDemo === demo.id ? 'white' : '#374151'
                 }}
               >
-                <Icon className="text-lg md:text-2xl mx-auto mb-1 md:mb-2" />
+                <Icon className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5] mx-auto mb-1 md:mb-2" />
                 <p className="font-semibold text-xs md:text-sm">{demo.title}</p>
               </button>
             );

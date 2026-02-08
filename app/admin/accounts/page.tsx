@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Users, Store, Shield, Star
+  Users, Store, Shield, Star, AlertTriangle
 } from 'lucide-react';
-import { PageHeader, DataTable, StatusBadge } from '@/components/portal';
+import { PageHeader, DataTable, StatusBadge, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 
 interface CustomerAccount {
   id: string;
@@ -53,14 +52,11 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-const mockCustomers: CustomerAccount[] = [
-  { id: 'cust-001', name: 'Sarah Cohen', nameHe: 'שרה כהן', email: 'sarah@example.com', orders: 12, points: 480, status: 'active' },
-  { id: 'cust-002', name: 'David Levi', nameHe: 'דוד לוי', email: 'david@example.com', orders: 8, points: 320, status: 'active' },
-  { id: 'cust-003', name: 'Miriam Yosef', nameHe: 'מרים יוסף', email: 'miriam@example.com', orders: 23, points: 920, status: 'active' },
-  { id: 'cust-004', name: 'Avi Ben-Israel', nameHe: 'אבי בן-ישראל', email: 'avi@example.com', orders: 5, points: 200, status: 'active' },
-  { id: 'cust-005', name: 'Rivka Amar', nameHe: 'רבקה עמר', email: 'rivka@example.com', orders: 0, points: 0, status: 'inactive' },
-  { id: 'cust-006', name: 'Yonatan Dayan', nameHe: 'יונתן דיין', email: 'yoni@example.com', orders: 15, points: 600, status: 'active' },
-];
+// --- Mock fallback data (kept for reference) ---
+// const mockCustomers: CustomerAccount[] = [
+//   { id: 'cust-001', name: 'Sarah Cohen', nameHe: 'שרה כהן', email: 'sarah@example.com', orders: 12, points: 480, status: 'active' },
+//   ... (6 entries)
+// ];
 
 const mockAdmins: AdminAccount[] = [
   { id: 'adm-001', name: 'System Admin', nameHe: 'מנהל מערכת', email: 'admin@kfar.com', role: 'Super Admin', roleHe: 'מנהל ראשי', lastLogin: '2025-02-07', status: 'active' },
@@ -72,21 +68,72 @@ type TabId = 'customers' | 'vendors' | 'admins';
 export default function AccountsPage() {
   const { language, t, isRTL } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabId>('customers');
+  const [customers, setCustomers] = useState<CustomerAccount[]>([]);
+  const [vendorAccounts, setVendorAccounts] = useState<VendorAccount[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const vendorAccounts: VendorAccount[] = useMemo(() => {
-    return Object.values(vendorStores).map((v) => ({
-      id: v.id,
-      storeName: v.name,
-      storeNameHe: v.name, // Vendor names are brand names, kept as-is
-      products: v.products.length,
-      revenue: Math.floor(Math.random() * 30000) + 5000,
-      rating: v.analytics?.averageRating ?? 4.5,
-      status: 'active' as const,
-    }));
+  const fetchAccounts = useCallback((search?: string) => {
+    setLoading(true);
+    setError(null);
+
+    const customerParams = new URLSearchParams({ type: 'customers' });
+    const vendorParams = new URLSearchParams({ type: 'vendors' });
+    if (search) {
+      customerParams.set('search', search);
+      vendorParams.set('search', search);
+    }
+
+    Promise.all([
+      fetch(`/api/admin/accounts?${customerParams.toString()}`).then((r) => {
+        if (!r.ok) throw new Error(`Customers: HTTP ${r.status}`);
+        return r.json();
+      }),
+      fetch(`/api/admin/accounts?${vendorParams.toString()}`).then((r) => {
+        if (!r.ok) throw new Error(`Vendors: HTTP ${r.status}`);
+        return r.json();
+      }),
+    ])
+      .then(([custData, vendData]) => {
+        // Normalize customer data from API shape to our interface
+        const normalizedCustomers: CustomerAccount[] = (custData.customers || []).map((c: any) => ({
+          id: c.id,
+          name: c.name || '',
+          nameHe: c.name || '',
+          email: c.email || '',
+          orders: c.totalOrders ?? c.orders ?? 0,
+          points: c.loyaltyPoints ?? c.points ?? 0,
+          status: c.status || 'active',
+        }));
+        setCustomers(normalizedCustomers);
+
+        // Normalize vendor data
+        const normalizedVendors: VendorAccount[] = (vendData.vendors || []).map((v: any) => ({
+          id: v.id,
+          storeName: v.name || '',
+          storeNameHe: v.name || '',
+          products: v.productCount ?? v.products ?? 0,
+          revenue: v.totalRevenue ?? v.revenue ?? 0,
+          rating: v.averageRating ?? v.rating ?? 4.5,
+          status: v.status || 'active',
+        }));
+        setVendorAccounts(normalizedVendors);
+
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Accounts fetch error:', err);
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
+
   const tabs: { id: TabId; label: string; labelHe: string; icon: React.ReactNode; count: number }[] = [
-    { id: 'customers', label: 'Customers', labelHe: 'לקוחות', icon: <Users className="w-4 h-4 stroke-[1.5]" />, count: mockCustomers.length },
+    { id: 'customers', label: 'Customers', labelHe: 'לקוחות', icon: <Users className="w-4 h-4 stroke-[1.5]" />, count: customers.length },
     { id: 'vendors', label: 'Vendors', labelHe: 'ספקים', icon: <Store className="w-4 h-4 stroke-[1.5]" />, count: vendorAccounts.length },
     { id: 'admins', label: 'Admins', labelHe: 'מנהלים', icon: <Shield className="w-4 h-4 stroke-[1.5]" />, count: mockAdmins.length },
   ];
@@ -195,14 +242,36 @@ export default function AccountsPage() {
     },
   ];
 
+  if (loading) {
+    return <LoadingState type="page" />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500 stroke-[1.5] mb-3" />
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+          {isRTL ? 'שגיאה בטעינת חשבונות' : 'Failed to load accounts'}
+        </h2>
+        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <button
+          onClick={() => fetchAccounts()}
+          className="px-4 py-2 text-sm font-medium text-white bg-[#2D5A27] rounded-lg hover:bg-[#234A1F] transition-colors cursor-pointer"
+        >
+          {isRTL ? 'נסה שוב' : 'Retry'}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <motion.div variants={container} initial="hidden" animate="show">
       <motion.div variants={item}>
         <PageHeader
           title={t('Accounts')}
           subtitle={isRTL
-            ? `${mockCustomers.length} לקוחות, ${vendorAccounts.length} ספקים, ${mockAdmins.length} מנהלים`
-            : `${mockCustomers.length} customers, ${vendorAccounts.length} vendors, ${mockAdmins.length} admins`
+            ? `${customers.length} לקוחות, ${vendorAccounts.length} ספקים, ${mockAdmins.length} מנהלים`
+            : `${customers.length} customers, ${vendorAccounts.length} vendors, ${mockAdmins.length} admins`
           }
           isRTL={isRTL}
         />
@@ -238,7 +307,7 @@ export default function AccountsPage() {
         {activeTab === 'customers' && (
           <DataTable<CustomerAccount>
             columns={customerColumns}
-            data={mockCustomers}
+            data={customers}
             searchable
             searchPlaceholder={isRTL ? 'חפש לקוחות...' : 'Search customers...'}
             pageSize={10}

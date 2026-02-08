@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { 
-  FaStar, 
-  FaCheck, 
-  FaTimes, 
-  FaExclamationTriangle,
-  FaSearch,
-  FaFilter
-} from 'react-icons/fa';
+import {
+  Star,
+  Check,
+  X,
+  AlertTriangle,
+  Search,
+  SlidersHorizontal
+} from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface Review {
@@ -103,10 +103,9 @@ export default function AdminReviewsPage() {
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
-          <FaStar
+          <Star
             key={star}
-            className={star <= rating ? 'text-yellow-400' : 'text-gray-300'}
-            size={16}
+            className={`w-4 h-4 stroke-[1.5] ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
           />
         ))}
       </div>
@@ -149,7 +148,7 @@ export default function AdminReviewsPage() {
                 <p className="text-sm text-gray-600">Total Reviews</p>
                 <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
               </div>
-              <FaStar className="text-3xl text-gray-400" />
+              <Star className="w-8 h-8 stroke-[1.5] text-gray-400" />
             </div>
           </motion.div>
 
@@ -164,7 +163,7 @@ export default function AdminReviewsPage() {
                 <p className="text-sm text-gray-600">Pending</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
               </div>
-              <FaExclamationTriangle className="text-3xl text-yellow-600" />
+              <AlertTriangle className="w-8 h-8 stroke-[1.5] text-yellow-600" />
             </div>
           </motion.div>
 
@@ -179,7 +178,7 @@ export default function AdminReviewsPage() {
                 <p className="text-sm text-gray-600">Approved</p>
                 <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
               </div>
-              <FaCheck className="text-3xl text-green-600" />
+              <Check className="w-8 h-8 stroke-[1.5] text-green-600" />
             </div>
           </motion.div>
 
@@ -194,7 +193,7 @@ export default function AdminReviewsPage() {
                 <p className="text-sm text-gray-600">Rejected</p>
                 <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
               </div>
-              <FaTimes className="text-3xl text-red-600" />
+              <X className="w-8 h-8 stroke-[1.5] text-red-600" />
             </div>
           </motion.div>
 
@@ -211,7 +210,7 @@ export default function AdminReviewsPage() {
                   {stats.averageRating}
                 </p>
               </div>
-              <FaStar className="text-3xl" style={{ color: '#478c0b' }} />
+              <Star className="w-8 h-8 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
           </motion.div>
         </div>
@@ -239,7 +238,7 @@ export default function AdminReviewsPage() {
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 stroke-[1.5] text-gray-400" />
                 <input
                   type="text"
                   value={searchTerm}
@@ -329,14 +328,14 @@ export default function AdminReviewsPage() {
                         onClick={() => handleModerateReview(review.id, 'approve')}
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                       >
-                        <FaCheck />
+                        <Check className="w-4 h-4 stroke-[1.5]" />
                         Approve
                       </button>
                       <button
                         onClick={() => handleModerateReview(review.id, 'reject')}
                         className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                       >
-                        <FaTimes />
+                        <X className="w-4 h-4 stroke-[1.5]" />
                         Reject
                       </button>
                       <button

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaQrcode, FaWifi } from 'react-icons/fa';
+import { QrCode, Wifi } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 
 const HeroSection = () => {
@@ -74,9 +74,9 @@ const HeroSection = () => {
                 <div className="animate-fade-in">
                   <Link href="/info/qr-nfc">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-white text-xs font-semibold shadow-lg animate-pulse cursor-pointer hover:animate-none transform hover:scale-105 transition-all" style={{ backgroundColor: '#478c0b' }}>
-                      <FaQrcode className="text-sm" />
+                      <QrCode className="w-3.5 h-3.5 stroke-[1.5]" />
                       <span>{t('Smart Shopping: QR & NFC')}</span>
-                      <FaWifi className="text-sm" />
+                      <Wifi className="w-3.5 h-3.5 stroke-[1.5]" />
                     </div>
                   </Link>
                 </div>
@@ -222,9 +222,9 @@ const HeroSection = () => {
                           <div className="hidden md:block absolute right-1/2 top-10 bg-white rounded-xl shadow-2xl p-4 transform translate-x-1/2 hover:scale-110 transition-all duration-300 cursor-pointer border-2" style={{ borderColor: '#478c0b' }}>
                             <div className="text-center">
                               <div className="flex items-center justify-center gap-3 mb-2">
-                                <FaQrcode className="text-2xl" style={{ color: '#478c0b' }} />
+                                <QrCode className="w-6 h-6 stroke-[1.5]" style={{ color: '#478c0b' }} />
                                 <div className="w-0.5 h-8 bg-gray-300"></div>
-                                <FaWifi className="text-2xl" style={{ color: '#f6af0d' }} />
+                                <Wifi className="w-6 h-6 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                               </div>
                               <p className="font-bold text-sm" style={{ color: '#3a3a1d' }}>Smart Shopping</p>
                               <p className="text-xs" style={{ color: '#478c0b' }}>QR & NFC Enabled</p>

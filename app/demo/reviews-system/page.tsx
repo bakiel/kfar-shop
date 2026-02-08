@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
-import { FaStar, FaCamera, FaGift, FaChartLine, FaShieldAlt } from 'react-icons/fa';
+import { Star, Camera, Gift, BarChart3, Shield } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 
 export default function ReviewsSystemDemo() {
@@ -14,22 +14,22 @@ export default function ReviewsSystemDemo() {
 
   const features = [
     {
-      icon: <FaStar className="text-2xl" />,
+      icon: <Star className="w-6 h-6 stroke-[1.5]" />,
       title: 'Star Rating System',
       description: 'Intuitive 5-star rating with detailed breakdown'
     },
     {
-      icon: <FaCamera className="text-2xl" />,
+      icon: <Camera className="w-6 h-6 stroke-[1.5]" />,
       title: 'Photo Reviews',
       description: 'Upload multiple images with reviews for bonus points'
     },
     {
-      icon: <FaGift className="text-2xl" />,
+      icon: <Gift className="w-6 h-6 stroke-[1.5]" />,
       title: 'Points Rewards',
       description: 'Earn 50-150 points based on review quality'
     },
     {
-      icon: <FaShieldAlt className="text-2xl" />,
+      icon: <Shield className="w-6 h-6 stroke-[1.5]" />,
       title: 'Verified Purchases',
       description: 'Automatic verification for authentic reviews'
     }
@@ -263,7 +263,7 @@ export default function ReviewsSystemDemo() {
                         className="text-2xl font-bold flex items-center gap-2"
                         style={{ color: '#478c0b' }}
                       >
-                        <FaGift />
+                        <Gift className="w-6 h-6 stroke-[1.5]" />
                         {item.points} pts
                       </div>
                     </div>
@@ -330,11 +330,11 @@ export default function ReviewsSystemDemo() {
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <FaChartLine className="text-green-500 text-xl" />
+                    <BarChart3 className="w-5 h-5 stroke-[1.5] text-green-500" />
                     <span>Detailed analytics on customer satisfaction</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <FaShieldAlt className="text-blue-500 text-xl" />
+                    <Shield className="w-5 h-5 stroke-[1.5] text-blue-500" />
                     <span>Build trust with verified purchase reviews</span>
                   </div>
                   <div className="flex items-center gap-3">

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { CollectionPoints } from '@/lib/services/collection-point-service';
 import { CollectionPoint, PickupSlot } from '@/lib/services/collection-point-service';
-import { FaMapMarkerAlt, FaClock, FaQrcode, FaWifi, FaSnowflake, FaUsers } from 'react-icons/fa';
+import { MapPin, Clock, QrCode, Wifi, Snowflake, Users } from 'lucide-react';
 
 interface CollectionPointPickerProps {
   onSelect: (point: CollectionPoint, slot?: PickupSlot) => void;
@@ -92,11 +92,11 @@ export const CollectionPointPicker: React.FC<CollectionPointPickerProps> = ({
 
   const getFeatureIcon = (feature: string) => {
     const icons: { [key: string]: JSX.Element } = {
-      'qr-scanner': <FaQrcode />,
-      'nfc-reader': <FaWifi />,
-      'refrigerated': <FaSnowflake />,
-      'staff-assisted': <FaUsers />,
-      '24/7 access': <FaClock />
+      'qr-scanner': <QrCode className="w-3.5 h-3.5 stroke-[1.5]" />,
+      'nfc-reader': <Wifi className="w-3.5 h-3.5 stroke-[1.5]" />,
+      'refrigerated': <Snowflake className="w-3.5 h-3.5 stroke-[1.5]" />,
+      'staff-assisted': <Users className="w-3.5 h-3.5 stroke-[1.5]" />,
+      '24/7 access': <Clock className="w-3.5 h-3.5 stroke-[1.5]" />
     };
     return icons[feature] || null;
   };
@@ -135,7 +135,7 @@ export const CollectionPointPicker: React.FC<CollectionPointPickerProps> = ({
         {nearestPoint && (
           <div className="mb-4 p-4 bg-green-50 rounded-lg border-2 border-green-200">
             <p className="text-sm font-medium text-green-800 mb-1">
-              <FaMapMarkerAlt className="inline mr-2" />
+              <MapPin className="inline w-4 h-4 stroke-[1.5] mr-2" />
               Nearest to you
             </p>
             <p className="font-semibold">{nearestPoint.name}</p>
@@ -164,7 +164,7 @@ export const CollectionPointPicker: React.FC<CollectionPointPickerProps> = ({
                   </div>
                   
                   <p className="text-sm text-gray-600 mb-2">
-                    <FaMapMarkerAlt className="inline mr-1" />
+                    <MapPin className="inline w-3.5 h-3.5 stroke-[1.5] mr-1" />
                     {point.location.address}
                   </p>
 

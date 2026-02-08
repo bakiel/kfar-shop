@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FaStar, FaMapMarkerAlt, FaLeaf, FaStore } from 'react-icons/fa';
+import { Star, MapPin, Leaf, Store } from 'lucide-react';
 import NewStoreBadge from '@/components/ui/NewStoreBadge';
 
 interface VendorBrowseCardProps {
@@ -89,7 +89,7 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
               </div>
             ) : (
               <div className="w-full h-full rounded-full flex items-center justify-center" style={{ backgroundColor: theme.primary }}>
-                <FaStore className="text-white text-2xl" />
+                <Store className="w-8 h-8 text-white stroke-[1.5]" />
               </div>
             )}
           </div>
@@ -97,7 +97,7 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
           {/* Stats Badge */}
           <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-md">
             <div className="flex items-center gap-1">
-              <FaStar className="text-yellow-400 text-sm" />
+              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 stroke-[1.5]" />
               <span className="text-sm font-semibold">{avgRating.toFixed(1)}</span>
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
           
           {/* Location Tag */}
           <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-            <FaMapMarkerAlt className="text-xs" />
+            <MapPin className="w-3.5 h-3.5 stroke-[1.5]" />
             <span>Dimona, Israel</span>
           </div>
           
@@ -132,7 +132,7 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                <FaLeaf className="inline" />
+                <Leaf className="w-6 h-6 inline stroke-[1.5]" />
               </div>
               <div className="text-xs text-gray-600">100% Vegan</div>
             </div>
@@ -191,7 +191,7 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
               className="w-full py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:shadow-lg transform hover:scale-105 flex items-center justify-center gap-2" 
               style={{ backgroundColor: theme.primary }}
             >
-              <FaStore />
+              <Store className="w-4 h-4 stroke-[1.5]" />
               Visit Store
               <span className="text-xs opacity-80">({totalProducts} items)</span>
             </button>

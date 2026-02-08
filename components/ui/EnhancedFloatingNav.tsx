@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/lib/context/CartContext';
-import { FaShoppingCart, FaGlobe } from 'react-icons/fa';
+import { ShoppingCart } from 'lucide-react';
 
 const EnhancedFloatingNav = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -105,7 +105,7 @@ const EnhancedFloatingNav = () => {
           {/* Cart Button */}
           <Link href="/cart">
             <button className="relative w-14 h-14 bg-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 border-2 border-gray-200">
-              <FaShoppingCart className="text-lg" style={{ color: '#c23c09' }} />
+              <ShoppingCart className="w-5 h-5 stroke-[1.5]" style={{ color: '#c23c09' }} />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                   {cartCount}

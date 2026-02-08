@@ -188,7 +188,7 @@ export default function VendorStorePage({ vendorId, vendorData, products, theme 
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#FDFBF7' }}>
       {/* Hero Section - Using unified template */}
       <VendorHeroSection 
         vendorData={vendorData}
@@ -199,18 +199,19 @@ export default function VendorStorePage({ vendorId, vendorData, products, theme 
       <CompactVendorBannerDisplay vendorId={vendorId} />
 
       {/* Search and Filter Bar */}
-      <section className="sticky top-0 z-30 bg-white shadow-md">
+      <section className="sticky top-0 z-30 border-b border-gray-100" style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)', backdropFilter: 'blur(16px)' }}>
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 stroke-[1.5]" />
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-leaf-green"
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent text-sm"
+                style={{ '--tw-ring-color': 'rgba(71, 140, 11, 0.2)' } as React.CSSProperties}
               />
             </div>
 
@@ -220,11 +221,12 @@ export default function VendorStorePage({ vendorId, vendorData, products, theme 
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
+                  className={`px-4 py-2 rounded-xl whitespace-nowrap transition-all text-sm font-medium cursor-pointer ${
                     selectedCategory === category
-                      ? 'bg-leaf-green text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
+                  style={selectedCategory === category ? { backgroundColor: '#478c0b' } : {}}
                 >
                   {category === 'all' ? 'All Products' : category.charAt(0).toUpperCase() + category.slice(1)}
                 </button>
@@ -237,27 +239,32 @@ export default function VendorStorePage({ vendorId, vendorData, products, theme 
       {/* Products Grid */}
       <section className="container mx-auto px-4 py-12">
         <div className="mb-8 flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-gray-800">Our Products</h2>
-          <p className="text-gray-600">{filteredProducts.length} items</p>
+          <h2 className="text-2xl font-bold tracking-tight" style={{ color: '#1a1a1a' }}>Our Products</h2>
+          <p className="text-sm text-gray-400 font-medium">{filteredProducts.length} items</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {filteredProducts.map((product, index) => {
             const inCart = isInCart(product.id);
             const quantity = getQuantity(product.id);
 
             return (
-              <div key={product.id} className={`${currentTheme.card} rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+              <div key={product.id} className="bg-white rounded-2xl overflow-hidden group cursor-pointer border border-gray-100/80 transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
                 <Link href={`/product/${product.id}`}>
-                  <div className="relative h-48 cursor-pointer">
+                  <div className="relative h-48 cursor-pointer overflow-hidden">
                     <ProductImage
                       src={product.image}
                       alt={product.name || "Image"}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
                     {product.isNew && (
-                      <span className="absolute top-2 right-2 bg-sun-gold text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      <span className="absolute top-3 right-3 px-2.5 py-1 text-[11px] rounded-lg font-semibold tracking-wide uppercase" style={{ backgroundColor: '#C4A265', color: 'white' }}>
                         New
+                      </span>
+                    )}
+                    {product.originalPrice && product.originalPrice > product.price && (
+                      <span className="absolute top-3 left-3 px-2 py-1 text-[11px] rounded-lg font-bold bg-white/90 backdrop-blur-sm" style={{ color: '#c23c09' }}>
+                        -{Math.round((1 - product.price / product.originalPrice) * 100)}%
                       </span>
                     )}
                   </div>
@@ -265,59 +272,59 @@ export default function VendorStorePage({ vendorId, vendorData, products, theme 
 
                 <div className="p-4">
                   <Link href={`/product/${product.id}`}>
-                    <h3 className={`font-semibold text-lg mb-2 ${currentTheme.text} hover:underline cursor-pointer`}>{product.name}</h3>
+                    <h3 className="font-semibold text-base mb-1 line-clamp-1 group-hover:text-[#2D5A27] transition-colors" style={{ color: '#1a1a1a' }}>{product.name}</h3>
                   </Link>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                  
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold" style={{ color: currentTheme.primary }}>
-                      ₪{product.price.toFixed(2)}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">
-                        ₪{product.originalPrice.toFixed(2)}
+                  <p className="text-gray-400 text-xs mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
+
+                  {/* Dietary badges */}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {product.vegan && (
+                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[10px] font-medium" style={{ backgroundColor: 'rgba(71, 140, 11, 0.08)', color: '#478c0b' }}>
+                        Vegan
+                      </span>
+                    )}
+                    {product.kashrut && (
+                      <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-[10px] font-medium" style={{ backgroundColor: 'rgba(66, 153, 225, 0.08)', color: '#4299e1' }}>
+                        Kosher
                       </span>
                     )}
                   </div>
 
-                  <div className="flex gap-2 mb-3">
-                    <Link href={`/product/${product.id}`} className="flex-1">
-                      <button
-                        className="w-full py-2 rounded-xl font-semibold transition-all duration-300 border-2"
-                        style={{ 
-                          borderColor: currentTheme.primary,
-                          color: currentTheme.primary 
-                        }}
-                      >
-                        View Details
-                      </button>
-                    </Link>
+                  <div className="flex items-end justify-between pt-3 border-t border-gray-50 mb-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-bold tracking-tight" style={{ color: '#1a1a1a' }}>
+                        ₪{product.price.toFixed(2)}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-xs text-gray-400 line-through">
+                          ₪{product.originalPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {!inCart ? (
                     <button
                       onClick={() => handleAddToCart(product)}
-                      className="w-full py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105"
-                      style={{ 
-                        backgroundColor: currentTheme.primary, 
-                        color: 'white' 
-                      }}
+                      className="w-full py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 text-white cursor-pointer flex items-center justify-center gap-2"
+                      style={{ backgroundColor: currentTheme.primary }}
                     >
+                      <ShoppingCart className="w-4 h-4 stroke-[1.5]" />
                       Add to Cart
                     </button>
                   ) : (
                     <div className="flex items-center justify-between gap-2">
                       <button
                         onClick={() => handleQuantityChange(product.id, quantity - 1)}
-                        className="px-4 py-2 rounded-lg border-2 font-semibold transition-all"
+                        className="w-10 h-10 rounded-xl border-2 font-semibold transition-all cursor-pointer flex items-center justify-center"
                         style={{ borderColor: currentTheme.primary, color: currentTheme.primary }}
                       >
                         -
                       </button>
-                      <span className="font-semibold text-lg">{quantity}</span>
+                      <span className="font-bold text-lg" style={{ color: '#1a1a1a' }}>{quantity}</span>
                       <button
                         onClick={() => handleQuantityChange(product.id, quantity + 1)}
-                        className="px-4 py-2 rounded-lg font-semibold transition-all"
+                        className="w-10 h-10 rounded-xl font-semibold transition-all cursor-pointer flex items-center justify-center"
                         style={{ backgroundColor: currentTheme.primary, color: 'white' }}
                       >
                         +

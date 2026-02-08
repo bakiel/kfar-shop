@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
-import { FaStar, FaCamera, FaTimes, FaGift } from 'react-icons/fa';
+import { Star, Camera, X, Gift, Loader2 } from 'lucide-react';
 
 interface ReviewSubmissionFormProps {
   productId: string;
@@ -164,7 +164,7 @@ export default function ReviewSubmissionForm({
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <FaTimes size={24} />
+            <X className="w-6 h-6 stroke-[1.5]" />
           </button>
         </div>
 
@@ -172,7 +172,7 @@ export default function ReviewSubmissionForm({
         <div className="px-6 py-4 bg-gradient-to-r from-leaf-green/10 to-sun-gold/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <FaGift className="text-2xl" style={{ color: '#478c0b' }} />
+              <Gift className="w-7 h-7 text-[#478c0b] stroke-[1.5]" />
               <div>
                 <p className="font-semibold" style={{ color: '#3a3a1d' }}>
                   Earn KFAR Points!
@@ -205,13 +205,12 @@ export default function ReviewSubmissionForm({
                   onMouseLeave={() => setHoveredRating(0)}
                   className="transition-transform hover:scale-110"
                 >
-                  <FaStar
-                    size={32}
-                    className={
+                  <Star
+                    className={`w-8 h-8 stroke-[1.5] ${
                       star <= (hoveredRating || rating)
-                        ? 'text-yellow-400'
+                        ? 'text-yellow-400 fill-yellow-400'
                         : 'text-gray-300'
-                    }
+                    }`}
                   />
                 </button>
               ))}
@@ -245,7 +244,6 @@ export default function ReviewSubmissionForm({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Summarize your experience"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
-              style={{ focusRingColor: '#478c0b' }}
               maxLength={100}
             />
             <p className="text-xs text-gray-500 mt-1">{title.length}/100</p>
@@ -270,7 +268,6 @@ export default function ReviewSubmissionForm({
               placeholder="Tell us about your experience with this product..."
               rows={5}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 resize-none"
-              style={{ focusRingColor: '#478c0b' }}
               maxLength={1000}
             />
             <div className="flex justify-between items-center mt-1">
@@ -309,7 +306,7 @@ export default function ReviewSubmissionForm({
                       onClick={() => removeImage(index)}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <FaTimes size={12} />
+                      <X className="w-3 h-3 stroke-[2]" />
                     </button>
                   </div>
                 ))}
@@ -318,7 +315,7 @@ export default function ReviewSubmissionForm({
 
             {images.length < 5 && (
               <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors">
-                <FaCamera className="text-gray-400" />
+                <Camera className="w-5 h-5 text-gray-400 stroke-[1.5]" />
                 <span className="text-gray-600">
                   Add photos ({images.length}/5)
                 </span>
@@ -356,7 +353,7 @@ export default function ReviewSubmissionForm({
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <i className="fas fa-spinner fa-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   Submitting...
                 </span>
               ) : (

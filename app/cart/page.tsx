@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'framer-motion';
 import {
   ShoppingCart, Store, Truck, Minus, Plus, Trash2, CheckCircle, X,
-  Lock, CreditCard, Shield, QrCode, Heart, ArrowRight, Tag, Gift
+  Lock, CreditCard, Shield, QrCode, Heart, ArrowRight, Tag, Gift,
+  ArrowLeft, Sparkles, Package
 } from 'lucide-react';
 import { useCart } from '@/lib/context/CartContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
@@ -42,6 +43,7 @@ export default function EnhancedCartPage() {
   const [appliedCoupons, setAppliedCoupons] = useState<string[]>([]);
   const [couponCode, setCouponCode] = useState('');
   const [couponSuccess, setCouponSuccess] = useState(false);
+  const [removingItem, setRemovingItem] = useState<string | null>(null);
 
   // Currency conversion rates
   const currencyRates = {
@@ -52,10 +54,10 @@ export default function EnhancedCartPage() {
   };
 
   const currencySymbols = {
-    ILS: '₪',
+    ILS: '\u20AA',
     USD: '$',
-    EUR: '€',
-    GBP: '£'
+    EUR: '\u20AC',
+    GBP: '\u00A3'
   };
 
   // Group items by vendor
@@ -65,14 +67,14 @@ export default function EnhancedCartPage() {
       let itemPrice = item.price;
       if (item.bulkPricing && item.bulkPricing.length > 0) {
         const applicableBulk = item.bulkPricing
-          .filter(bulk => item.quantity >= bulk.quantity)
-          .sort((a, b) => b.quantity - a.quantity)[0];
-        
+          .filter((bulk: any) => item.quantity >= bulk.quantity)
+          .sort((a: any, b: any) => b.quantity - a.quantity)[0];
+
         if (applicableBulk) {
           itemPrice = applicableBulk.price;
         }
       }
-      
+
       const existingGroup = acc.find(g => g.vendor === item.vendorName);
       if (existingGroup) {
         existingGroup.items.push(item);
@@ -101,7 +103,6 @@ export default function EnhancedCartPage() {
   }, [items.length]);
 
   const getVendorLogo = (vendor: string): string => {
-    // Map vendor names to their IDs for consistent logo retrieval
     const vendorIdMap: Record<string, string> = {
       'Teva Deli': 'teva-deli',
       'Gahn Delight': 'gahn-delight',
@@ -109,17 +110,16 @@ export default function EnhancedCartPage() {
       'VOP Shop': 'vop-shop',
       'People Store': 'people-store'
     };
-    
+
     const vendorId = vendorIdMap[vendor];
-    
-    // Use consistent logo paths based on vendor ID
+
     const logoPath = vendorId === 'people-store' ? '/images/vendors/people_store_logo_community_retail.jpg' :
                      vendorId === 'teva-deli' ? '/images/vendors/teva_deli_logo_vegan_factory.jpg' :
                      vendorId === 'queens-cuisine' ? '/images/vendors/queens_cuisine_logo_vegan_food_art.jpg' :
                      vendorId === 'gahn-delight' ? '/images/vendors/gahn_delight_logo_handcrafted_foods.jpg' :
                      vendorId === 'vop-shop' ? '/images/vendors/vop_shop_logo_village_marketplace.jpg' :
-                     '/images/vendors/people_store_logo_community_retail.jpg'; // Default to People Store logo
-    
+                     '/images/vendors/people_store_logo_community_retail.jpg';
+
     return logoPath;
   };
 
@@ -155,7 +155,7 @@ export default function EnhancedCartPage() {
       'NEWMEMBER': 0.15,
       'VOP2024': 0.2
     };
-    
+
     return appliedCoupons.reduce((total, coupon) => {
       return total + (getCartTotal() * (discounts[coupon] || 0));
     }, 0);
@@ -164,6 +164,14 @@ export default function EnhancedCartPage() {
   const convertPrice = (price: number) => {
     const converted = price * currencyRates[selectedCurrency as keyof typeof currencyRates];
     return `${currencySymbols[selectedCurrency as keyof typeof currencySymbols]}${converted.toFixed(2)}`;
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    setRemovingItem(itemId);
+    setTimeout(() => {
+      removeFromCart(itemId);
+      setRemovingItem(null);
+    }, 300);
   };
 
   const subtotal = getCartTotal();
@@ -180,33 +188,35 @@ export default function EnhancedCartPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="max-w-2xl mx-auto text-center"
+              className="max-w-lg mx-auto text-center"
             >
-              <div className="bg-white rounded-2xl shadow-lg p-12">
+              <div className="bg-white rounded-3xl shadow-lg p-12 border border-gray-100">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2, duration: 0.4 }}
+                  className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gray-50 flex items-center justify-center"
                 >
-                  <ShoppingCart className="w-20 h-20 mx-auto mb-6 text-gray-300 stroke-[1.5]" />
+                  <ShoppingCart className="w-12 h-12 text-gray-300 stroke-[1.5]" />
                 </motion.div>
-                <h2 className="text-2xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
+                <h2 className="text-2xl font-bold mb-3" style={{ color: '#3a3a1d' }}>
                   {language === 'he' ? 'העגלה שלך ריקה' : 'Your cart is empty'}
                 </h2>
-                <p className="text-gray-600 mb-8">
+                <p className="text-gray-500 mb-8">
                   {language === 'he'
-                    ? 'גלה מוצרים מדהימים מספקי כפר השלום'
+                    ? 'גלו מוצרים מדהימים מספקי כפר השלום'
                     : 'Discover amazing products from Village of Peace vendors'}
                 </p>
                 <Link href="/shop">
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, boxShadow: '0 10px 30px rgba(71, 140, 11, 0.25)' }}
                     whileTap={{ scale: 0.98 }}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold hover:shadow-lg transition-all cursor-pointer"
-                    style={{ backgroundColor: '#478c0b' }}
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-white font-semibold text-lg hover:shadow-lg transition-all cursor-pointer"
+                    style={{ background: 'linear-gradient(135deg, #478c0b, #2D5A27)' }}
                   >
                     <Store className="w-5 h-5 stroke-[1.5]" />
-                    {language === 'he' ? 'התחל לקנות' : 'Start Shopping'}
+                    {language === 'he' ? 'התחילו לקנות' : 'Start Shopping'}
+                    <ArrowRight className="w-5 h-5 stroke-[1.5]" />
                   </motion.button>
                 </Link>
               </div>
@@ -219,33 +229,41 @@ export default function EnhancedCartPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#fef9ef] py-8" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="min-h-screen bg-[#fef9ef] py-8 md:py-12" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="container mx-auto px-4">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="flex items-center justify-between mb-8"
+            className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4"
           >
-            <h1 className="text-3xl font-bold" style={{ color: '#3a3a1d' }}>
-              {language === 'he' ? 'עגלת קניות' : 'Shopping Cart'} ({items.length} {items.length === 1 ? (language === 'he' ? 'פריט' : 'item') : (language === 'he' ? 'פריטים' : 'items')})
-            </h1>
+            <div>
+              <Link href="/shop" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#478c0b] transition-colors mb-2 cursor-pointer">
+                <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
+                {language === 'he' ? 'חזרה לחנות' : 'Continue Shopping'}
+              </Link>
+              <h1 className="text-3xl md:text-4xl font-bold" style={{ color: '#3a3a1d' }}>
+                {language === 'he' ? 'עגלת קניות' : 'Shopping Cart'}
+                <span className="text-lg font-normal text-gray-400 ml-3">
+                  ({items.length} {items.length === 1 ? (language === 'he' ? 'פריט' : 'item') : (language === 'he' ? 'פריטים' : 'items')})
+                </span>
+              </h1>
+            </div>
 
             {/* Currency Selector */}
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 bg-white rounded-xl p-1.5 shadow-sm border border-gray-100">
               {Object.keys(currencySymbols).map(currency => (
                 <motion.button
                   key={currency}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedCurrency(currency)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all cursor-pointer ${
                     selectedCurrency === currency
-                      ? 'text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                      ? 'bg-[#478c0b] text-white shadow-sm'
+                      : 'text-gray-500 hover:bg-gray-50'
                   }`}
-                  style={selectedCurrency === currency ? { backgroundColor: '#478c0b' } : {}}
                 >
                   {currencySymbols[currency as keyof typeof currencySymbols]}
                 </motion.button>
@@ -261,181 +279,199 @@ export default function EnhancedCartPage() {
               animate="show"
               className="lg:col-span-2 space-y-6"
             >
-              {vendorGroups.map((group, index) => (
-                <motion.div
-                  key={index}
-                  variants={listItem}
-                  whileHover={shouldReduceMotion ? {} : { y: -4 }}
-                  transition={cardTransition}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden"
-                  style={{ border: '2px solid #cfe7c1' }}
-                >
-                  {/* Vendor Header */}
-                  <div className="bg-gradient-to-r from-[#478c0b] to-[#f6af0d] p-4">
-                    <div className="flex items-center justify-between text-white">
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white">
-                          <Image src={group.vendorLogo}
-                            alt={`${group.vendor || "Product image"} logo`}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg">{group.vendor}</h3>
-                          <p className="text-sm opacity-90 flex items-center gap-1">
-                            <Truck className="w-4 h-4 stroke-[1.5]" />
-                            {language === 'he' ? 'משלוח משוער:' : 'Est. delivery:'} {group.estimatedDelivery}
-                          </p>
-                        </div>
-                      </div>
-                      <div className={isRTL ? 'text-left' : 'text-right'}>
-                        <p className="text-sm opacity-90">{language === 'he' ? 'סכום ביניים' : 'Subtotal'}</p>
-                        <p className="text-xl font-bold">{convertPrice(group.subtotal)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Vendor Items */}
-                  <div className="p-6 space-y-4">
-                    {group.items.map((item) => {
-                      // Fix People Store images
-                      let itemImage = item.image;
-                      if (item.vendorId === 'people-store' && !item.image.startsWith('/images/')) {
-                        // If it's a People Store item with a broken image path, use the first available People Store image
-                        itemImage = '/images/teva-deli/teva_deli_vegan_specialty_product_21_burger_schnitzel_plant_based_deli.jpg';
-                      }
-                      
-                      return (
-                        <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
-                          <div className="relative w-24 h-24 rounded-lg overflow-hidden">
-                            <Image
-                              src={itemImage}
-                              alt={item.name || "Product image"}
+              <AnimatePresence mode="popLayout">
+                {vendorGroups.map((group, index) => (
+                  <motion.div
+                    key={group.vendor}
+                    layout
+                    variants={listItem}
+                    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                    className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100"
+                  >
+                    {/* Vendor Header */}
+                    <div className="bg-gradient-to-r from-[#478c0b] to-[#2D5A27] p-5">
+                      <div className="flex items-center justify-between text-white">
+                        <div className="flex items-center gap-3">
+                          <div className="relative w-11 h-11 rounded-xl overflow-hidden border-2 border-white/30 shadow-sm">
+                            <Image src={group.vendorLogo}
+                              alt={`${group.vendor || "Product image"} logo`}
                               fill
                               className="object-cover"
-                              onError={(e) => {
-                                // Fallback image on error
-                                const target = e.currentTarget as HTMLImageElement;
-                                target.src = '/images/teva-deli/teva_deli_vegan_specialty_product_21_burger_schnitzel_plant_based_deli.jpg';
-                              }}
                             />
                           </div>
-                        
-                        <div className="flex-1">
-                          <h4 className="font-semibold mb-1" style={{ color: '#3a3a1d' }}>
-                            {item.name}
-                          </h4>
-                          <p className="text-sm text-gray-600 mb-2">
-                            {language === 'he' ? 'מחיר ליחידה:' : 'Unit price:'} {convertPrice(item.price)}
-                            {item.bulkPricing && item.bulkPricing.length > 0 && (() => {
-                              const applicableBulk = item.bulkPricing
-                                .filter((bulk: any) => item.quantity >= bulk.quantity)
-                                .sort((a: any, b: any) => b.quantity - a.quantity)[0];
-                              
-                              if (applicableBulk) {
-                                const savings = (item.price - applicableBulk.price) * item.quantity;
-                                return (
-                                  <>
-                                    <span className={`line-through ${isRTL ? 'mr-2' : 'ml-2'}`}>{convertPrice(item.price)}</span>
-                                    <span className={`text-green-600 font-semibold ${isRTL ? 'mr-2' : 'ml-2'}`}>
-                                      {convertPrice(applicableBulk.price)} ({language === 'he' ? 'חיסכון' : 'Save'} {convertPrice(savings)})
-                                    </span>
-                                  </>
-                                );
-                              }
-                              return null;
-                            })()}
-                          </p>
-                          
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center border rounded-lg overflow-hidden">
-                              <motion.button
-                                whileHover={{ backgroundColor: '#f3f4f6' }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
-                                className="px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer"
-                              >
-                                <Minus className="w-4 h-4 stroke-[1.5]" />
-                              </motion.button>
-                              <span className="px-4 py-1 font-medium min-w-[40px] text-center">{item.quantity}</span>
-                              <motion.button
-                                whileHover={{ backgroundColor: '#f3f4f6' }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="px-3 py-2 hover:bg-gray-100 transition-colors cursor-pointer"
-                              >
-                                <Plus className="w-4 h-4 stroke-[1.5]" />
-                              </motion.button>
-                            </div>
-
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => removeFromCart(item.id)}
-                              className="text-red-500 hover:text-red-600 transition-colors p-2 cursor-pointer"
-                            >
-                              <Trash2 className="w-5 h-5 stroke-[1.5]" />
-                            </motion.button>
+                          <div>
+                            <h3 className="font-bold text-lg">{group.vendor}</h3>
+                            <p className="text-sm text-white/75 flex items-center gap-1.5">
+                              <Truck className="w-3.5 h-3.5 stroke-[1.5]" />
+                              {language === 'he' ? 'משלוח:' : 'Delivery:'} {group.estimatedDelivery}
+                            </p>
                           </div>
                         </div>
-                        
-                        <div className="text-right">
-                          <p className="font-bold text-lg" style={{ color: '#478c0b' }}>
-                            {(() => {
-                              let itemPrice = item.price;
-                              if (item.bulkPricing && item.bulkPricing.length > 0) {
-                                const applicableBulk = item.bulkPricing
-                                  .filter((bulk: any) => item.quantity >= bulk.quantity)
-                                  .sort((a: any, b: any) => b.quantity - a.quantity)[0];
-                                
-                                if (applicableBulk) {
-                                  itemPrice = applicableBulk.price;
-                                }
-                              }
-                              return convertPrice(itemPrice * item.quantity);
-                            })()}
-                          </p>
+                        <div className={isRTL ? 'text-left' : 'text-right'}>
+                          <p className="text-xs text-white/60 uppercase tracking-wider">{language === 'he' ? 'סכום ביניים' : 'Subtotal'}</p>
+                          <p className="text-xl font-bold">{convertPrice(group.subtotal)}</p>
                         </div>
                       </div>
-                      );
-                    })}
-                  </div>
+                    </div>
 
-                  {/* Free Shipping Progress */}
-                  {group.vendor === 'Teva Deli' && group.subtotal < 150 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="px-6 pb-4"
-                    >
-                      <div className="bg-[#fef9ef] rounded-lg p-3">
-                        <p className="text-sm mb-2 flex items-center gap-2">
-                          <Truck className="w-4 h-4 text-[#478c0b] stroke-[1.5]" />
-                          {language === 'he'
-                            ? `הוסף ${convertPrice(150 - group.subtotal)} עוד למשלוח חינם!`
-                            : `Add ${convertPrice(150 - group.subtotal)} more for free shipping!`}
-                        </p>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(group.subtotal / 150) * 100}%` }}
-                            transition={{ duration: 0.5, ease: 'easeOut' }}
-                            className="h-2 rounded-full"
-                            style={{ backgroundColor: '#478c0b' }}
-                          />
+                    {/* Vendor Items */}
+                    <div className="p-5 md:p-6">
+                      <AnimatePresence mode="popLayout">
+                        {group.items.map((cartItem) => {
+                          let itemImage = cartItem.image;
+                          if (cartItem.vendorId === 'people-store' && !cartItem.image.startsWith('/images/')) {
+                            itemImage = '/images/teva-deli/teva_deli_vegan_specialty_product_21_burger_schnitzel_plant_based_deli.jpg';
+                          }
+
+                          return (
+                            <motion.div
+                              key={cartItem.id}
+                              layout
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: removingItem === cartItem.id ? 0.3 : 1, y: 0, scale: removingItem === cartItem.id ? 0.95 : 1 }}
+                              exit={{ opacity: 0, x: isRTL ? 60 : -60, transition: { duration: 0.3 } }}
+                              className="flex gap-4 py-5 border-b border-gray-50 last:border-0 last:pb-0 first:pt-0"
+                            >
+                              {/* Product Image */}
+                              <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden shrink-0 shadow-sm">
+                                <Image
+                                  src={itemImage}
+                                  alt={cartItem.name || "Product image"}
+                                  fill
+                                  className="object-cover"
+                                  onError={(e) => {
+                                    const target = e.currentTarget as HTMLImageElement;
+                                    target.src = '/images/teva-deli/teva_deli_vegan_specialty_product_21_burger_schnitzel_plant_based_deli.jpg';
+                                  }}
+                                />
+                              </div>
+
+                              {/* Product Info */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-[#3a3a1d] mb-1 truncate">{cartItem.name}</h4>
+                                <p className="text-sm text-gray-400 mb-3">
+                                  {language === 'he' ? 'מחיר:' : 'Price:'} {convertPrice(cartItem.price)}
+                                  {cartItem.bulkPricing && cartItem.bulkPricing.length > 0 && (() => {
+                                    const applicableBulk = cartItem.bulkPricing
+                                      .filter((bulk: any) => cartItem.quantity >= bulk.quantity)
+                                      .sort((a: any, b: any) => b.quantity - a.quantity)[0];
+
+                                    if (applicableBulk) {
+                                      const savings = (cartItem.price - applicableBulk.price) * cartItem.quantity;
+                                      return (
+                                        <span className={`text-[#478c0b] font-semibold ${isRTL ? 'mr-2' : 'ml-2'}`}>
+                                          {language === 'he' ? 'חיסכון' : 'Save'} {convertPrice(savings)}
+                                        </span>
+                                      );
+                                    }
+                                    return null;
+                                  })()}
+                                </p>
+
+                                {/* Quantity Controls */}
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                                    <motion.button
+                                      whileHover={{ backgroundColor: '#f3f4f6' }}
+                                      whileTap={{ scale: 0.85 }}
+                                      onClick={() => updateQuantity(cartItem.id, Math.max(0, cartItem.quantity - 1))}
+                                      className="px-3 py-2.5 hover:bg-gray-100 transition-colors cursor-pointer"
+                                    >
+                                      <Minus className="w-4 h-4 stroke-[1.5] text-gray-500" />
+                                    </motion.button>
+                                    <motion.span
+                                      key={cartItem.quantity}
+                                      initial={{ scale: 1.3 }}
+                                      animate={{ scale: 1 }}
+                                      transition={{ duration: 0.15 }}
+                                      className="px-4 py-1 font-bold text-[#3a3a1d] min-w-[40px] text-center text-sm"
+                                    >
+                                      {cartItem.quantity}
+                                    </motion.span>
+                                    <motion.button
+                                      whileHover={{ backgroundColor: '#f3f4f6' }}
+                                      whileTap={{ scale: 0.85 }}
+                                      onClick={() => updateQuantity(cartItem.id, cartItem.quantity + 1)}
+                                      className="px-3 py-2.5 hover:bg-gray-100 transition-colors cursor-pointer"
+                                    >
+                                      <Plus className="w-4 h-4 stroke-[1.5] text-gray-500" />
+                                    </motion.button>
+                                  </div>
+
+                                  <motion.button
+                                    whileHover={{ scale: 1.1, color: '#dc2626' }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => handleRemoveItem(cartItem.id)}
+                                    className="text-gray-300 hover:text-red-500 transition-colors p-2 cursor-pointer"
+                                  >
+                                    <Trash2 className="w-4 h-4 stroke-[1.5]" />
+                                  </motion.button>
+                                </div>
+                              </div>
+
+                              {/* Price */}
+                              <div className={isRTL ? 'text-left' : 'text-right'}>
+                                <motion.p
+                                  key={`${cartItem.id}-${cartItem.quantity}`}
+                                  initial={{ scale: 1.1 }}
+                                  animate={{ scale: 1 }}
+                                  className="font-bold text-lg"
+                                  style={{ color: '#478c0b' }}
+                                >
+                                  {(() => {
+                                    let itemPrice = cartItem.price;
+                                    if (cartItem.bulkPricing && cartItem.bulkPricing.length > 0) {
+                                      const applicableBulk = cartItem.bulkPricing
+                                        .filter((bulk: any) => cartItem.quantity >= bulk.quantity)
+                                        .sort((a: any, b: any) => b.quantity - a.quantity)[0];
+
+                                      if (applicableBulk) {
+                                        itemPrice = applicableBulk.price;
+                                      }
+                                    }
+                                    return convertPrice(itemPrice * cartItem.quantity);
+                                  })()}
+                                </motion.p>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Free Shipping Progress */}
+                    {group.vendor === 'Teva Deli' && group.subtotal < 150 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="px-5 md:px-6 pb-5"
+                      >
+                        <div className="bg-[#478c0b]/5 rounded-xl p-4">
+                          <p className="text-sm mb-2 flex items-center gap-2 text-[#3a3a1d]">
+                            <Truck className="w-4 h-4 text-[#478c0b] stroke-[1.5]" />
+                            {language === 'he'
+                              ? `הוסיפו ${convertPrice(150 - group.subtotal)} עוד למשלוח חינם!`
+                              : `Add ${convertPrice(150 - group.subtotal)} more for free shipping!`}
+                          </p>
+                          <div className="w-full bg-gray-100 rounded-full h-2">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min((group.subtotal / 150) * 100, 100)}%` }}
+                              transition={{ duration: 0.8, ease: 'easeOut' }}
+                              className="h-2 rounded-full bg-gradient-to-r from-[#478c0b] to-[#2D5A27]"
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </motion.div>
-              ))}
+                      </motion.div>
+                    )}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </motion.div>
 
-            {/* Order Summary */}
+            {/* Order Summary Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 sticky top-24">
+              <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-24 border border-gray-100">
                 <h2 className="text-xl font-bold mb-6" style={{ color: '#3a3a1d' }}>
                   {language === 'he' ? 'סיכום הזמנה' : 'Order Summary'}
                 </h2>
@@ -447,17 +483,17 @@ export default function EnhancedCartPage() {
                       <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 stroke-[1.5]" />
                       <input
                         type="text"
-                        placeholder={language === 'he' ? 'הזן קוד קופון' : 'Enter coupon code'}
+                        placeholder={language === 'he' ? 'קוד קופון' : 'Coupon code'}
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        className="w-full px-4 py-2 pl-10 border-2 rounded-lg focus:outline-none focus:border-[#478c0b] transition-colors"
+                        className="w-full px-4 py-2.5 pl-10 border-2 border-gray-100 rounded-xl focus:outline-none focus:border-[#478c0b] transition-colors text-sm"
                       />
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={applyCoupon}
-                      className="px-4 py-2 rounded-lg text-white font-medium hover:shadow-lg transition-all cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl text-white font-semibold text-sm hover:shadow-lg transition-all cursor-pointer"
                       style={{ backgroundColor: '#f6af0d' }}
                     >
                       {language === 'he' ? 'החל' : 'Apply'}
@@ -481,9 +517,9 @@ export default function EnhancedCartPage() {
                               x: 0,
                               scale: [1, 1.05, 1],
                             } : { opacity: 1, x: 0 }}
-                            className="flex items-center justify-between text-sm bg-green-50 px-3 py-2 rounded-lg"
+                            className="flex items-center justify-between text-sm bg-[#478c0b]/5 px-3 py-2 rounded-lg"
                           >
-                            <span className="text-green-600 flex items-center gap-1">
+                            <span className="text-[#478c0b] flex items-center gap-1 font-medium">
                               <CheckCircle className="w-4 h-4 stroke-[1.5]" />
                               {coupon} {language === 'he' ? 'הוחל' : 'applied'}
                             </span>
@@ -491,7 +527,7 @@ export default function EnhancedCartPage() {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => setAppliedCoupons(appliedCoupons.filter(c => c !== coupon))}
-                              className="text-red-500 hover:text-red-600 cursor-pointer"
+                              className="text-gray-400 hover:text-red-500 cursor-pointer"
                             >
                               <X className="w-4 h-4 stroke-[1.5]" />
                             </motion.button>
@@ -503,10 +539,10 @@ export default function EnhancedCartPage() {
                 </div>
 
                 {/* Summary Details */}
-                <div className="space-y-3 pb-6 border-b">
-                  <div className="flex justify-between">
-                    <span>{language === 'he' ? 'סכום ביניים' : 'Subtotal'}</span>
-                    <span>{convertPrice(subtotal)}</span>
+                <div className="space-y-3 pb-5 border-b border-gray-100">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">{language === 'he' ? 'סכום ביניים' : 'Subtotal'}</span>
+                    <span className="font-medium text-[#3a3a1d]">{convertPrice(subtotal)}</span>
                   </div>
                   <AnimatePresence>
                     {discount > 0 && (
@@ -514,29 +550,29 @@ export default function EnhancedCartPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="flex justify-between text-green-600"
+                        className="flex justify-between text-sm"
                       >
-                        <span className="flex items-center gap-1">
-                          <Gift className="w-4 h-4 stroke-[1.5]" />
+                        <span className="flex items-center gap-1 text-[#478c0b]">
+                          <Sparkles className="w-3.5 h-3.5 stroke-[1.5]" />
                           {language === 'he' ? 'הנחה' : 'Discount'}
                         </span>
-                        <span>-{convertPrice(discount)}</span>
+                        <span className="text-[#478c0b] font-medium">-{convertPrice(discount)}</span>
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  <div className="flex justify-between">
-                    <span>{language === 'he' ? 'מע"מ (17%)' : 'Tax (17%)'}</span>
-                    <span>{convertPrice(tax)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">{language === 'he' ? 'מע"מ (17%)' : 'VAT (17%)'}</span>
+                    <span className="font-medium text-[#3a3a1d]">{convertPrice(tax)}</span>
                   </div>
                 </div>
 
-                <div className="flex justify-between font-bold text-lg py-6">
-                  <span>{language === 'he' ? 'סה"כ' : 'Total'}</span>
+                <div className="flex justify-between font-bold text-lg py-5">
+                  <span className="text-[#3a3a1d]">{language === 'he' ? 'סה"כ' : 'Total'}</span>
                   <motion.span
                     key={total}
-                    initial={{ scale: 1.1, color: '#478c0b' }}
-                    animate={{ scale: 1, color: '#c23c09' }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ scale: 1.1 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.2 }}
                     style={{ color: '#c23c09' }}
                   >
                     {convertPrice(total)}
@@ -545,75 +581,45 @@ export default function EnhancedCartPage() {
 
                 <Link href="/checkout">
                   <motion.button
-                    whileHover={{ scale: 1.02, boxShadow: '0 10px 30px rgba(71, 140, 11, 0.3)' }}
+                    whileHover={{ scale: 1.01, boxShadow: '0 10px 30px rgba(71, 140, 11, 0.25)' }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-white font-semibold transition-all cursor-pointer"
-                    style={{ backgroundColor: '#478c0b' }}
+                    className="w-full flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl text-white font-semibold text-lg transition-all cursor-pointer"
+                    style={{ background: 'linear-gradient(135deg, #478c0b, #2D5A27)' }}
                   >
                     <Lock className="w-5 h-5 stroke-[1.5]" />
-                    {language === 'he' ? 'המשך לתשלום מאובטח' : 'Proceed to Secure Checkout'}
+                    {language === 'he' ? 'המשיכו לתשלום' : 'Proceed to Checkout'}
                     <ArrowRight className="w-5 h-5 stroke-[1.5]" />
                   </motion.button>
                 </Link>
 
-                {/* QR Code for Quick Cart Save */}
-                <motion.div
-                  ref={summaryRef}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isSummaryInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="mt-6"
-                >
-                  <h3 className="text-base font-bold mb-3 text-center" style={{ color: '#3a3a1d' }}>
-                    {language === 'he' ? 'שמור עגלה להמשך' : 'Save Cart for Later'}
-                  </h3>
-                  <div className="flex justify-center">
-                    <SmartQRCompactFixed
-                      type="order"
-                      data={{
-                        id: `cart-${Date.now()}`,
-                        items: items.map(item => ({
-                          id: item.id,
-                          name: item.name,
-                          quantity: item.quantity,
-                          price: item.price
-                        })),
-                        total: total,
-                        currency: selectedCurrency,
-                        timestamp: Date.now()
-                      }}
-                      size={200}
-                      hideActions={false}
-                    />
-                  </div>
-                </motion.div>
-
                 {/* Trust Badges */}
                 <motion.div
+                  ref={summaryRef}
                   initial={{ opacity: 0 }}
                   animate={isSummaryInView ? { opacity: 1 } : {}}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="mt-6 pt-6 border-t text-center"
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="mt-6 pt-6 border-t border-gray-100 text-center"
                 >
-                  <p className="text-sm text-gray-600 mb-3">
-                    {language === 'he' ? 'אפשרויות תשלום מאובטחות' : 'Secure Payment Options'}
+                  <p className="text-xs text-gray-400 mb-3 uppercase tracking-wider font-medium">
+                    {language === 'he' ? 'תשלום מאובטח' : 'Secure Payment'}
                   </p>
                   <div className="flex justify-center gap-4">
-                    <motion.div whileHover={{ scale: 1.1 }}>
-                      <CreditCard className="w-8 h-8 text-blue-600 stroke-[1.5]" />
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.1 }}>
-                      <Shield className="w-8 h-8 text-green-600 stroke-[1.5]" />
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.1 }}>
-                      <QrCode className="w-8 h-8 text-purple-600 stroke-[1.5]" />
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.1 }}>
-                      <Lock className="w-8 h-8 text-gray-600 stroke-[1.5]" />
-                    </motion.div>
+                    {[
+                      { icon: CreditCard, color: '#3b82f6' },
+                      { icon: Shield, color: '#478c0b' },
+                      { icon: QrCode, color: '#8b5cf6' },
+                      { icon: Lock, color: '#6b7280' }
+                    ].map((badge, i) => {
+                      const BadgeIcon = badge.icon;
+                      return (
+                        <motion.div key={i} whileHover={{ scale: 1.15, y: -2 }} transition={{ duration: 0.2 }}>
+                          <BadgeIcon className="w-7 h-7 stroke-[1.5]" style={{ color: badge.color }} />
+                        </motion.div>
+                      );
+                    })}
                   </div>
-                  <p className="text-xs text-gray-500 mt-3">
-                    {language === 'he' ? 'SSL מאובטח • תשלום בטוח 100%' : 'SSL Secured • 100% Safe Checkout'}
+                  <p className="text-xs text-gray-400 mt-3">
+                    {language === 'he' ? 'SSL מאובטח - 100% בטוח' : 'SSL Secured - 100% Safe'}
                   </p>
                 </motion.div>
 
@@ -621,20 +627,20 @@ export default function EnhancedCartPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={isSummaryInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  whileHover={{ scale: 1.02 }}
-                  className="mt-6 p-4 bg-gradient-to-r from-[#478c0b] to-[#f6af0d] rounded-lg text-white text-center cursor-default"
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="mt-6 p-4 rounded-xl text-center text-white"
+                  style={{ background: 'linear-gradient(135deg, #478c0b, #f6af0d)' }}
                 >
                   <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
+                    animate={shouldReduceMotion ? {} : { scale: [1, 1.1, 1] }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                   >
-                    <Heart className="w-6 h-6 mx-auto mb-2 stroke-[1.5]" />
+                    <Heart className="w-5 h-5 mx-auto mb-2 stroke-[1.5]" />
                   </motion.div>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-semibold">
                     {language === 'he' ? 'תומכים בכפר השלום' : 'Supporting Village of Peace'}
                   </p>
-                  <p className="text-xs mt-1">Yah Khai! HalleluYah!</p>
+                  <p className="text-xs mt-1 text-white/75">Yah Khai! HalleluYah!</p>
                 </motion.div>
               </div>
             </div>

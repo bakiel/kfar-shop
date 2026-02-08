@@ -392,10 +392,10 @@ export default function MarketplacePage() {
     <EnhancedLayout>
       <div className="min-h-screen" style={{ backgroundColor: '#fef9ef' }} dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Hero Section with Smart Features */}
-        <section className={`relative text-white ${isMobile ? 'py-8' : 'py-16'} overflow-hidden bg-gradient-to-br from-[#478c0b] via-[#f6af0d] to-[#c23c09]`}>
+        <section className={`relative text-white ${isMobile ? 'py-10' : 'py-20'} overflow-hidden`} style={{ background: 'linear-gradient(135deg, #1a3a0a 0%, #2D5A27 30%, #478c0b 60%, #3a7209 100%)' }}>
           {/* Background Image with Overlay - Desaturated for texture only */}
           <motion.div
-            className="absolute inset-0 opacity-20"
+            className="absolute inset-0 opacity-10"
             style={{ y }}
           >
             <Image
@@ -407,8 +407,12 @@ export default function MarketplacePage() {
             />
           </motion.div>
 
-          {/* Subtle texture overlay */}
-          <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
+          {/* Decorative gradient orbs */}
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #f6af0d 0%, transparent 70%)' }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #C4A265 0%, transparent 70%)' }} />
+
+          {/* Subtle noise texture overlay */}
+          <div className="absolute inset-0 bg-black/5 mix-blend-overlay"></div>
 
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
@@ -417,11 +421,25 @@ export default function MarketplacePage() {
               transition={{ duration: 0.6 }}
               className="text-center max-w-4xl mx-auto"
             >
+              {/* Subtle label */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.05 }}
+                className="mb-4"
+              >
+                <span className={`inline-flex items-center gap-2 ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'} rounded-full font-medium tracking-wide`} style={{ backgroundColor: 'rgba(196, 162, 101, 0.2)', color: '#F5F0E8', border: '1px solid rgba(196, 162, 101, 0.3)' }}>
+                  <Leaf className="w-3.5 h-3.5 stroke-[1.5]" />
+                  {language === 'he' ? 'כפר השלום, דימונה' : 'Village of Peace, Dimona'}
+                </span>
+              </motion.div>
+
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className={`${isMobile ? 'text-3xl' : 'text-4xl md:text-6xl'} font-bold mb-4 drop-shadow-2xl`}
+                className={`${isMobile ? 'text-3xl' : 'text-5xl md:text-7xl'} font-bold mb-4 tracking-tight`}
+                style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}
               >
                 {language === 'he' ? 'שוק חכם' : 'Smart Marketplace'}
               </motion.h1>
@@ -429,7 +447,8 @@ export default function MarketplacePage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className={`${isMobile ? 'text-base' : 'text-xl'} mb-8 opacity-90 drop-shadow-lg`}
+                className={`${isMobile ? 'text-base' : 'text-lg md:text-xl'} mb-10 max-w-2xl mx-auto`}
+                style={{ color: 'rgba(245, 240, 232, 0.85)' }}
               >
                 {language === 'he'
                   ? `גלה ${products.length} מוצרים מכפר השלום`
@@ -461,12 +480,12 @@ export default function MarketplacePage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setSearchFocused(true)}
                     onBlur={() => setSearchFocused(false)}
-                    className={`w-full ${isMobile ? 'px-4 py-3 min-h-[44px]' : 'px-6 py-4'} rounded-full text-gray-800 shadow-xl ${
+                    className={`w-full ${isMobile ? 'px-4 py-3.5 min-h-[48px]' : 'px-6 py-4 text-lg'} rounded-2xl text-gray-800 shadow-2xl border-0 focus:outline-none focus:ring-0 ${
                       isRTL
                         ? (isMobile ? 'pl-32 pr-4 text-right' : 'pl-48 pr-6 text-right')
                         : (isMobile ? 'pr-32 pl-4' : 'pr-48 pl-6')
                     }`}
-                    style={{ backgroundColor: 'rgba(255,255,255,0.98)' }}
+                    style={{ backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)' }}
                   />
                 </motion.div>
                 <div className={`absolute ${isMobile ? 'top-1' : 'top-2'} flex gap-2 ${
@@ -592,35 +611,67 @@ export default function MarketplacePage() {
         <CompactPromotionalBanners />
 
         {/* Stats Bar */}
-        <div className="bg-white shadow-md py-4">
-          <div className="container mx-auto px-4">
-            <div className={`grid grid-cols-2 ${isMobile ? 'gap-3' : 'md:grid-cols-4 gap-4'} text-center`}>
-              <div>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`} style={{ color: '#478c0b' }}>
+        <div className="border-b" style={{ backgroundColor: '#FDFBF7' }}>
+          <div className="container mx-auto px-4 py-5">
+            <div className={`grid grid-cols-2 ${isMobile ? 'gap-3' : 'md:grid-cols-4 gap-6'} text-center`}>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className={`${isMobile ? 'p-3' : 'p-4'} rounded-2xl`}
+                style={{ backgroundColor: 'rgba(71, 140, 11, 0.06)' }}
+              >
+                <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`} style={{ color: '#478c0b' }}>
                   {filteredProducts.length}
                 </div>
-                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Products</div>
-              </div>
-              <div>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`} style={{ color: '#f6af0d' }}>
+                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 font-medium mt-0.5`}>
+                  {language === 'he' ? 'מוצרים' : 'Products'}
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className={`${isMobile ? 'p-3' : 'p-4'} rounded-2xl`}
+                style={{ backgroundColor: 'rgba(196, 162, 101, 0.08)' }}
+              >
+                <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold tracking-tight`} style={{ color: '#C4A265' }}>
                   {Object.keys(vendorGroups).length}
                 </div>
-                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>Vendors</div>
-              </div>
-              <div>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold flex items-center justify-center gap-1`} style={{ color: '#c23c09' }}>
+                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 font-medium mt-0.5`}>
+                  {language === 'he' ? 'ספקים' : 'Vendors'}
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className={`${isMobile ? 'p-3' : 'p-4'} rounded-2xl`}
+                style={{ backgroundColor: 'rgba(194, 60, 9, 0.06)' }}
+              >
+                <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold flex items-center justify-center gap-1.5 tracking-tight`} style={{ color: '#c23c09' }}>
                   <Flame className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} stroke-[1.5]`} />
                   {filteredProducts.filter(p => p.badge === 'Best Seller').length}
                 </div>
-                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>{language === 'he' ? 'רבי מכר' : 'Best Sellers'}</div>
-              </div>
-              <div>
-                <div className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold flex items-center justify-center gap-1`} style={{ color: '#478c0b' }}>
+                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 font-medium mt-0.5`}>
+                  {language === 'he' ? 'רבי מכר' : 'Best Sellers'}
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.4 }}
+                className={`${isMobile ? 'p-3' : 'p-4'} rounded-2xl`}
+                style={{ backgroundColor: 'rgba(71, 140, 11, 0.06)' }}
+              >
+                <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold flex items-center justify-center gap-1.5 tracking-tight`} style={{ color: '#2D5A27' }}>
                   <Leaf className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} stroke-[1.5]`} />
                   100%
                 </div>
-                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600`}>{language === 'he' ? 'טבעוני' : 'Vegan'}</div>
-              </div>
+                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500 font-medium mt-0.5`}>
+                  {language === 'he' ? 'טבעוני' : 'Vegan'}
+                </div>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -756,9 +807,23 @@ export default function MarketplacePage() {
             </div>
           )}
           {loading ? (
-            <div className="text-center py-16">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-              <p className="mt-4 text-gray-600">Loading products...</p>
+            <div className="text-center py-20">
+              <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'}`}>
+                {[...Array(isMobile ? 4 : 8)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-2xl overflow-hidden border border-gray-100/80 animate-pulse">
+                    <div className={`${isMobile ? 'h-36' : 'h-56'} bg-gray-100`} />
+                    <div className="p-4">
+                      <div className="h-3 bg-gray-100 rounded-full w-20 mb-3" />
+                      <div className="h-4 bg-gray-100 rounded-full w-3/4 mb-2" />
+                      <div className="h-3 bg-gray-100 rounded-full w-1/2 mb-4" />
+                      <div className="flex justify-between items-center">
+                        <div className="h-5 bg-gray-100 rounded-full w-16" />
+                        <div className="w-10 h-10 bg-gray-100 rounded-xl" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : viewMode === 'vendors' ? (
             // Vendors View with Enhanced Design
@@ -796,24 +861,24 @@ export default function MarketplacePage() {
                     }}
                   />
                 ) : (
-                  // Desktop Product Card
+                  // Desktop Product Card - Premium Design
                 <motion.div
                   key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  whileHover={cardHover}
-                  transition={cardTransition}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden group cursor-pointer"
+                  transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease: [0.25, 0.46, 0.45, 0.94] }}
+                  whileHover={{ y: -6, boxShadow: '0 20px 40px -8px rgba(0,0,0,0.12)' }}
+                  className="bg-white rounded-2xl overflow-hidden group cursor-pointer border border-gray-100/80"
+                  style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}
                 >
                   <Link href={`/product/${product.id}`}>
-                    <div className="relative h-64 overflow-hidden">
+                    <div className="relative h-56 overflow-hidden">
                       <Image
                         src={product.image}
                         alt={product.name || "Image"}
                         fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                         onError={(e) => {
-                          // Use vendor-specific fallback, never cross-vendor images
                           const vendorFallbacks: Record<string, string> = {
                             'teva-deli': '/images/fallbacks/teva-deli-product.svg',
                             'queens-cuisine': '/images/fallbacks/queens-cuisine-product.svg',
@@ -826,78 +891,142 @@ export default function MarketplacePage() {
                           e.currentTarget.src = vendorFallbacks[product.vendorId] || '/images/fallbacks/kfar-product-fallback.svg';
                         }}
                       />
+                      {/* Gradient overlay for polish */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
                       {/* Badges */}
-                      <div className="absolute top-2 left-2 flex flex-col gap-2">
+                      <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} flex flex-col gap-1.5`}>
                         {product.badge === 'Best Seller' && (
-                          <span className="px-3 py-1 text-xs rounded-full font-semibold bg-red-500 text-white">
-                            Best Seller
+                          <span className="px-2.5 py-1 text-[11px] rounded-lg font-semibold tracking-wide uppercase" style={{ backgroundColor: '#c23c09', color: 'white' }}>
+                            {language === 'he' ? 'רב מכר' : 'Best Seller'}
                           </span>
                         )}
-                        {product.isFeatured && (
-                          <span className="px-3 py-1 text-xs rounded-full font-semibold bg-yellow-400 text-gray-800">
-                            Featured
+                        {product.isFeatured && !product.badge && (
+                          <span className="px-2.5 py-1 text-[11px] rounded-lg font-semibold tracking-wide uppercase" style={{ backgroundColor: '#C4A265', color: 'white' }}>
+                            {language === 'he' ? 'מומלץ' : 'Featured'}
                           </span>
                         )}
                         {product.badge && product.badge !== 'Best Seller' && (
-                          <span className="px-3 py-1 text-xs rounded-full font-semibold bg-purple-500 text-white">
+                          <span className="px-2.5 py-1 text-[11px] rounded-lg font-semibold tracking-wide uppercase bg-[#2D5A27] text-white">
                             {product.badge}
                           </span>
                         )}
                       </div>
-                      
-                      {/* Vendor Badge */}
-                      {(product.vendorName || product.vendorId) && (
-                        <div className="absolute bottom-2 right-2">
-                          <span className="px-3 py-1 text-xs rounded-full font-medium bg-white/90 backdrop-blur-sm">
-                            {product.vendorName || getVendorDisplayName(product.vendorId)}
+
+                      {/* Discount badge */}
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'}`}>
+                          <span className="px-2 py-1 text-[11px] rounded-lg font-bold bg-white/90 backdrop-blur-sm" style={{ color: '#c23c09' }}>
+                            -{Math.round((1 - product.price / product.originalPrice) * 100)}%
                           </span>
                         </div>
                       )}
+
+                      {/* Quick add overlay on hover */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileHover={{ opacity: 1, y: 0 }}
+                        className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300"
+                      >
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
+                          className="w-full py-2.5 rounded-xl font-semibold text-white text-sm transition-all flex items-center justify-center gap-2 cursor-pointer backdrop-blur-sm"
+                          style={{ backgroundColor: 'rgba(71, 140, 11, 0.92)' }}
+                        >
+                          <ShoppingCart className="w-4 h-4 stroke-[1.5]" />
+                          {language === 'he' ? 'הוסף לסל' : 'Add to Cart'}
+                        </motion.button>
+                      </motion.div>
                     </div>
                   </Link>
 
-                  <div className="p-5">
+                  <div className="p-4 pb-5">
+                    {/* Vendor label */}
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Store className="w-3 h-3 stroke-[1.5]" style={{ color: '#C4A265' }} />
+                      <span className="text-xs font-medium" style={{ color: '#C4A265' }}>
+                        {product.vendorName || getVendorDisplayName(product.vendorId)}
+                      </span>
+                    </div>
+
                     <Link href={`/product/${product.id}`}>
-                      <h3 className="text-lg font-semibold mb-1 hover:text-green-700 transition-colors" style={{ color: '#3a3a1d' }}>
+                      <h3 className="text-base font-semibold mb-1 line-clamp-1 group-hover:text-[#2D5A27] transition-colors" style={{ color: '#1a1a1a' }}>
                         {product.name}
                       </h3>
                     </Link>
-                    
-                    {product.nameHe && (
-                      <p className="text-sm text-gray-600 mb-2" dir="rtl">
+
+                    {product.nameHe && language !== 'he' && (
+                      <p className="text-xs text-gray-400 mb-1.5" dir="rtl">
                         {product.nameHe}
                       </p>
                     )}
-                    
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
+
+                    {/* Rating row */}
+                    {product.rating && (
+                      <div className="flex items-center gap-1.5 mb-2.5">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < Math.floor(product.rating || 0) ? 'fill-[#f6af0d] text-[#f6af0d]' : 'text-gray-200'} stroke-[1.5]`} />
+                          ))}
+                        </div>
+                        {product.reviewCount && (
+                          <span className="text-xs text-gray-400">({product.reviewCount})</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Dietary badges */}
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {product.vegan && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium" style={{ backgroundColor: 'rgba(71, 140, 11, 0.08)', color: '#478c0b' }}>
+                          <Leaf className="w-2.5 h-2.5 stroke-[1.5]" />
+                          {language === 'he' ? 'טבעוני' : 'Vegan'}
+                        </span>
+                      )}
+                      {product.kashrut && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium" style={{ backgroundColor: 'rgba(66, 153, 225, 0.08)', color: '#4299e1' }}>
+                          <Check className="w-2.5 h-2.5 stroke-[1.5]" />
+                          {language === 'he' ? 'כשר' : 'Kosher'}
+                        </span>
+                      )}
+                      {product.organic && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium" style={{ backgroundColor: 'rgba(72, 187, 120, 0.08)', color: '#48bb78' }}>
+                          {language === 'he' ? 'אורגני' : 'Organic'}
+                        </span>
+                      )}
+                    </div>
 
                     {/* Price and Action */}
-                    <div className="flex items-center justify-between">
-                      <div>
+                    <div className="flex items-end justify-between pt-2 border-t border-gray-50">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-xl font-bold tracking-tight" style={{ color: '#1a1a1a' }}>
+                          ₪{product.price}
+                        </span>
                         {product.originalPrice && product.originalPrice > product.price && (
-                          <span className="text-sm text-gray-500 line-through">
+                          <span className="text-sm text-gray-400 line-through">
                             ₪{product.originalPrice}
                           </span>
                         )}
-                        <span className="text-xl font-bold ml-2" style={{ color: '#c23c09' }}>
-                          ₪{product.price}
-                        </span>
                       </div>
-                      
+
                       <motion.button
-                        whileHover={{ scale: 1.05, y: -2 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.92 }}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleAddToCart(product);
                         }}
-                        className="px-4 py-2 rounded-lg font-semibold text-white transition-all hover:shadow-lg cursor-pointer"
+                        className="w-10 h-10 rounded-xl font-semibold text-white transition-all flex items-center justify-center cursor-pointer"
                         style={{ backgroundColor: '#478c0b' }}
                       >
-                        <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
+                        <ShoppingCart className="w-4 h-4 stroke-[1.5]" />
                       </motion.button>
                     </div>
                   </div>

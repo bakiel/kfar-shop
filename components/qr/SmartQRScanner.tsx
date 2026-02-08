@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import { AI } from '@/lib/services/ai';
-import { FaCamera, FaUpload, FaTimes, FaQrcode } from 'react-icons/fa';
+import { Camera, Upload, X, QrCode } from 'lucide-react';
 
 interface SmartQRScannerProps {
   onScan: (data: any) => void;
@@ -208,7 +208,7 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
         {/* Header */}
         <div className="p-6 border-b flex items-center justify-between">
           <h3 className="text-xl font-bold flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-            <FaQrcode className="text-green-600" />
+            <QrCode className="w-5 h-5 stroke-[1.5] text-green-600" />
             Smart QR Scanner
           </h3>
           {onClose && (
@@ -216,7 +216,7 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <FaTimes className="text-gray-600" />
+              <X className="w-5 h-5 stroke-[1.5] text-gray-600" />
             </button>
           )}
         </div>
@@ -226,7 +226,7 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
           {cameraPermission === 'denied' ? (
             <div className="absolute inset-0 flex items-center justify-center text-white p-8 text-center">
               <div>
-                <FaCamera className="text-6xl mb-4 mx-auto opacity-50" />
+                <Camera className="w-16 h-16 stroke-[1.5] mb-4 mx-auto opacity-50" />
                 <p className="mb-4">Camera access is required to scan QR codes</p>
                 <button
                   onClick={requestCameraPermission}
@@ -309,7 +309,7 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
                 disabled={processing}
                 className="w-full py-3 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium text-gray-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                <FaUpload />
+                <Upload className="w-4 h-4 stroke-[1.5]" />
                 Upload QR Image
               </button>
             </>

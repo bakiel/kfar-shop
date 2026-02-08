@@ -16,10 +16,15 @@ import {
   Mail,
   ArrowRight,
   MapPin,
-  Clock
+  Clock,
+  Phone,
+  ChevronRight
 } from 'lucide-react';
+import { useLanguage } from '@/lib/context/LanguageContext';
 
-// Custom social media icons (Lucide deprecated brand icons)
+// ---------------------------------------------------------------------------
+// Custom social media SVG icons (Lucide does not include brand icons)
+// ---------------------------------------------------------------------------
 const FacebookIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 sm:w-5 sm:h-5">
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
@@ -41,9 +46,9 @@ const YoutubeIcon = () => (
   </svg>
 );
 
-import { useLanguage } from '@/lib/context/LanguageContext';
-
+// ---------------------------------------------------------------------------
 // SVG Payment Icons
+// ---------------------------------------------------------------------------
 const PaymentIcons = {
   visa: (
     <svg viewBox="0 0 48 32" className="w-10 h-7" fill="none">
@@ -89,20 +94,39 @@ const PaymentIcons = {
   )
 };
 
+// ---------------------------------------------------------------------------
+// Footer Link Hover Component
+// ---------------------------------------------------------------------------
+const FooterLink = ({ href, children, hoverColor = 'hover:text-white' }: { href: string; children: React.ReactNode; hoverColor?: string }) => (
+  <li>
+    <Link
+      href={href}
+      className={`group flex items-center gap-1 text-gray-400 ${hoverColor} transition-colors duration-200 text-sm cursor-pointer`}
+    >
+      <ChevronRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 stroke-[1.5]" />
+      <span className="group-hover:translate-x-0.5 transition-transform duration-200">{children}</span>
+    </Link>
+  </li>
+);
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const { language, isRTL } = useLanguage();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Newsletter signup:', email);
     setEmail('');
     setIsSubmitting(false);
+    setIsSubscribed(true);
+    setTimeout(() => setIsSubscribed(false), 4000);
   };
 
   const containerVariants = {
@@ -110,72 +134,74 @@ const Footer = () => {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.1
+        staggerChildren: shouldReduceMotion ? 0 : 0.08,
+        delayChildren: shouldReduceMotion ? 0 : 0.1,
       }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 24 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: shouldReduceMotion ? 0 : 0.4, ease: 'easeOut' as const }
+      transition: { duration: shouldReduceMotion ? 0 : 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
     }
   };
 
   const footerLinks = {
     shop: [
-      { href: '/categories', label: language === 'he' ? 'כל הקטגוריות' : 'All Categories' },
-      { href: '/store/featured', label: language === 'he' ? 'מוצרים מומלצים' : 'Featured Products' },
+      { href: '/marketplace', label: language === 'he' ? 'כל המוצרים' : 'All Products' },
+      { href: '/categories', label: language === 'he' ? 'קטגוריות' : 'Categories' },
+      { href: '/store/featured', label: language === 'he' ? 'מוצרים מומלצים' : 'Featured' },
       { href: '/store/new', label: language === 'he' ? 'חדש באתר' : 'New Arrivals' },
       { href: '/store/deals', label: language === 'he' ? 'מבצעים' : 'Special Offers' },
-      { href: '/vendors', label: language === 'he' ? 'הספקים שלנו' : 'Our Vendors' }
     ],
     support: [
       { href: '/help', label: language === 'he' ? 'מרכז עזרה' : 'Help Center' },
       { href: '/faq', label: language === 'he' ? 'שאלות נפוצות' : 'FAQs' },
       { href: '/contact', label: language === 'he' ? 'צור קשר' : 'Contact Us' },
-      { href: '/info/qr-nfc', label: language === 'he' ? 'מדריך QR & NFC' : 'QR & NFC Guide' },
-      { href: '/shipping', label: language === 'he' ? 'מידע על משלוחים' : 'Shipping Info' }
-    ],
-    policies: [
-      { href: '/policies/privacy', label: language === 'he' ? 'מדיניות פרטיות' : 'Privacy Policy' },
-      { href: '/policies/terms', label: language === 'he' ? 'תנאי שימוש' : 'Terms of Service' },
-      { href: '/policies/returns', label: language === 'he' ? 'מדיניות החזרות' : 'Return Policy' },
-      { href: '/policies/shipping', label: language === 'he' ? 'מדיניות משלוחים' : 'Shipping Policy' },
-      { href: '/policies/cookies', label: language === 'he' ? 'מדיניות עוגיות' : 'Cookie Policy' }
+      { href: '/shipping', label: language === 'he' ? 'משלוחים' : 'Shipping Info' },
+      { href: '/policies/returns', label: language === 'he' ? 'החזרות' : 'Returns' },
     ],
     vendors: [
+      { href: '/vendors', label: language === 'he' ? 'הספקים שלנו' : 'Our Vendors' },
       { href: '/vendor/join', label: language === 'he' ? 'הצטרף כספק' : 'Become a Vendor' },
       { href: '/vendor/dashboard', label: language === 'he' ? 'לוח בקרה' : 'Vendor Dashboard' },
       { href: '/vendor/resources', label: language === 'he' ? 'משאבים' : 'Resources' },
-      { href: '/vendor/commission', label: language === 'he' ? 'עמלות' : 'Commission Rates' },
-      { href: '/vendor/success', label: language === 'he' ? 'סיפורי הצלחה' : 'Success Stories' }
-    ]
+    ],
+    legal: [
+      { href: '/policies/privacy', label: language === 'he' ? 'פרטיות' : 'Privacy Policy' },
+      { href: '/policies/terms', label: language === 'he' ? 'תנאי שימוש' : 'Terms of Service' },
+      { href: '/policies/cookies', label: language === 'he' ? 'עוגיות' : 'Cookie Policy' },
+      { href: '/policies/accessibility', label: language === 'he' ? 'נגישות' : 'Accessibility' },
+    ],
   };
 
   return (
     <footer className="relative" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Newsletter Section */}
-      <section className="py-10 md:py-14 relative overflow-hidden" style={{ backgroundColor: '#fef9ef' }}>
-        <div className="absolute inset-0 bg-gradient-to-br from-leaf-green/5 via-transparent to-sun-gold/5" />
+      {/* ================================================================= */}
+      {/* NEWSLETTER BANNER                                                 */}
+      {/* ================================================================= */}
+      <section className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e0a 0%, #2D5A27 50%, #1a3a12 100%)' }}>
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
         <motion.div
-          className="container mx-auto px-4 sm:px-6 relative z-10"
+          className="container mx-auto px-4 sm:px-6 py-10 md:py-14 relative z-10"
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, margin: '-60px' }}
           variants={containerVariants}
         >
           <motion.div variants={itemVariants} className="max-w-2xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-leaf-green/10 mb-5">
-              <Mail className="w-7 h-7 text-leaf-green" />
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4" style={{ backgroundColor: 'rgba(196, 162, 101, 0.15)' }}>
+              <Mail className="w-6 h-6 stroke-[1.5]" style={{ color: '#C4A265' }} />
             </div>
-            <h3 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 font-display">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-2 text-white">
               {language === 'he' ? 'הצטרפו לקהילה שלנו' : 'Join Our Community'}
             </h3>
-            <p className="text-gray-600 mb-6 text-sm sm:text-base px-4">
+            <p className="text-white/60 mb-6 text-sm sm:text-base px-4 leading-relaxed">
               {language === 'he'
                 ? 'קבלו עדכונים בלעדיים על ספקים חדשים, הצעות מיוחדות ואירועי קהילה'
                 : 'Get exclusive updates on new vendors, special offers, and community events'
@@ -183,27 +209,33 @@ const Footer = () => {
             </p>
 
             <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto px-4 sm:px-0">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={language === 'he' ? 'הזינו את האימייל שלכם' : 'Enter your email'}
-                className="flex-1 px-4 py-3 rounded-xl border-2 border-leaf-green/30 focus:border-leaf-green focus:outline-none focus:ring-2 focus:ring-leaf-green/20 transition-all text-sm sm:text-base bg-white"
-                required
-              />
+              <div className="relative flex-1">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={language === 'he' ? 'הזינו את האימייל שלכם' : 'Enter your email'}
+                  className="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm text-white placeholder-white/40 focus:outline-none focus:border-[#C4A265] focus:ring-1 focus:ring-[#C4A265]/30 transition-all text-sm sm:text-base"
+                  required
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
                 whileHover={shouldReduceMotion ? {} : { scale: 1.02 }}
                 whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}
-                className="px-6 py-3 bg-leaf-green text-white rounded-xl font-semibold hover:bg-leaf-green/90 transition-all duration-200 whitespace-nowrap text-sm sm:text-base flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer"
+                className="px-6 py-3 rounded-xl font-semibold text-sm sm:text-base flex items-center justify-center gap-2 disabled:opacity-70 cursor-pointer transition-all duration-200 text-[#1a2e0a]"
+                style={{ backgroundColor: '#C4A265' }}
               >
                 {isSubmitting ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-[#1a2e0a]/30 border-t-[#1a2e0a] rounded-full animate-spin" />
+                ) : isSubscribed ? (
+                  <span>{language === 'he' ? 'נרשמת!' : 'Subscribed!'}</span>
                 ) : (
                   <>
                     {language === 'he' ? 'הרשמה' : 'Subscribe'}
-                    <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+                    <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''} stroke-[1.5]`} />
                   </>
                 )}
               </motion.button>
@@ -212,155 +244,142 @@ const Footer = () => {
         </motion.div>
       </section>
 
-      {/* Main Footer */}
-      <div className="bg-gray-900 text-white py-12 md:py-16">
-        <div className="container mx-auto px-4 sm:px-6">
-          {/* Top Section */}
+      {/* ================================================================= */}
+      {/* MAIN FOOTER                                                       */}
+      {/* ================================================================= */}
+      <div className="relative" style={{ background: 'linear-gradient(180deg, #0f1a0a 0%, #111810 40%, #0d120a 100%)' }}>
+        {/* Top separator accent */}
+        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #C4A265, transparent)' }} />
+
+        <div className="container mx-auto px-4 sm:px-6 pt-14 md:pt-16 pb-8">
+          {/* ---- Links Grid ---- */}
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8 mb-10 md:mb-12"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-12 gap-8 md:gap-10 mb-12 md:mb-14"
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, margin: "-50px" }}
+            viewport={{ once: true, margin: '-60px' }}
             variants={containerVariants}
           >
-            {/* Brand Section - Full width on mobile, 2 cols on larger */}
-            <motion.div variants={itemVariants} className="col-span-2 md:col-span-3 lg:col-span-2">
+            {/* Brand Column */}
+            <motion.div variants={itemVariants} className="col-span-2 md:col-span-3 lg:col-span-4">
               <div className="mb-5">
                 <Image
                   src="/images/logos/kfar_logo_africa_heritage.png"
                   alt="KFAR Marketplace"
                   width={140}
                   height={50}
-                  className="h-12 sm:h-14 w-auto"
+                  className="h-12 sm:h-14 w-auto brightness-110"
                 />
               </div>
-              <h4 className="text-lg sm:text-xl font-bold mb-2 font-display">KFAR Marketplace</h4>
-              <p className="text-gray-400 text-sm mb-5 leading-relaxed max-w-xs">
+              <p className="text-gray-400 text-sm mb-6 leading-relaxed max-w-xs">
                 {language === 'he'
                   ? 'משרתים את קהילת כפר השלום בדימונה עם מוצרים ושירותים טבעוניים מאז 1969.'
                   : 'Serving the Village of Peace community in Dimona with authentic vegan products since 1969.'
                 }
               </p>
 
-              {/* Contact Info - Mobile friendly */}
-              <div className="space-y-2 mb-5 text-sm">
-                <div className="flex items-center gap-2 text-gray-400">
-                  <MapPin className="w-4 h-4 text-leaf-green flex-shrink-0" />
-                  <span>{language === 'he' ? 'דימונה, ישראל' : 'Dimona, Israel'}</span>
+              {/* Contact Info */}
+              <div className="space-y-2.5 mb-6">
+                <div className="flex items-center gap-2.5 text-gray-400 text-sm">
+                  <MapPin className="w-4 h-4 flex-shrink-0 stroke-[1.5]" style={{ color: '#478c0b' }} />
+                  <span>{language === 'he' ? 'כפר השלום, דימונה, ישראל' : 'Village of Peace, Dimona, Israel'}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-400">
-                  <Clock className="w-4 h-4 text-sun-gold flex-shrink-0" />
+                <div className="flex items-center gap-2.5 text-gray-400 text-sm">
+                  <Clock className="w-4 h-4 flex-shrink-0 stroke-[1.5]" style={{ color: '#C4A265' }} />
                   <span>{language === 'he' ? 'א-ה: 8:00-20:00' : 'Sun-Thu: 8AM-8PM'}</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-gray-400 text-sm">
+                  <Phone className="w-4 h-4 flex-shrink-0 stroke-[1.5]" style={{ color: '#f6af0d' }} />
+                  <span dir="ltr">+972-8-XXX-XXXX</span>
                 </div>
               </div>
 
               {/* Social Links */}
-              <div className="flex gap-2">
-                <motion.a
-                  href="#"
-                  aria-label="Facebook"
-                  whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
-                  whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer text-white"
-                  style={{ backgroundColor: '#478c0b' }}
-                >
-                  <FacebookIcon />
-                </motion.a>
-                <motion.a
-                  href="#"
-                  aria-label="Instagram"
-                  whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
-                  whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer text-white"
-                  style={{ backgroundColor: '#f6af0d' }}
-                >
-                  <InstagramIcon />
-                </motion.a>
-                <motion.a
-                  href="#"
-                  aria-label="YouTube"
-                  whileHover={shouldReduceMotion ? {} : { scale: 1.1 }}
-                  whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer text-white"
-                  style={{ backgroundColor: '#c23c09' }}
-                >
-                  <YoutubeIcon />
-                </motion.a>
+              <div className="flex gap-2.5">
+                {[
+                  { icon: FacebookIcon, label: 'Facebook', bg: '#478c0b' },
+                  { icon: InstagramIcon, label: 'Instagram', bg: '#C4A265' },
+                  { icon: YoutubeIcon, label: 'YouTube', bg: '#c23c09' },
+                ].map((social) => (
+                  <motion.a
+                    key={social.label}
+                    href="#"
+                    aria-label={social.label}
+                    whileHover={shouldReduceMotion ? {} : { scale: 1.1, y: -2 }}
+                    whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer text-white"
+                    style={{ backgroundColor: social.bg }}
+                  >
+                    <social.icon />
+                  </motion.a>
+                ))}
               </div>
             </motion.div>
 
             {/* Shop Links */}
-            <motion.div variants={itemVariants}>
-              <h5 className="font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-sun-gold" />
+            <motion.div variants={itemVariants} className="lg:col-span-2">
+              <h5 className="font-semibold text-sm mb-4 flex items-center gap-2 text-white/90 uppercase tracking-wider">
+                <ShoppingBag className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                 {language === 'he' ? 'חנות' : 'Shop'}
               </h5>
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2.5">
                 {footerLinks.shop.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-gray-400 hover:text-sun-gold transition-colors duration-200">
-                      {link.label}
-                    </Link>
-                  </li>
+                  <FooterLink key={link.href} href={link.href} hoverColor="hover:text-[#f6af0d]">
+                    {link.label}
+                  </FooterLink>
                 ))}
               </ul>
             </motion.div>
 
             {/* Support Links */}
-            <motion.div variants={itemVariants}>
-              <h5 className="font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                <Headphones className="w-4 h-4 sm:w-5 sm:h-5 text-leaf-green" />
+            <motion.div variants={itemVariants} className="lg:col-span-2">
+              <h5 className="font-semibold text-sm mb-4 flex items-center gap-2 text-white/90 uppercase tracking-wider">
+                <Headphones className="w-4 h-4 stroke-[1.5]" style={{ color: '#478c0b' }} />
                 {language === 'he' ? 'תמיכה' : 'Support'}
               </h5>
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2.5">
                 {footerLinks.support.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-gray-400 hover:text-leaf-green transition-colors duration-200">
-                      {link.label}
-                    </Link>
-                  </li>
+                  <FooterLink key={link.href} href={link.href} hoverColor="hover:text-[#478c0b]">
+                    {link.label}
+                  </FooterLink>
                 ))}
               </ul>
             </motion.div>
 
-            {/* Policies Links */}
-            <motion.div variants={itemVariants}>
-              <h5 className="font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-earth-flame" />
-                {language === 'he' ? 'מדיניות' : 'Policies'}
-              </h5>
-              <ul className="space-y-2 text-sm">
-                {footerLinks.policies.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-gray-400 hover:text-earth-flame transition-colors duration-200">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            {/* Vendor Links */}
-            <motion.div variants={itemVariants}>
-              <h5 className="font-bold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                <Store className="w-4 h-4 sm:w-5 sm:h-5 text-sun-gold" />
+            {/* Vendors Links */}
+            <motion.div variants={itemVariants} className="lg:col-span-2">
+              <h5 className="font-semibold text-sm mb-4 flex items-center gap-2 text-white/90 uppercase tracking-wider">
+                <Store className="w-4 h-4 stroke-[1.5]" style={{ color: '#C4A265' }} />
                 {language === 'he' ? 'ספקים' : 'Vendors'}
               </h5>
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2.5">
                 {footerLinks.vendors.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-gray-400 hover:text-sun-gold transition-colors duration-200">
-                      {link.label}
-                    </Link>
-                  </li>
+                  <FooterLink key={link.href} href={link.href} hoverColor="hover:text-[#C4A265]">
+                    {link.label}
+                  </FooterLink>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Legal Links */}
+            <motion.div variants={itemVariants} className="lg:col-span-2">
+              <h5 className="font-semibold text-sm mb-4 flex items-center gap-2 text-white/90 uppercase tracking-wider">
+                <Shield className="w-4 h-4 stroke-[1.5]" style={{ color: '#c23c09' }} />
+                {language === 'he' ? 'משפטי' : 'Legal'}
+              </h5>
+              <ul className="space-y-2.5">
+                {footerLinks.legal.map((link) => (
+                  <FooterLink key={link.href} href={link.href} hoverColor="hover:text-white">
+                    {link.label}
+                  </FooterLink>
                 ))}
               </ul>
             </motion.div>
           </motion.div>
 
-          {/* Trust Badges & Payment Methods */}
+          {/* ---- Trust Badges & Payment ---- */}
           <motion.div
-            className="border-t border-gray-800 pt-8 mb-8"
+            className="border-t border-white/[0.06] pt-8 mb-8"
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
@@ -369,18 +388,18 @@ const Footer = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
               {/* Trust Badges */}
               <motion.div variants={itemVariants}>
-                <h6 className="font-semibold mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500 uppercase tracking-wider">
+                <h6 className="font-semibold mb-3 sm:mb-4 text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest">
                   {language === 'he' ? 'מאומת ומאובטח' : 'Certified & Secure'}
                 </h6>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {[
-                    { icon: Leaf, label: language === 'he' ? '100% טבעוני' : '100% Vegan', color: 'text-green-400' },
-                    { icon: Lock, label: language === 'he' ? 'קניות מאובטחות' : 'Secure Shopping', color: 'text-yellow-400' },
-                    { icon: Star, label: language === 'he' ? 'מאז 1969' : 'Since 1969', color: 'text-orange-400' }
+                    { icon: Leaf, label: language === 'he' ? '100% טבעוני' : '100% Vegan', color: '#478c0b' },
+                    { icon: Lock, label: language === 'he' ? 'קניות מאובטחות' : 'Secure Shopping', color: '#C4A265' },
+                    { icon: Star, label: language === 'he' ? 'מאז 1969' : 'Since 1969', color: '#f6af0d' }
                   ].map((badge) => (
-                    <div key={badge.label} className="bg-white/10 rounded-lg px-3 sm:px-4 py-2 flex items-center gap-2">
-                      <badge.icon className={`w-4 h-4 ${badge.color}`} />
-                      <span className="text-xs sm:text-sm text-white">{badge.label}</span>
+                    <div key={badge.label} className="bg-white/[0.06] rounded-lg px-3 sm:px-4 py-2 flex items-center gap-2 border border-white/[0.04]">
+                      <badge.icon className="w-4 h-4 stroke-[1.5]" style={{ color: badge.color }} />
+                      <span className="text-xs sm:text-sm text-gray-300">{badge.label}</span>
                     </div>
                   ))}
                 </div>
@@ -388,12 +407,12 @@ const Footer = () => {
 
               {/* Payment Methods */}
               <motion.div variants={itemVariants} className="lg:text-right">
-                <h6 className="font-semibold mb-3 sm:mb-4 text-xs sm:text-sm text-gray-500 uppercase tracking-wider">
+                <h6 className="font-semibold mb-3 sm:mb-4 text-[10px] sm:text-xs text-gray-500 uppercase tracking-widest">
                   {language === 'he' ? 'אמצעי תשלום' : 'Payment Methods'}
                 </h6>
                 <div className="flex flex-wrap gap-2 sm:gap-3 lg:justify-end">
                   {Object.entries(PaymentIcons).map(([name, icon]) => (
-                    <div key={name} className="bg-white/10 rounded-lg p-2 sm:p-2.5 flex items-center justify-center">
+                    <div key={name} className="bg-white/[0.06] rounded-lg p-2 sm:p-2.5 flex items-center justify-center border border-white/[0.04]">
                       {icon}
                     </div>
                   ))}
@@ -402,27 +421,22 @@ const Footer = () => {
             </div>
           </motion.div>
 
-          {/* Bottom Section */}
-          <div className="border-t border-gray-800 pt-6 sm:pt-8">
+          {/* ---- Bottom Bar ---- */}
+          <div className="border-t border-white/[0.06] pt-6 sm:pt-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="text-center sm:text-left">
-                <p className="text-xs sm:text-sm text-gray-500">
-                  &copy; {new Date().getFullYear()} KFAR Marketplace. {language === 'he' ? 'כל הזכויות שמורות.' : 'All rights reserved.'}
-                  <span className="hidden sm:inline"> | </span>
-                  <br className="sm:hidden" />
-                  <Link href="/policies/accessibility" className="text-gray-500 hover:text-white transition-colors mx-1 sm:mx-2">
-                    {language === 'he' ? 'נגישות' : 'Accessibility'}
-                  </Link>
-                  <span className="text-gray-700">|</span>
-                  <Link href="/sitemap" className="text-gray-500 hover:text-white transition-colors mx-1 sm:mx-2">
-                    {language === 'he' ? 'מפת אתר' : 'Sitemap'}
-                  </Link>
-                </p>
-              </div>
+              <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
+                &copy; {new Date().getFullYear()} KFAR Marketplace.{' '}
+                {language === 'he' ? 'כל הזכויות שמורות.' : 'All rights reserved.'}
+                <span className="hidden sm:inline mx-2 text-gray-700">|</span>
+                <br className="sm:hidden" />
+                <Link href="/sitemap" className="text-gray-500 hover:text-white transition-colors cursor-pointer mx-1 sm:mx-0">
+                  {language === 'he' ? 'מפת אתר' : 'Sitemap'}
+                </Link>
+              </p>
 
               <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
                 <span>{language === 'he' ? 'נוצר עם' : 'Made with'}</span>
-                <Sun className="w-4 h-4 text-sun-gold" />
+                <Sun className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                 <span>{language === 'he' ? 'בדימונה, ישראל' : 'in Dimona, Israel'}</span>
               </div>
             </div>

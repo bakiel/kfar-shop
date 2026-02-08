@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMicrophone, FaMicrophoneSlash, FaVolumeUp, FaShoppingCart, FaUser, FaRobot } from 'react-icons/fa';
+import { Mic, MicOff, Volume2, ShoppingCart, User, Bot } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -224,7 +224,7 @@ export default function EnhancedChatWidget() {
           <i className="fas fa-times text-white text-xl"></i>
         ) : (
           <div className="relative">
-            <FaRobot className="text-white text-xl" />
+            <Bot className="text-white text-xl" />
             {voiceSettings.enabled && (
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
             )}
@@ -253,7 +253,7 @@ export default function EnhancedChatWidget() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <FaRobot className="text-green-600 text-lg" />
+                      <Bot className="text-green-600 text-lg" />
                     </div>
                     <div>
                       <h3 className="font-bold text-lg">KFAR AI Assistant</h3>
@@ -268,9 +268,9 @@ export default function EnhancedChatWidget() {
                     title={voiceSettings.enabled ? 'Voice enabled' : 'Voice disabled'}
                   >
                     {voiceSettings.enabled ? (
-                      <FaVolumeUp className="text-white" />
+                      <Volume2 className="text-white" />
                     ) : (
-                      <FaMicrophoneSlash className="text-white" />
+                      <MicOff className="text-white" />
                     )}
                   </button>
                 </div>
@@ -303,7 +303,7 @@ export default function EnhancedChatWidget() {
                 <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
                     <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                      <FaRobot className="text-green-600 text-sm" />
+                      <Bot className="text-green-600 text-sm" />
                     </div>
                   )}
                   
@@ -324,7 +324,7 @@ export default function EnhancedChatWidget() {
                             onClick={() => playAudio(msg.audio_url!)}
                             className="p-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
                           >
-                            <FaVolumeUp className="text-xs" />
+                            <Volume2 className="text-xs" />
                           </button>
                           <span className="text-xs opacity-75">Play audio</span>
                         </div>
@@ -384,7 +384,7 @@ export default function EnhancedChatWidget() {
 
                   {msg.role === 'user' && (
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                      <FaUser className="text-blue-600 text-sm" />
+                      <User className="text-blue-600 text-sm" />
                     </div>
                   )}
                 </div>
@@ -393,7 +393,7 @@ export default function EnhancedChatWidget() {
               {isLoading && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <FaRobot className="text-green-600 text-sm" />
+                    <Bot className="text-green-600 text-sm" />
                   </div>
                   <div className="bg-gray-100 rounded-lg p-3">
                     <div className="flex space-x-1">
@@ -434,7 +434,7 @@ export default function EnhancedChatWidget() {
                       }`}
                       title={isListening ? 'Stop listening' : 'Start voice input'}
                     >
-                      <FaMicrophone className="text-sm" />
+                      <Mic className="text-sm" />
                     </button>
                   )}
                   

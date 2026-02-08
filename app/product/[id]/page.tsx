@@ -493,15 +493,15 @@ export default function ProductDetailPage() {
 
         {/* Desktop Breadcrumb */}
         {!isMobile && (
-          <div className="container mx-auto px-4 py-4">
-            <nav className="text-sm text-gray-600">
-              <Link href="/" className="hover:text-[#478c0b]">Home</Link>
-              <span className="mx-2">/</span>
-              <Link href="/marketplace" className="hover:text-[#478c0b]">Marketplace</Link>
-              <span className="mx-2">/</span>
-              <Link href={`/store/${product.vendorId}`} className="hover:text-[#478c0b]">{product.vendor}</Link>
-              <span className="mx-2">/</span>
-              <span className="text-gray-800">{product.name}</span>
+          <div className="container mx-auto px-4 py-5">
+            <nav className="text-sm text-gray-400 flex items-center gap-2">
+              <Link href="/" className="hover:text-[#478c0b] transition-colors">Home</Link>
+              <ChevronRight className="w-3 h-3 stroke-[1.5]" />
+              <Link href="/marketplace" className="hover:text-[#478c0b] transition-colors">Marketplace</Link>
+              <ChevronRight className="w-3 h-3 stroke-[1.5]" />
+              <Link href={`/store/${product.vendorId}`} className="hover:text-[#478c0b] transition-colors">{product.vendor}</Link>
+              <ChevronRight className="w-3 h-3 stroke-[1.5]" />
+              <span className="text-gray-700 font-medium">{product.name}</span>
             </nav>
           </div>
         )}
@@ -511,7 +511,7 @@ export default function ProductDetailPage() {
             {/* Main Content */}
             <div className={`${isMobile ? '' : 'lg:col-span-2'}`}>
               {/* Product Images - Mobile Optimized */}
-              <div className={`bg-white ${isMobile ? '' : 'rounded-xl'} shadow-lg overflow-hidden mb-6`}>
+              <div className={`bg-white ${isMobile ? '' : 'rounded-2xl border border-gray-100/80'} overflow-hidden mb-6`} style={isMobile ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
                 <div className="relative">
                   <div 
                     className={`relative ${isMobile ? 'h-[350px]' : 'h-[400px]'} overflow-hidden`}
@@ -632,7 +632,7 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Product Information - Mobile Optimized */}
-              <div className={`bg-white ${isMobile ? '' : 'rounded-xl'} shadow-lg ${isMobile ? 'p-4' : 'p-6'} mb-6`}>
+              <div className={`bg-white ${isMobile ? '' : 'rounded-2xl border border-gray-100/80'} ${isMobile ? 'p-4' : 'p-8'} mb-6`} style={isMobile ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
                 {/* Mobile Quick Actions Bar */}
                 {isMobile && (
                   <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
@@ -677,26 +677,28 @@ export default function ProductDetailPage() {
                 
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold mb-2`} style={{ color: '#3a3a1d' }}>{product.name}</h1>
-                    <p className={`text-gray-600 mb-3 ${isMobile ? 'text-sm leading-relaxed' : ''}`}>{product.description}</p>
+                    <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold mb-2 tracking-tight`} style={{ color: '#1a1a1a' }}>{product.name}</h1>
+                    <p className={`mb-3 ${isMobile ? 'text-sm leading-relaxed text-gray-600' : 'text-gray-500 leading-relaxed'}`}>{product.description}</p>
                     <div className={`flex ${isMobile ? 'flex-wrap' : ''} items-center gap-2 mb-4`}>
                       {product.kashrut && (
-                        <span className={`bg-[#cfe7c1] text-[#3a3a1d] ${isMobile ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'} rounded-full font-medium`}>
+                        <span className={`${isMobile ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-xs'} rounded-lg font-medium inline-flex items-center gap-1`} style={{ backgroundColor: 'rgba(66, 153, 225, 0.08)', color: '#4299e1' }}>
+                          <Check className="w-3 h-3 stroke-[1.5]" />
                           {product.kashrut}
                         </span>
                       )}
                       {product.vegan && (
-                        <span className={`bg-[#478c0b] text-white ${isMobile ? 'px-2 py-0.5 text-xs' : 'px-2 py-0.5 text-xs'} rounded-full font-medium`}>
+                        <span className={`${isMobile ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-xs'} rounded-lg font-medium inline-flex items-center gap-1`} style={{ backgroundColor: 'rgba(71, 140, 11, 0.08)', color: '#478c0b' }}>
+                          <Leaf className="w-3 h-3 stroke-[1.5]" />
                           Vegan
                         </span>
                       )}
                       {product.organic && (
-                        <span className={`bg-[#478c0b] text-white ${isMobile ? 'px-2 py-0.5 text-xs' : 'px-2 py-0.5 text-xs'} rounded-full font-medium`}>
+                        <span className={`${isMobile ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-xs'} rounded-lg font-medium inline-flex items-center gap-1`} style={{ backgroundColor: 'rgba(72, 187, 120, 0.08)', color: '#48bb78' }}>
                           Organic
                         </span>
                       )}
                       {product.glutenFree && (
-                        <span className={`bg-[#478c0b] text-white ${isMobile ? 'px-2 py-0.5 text-xs' : 'px-2 py-0.5 text-xs'} rounded-full font-medium`}>
+                        <span className={`${isMobile ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-xs'} rounded-lg font-medium inline-flex items-center gap-1`} style={{ backgroundColor: 'rgba(196, 162, 101, 0.08)', color: '#C4A265' }}>
                           Gluten Free
                         </span>
                       )}
@@ -890,7 +892,7 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Vendor Information - Mobile Optimized */}
-              <div className={`bg-white ${isMobile ? '' : 'rounded-xl'} shadow-lg ${isMobile ? 'p-4' : 'p-6'} mb-6`}>
+              <div className={`bg-white ${isMobile ? '' : 'rounded-2xl border border-gray-100/80'} ${isMobile ? 'p-4' : 'p-6'} mb-6`} style={isMobile ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
                 {isMobile ? (
                   // Mobile-Enhanced Vendor Section
                   <div className="space-y-3">
@@ -1339,7 +1341,7 @@ export default function ProductDetailPage() {
               )}
 
               {/* Q&A Section */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <div className="bg-white rounded-2xl border border-gray-100/80 p-6 mb-6" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold" style={{ color: '#3a3a1d' }}>Questions & Answers</h3>
                   <button className="px-4 py-2 border-2 border-[#478c0b] text-[#478c0b] rounded-lg hover:bg-[#478c0b] hover:text-white transition-colors text-sm font-semibold">
@@ -1386,37 +1388,30 @@ export default function ProductDetailPage() {
               
               {/* Enhanced Floating Card Panel */}
               <div className={`sticky top-4 transition-all duration-500 ${showSidebar ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-                {/* Glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#478c0b]/20 via-[#f6af0d]/20 to-[#c23c09]/20 rounded-2xl blur-xl opacity-50"></div>
-                
                 {/* Main card */}
-                <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
-                  {/* Header with gradient */}
-                  <div className="relative bg-gradient-to-r from-[#478c0b] to-[#f6af0d] p-4 text-white">
+                <div className="relative bg-white rounded-2xl overflow-hidden border border-gray-100/80" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)' }}>
+                  {/* Header */}
+                  <div className="relative p-5 pb-4 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, rgba(71, 140, 11, 0.04) 0%, rgba(196, 162, 101, 0.04) 100%)' }}>
                     <button
                       onClick={() => setShowSidebar(false)}
-                      className="absolute top-3 right-3 w-8 h-8 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full transition-all flex items-center justify-center group"
+                      className="absolute top-4 right-4 w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center justify-center group cursor-pointer"
                       title="Hide panel"
                     >
-                      <ChevronRight className="w-4 h-4 text-white group-hover:translate-x-0.5 transition-transform stroke-[1.5]" />
+                      <ChevronRight className="w-3.5 h-3.5 text-gray-500 group-hover:translate-x-0.5 transition-transform stroke-[1.5]" />
                     </button>
-                    <h3 className="font-bold text-lg flex items-center gap-2">
-                      <ShoppingBasket className="w-5 h-5 stroke-[1.5]" />
-                      Quick Purchase
+                    <h3 className="font-bold text-base flex items-center gap-2" style={{ color: '#1a1a1a' }}>
+                      <ShoppingBasket className="w-4 h-4 stroke-[1.5]" style={{ color: '#478c0b' }} />
+                      {language === 'he' ? 'קנייה מהירה' : 'Quick Purchase'}
                     </h3>
-                    <p className="text-sm opacity-90">Secure checkout available</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{language === 'he' ? 'תשלום מאובטח' : 'Secure checkout available'}</p>
                   </div>
                   
                   {/* Content with padding */}
-                  <div className="p-6">
+                  <div className="p-5">
                 {/* Price & Purchase */}
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl font-bold" style={{ 
-                      background: 'linear-gradient(135deg, #478c0b, #f6af0d)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent'
-                    }}>
+                    <span className="text-3xl font-bold tracking-tight" style={{ color: '#1a1a1a' }}>
                       {currencySymbols[selectedCurrency as keyof typeof currencySymbols]}{currentPrice.toFixed(2)}
                     </span>
                     {originalPrice && (
@@ -1533,9 +1528,10 @@ export default function ProductDetailPage() {
                   {/* Action Buttons */}
                   <div className="space-y-3">
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full py-3 bg-[#478c0b] text-white rounded-lg font-semibold text-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                      whileHover={{ scale: 1.01, boxShadow: '0 8px 24px rgba(71, 140, 11, 0.3)' }}
+                      whileTap={{ scale: 0.99 }}
+                      className="w-full py-3.5 text-white rounded-xl font-semibold text-base transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                      style={{ backgroundColor: '#478c0b' }}
                       onClick={handleAddToCart}
                       disabled={!product.inStock}
                     >
@@ -1703,13 +1699,10 @@ export default function ProductDetailPage() {
               {/* Related Products - Enhanced Floating Card */}
               {relatedProducts.length > 0 && showSidebar && showSuggestions && (
                 <div className="relative mt-6 transition-all duration-500">
-                  {/* Subtle glow effect */}
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-[#478c0b]/10 to-[#f6af0d]/10 rounded-2xl blur-lg opacity-50"></div>
-                  
                   {/* Main card */}
-                  <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden">
-                    {/* Header with consistent design */}
-                    <div className="bg-gradient-to-r from-[#cfe7c1] to-[#f6af0d]/20 p-4 flex items-center justify-between">
+                  <div className="relative bg-white rounded-2xl overflow-hidden border border-gray-100/80" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>
+                    {/* Header */}
+                    <div className="p-4 pb-3 flex items-center justify-between border-b border-gray-50" style={{ background: 'linear-gradient(135deg, rgba(71, 140, 11, 0.03) 0%, rgba(196, 162, 101, 0.03) 100%)' }}>
                       <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: '#3a3a1d' }}>
                         <Sparkles className="w-5 h-5 text-[#f6af0d] stroke-[1.5]" />
                         You Might Also Like
@@ -1829,9 +1822,11 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Recently Viewed - Mobile Optimized Carousel */}
-        <div className={`${isMobile ? '' : 'container mx-auto'} px-4 py-12`}>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`} style={{ color: '#3a3a1d' }}>Recently Viewed</h3>
+        <div className={`${isMobile ? '' : 'container mx-auto'} px-4 py-14`}>
+          <div className="flex items-center justify-between mb-8">
+            <h3 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold tracking-tight`} style={{ color: '#1a1a1a' }}>
+              {language === 'he' ? 'נצפו לאחרונה' : 'Recently Viewed'}
+            </h3>
             {isMobile && recentlyViewed.length > 3 && (
               <button 
                 className="text-sm text-[#478c0b] font-medium flex items-center gap-1"
@@ -1954,23 +1949,31 @@ export default function ProductDetailPage() {
           ) : (
             // Desktop Grid View
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {recentlyViewed.map(recentProduct => (
-                <Link key={recentProduct.id} href={`/product/${recentProduct.id}`}>
-                  <div className="bg-white rounded-lg overflow-hidden shadow hover:shadow-lg transition-all cursor-pointer group">
-                    <div className="relative h-32 overflow-hidden">
-                      <Image 
-                        src={recentProduct.image} 
-                        alt={recentProduct.name || "Image"} 
-                        fill 
-                        className="object-cover group-hover:scale-110 transition-transform duration-300" 
-                      />
+              {recentlyViewed.map((recentProduct, idx) => (
+                <motion.div
+                  key={recentProduct.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: Math.min(idx * 0.05, 0.25) }}
+                  whileHover={{ y: -4, boxShadow: '0 12px 24px -4px rgba(0,0,0,0.1)' }}
+                >
+                  <Link href={`/product/${recentProduct.id}`}>
+                    <div className="bg-white rounded-xl overflow-hidden cursor-pointer group border border-gray-100/80" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                      <div className="relative h-32 overflow-hidden">
+                        <Image
+                          src={recentProduct.image}
+                          alt={recentProduct.name || "Image"}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="p-3">
+                        <h5 className="font-semibold text-sm mb-1 truncate" style={{ color: '#1a1a1a' }}>{recentProduct.name}</h5>
+                        <div className="font-bold text-sm" style={{ color: '#478c0b' }}>₪{recentProduct.price}</div>
+                      </div>
                     </div>
-                    <div className="p-3">
-                      <h5 className="font-semibold text-sm mb-1 truncate">{recentProduct.name}</h5>
-                      <div className="text-[#478c0b] font-semibold text-sm">₪{recentProduct.price}</div>
-                    </div>
-                  </div>
-                </Link>
+                  </Link>
+                </motion.div>
               ))}
             </div>
           )}
@@ -1992,7 +1995,7 @@ export default function ProductDetailPage() {
                 animate={isRelatedInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.2 }}
               >
-                <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`} style={{ color: '#3a3a1d' }}>
+                <h3 className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold tracking-tight`} style={{ color: '#1a1a1a' }}>
                   {language === 'he' ? `עוד מ${product.vendor}` : `More from ${product.vendor}`}
                 </h3>
                 {isMobile && (

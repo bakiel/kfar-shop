@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, Package, X, Percent, ShoppingBag
+  Plus, Package, X, Percent, ShoppingBag, AlertTriangle
 } from 'lucide-react';
-import { PageHeader, DataTable, StatusBadge, FormField, ConfirmDialog } from '@/components/portal';
+import { PageHeader, DataTable, StatusBadge, FormField, ConfirmDialog, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 
@@ -29,16 +29,32 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-const initialBundles: Bundle[] = [
-  { id: 'bnd-001', name: 'Shabbat Essentials Bundle', nameHe: 'חבילת מוצרי שבת', productsCount: 6, price: 149, originalPrice: 195, status: 'active' },
-  { id: 'bnd-002', name: 'Healthy Breakfast Pack', nameHe: 'חבילת ארוחת בוקר בריאה', productsCount: 4, price: 89, originalPrice: 120, status: 'active' },
-  { id: 'bnd-003', name: 'Vegan BBQ Kit', nameHe: 'ערכת ברביקיו טבעונית', productsCount: 5, price: 119, originalPrice: 155, status: 'draft' },
-  { id: 'bnd-004', name: 'Sweet Treats Collection', nameHe: 'אוסף מתוקים', productsCount: 3, price: 69, originalPrice: 85, status: 'active' },
-];
+// --- Mock fallback data (kept for reference) ---
+// const initialBundles: Bundle[] = [
+//   { id: 'bnd-001', name: 'Shabbat Essentials Bundle', nameHe: 'חבילת מוצרי שבת', productsCount: 6, price: 149, originalPrice: 195, status: 'active' },
+//   { id: 'bnd-002', name: 'Healthy Breakfast Pack', nameHe: 'חבילת ארוחת בוקר בריאה', productsCount: 4, price: 89, originalPrice: 120, status: 'active' },
+//   { id: 'bnd-003', name: 'Vegan BBQ Kit', nameHe: 'ערכת ברביקיו טבעונית', productsCount: 5, price: 119, originalPrice: 155, status: 'draft' },
+//   { id: 'bnd-004', name: 'Sweet Treats Collection', nameHe: 'אוסף מתוקים', productsCount: 3, price: 69, originalPrice: 85, status: 'active' },
+// ];
+
+function normalizeBundle(b: any): Bundle {
+  return {
+    id: b.id,
+    name: b.name || '',
+    nameHe: b.nameHe || b.name_he || '',
+    productsCount: b.resolvedProducts?.length ?? (Array.isArray(b.products) ? b.products.length : (b.productsCount || 0)),
+    price: b.price || 0,
+    originalPrice: b.originalPrice || b.original_price || b.price || 0,
+    status: b.status || 'draft',
+  };
+}
 
 export default function BundlesPage() {
   const { language, t, isRTL } = useLanguage();
-  const [bundles, setBundles] = useState<Bundle[]>(initialBundles);
+  const [bundles, setBundles] = useState<Bundle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingBundle, setEditingBundle] = useState<Bundle | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Bundle | null>(null);
@@ -50,6 +66,30 @@ export default function BundlesPage() {
   const [formOriginalPrice, setFormOriginalPrice] = useState('');
   const [formProducts, setFormProducts] = useState('');
   const [formStatus, setFormStatus] = useState<'active' | 'draft'>('draft');
+
+  const fetchBundles = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    fetch('/api/admin/bundles')
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((json) => {
+        const normalized = (json.bundles || []).map(normalizeBundle);
+        setBundles(normalized);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Bundles fetch error:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchBundles();
+  }, [fetchBundles]);
 
   const openCreateForm = () => {
     setEditingBundle(null);
@@ -74,34 +114,93 @@ export default function BundlesPage() {
   };
 
   const handleSave = () => {
-    const newBundle: Bundle = {
-      id: editingBundle?.id || `bnd-${String(Date.now()).slice(-3)}`,
-      name: formName,
-      nameHe: formNameHe,
-      productsCount: Number(formProducts) || 0,
-      price: Number(formPrice) || 0,
-      originalPrice: Number(formOriginalPrice) || 0,
-      status: formStatus,
-    };
+    setSaving(true);
+    const productIds = formProducts
+      ? Array.from({ length: Number(formProducts) || 1 }, (_, i) => `product-${i + 1}`)
+      : ['product-1'];
 
     if (editingBundle) {
-      setBundles(bundles.map((b) => (b.id === editingBundle.id ? newBundle : b)));
+      // PATCH update
+      fetch('/api/admin/bundles', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingBundle.id,
+          name: formName,
+          nameHe: formNameHe,
+          price: Number(formPrice) || 0,
+          originalPrice: Number(formOriginalPrice) || 0,
+          products: productIds,
+          status: formStatus,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(() => {
+          setShowForm(false);
+          fetchBundles();
+        })
+        .catch((err) => console.error('Bundle update error:', err))
+        .finally(() => setSaving(false));
     } else {
-      setBundles([newBundle, ...bundles]);
+      // POST create
+      fetch('/api/admin/bundles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formName,
+          nameHe: formNameHe,
+          price: Number(formPrice) || 0,
+          originalPrice: Number(formOriginalPrice) || 0,
+          products: productIds,
+          status: formStatus,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(() => {
+          setShowForm(false);
+          fetchBundles();
+        })
+        .catch((err) => console.error('Bundle create error:', err))
+        .finally(() => setSaving(false));
     }
-    setShowForm(false);
   };
 
   const handleToggleStatus = (bundle: Bundle) => {
-    setBundles(bundles.map((b) =>
-      b.id === bundle.id ? { ...b, status: b.status === 'active' ? 'draft' as const : 'active' as const } : b
-    ));
+    const newStatus = bundle.status === 'active' ? 'draft' : 'active';
+    fetch('/api/admin/bundles', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: bundle.id, status: newStatus }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(() => fetchBundles())
+      .catch((err) => console.error('Bundle status toggle error:', err));
   };
 
   const handleDelete = () => {
     if (!deleteTarget) return;
-    setBundles(bundles.filter((b) => b.id !== deleteTarget.id));
-    setDeleteTarget(null);
+    fetch(`/api/admin/bundles?id=${deleteTarget.id}`, { method: 'DELETE' })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(() => {
+        setDeleteTarget(null);
+        fetchBundles();
+      })
+      .catch((err) => {
+        console.error('Bundle delete error:', err);
+        setDeleteTarget(null);
+      });
   };
 
   const savingsPercent = (original: number, price: number) =>
@@ -156,6 +255,28 @@ export default function BundlesPage() {
       render: (row) => <StatusBadge status={row.status} language={language} />,
     },
   ];
+
+  if (loading) {
+    return <LoadingState type="page" />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500 stroke-[1.5] mb-3" />
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">
+          {isRTL ? 'שגיאה בטעינת חבילות' : 'Failed to load bundles'}
+        </h2>
+        <p className="text-sm text-gray-500 mb-4">{error}</p>
+        <button
+          onClick={fetchBundles}
+          className="px-4 py-2 text-sm font-medium text-white bg-[#2D5A27] rounded-lg hover:bg-[#234A1F] transition-colors cursor-pointer"
+        >
+          {isRTL ? 'נסה שוב' : 'Retry'}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <motion.div variants={container} initial="hidden" animate="show">
@@ -304,9 +425,13 @@ export default function BundlesPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSave}
-                    className="px-4 py-2.5 text-sm font-medium text-white bg-[#2D5A27] hover:bg-[#234A1F] rounded-lg transition-colors cursor-pointer"
+                    disabled={saving}
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-[#2D5A27] hover:bg-[#234A1F] rounded-lg transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    {editingBundle ? t('Save Changes') : t('Create')}
+                    {saving
+                      ? (isRTL ? 'שומר...' : 'Saving...')
+                      : (editingBundle ? t('Save Changes') : t('Create'))
+                    }
                   </motion.button>
                 </div>
               </div>

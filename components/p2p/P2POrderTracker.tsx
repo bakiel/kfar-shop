@@ -5,7 +5,7 @@ import { CollectionPoints } from '@/lib/services/collection-point-service';
 import { P2POrderTracking } from '@/lib/services/ai/types';
 import { SmartQRGenerator } from '../qr/SmartQRGenerator';
 import { NFCReader } from '../nfc/NFCReader';
-import { FaHandshake, FaMapMarkerAlt, FaClock, FaCheckCircle, FaQrcode } from 'react-icons/fa';
+import { Handshake, MapPin, Clock, CheckCircle, QrCode, AlertTriangle, Wifi } from 'lucide-react';
 
 interface P2POrderTrackerProps {
   orderId: string;
@@ -130,13 +130,13 @@ export const P2POrderTracker: React.FC<P2POrderTrackerProps> = ({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
-        return <FaClock className="text-yellow-500" />;
+        return <Clock className="w-5 h-5 stroke-[1.5] text-yellow-500" />;
       case 'ready':
-        return <FaHandshake className="text-blue-500" />;
+        return <Handshake className="w-5 h-5 stroke-[1.5] text-blue-500" />;
       case 'collected':
-        return <FaCheckCircle className="text-green-500" />;
+        return <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500" />;
       case 'completed':
-        return <FaCheckCircle className="text-green-600" />;
+        return <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-600" />;
       default:
         return null;
     }
@@ -177,7 +177,7 @@ export const P2POrderTracker: React.FC<P2POrderTrackerProps> = ({
   if (!tracking) {
     return (
       <div className="text-center py-8">
-        <FaExclamationTriangle className="text-5xl text-red-500 mx-auto mb-4" />
+        <AlertTriangle className="w-12 h-12 stroke-[1.5] text-red-500 mx-auto mb-4" />
         <p className="text-gray-600">Order tracking not found</p>
       </div>
     );
@@ -226,7 +226,7 @@ export const P2POrderTracker: React.FC<P2POrderTrackerProps> = ({
       {tracking.location && (
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <FaMapMarkerAlt className="text-red-500" />
+            <MapPin className="w-5 h-5 stroke-[1.5] text-red-500" />
             Exchange Location
           </h3>
           
@@ -242,7 +242,7 @@ export const P2POrderTracker: React.FC<P2POrderTrackerProps> = ({
             </div>
 
             <button className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
-              <FaMapMarkerAlt className="inline mr-2" />
+              <MapPin className="inline w-4 h-4 stroke-[1.5] mr-2" />
               Get Directions
             </button>
           </div>
@@ -261,9 +261,9 @@ export const P2POrderTracker: React.FC<P2POrderTrackerProps> = ({
                   event.verified ? 'bg-green-100' : 'bg-gray-100'
                 }`}>
                   {event.verified ? (
-                    <FaCheckCircle className="text-green-600" />
+                    <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-600" />
                   ) : (
-                    <FaClock className="text-gray-400" />
+                    <Clock className="w-5 h-5 stroke-[1.5] text-gray-400" />
                   )}
                 </div>
               </div>
@@ -274,7 +274,7 @@ export const P2POrderTracker: React.FC<P2POrderTrackerProps> = ({
                 </p>
                 {event.location && (
                   <p className="text-sm text-gray-500">
-                    <FaMapMarkerAlt className="inline mr-1" />
+                    <MapPin className="inline w-3.5 h-3.5 stroke-[1.5] mr-1" />
                     {event.location}
                   </p>
                 )}
@@ -338,8 +338,8 @@ export const P2POrderTracker: React.FC<P2POrderTrackerProps> = ({
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {method === 'qr' && <FaQrcode className="inline mr-2" />}
-                  {method === 'nfc' && <FaWifi className="inline mr-2" />}
+                  {method === 'qr' && <QrCode className="inline w-4 h-4 stroke-[1.5] mr-2" />}
+                  {method === 'nfc' && <Wifi className="inline w-4 h-4 stroke-[1.5] mr-2" />}
                   {method.toUpperCase()}
                 </button>
               ))}

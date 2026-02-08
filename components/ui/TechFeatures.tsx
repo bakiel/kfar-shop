@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FaQrcode, FaWifi, FaShieldAlt, FaBolt } from 'react-icons/fa';
+import { QrCode, Wifi, Shield, Zap } from 'lucide-react';
 
 export default function TechFeatures() {
   return (
@@ -35,7 +35,7 @@ export default function TechFeatures() {
               <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 h-full shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4"
                      style={{ backgroundColor: '#478c0b' }}>
-                  <FaQrcode className="text-lg md:text-2xl text-white" />
+                  <QrCode className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="font-bold mb-1 md:mb-2 text-sm md:text-base" style={{ color: '#3a3a1d' }}>QR Payments</h3>
                 <p className="text-xs md:text-sm text-gray-600">
@@ -49,7 +49,7 @@ export default function TechFeatures() {
               <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 h-full shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4"
                      style={{ backgroundColor: '#f6af0d' }}>
-                  <FaWifi className="text-lg md:text-2xl text-white" />
+                  <Wifi className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="font-bold mb-1 md:mb-2 text-sm md:text-base" style={{ color: '#3a3a1d' }}>Tap & Go</h3>
                 <p className="text-xs md:text-sm text-gray-600">
@@ -63,7 +63,7 @@ export default function TechFeatures() {
               <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 h-full shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4"
                      style={{ backgroundColor: '#c23c09' }}>
-                  <FaShieldAlt className="text-lg md:text-2xl text-white" />
+                  <Shield className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="font-bold mb-1 md:mb-2 text-sm md:text-base" style={{ color: '#3a3a1d' }}>100% Secure</h3>
                 <p className="text-xs md:text-sm text-gray-600">
@@ -77,7 +77,7 @@ export default function TechFeatures() {
               <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 h-full shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl flex items-center justify-center mb-3 md:mb-4"
                      style={{ backgroundColor: '#478c0b' }}>
-                  <FaBolt className="text-lg md:text-2xl text-white" />
+                  <Zap className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="font-bold mb-1 md:mb-2 text-sm md:text-base" style={{ color: '#3a3a1d' }}>Lightning Fast</h3>
                 <p className="text-xs md:text-sm text-gray-600">
@@ -94,7 +94,7 @@ export default function TechFeatures() {
               className="inline-flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg md:rounded-xl text-sm md:text-base font-semibold text-white shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
               style={{ backgroundColor: '#478c0b' }}
             >
-              <FaQrcode className="text-sm md:text-base" />
+              <QrCode className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[1.5]" />
               <span>Learn About Smart Shopping</span>
               <span className="text-xs bg-white/20 rounded-full px-2 py-0.5 ml-1 md:ml-2">New</span>
             </Link>

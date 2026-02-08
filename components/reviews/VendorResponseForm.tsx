@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaReply, FaTimes } from 'react-icons/fa';
+import { Reply, X, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
 interface VendorResponseFormProps {
@@ -32,7 +32,7 @@ export default function VendorResponseForm({
     },
     {
       label: 'Clarification',
-      text: 'Thank you for your feedback. We'd like to clarify that...'
+      text: "Thank you for your feedback. We'd like to clarify that..."
     }
   ];
 
@@ -90,7 +90,7 @@ export default function VendorResponseForm({
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <FaReply className="text-2xl" style={{ color: '#478c0b' }} />
+              <Reply className="w-7 h-7 text-[#478c0b] stroke-[1.5]" />
               <div>
                 <h2 className="text-xl font-bold" style={{ color: '#3a3a1d' }}>
                   Respond to Review
@@ -104,7 +104,7 @@ export default function VendorResponseForm({
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <FaTimes size={20} />
+              <X className="w-5 h-5 stroke-[1.5]" />
             </button>
           </div>
 
@@ -144,7 +144,6 @@ export default function VendorResponseForm({
                 placeholder="Write a thoughtful response to the customer's review..."
                 rows={5}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 resize-none"
-                style={{ focusRingColor: '#478c0b' }}
                 maxLength={500}
               />
               <p className="text-xs text-gray-500 mt-1">{response.length}/500</p>
@@ -180,7 +179,7 @@ export default function VendorResponseForm({
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <i className="fas fa-spinner fa-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                     Posting...
                   </span>
                 ) : (

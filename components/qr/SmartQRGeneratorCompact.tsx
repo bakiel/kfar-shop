@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 import { AI } from '@/lib/services/ai';
 import { SmartQRContent } from '@/lib/services/ai/types';
 import { MockAIService } from '@/lib/services/ai/mock-ai-service';
-import { FaQrcode, FaDownload, FaCopy, FaShare, FaExpand, FaCompress } from 'react-icons/fa';
+import { QrCode, Download, Copy, Share2, Maximize, Minimize } from 'lucide-react';
 import QRTrackingService from '@/lib/services/qr-tracking-mock';
 
 interface SmartQRGeneratorCompactProps {
@@ -329,7 +329,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
                 className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:shadow-lg transition-all group relative"
                 title="Expand"
               >
-                <FaExpand className="text-xs text-gray-600 group-hover:text-gray-800" />
+                <Maximize className="w-3 h-3 stroke-[1.5] text-gray-600 group-hover:text-gray-800" />
                 {showTooltip === 'expand' && (
                   <span className="absolute right-full mr-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
                     Expand View
@@ -345,7 +345,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
                 onMouseEnter={() => setShowTooltip('download')}
                 onMouseLeave={() => setShowTooltip(null)}
               >
-                <FaDownload className="text-xs text-gray-600 group-hover:text-gray-800" />
+                <Download className="w-3 h-3 stroke-[1.5] text-gray-600 group-hover:text-gray-800" />
                 {showTooltip === 'download' && (
                   <span className="absolute right-full mr-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
                     Download QR
@@ -361,7 +361,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
                 onMouseEnter={() => setShowTooltip('copy')}
                 onMouseLeave={() => showTooltip !== 'copied' ? setShowTooltip(null) : null}
               >
-                <FaCopy className="text-xs text-gray-600 group-hover:text-gray-800" />
+                <Copy className="w-3 h-3 stroke-[1.5] text-gray-600 group-hover:text-gray-800" />
                 {showTooltip === 'copy' && (
                   <span className="absolute right-full mr-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
                     Copy Link
@@ -383,7 +383,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
                   onMouseEnter={() => setShowTooltip('share')}
                   onMouseLeave={() => setShowTooltip(null)}
                 >
-                  <FaShare className="text-xs text-gray-600 group-hover:text-gray-800" />
+                  <Share2 className="w-3 h-3 stroke-[1.5] text-gray-600 group-hover:text-gray-800" />
                   {showTooltip === 'share' && (
                     <span className="absolute right-full mr-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap">
                       Share QR
@@ -437,7 +437,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
             className="text-gray-400 hover:text-gray-600 transition-colors"
             title="Compact View"
           >
-            <FaCompress />
+            <Minimize className="w-4 h-4 stroke-[1.5]" />
           </button>
           <button
             onClick={() => setShowDetails(!showDetails)}
@@ -505,7 +505,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
           disabled={loading || !!error}
           className="flex flex-col items-center justify-center py-2 sm:py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
         >
-          <FaDownload className="text-lg sm:text-xl mb-1 text-gray-600" />
+          <Download className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] mb-1 text-gray-600" />
           <span className="text-xs sm:text-sm font-medium text-gray-700">Download</span>
         </button>
         
@@ -514,7 +514,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
           disabled={loading || !!error}
           className="flex flex-col items-center justify-center py-2 sm:py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 relative"
         >
-          <FaCopy className="text-lg sm:text-xl mb-1 text-gray-600" />
+          <Copy className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] mb-1 text-gray-600" />
           <span className="text-xs sm:text-sm font-medium text-gray-700">Copy Link</span>
           {showTooltip === 'copied' && (
             <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-green-600 text-white text-xs rounded whitespace-nowrap">
@@ -529,7 +529,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
             disabled={loading || !!error}
             className="flex flex-col items-center justify-center py-2 sm:py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
           >
-            <FaShare className="text-lg sm:text-xl mb-1 text-gray-600" />
+            <Share2 className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] mb-1 text-gray-600" />
             <span className="text-xs sm:text-sm font-medium text-gray-700">Share</span>
           </button>
         ) : (
