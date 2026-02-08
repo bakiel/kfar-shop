@@ -71,7 +71,7 @@ export default function CTABanners() {
         <motion.div variants={cardVariants} className="group">
           <Link href="/vendors" className="block cursor-pointer">
             <motion.div
-              className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-[380px] sm:h-[420px] lg:h-[460px]"
+              className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-[300px] sm:h-[420px] lg:h-[460px]"
               whileHover={{ scale: 1.015 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
@@ -124,7 +124,7 @@ export default function CTABanners() {
                 </div>
 
                 {/* Headline */}
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2">
+                <h3 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2">
                   {language === 'he' ? 'קנו מהכפר' : 'Shop the Village'}
                 </h3>
                 <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-5 max-w-md">
@@ -154,7 +154,7 @@ export default function CTABanners() {
         <motion.div variants={cardVariants} className="group">
           <Link href="/become-a-vendor" className="block cursor-pointer">
             <motion.div
-              className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-[380px] sm:h-[420px] lg:h-[460px]"
+              className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-[300px] sm:h-[420px] lg:h-[460px]"
               whileHover={{ scale: 1.015 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
@@ -206,7 +206,7 @@ export default function CTABanners() {
                 </div>
 
                 {/* Headline */}
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2">
+                <h3 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight mb-2">
                   {language === 'he' ? 'הצמיחו את העסק שלכם' : 'Grow Your Business'}
                 </h3>
                 <p className="text-white/80 text-sm sm:text-base leading-relaxed mb-5 max-w-md">

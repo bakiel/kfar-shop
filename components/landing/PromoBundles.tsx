@@ -141,22 +141,46 @@ export default function PromoBundles({ bundles, featuredProducts }: PromoBundles
 
         {/* Featured Products Fallback */}
         {showFeatured && (
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-          >
-            {featuredProducts.slice(0, 4).map((product) => (
-              <FeaturedProductCard
-                key={product.id}
-                product={product}
-                language={language}
-                isRTL={isRTL}
-                t={t}
-              />
-            ))}
-          </motion.div>
+          <>
+            {/* Mobile: horizontal scroll */}
+            <div className="sm:hidden -mx-4 px-4">
+              <motion.div
+                className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+                variants={containerVariants}
+                initial="hidden"
+                animate={isInView ? 'visible' : 'hidden'}
+              >
+                {featuredProducts.slice(0, 6).map((product) => (
+                  <div key={product.id} className="flex-shrink-0 w-[65vw] max-w-[240px] snap-start">
+                    <FeaturedProductCard
+                      product={product}
+                      language={language}
+                      isRTL={isRTL}
+                      t={t}
+                    />
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+            {/* Desktop: grid */}
+            <motion.div
+              className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate={isInView ? 'visible' : 'hidden'}
+            >
+              {featuredProducts.slice(0, 4).map((product) => (
+                <FeaturedProductCard
+                  key={product.id}
+                  product={product}
+                  language={language}
+                  isRTL={isRTL}
+                  t={t}
+                />
+              ))}
+            </motion.div>
+          </>
         )}
       </div>
     </section>

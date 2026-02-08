@@ -790,7 +790,7 @@ const Header = () => {
       {/* Floating Voice Button - Hidden on marketplace and product pages */}
       {pathname !== '/marketplace' && !pathname.startsWith('/product/') && (
         <button
-          className={`fixed bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-300 z-40 hover:scale-110 ${
+          className={`fixed bottom-24 sm:bottom-8 right-4 sm:right-8 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white shadow-2xl transition-all duration-300 z-40 hover:scale-110 ${
             showFloatingNav ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'
           }`}
           style={{ backgroundColor: '#c23c09' }}

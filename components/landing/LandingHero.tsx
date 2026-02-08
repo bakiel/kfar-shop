@@ -526,14 +526,14 @@ export default function LandingHero({
       </motion.div>
 
       {/* ---- Main hero content ---- */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 relative">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-16 relative">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-10 lg:gap-14 items-start">
           {/* ------ LEFT column: text ------ */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="show"
-            className="order-2 lg:order-1 flex flex-col gap-6"
+            className="order-1 lg:order-1 flex flex-col gap-4 sm:gap-6"
           >
             {/* Heritage badges */}
             <motion.div variants={staggerItem} className="flex flex-wrap gap-2">
@@ -550,7 +550,7 @@ export default function LandingHero({
             {/* Headline — bigger, split into two lines */}
             <motion.h1
               variants={staggerItem}
-              className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-[1.08] text-soil-brown"
+              className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.08] text-soil-brown"
               style={{ letterSpacing: '-0.03em' }}
             >
               {language === 'he' ? (
@@ -588,12 +588,12 @@ export default function LandingHero({
             </motion.div>
 
             {/* CTA buttons */}
-            <motion.div variants={staggerItem} className="flex flex-wrap gap-3">
-              <Link href="/marketplace">
+            <motion.div variants={staggerItem} className="flex flex-col xs:flex-row flex-wrap gap-3">
+              <Link href="/marketplace" className="flex-1 xs:flex-initial">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-kfar-mint text-white font-semibold shadow-glow-green hover:bg-kfar-mint-dark transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 py-3.5 sm:py-3 rounded-full bg-kfar-mint text-white font-semibold shadow-glow-green hover:bg-kfar-mint-dark transition-colors cursor-pointer text-sm sm:text-base"
                 >
                   <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
                   {t('Shop Now')}
@@ -601,11 +601,11 @@ export default function LandingHero({
                 </motion.span>
               </Link>
 
-              <Link href="/vendors">
+              <Link href="/vendors" className="flex-1 xs:flex-initial">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2 border-kfar-gold text-kfar-gold-dark font-semibold hover:bg-kfar-gold/10 transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 py-3.5 sm:py-3 rounded-full border-2 border-kfar-gold text-kfar-gold-dark font-semibold hover:bg-kfar-gold/10 transition-colors cursor-pointer text-sm sm:text-base"
                 >
                   <Store className="w-5 h-5 stroke-[1.5]" />
                   {t('Explore Vendors')}
@@ -615,7 +615,7 @@ export default function LandingHero({
           </motion.div>
 
           {/* ------ RIGHT column: Spotlight + Bento product grid ------ */}
-          <div className="order-1 lg:order-2">
+          <div className="order-2 lg:order-2">
             {/* Desktop: spotlight + bento */}
             <div className="hidden sm:grid grid-cols-2 gap-3">
               {spotlightProduct && (
@@ -639,13 +639,13 @@ export default function LandingHero({
             {/* Mobile: horizontal scroll */}
             <div className="sm:hidden -mx-4 px-4">
               <div
-                className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+                className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
                 {featuredProducts.slice(0, 6).map((product, i) => (
                   <div
                     key={product.id}
-                    className="flex-shrink-0 w-[70vw] max-w-[260px] snap-start"
+                    className="flex-shrink-0 w-[62vw] max-w-[240px] snap-start"
                   >
                     <BentoProductCard
                       product={product}
@@ -654,6 +654,12 @@ export default function LandingHero({
                       isRTL={isRTL}
                     />
                   </div>
+                ))}
+              </div>
+              {/* Scroll hint */}
+              <div className="flex justify-center gap-1.5 mt-2">
+                {featuredProducts.slice(0, 6).map((_, i) => (
+                  <div key={i} className={`w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-kfar-mint' : 'bg-gray-300'}`} />
                 ))}
               </div>
             </div>
@@ -665,9 +671,9 @@ export default function LandingHero({
           initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className="mt-10 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-soft px-6 py-5"
+          className="mt-8 sm:mt-10 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-soft px-4 sm:px-6 py-4 sm:py-5"
         >
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
             {statTiles.map((s) => {
               const Icon = s.icon;
               return (
@@ -679,7 +685,7 @@ export default function LandingHero({
                     <Icon className={`w-5 h-5 ${s.color} stroke-[1.5]`} />
                   </div>
                   <div>
-                    <span className={`text-2xl font-accent font-bold ${s.color}`}>
+                    <span className={`text-xl sm:text-2xl font-accent font-bold ${s.color}`}>
                       <AnimatedCounter target={s.value} suffix={s.suffix} />
                     </span>
                     <p className="text-[11px] font-medium text-gray-500 leading-tight">

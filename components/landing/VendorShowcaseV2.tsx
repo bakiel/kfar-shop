@@ -250,7 +250,7 @@ export default function VendorShowcaseV2({
   return (
     <section
       ref={sectionRef}
-      className="py-14 md:py-20 relative overflow-hidden bg-kfar-cream"
+      className="py-10 sm:py-14 md:py-20 relative overflow-hidden bg-kfar-cream"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Subtle decorative bg */}
