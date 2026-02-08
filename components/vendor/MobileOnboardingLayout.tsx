@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { Bot, X, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface MobileOnboardingLayoutProps {
   currentStep: number;
@@ -48,7 +49,7 @@ export default function MobileOnboardingLayout({
               onClick={() => setShowAIAssistant(!showAIAssistant)}
               className="w-8 h-8 bg-leaf-green/10 text-leaf-green rounded-full flex items-center justify-center"
             >
-              <i className="fas fa-robot text-sm"></i>
+              <Bot className="w-4 h-4 stroke-[1.5]" />
             </button>
           </div>
           
@@ -75,7 +76,7 @@ export default function MobileOnboardingLayout({
             <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 bg-leaf-green/10 rounded-full flex items-center justify-center">
-                  <i className="fas fa-robot text-leaf-green"></i>
+                  <Bot className="w-5 h-5 stroke-[1.5] text-leaf-green" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">AI Assistant</h3>
@@ -86,7 +87,7 @@ export default function MobileOnboardingLayout({
                 onClick={() => setShowAIAssistant(false)}
                 className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center"
               >
-                <i className="fas fa-times text-gray-500"></i>
+                <X className="w-4 h-4 stroke-[1.5] text-gray-500" />
               </button>
             </div>
             
@@ -150,7 +151,7 @@ export default function MobileOnboardingLayout({
               disabled={isPrevDisabled}
               className="flex-1 py-3 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <i className="fas fa-arrow-left mr-2"></i>
+              <ArrowLeft className="w-4 h-4 stroke-[1.5] inline mr-2" />
               Previous
             </button>
           )}
@@ -161,7 +162,7 @@ export default function MobileOnboardingLayout({
               className="flex-1 py-3 px-4 bg-leaf-green text-white rounded-lg text-sm font-medium hover:bg-leaf-green-dark disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
             >
               Continue
-              <i className="fas fa-arrow-right ml-2"></i>
+              <ArrowRight className="w-4 h-4 stroke-[1.5] inline ml-2" />
             </button>
           )}
         </div>

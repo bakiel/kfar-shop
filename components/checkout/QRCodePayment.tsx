@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { Clock, Download, Check, Lock } from 'lucide-react';
 import { SmartQRCompactFixed } from '@/components/qr/SmartQRCompactFixed';
 
 interface QRCodePaymentProps {
@@ -102,7 +103,7 @@ export default function QRCodePayment({ amount, currency, onComplete }: QRCodePa
                 
                 {/* Timer Badge - positioned on QR container */}
                 <div className="absolute top-2 right-2 bg-[#c23c09] text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg flex items-center gap-1 z-20">
-                  <i className="fas fa-clock text-xs"></i>
+                  <Clock className="w-3 h-3 stroke-[1.5]" />
                   {formatTime(timeLeft)}
                 </div>
               </div>
@@ -121,7 +122,7 @@ export default function QRCodePayment({ amount, currency, onComplete }: QRCodePa
                   }}
                   className="text-gray-500 hover:text-gray-700 text-sm flex items-center gap-1"
                 >
-                  <i className="fas fa-download"></i>
+                  <Download className="w-4 h-4 stroke-[1.5]" />
                   Save QR
                 </button>
               </div>
@@ -192,7 +193,7 @@ export default function QRCodePayment({ amount, currency, onComplete }: QRCodePa
           /* Payment Confirmation Animation */
           <div className="py-8">
             <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-              <i className="fas fa-check text-white text-4xl"></i>
+              <Check className="w-10 h-10 stroke-[1.5] text-white" />
             </div>
             <h3 className="text-2xl font-bold text-green-600 mb-2">
               Payment Received!
@@ -206,7 +207,7 @@ export default function QRCodePayment({ amount, currency, onComplete }: QRCodePa
 
       {/* Security Notice */}
       <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
-        <i className="fas fa-lock"></i>
+        <Lock className="w-3 h-3 stroke-[1.5]" />
         <span>Secure payment powered by KFAR Pay</span>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/lib/context/CartContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { X, Store, ShoppingCart, Mic, Share2 } from 'lucide-react';
 
 interface CompactFloatingMenuProps {
   onCartClick: () => void;
@@ -66,7 +67,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
                   onClick={() => setIsExpanded(false)}
                   className="absolute top-3 right-3 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"
                 >
-                  <i className="fas fa-times text-gray-600"></i>
+                  <X className="w-4 h-4 stroke-[1.5] text-gray-600" />
                 </button>
 
                 {/* Menu Title */}
@@ -81,7 +82,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
                       className="flex flex-col items-center gap-2 p-4 bg-[#f6af0d]/10 rounded-2xl"
                     >
                       <div className="w-14 h-14 bg-[#f6af0d] rounded-full flex items-center justify-center">
-                        <i className="fas fa-store text-white text-xl"></i>
+                        <Store className="w-6 h-6 stroke-[1.5] text-white" />
                       </div>
                       <span className="text-sm font-medium text-gray-700">Store</span>
                     </motion.button>
@@ -97,7 +98,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
                     className="flex flex-col items-center gap-2 p-4 bg-[#478c0b]/10 rounded-2xl relative"
                   >
                     <div className="w-14 h-14 bg-[#478c0b] rounded-full flex items-center justify-center">
-                      <i className="fas fa-shopping-cart text-white text-xl"></i>
+                      <ShoppingCart className="w-6 h-6 stroke-[1.5] text-white" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">Cart</span>
                     {cartCount > 0 && (
@@ -119,7 +120,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
                     className="flex flex-col items-center gap-2 p-4 bg-[#c23c09]/10 rounded-2xl"
                   >
                     <div className="w-14 h-14 bg-[#c23c09] rounded-full flex items-center justify-center">
-                      <i className="fas fa-microphone text-white text-xl"></i>
+                      <Mic className="w-6 h-6 stroke-[1.5] text-white" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">Voice</span>
                   </motion.button>
@@ -139,7 +140,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
                     className="flex flex-col items-center gap-2 p-4 bg-gray-100 rounded-2xl"
                   >
                     <div className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center">
-                      <i className="fas fa-share-alt text-white text-xl"></i>
+                      <Share2 className="w-6 h-6 stroke-[1.5] text-white" />
                     </div>
                     <span className="text-sm font-medium text-gray-700">Share</span>
                   </motion.button>

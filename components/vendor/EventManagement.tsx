@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { Plus, Calendar, Clock, MapPin, Users, Eye, EyeOff } from 'lucide-react';
 
 interface Event {
   id: number;
@@ -369,7 +370,7 @@ export default function EventManagement({ vendorId }: { vendorId: number }) {
             className="px-6 py-3 text-white rounded-lg font-medium hover:shadow-lg transition-all flex items-center gap-2"
             style={{ backgroundColor: '#478c0b' }}
           >
-            <i className="fas fa-plus"></i>
+            <Plus className="w-5 h-5 stroke-[1.5]" />
             Create New Event
           </button>
         )}
@@ -411,21 +412,21 @@ export default function EventManagement({ vendorId }: { vendorId: number }) {
                         <p className="text-gray-600 mb-2">{event.description}</p>
                         
                         <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>
-                            <i className="fas fa-calendar mr-1"></i>
+                          <span className="inline-flex items-center">
+                            <Calendar className="w-4 h-4 stroke-[1.5] mr-1" />
                             {format(new Date(event.start_date), 'MMM d, yyyy')}
                           </span>
-                          <span>
-                            <i className="fas fa-clock mr-1"></i>
+                          <span className="inline-flex items-center">
+                            <Clock className="w-4 h-4 stroke-[1.5] mr-1" />
                             {event.start_time} - {event.end_time}
                           </span>
-                          <span>
-                            <i className="fas fa-map-marker-alt mr-1"></i>
+                          <span className="inline-flex items-center">
+                            <MapPin className="w-4 h-4 stroke-[1.5] mr-1" />
                             {event.venue_name}
                           </span>
                           {event.capacity && (
-                            <span>
-                              <i className="fas fa-users mr-1"></i>
+                            <span className="inline-flex items-center">
+                              <Users className="w-4 h-4 stroke-[1.5] mr-1" />
                               {event.current_registrations || 0}/{event.capacity}
                             </span>
                           )}
@@ -437,7 +438,7 @@ export default function EventManagement({ vendorId }: { vendorId: number }) {
                           onClick={() => setSelectedEvent(event)}
                           className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all"
                         >
-                          <i className="fas fa-eye"></i>
+                          <Eye className="w-5 h-5 stroke-[1.5]" />
                         </button>
                         <button
                           onClick={() => handlePublishToggle(event.id, event.status)}
@@ -447,7 +448,7 @@ export default function EventManagement({ vendorId }: { vendorId: number }) {
                               : 'bg-green-100 text-green-700 hover:bg-green-200'
                           }`}
                         >
-                          <i className={`fas ${event.status === 'published' ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                          {event.status === 'published' ? <EyeOff className="w-5 h-5 stroke-[1.5]" /> : <Eye className="w-5 h-5 stroke-[1.5]" />}
                         </button>
                       </div>
                     </div>

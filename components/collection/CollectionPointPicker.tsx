@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { CollectionPoints } from '@/lib/services/collection-point-service';
 import { CollectionPoint, PickupSlot } from '@/lib/services/collection-point-service';
-import { MapPin, Clock, QrCode, Wifi, Snowflake, Users } from 'lucide-react';
+import { MapPin, Clock, QrCode, Wifi, Snowflake, Users, Star, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
 interface CollectionPointPickerProps {
   onSelect: (point: CollectionPoint, slot?: PickupSlot) => void;
@@ -197,7 +197,7 @@ export const CollectionPointPicker: React.FC<CollectionPointPickerProps> = ({
                 {/* Stats */}
                 <div className="text-right text-sm">
                   <div className="flex items-center gap-1 text-yellow-500">
-                    <i className="fas fa-star"></i>
+                    <Star className="w-3.5 h-3.5 stroke-[1.5]" />
                     <span className="font-medium">{point.stats.rating}</span>
                   </div>
                   <p className="text-gray-500">
@@ -224,7 +224,7 @@ export const CollectionPointPicker: React.FC<CollectionPointPickerProps> = ({
               disabled={selectedDate.toDateString() === new Date().toDateString()}
               className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
             >
-              <i className="fas fa-chevron-left"></i>
+              <ChevronLeft className="w-4 h-4 stroke-[1.5]" />
             </button>
             
             <div className="flex-1 text-center">
@@ -241,7 +241,7 @@ export const CollectionPointPicker: React.FC<CollectionPointPickerProps> = ({
               onClick={() => handleDateChange(1)}
               className="p-2 rounded-lg border hover:bg-gray-50"
             >
-              <i className="fas fa-chevron-right"></i>
+              <ChevronRight className="w-4 h-4 stroke-[1.5]" />
             </button>
           </div>
 
@@ -278,7 +278,7 @@ export const CollectionPointPicker: React.FC<CollectionPointPickerProps> = ({
           {selectedSlot && (
             <div className="mt-6 p-4 bg-green-50 rounded-lg">
               <p className="font-semibold text-green-800">
-                <i className="fas fa-check-circle mr-2"></i>
+                <CheckCircle className="w-5 h-5 stroke-[1.5] inline mr-2" />
                 Selected Pickup Details
               </p>
               <p className="text-sm mt-2">

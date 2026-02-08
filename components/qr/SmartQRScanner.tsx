@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import { AI } from '@/lib/services/ai';
-import { Camera, Upload, X, QrCode } from 'lucide-react';
+import { Camera, Upload, X, QrCode, Check } from 'lucide-react';
 
 interface SmartQRScannerProps {
   onScan: (data: any) => void;
@@ -276,7 +276,7 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
             <div className="absolute inset-0 flex items-center justify-center text-white p-8">
               <div className="text-center">
                 <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="fas fa-check text-3xl"></i>
+                  <Check className="w-8 h-8 stroke-[1.5]" />
                 </div>
                 <p className="text-lg font-medium mb-2">QR Code Scanned!</p>
                 <p className="text-sm opacity-75">Type: {scanResult.type}</p>

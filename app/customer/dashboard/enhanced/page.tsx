@@ -9,6 +9,7 @@ import CustomerQRCode from '@/components/customer/CustomerQRCode';
 import PersonalizedShopping from '@/components/customer/PersonalizedShopping';
 import { toast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
+import { ShoppingCart, QrCode, Heart, Settings, ShoppingBag, Star, Trophy, Percent, Gift, Zap, Leaf, MapPin, Recycle, Store, Package, Coins } from 'lucide-react';
 
 export default function EnhancedCustomerDashboard() {
   const router = useRouter();
@@ -112,11 +113,18 @@ export default function EnhancedCustomerDashboard() {
     };
   };
 
+  const quickActionIcons: Record<string, React.ReactNode> = {
+    'shopping-cart': <ShoppingCart className="w-6 h-6 stroke-[1.5]" />,
+    'qrcode': <QrCode className="w-6 h-6 stroke-[1.5]" />,
+    'heart': <Heart className="w-6 h-6 stroke-[1.5]" />,
+    'settings': <Settings className="w-6 h-6 stroke-[1.5]" />,
+  };
+
   const quickActions = [
-    { icon: 'fa-shopping-cart', label: 'Browse Products', href: '/shop', color: 'green' },
-    { icon: 'fa-qrcode', label: 'Show QR Code', action: 'showQR', color: 'blue' },
-    { icon: 'fa-heart', label: 'Saved Items', href: '/customer/saved', color: 'red' },
-    { icon: 'fa-cog', label: 'Settings', href: '/customer/settings', color: 'gray' }
+    { icon: 'shopping-cart', label: 'Browse Products', href: '/shop', color: 'green' },
+    { icon: 'qrcode', label: 'Show QR Code', action: 'showQR', color: 'blue' },
+    { icon: 'heart', label: 'Saved Items', href: '/customer/saved', color: 'red' },
+    { icon: 'settings', label: 'Settings', href: '/customer/settings', color: 'gray' }
   ];
 
   if (loading) {
@@ -229,7 +237,7 @@ export default function EnhancedCustomerDashboard() {
                       href={action.href}
                       className={`flex flex-col items-center gap-3 p-4 rounded-lg bg-${action.color}-50 hover:bg-${action.color}-100 transition-colors cursor-pointer`}
                     >
-                      <i className={`fas ${action.icon} text-2xl text-${action.color}-600`} />
+                      <span className={`text-${action.color}-600`}>{quickActionIcons[action.icon]}</span>
                       <span className="text-sm font-medium text-gray-700">{action.label}</span>
                     </Link>
                   ) : (
@@ -241,7 +249,7 @@ export default function EnhancedCustomerDashboard() {
                       }}
                       className={`flex flex-col items-center gap-3 p-4 rounded-lg bg-${action.color}-50 hover:bg-${action.color}-100 transition-colors cursor-pointer`}
                     >
-                      <i className={`fas ${action.icon} text-2xl text-${action.color}-600`} />
+                      <span className={`text-${action.color}-600`}>{quickActionIcons[action.icon]}</span>
                       <span className="text-sm font-medium text-gray-700">{action.label}</span>
                     </button>
                   )}
@@ -298,7 +306,7 @@ export default function EnhancedCustomerDashboard() {
                   <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <i className="fas fa-shopping-bag text-green-600" />
+                      <ShoppingBag className="w-5 h-5 stroke-[1.5] text-green-600" />
                       <div className="flex-1">
                         <p className="font-medium">Order from {stats.favoriteVendor}</p>
                         <p className="text-sm text-gray-600">
@@ -309,7 +317,7 @@ export default function EnhancedCustomerDashboard() {
                     </div>
                     
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <i className="fas fa-star text-yellow-500" />
+                      <Star className="w-5 h-5 stroke-[1.5] text-yellow-500" />
                       <div className="flex-1">
                         <p className="font-medium">Left a review</p>
                         <p className="text-sm text-gray-600">Organic Hummus - 5 stars</p>
@@ -318,7 +326,7 @@ export default function EnhancedCustomerDashboard() {
                     </div>
                     
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <i className="fas fa-trophy text-purple-600" />
+                      <Trophy className="w-5 h-5 stroke-[1.5] text-purple-600" />
                       <div className="flex-1">
                         <p className="font-medium">Reached Gold Tier!</p>
                         <p className="text-sm text-gray-600">Unlocked 15% discounts</p>
@@ -376,9 +384,9 @@ export default function EnhancedCustomerDashboard() {
                         </div>
                         
                         <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <span><i className="fas fa-store mr-1" />Teva Deli</span>
-                          <span><i className="fas fa-box mr-1" />{3 + order} items</span>
-                          <span><i className="fas fa-coins mr-1" />+{50 + order * 10} points</span>
+                          <span className="inline-flex items-center gap-1"><Store className="w-3.5 h-3.5 stroke-[1.5]" />Teva Deli</span>
+                          <span className="inline-flex items-center gap-1"><Package className="w-3.5 h-3.5 stroke-[1.5]" />{3 + order} items</span>
+                          <span className="inline-flex items-center gap-1"><Coins className="w-3.5 h-3.5 stroke-[1.5]" />+{50 + order * 10} points</span>
                         </div>
                         
                         <div className="mt-3 flex gap-2">
@@ -491,23 +499,23 @@ export default function EnhancedCustomerDashboard() {
                   
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="flex items-start gap-3">
-                      <i className="fas fa-percentage text-yellow-600 text-xl" />
+                      <Percent className="w-5 h-5 stroke-[1.5] text-yellow-600 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium">15% Discount</h4>
                         <p className="text-sm text-gray-600">On all orders</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start gap-3">
-                      <i className="fas fa-gift text-yellow-600 text-xl" />
+                      <Gift className="w-5 h-5 stroke-[1.5] text-yellow-600 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium">Birthday Bonus</h4>
                         <p className="text-sm text-gray-600">500 bonus points</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start gap-3">
-                      <i className="fas fa-bolt text-yellow-600 text-xl" />
+                      <Zap className="w-5 h-5 stroke-[1.5] text-yellow-600 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium">Early Access</h4>
                         <p className="text-sm text-gray-600">New products & sales</p>
@@ -646,15 +654,15 @@ export default function EnhancedCustomerDashboard() {
                   
                   <div className="space-y-3 mt-4">
                     <div className="flex items-center gap-3">
-                      <i className="fas fa-leaf text-green-600" />
+                      <Leaf className="w-5 h-5 stroke-[1.5] text-green-600" />
                       <span className="text-sm">100% plant-based purchases</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <i className="fas fa-map-marker-alt text-green-600" />
+                      <MapPin className="w-5 h-5 stroke-[1.5] text-green-600" />
                       <span className="text-sm">Supporting 6 local vendors</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <i className="fas fa-recycle text-green-600" />
+                      <Recycle className="w-5 h-5 stroke-[1.5] text-green-600" />
                       <span className="text-sm">42 plastic-free orders</span>
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { MapPin, Home } from 'lucide-react'
 
 export default function NotFound() {
   return (
@@ -8,7 +9,7 @@ export default function NotFound() {
           404
         </h1>
         <h2 className="text-3xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
-          <i className="fas fa-map-marked-alt mr-3"></i>
+          <MapPin className="w-6 h-6 stroke-[1.5] inline mr-3" />
           Page Not Found
         </h2>
         <p className="text-gray-600 mb-8">
@@ -20,7 +21,7 @@ export default function NotFound() {
           className="inline-flex items-center px-6 py-3 rounded-lg text-white font-semibold hover:shadow-lg transition-all duration-300"
           style={{ backgroundColor: '#478c0b' }}
         >
-          <i className="fas fa-home mr-2"></i>
+          <Home className="w-5 h-5 stroke-[1.5] inline mr-2" />
           Back to Home
         </Link>
       </div>

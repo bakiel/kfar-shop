@@ -1,7 +1,22 @@
 'use client';
 
-import { useState, useEffect, ComponentType } from 'react';
-import { LucideProps } from 'lucide-react';
+import React, { useState, useEffect, ComponentType } from 'react';
+import { LucideProps, X, SlidersHorizontal, ArrowUpDown, Check, Leaf, CheckCircle, Sprout, Wheat, Candy, Carrot, Flame, ArrowUp, ArrowDown, Star, Clock, TrendingUp, type LucideIcon } from 'lucide-react';
+
+const faToLucide: Record<string, LucideIcon> = {
+  'fa-leaf': Leaf,
+  'fa-check-circle': CheckCircle,
+  'fa-seedling': Sprout,
+  'fa-wheat': Wheat,
+  'fa-candy-cane': Candy,
+  'fa-carrot': Carrot,
+  'fa-fire': Flame,
+  'fa-sort-amount-up': ArrowUp,
+  'fa-sort-amount-down': ArrowDown,
+  'fa-star': Star,
+  'fa-clock': Clock,
+  'fa-chart-line': TrendingUp,
+};
 
 // Allow icon to be either a string (FontAwesome class) or a Lucide component
 type IconType = string | ComponentType<LucideProps>;
@@ -132,7 +147,7 @@ export default function MobileFilterSheet({
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full"
             >
-              <i className="fas fa-times text-gray-600"></i>
+              <X className="w-5 h-5 stroke-[1.5] text-gray-600" />
             </button>
           </div>
           
@@ -146,7 +161,7 @@ export default function MobileFilterSheet({
                   : 'border-transparent text-gray-500'
               }`}
             >
-              <i className="fas fa-filter mr-2"></i>
+              <SlidersHorizontal className="w-4 h-4 stroke-[1.5] inline mr-2" />
               Filters
             </button>
             <button
@@ -157,7 +172,7 @@ export default function MobileFilterSheet({
                   : 'border-transparent text-gray-500'
               }`}
             >
-              <i className="fas fa-sort mr-2"></i>
+              <ArrowUpDown className="w-4 h-4 stroke-[1.5] inline mr-2" />
               Sort
             </button>
           </div>
@@ -196,7 +211,7 @@ export default function MobileFilterSheet({
                           {IconComponent ? (
                             <IconComponent className="w-3.5 h-3.5 stroke-[1.5]" />
                           ) : (
-                            <i className={`fas ${tag.icon}`}></i>
+                            faToLucide[tag.icon as string] ? React.createElement(faToLucide[tag.icon as string], { className: 'w-3.5 h-3.5 stroke-[1.5]' }) : null
                           )}
                           {tag.name}
                         </button>
@@ -316,7 +331,7 @@ export default function MobileFilterSheet({
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      <i className={`fas ${option.icon} mr-2 text-xs`}></i>
+                      {faToLucide[option.icon] && React.createElement(faToLucide[option.icon], { className: 'w-3 h-3 stroke-[1.5] mr-2' })}
                       <span>{option.name}</span>
                     </button>
                   ))}
@@ -337,10 +352,10 @@ export default function MobileFilterSheet({
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <i className={`fas ${option.icon} mr-3 text-sm`}></i>
+                    {faToLucide[option.icon] && React.createElement(faToLucide[option.icon], { className: 'w-4 h-4 stroke-[1.5] mr-3' })}
                     <span className="font-medium">{option.label}</span>
                     {localFilters.sort === option.value && (
-                      <i className="fas fa-check ml-auto"></i>
+                      <Check className="w-4 h-4 stroke-[1.5] ml-auto" />
                     )}
                   </button>
                 ))}

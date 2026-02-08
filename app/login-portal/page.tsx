@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { KeyRound, ShoppingBag, Store, Crown, UserPlus, Handshake, TrendingUp, Rocket, ArrowRight, FlaskConical } from 'lucide-react';
 
 export default function LoginPortal() {
   const { t, isRTL } = useLanguage();
@@ -27,7 +28,7 @@ export default function LoginPortal() {
           <div>
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg mb-4 animate-fade-in" style={{ backgroundColor: '#f6af0d' }}>
-              <i className="fas fa-key"></i>
+              <KeyRound className="w-4 h-4 stroke-[1.5]" />
               <span>Secure Access</span>
             </div>
             
@@ -56,7 +57,7 @@ export default function LoginPortal() {
               
               <div className="relative z-10 text-white">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <i className="fas fa-shopping-bag text-2xl"></i>
+                  <ShoppingBag className="w-7 h-7 stroke-[1.5]" />
                 </div>
                 <h3 className="text-2xl font-bold mb-2">{t('Customer')}</h3>
                 <p className="opacity-90 text-lg">{t('Shop & track your orders')}</p>
@@ -70,7 +71,7 @@ export default function LoginPortal() {
                     className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                     style={{ backgroundColor: '#478c0b' }}
                   >
-                    <i className="fas fa-shopping-bag mr-2"></i>
+                    <ShoppingBag className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                     {t('Customer Login')}
                   </Link>
                 </div>
@@ -91,7 +92,7 @@ export default function LoginPortal() {
                     className="inline-flex items-center gap-2 text-sm font-semibold hover:underline transition-colors"
                     style={{ color: '#478c0b' }}
                   >
-                    <i className="fas fa-user-plus"></i>
+                    <UserPlus className="w-4 h-4 stroke-[1.5]" />
                     {t('New? Start onboarding →')}
                   </Link>
                 </div>
@@ -110,7 +111,7 @@ export default function LoginPortal() {
               
               <div className="relative z-10 text-white">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <i className="fas fa-store text-2xl"></i>
+                  <Store className="w-7 h-7 stroke-[1.5]" />
                 </div>
                 <h3 className="text-2xl font-bold mb-2">{t('Vendor')}</h3>
                 <p className="opacity-90 text-lg">{t('Manage your store')}</p>
@@ -124,7 +125,7 @@ export default function LoginPortal() {
                     className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                     style={{ backgroundColor: '#f6af0d' }}
                   >
-                    <i className="fas fa-store mr-2"></i>
+                    <Store className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                     {t('Vendor Portal')}
                   </Link>
                 </div>
@@ -145,7 +146,7 @@ export default function LoginPortal() {
                     className="inline-flex items-center gap-2 text-sm font-semibold hover:underline transition-colors"
                     style={{ color: '#f6af0d' }}
                   >
-                    <i className="fas fa-handshake"></i>
+                    <Handshake className="w-4 h-4 stroke-[1.5]" />
                     {t('New vendor? Join us →')}
                   </Link>
                 </div>
@@ -164,7 +165,7 @@ export default function LoginPortal() {
               
               <div className="relative z-10 text-white">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <i className="fas fa-crown text-2xl"></i>
+                  <Crown className="w-7 h-7 stroke-[1.5]" />
                 </div>
                 <h3 className="text-2xl font-bold mb-2">{t('Admin')}</h3>
                 <p className="opacity-90 text-lg">{t('Platform management')}</p>
@@ -178,7 +179,7 @@ export default function LoginPortal() {
                     className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                     style={{ backgroundColor: '#c23c09' }}
                   >
-                    <i className="fas fa-crown mr-2"></i>
+                    <Crown className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                     {t('Admin Access')}
                   </Link>
                 </div>
@@ -199,7 +200,7 @@ export default function LoginPortal() {
                     className="inline-flex items-center gap-2 text-sm font-semibold hover:underline transition-colors"
                     style={{ color: '#c23c09' }}
                   >
-                    <i className="fas fa-chart-line"></i>
+                    <TrendingUp className="w-4 h-4 stroke-[1.5]" />
                     {t('Platform overview →')}
                   </Link>
                 </div>
@@ -218,7 +219,7 @@ export default function LoginPortal() {
               
               <div className="relative z-10">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f6af0d' }}>
-                  <i className="fas fa-flask text-2xl text-white"></i>
+                  <FlaskConical className="w-7 h-7 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="text-2xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
                   🧪 {t('Just Testing?')}
@@ -231,9 +232,9 @@ export default function LoginPortal() {
                   className="inline-flex items-center gap-3 px-8 py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                   style={{ backgroundColor: '#f6af0d' }}
                 >
-                  <i className="fas fa-rocket"></i>
+                  <Rocket className="w-5 h-5 stroke-[1.5]" />
                   <span>{t('Open Demo Center')}</span>
-                  <i className="fas fa-arrow-right text-sm"></i>
+                  <ArrowRight className="w-4 h-4 stroke-[1.5]" />
                 </Link>
               </div>
             </div>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { Star, Leaf, Store, Globe, Crown, BookOpen, HandHelping, Shield, Sprout, Heart, Check, Users, Info, MapPin, Utensils, Bird, Recycle, Calendar, Plane } from 'lucide-react';
 
 interface AboutVOPProps {
   audience?: 'community' | 'israeli' | 'international' | 'all';
@@ -46,12 +47,12 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
   const selectedContent = content[audience];
 
   const milestones = [
-    { year: '1967', event: 'Spiritual awakening in Chicago', icon: 'fa-star' },
-    { year: '1969', event: 'First families arrive in Israel', icon: 'fa-plane' },
-    { year: '1973', event: '100% vegan lifestyle adopted', icon: 'fa-leaf' },
-    { year: '1983', event: 'Teva Deli founded', icon: 'fa-store' },
-    { year: '2003', event: 'Official Israeli recognition', icon: 'fa-certificate' },
-    { year: '2025', event: 'VOP-Market digital launch', icon: 'fa-globe' }
+    { year: '1967', event: 'Spiritual awakening in Chicago', icon: Star },
+    { year: '1969', event: 'First families arrive in Israel', icon: Plane },
+    { year: '1973', event: '100% vegan lifestyle adopted', icon: Leaf },
+    { year: '1983', event: 'Teva Deli founded', icon: Store },
+    { year: '2003', event: 'Official Israeli recognition', icon: Shield },
+    { year: '2025', event: 'VOP-Market digital launch', icon: Globe }
   ];
 
   if (compact) {
@@ -96,15 +97,15 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
               {audience === 'community' && (
                 <>
                   <div className="flex items-center">
-                    <i className="fas fa-crown mr-3" style={{ color: '#478c0b' }}></i>
+                    <Crown className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>Living under Divine governance</span>
                   </div>
                   <div className="flex items-center">
-                    <i className="fas fa-book-open mr-3" style={{ color: '#478c0b' }}></i>
+                    <BookOpen className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>Kingdom School educating our youth</span>
                   </div>
                   <div className="flex items-center">
-                    <i className="fas fa-hands-praying mr-3" style={{ color: '#478c0b' }}></i>
+                    <HandHelping className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>United in faith and purpose</span>
                   </div>
                 </>
@@ -113,15 +114,15 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
               {audience === 'israeli' && (
                 <>
                   <div className="flex items-center">
-                    <i className="fas fa-handshake mr-3" style={{ color: '#478c0b' }}></i>
+                    <HandHelping className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>שותפים בחברה הישראלית</span>
                   </div>
                   <div className="flex items-center">
-                    <i className="fas fa-shield-alt mr-3" style={{ color: '#478c0b' }}></i>
+                    <Shield className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>משרתים בצה"ל</span>
                   </div>
                   <div className="flex items-center">
-                    <i className="fas fa-seedling mr-3" style={{ color: '#478c0b' }}></i>
+                    <Sprout className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>חלוצי הטבעונות בישראל</span>
                   </div>
                 </>
@@ -130,15 +131,15 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
               {audience === 'international' && (
                 <>
                   <div className="flex items-center">
-                    <i className="fas fa-globe-africa mr-3" style={{ color: '#478c0b' }}></i>
+                    <Globe className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>African diaspora heritage site</span>
                   </div>
                   <div className="flex items-center">
-                    <i className="fas fa-leaf mr-3" style={{ color: '#478c0b' }}></i>
+                    <Leaf className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>Pioneer vegan community</span>
                   </div>
                   <div className="flex items-center">
-                    <i className="fas fa-heart mr-3" style={{ color: '#478c0b' }}></i>
+                    <Heart className="w-5 h-5 stroke-[1.5] mr-3" style={{ color: '#478c0b' }} />
                     <span>Cultural tourism destination</span>
                   </div>
                 </>
@@ -169,7 +170,7 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
                 className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: '#cfe7c1' }}
               >
-                <i className={`fas ${milestone.icon}`} style={{ color: '#478c0b' }}></i>
+                <milestone.icon className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
               </div>
               <div>
                 <p className="font-bold text-lg" style={{ color: '#478c0b' }}>
@@ -193,40 +194,40 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
               className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
               style={{ backgroundColor: 'white' }}
             >
-              <i className="fas fa-carrot text-3xl" style={{ color: '#478c0b' }}></i>
+              <Utensils className="w-8 h-8 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
             <h4 className="font-bold mb-2">Divine Nutrition</h4>
             <p className="text-sm text-gray-600">Genesis 1:29 plant-based diet</p>
           </div>
-          
+
           <div className="text-center">
-            <div 
+            <div
               className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
               style={{ backgroundColor: 'white' }}
             >
-              <i className="fas fa-torah text-3xl" style={{ color: '#f6af0d' }}></i>
+              <BookOpen className="w-8 h-8 stroke-[1.5]" style={{ color: '#f6af0d' }} />
             </div>
             <h4 className="font-bold mb-2">Hebrew Heritage</h4>
             <p className="text-sm text-gray-600">Biblical identity & language</p>
           </div>
-          
+
           <div className="text-center">
-            <div 
+            <div
               className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
               style={{ backgroundColor: 'white' }}
             >
-              <i className="fas fa-dove text-3xl" style={{ color: '#c23c09' }}></i>
+              <Bird className="w-8 h-8 stroke-[1.5]" style={{ color: '#c23c09' }} />
             </div>
             <h4 className="font-bold mb-2">Peace & Harmony</h4>
             <p className="text-sm text-gray-600">Living in unity with all</p>
           </div>
-          
+
           <div className="text-center">
-            <div 
+            <div
               className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
               style={{ backgroundColor: 'white' }}
             >
-              <i className="fas fa-recycle text-3xl" style={{ color: '#478c0b' }}></i>
+              <Recycle className="w-8 h-8 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
             <h4 className="font-bold mb-2">Sustainability</h4>
             <p className="text-sm text-gray-600">Earth-conscious living</p>
@@ -246,15 +247,15 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
             </h4>
             <ul className="space-y-3">
               <li className="flex items-start">
-                <i className="fas fa-check mt-1 mr-3" style={{ color: '#478c0b' }}></i>
+                <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                 <span>100+ community businesses providing employment</span>
               </li>
               <li className="flex items-start">
-                <i className="fas fa-check mt-1 mr-3" style={{ color: '#478c0b' }}></i>
+                <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                 <span>₪18 million annual contribution to local economy</span>
               </li>
               <li className="flex items-start">
-                <i className="fas fa-check mt-1 mr-3" style={{ color: '#478c0b' }}></i>
+                <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                 <span>20,000+ tourists bringing revenue to Negev</span>
               </li>
             </ul>
@@ -266,15 +267,15 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
             </h4>
             <ul className="space-y-3">
               <li className="flex items-start">
-                <i className="fas fa-check mt-1 mr-3" style={{ color: '#f6af0d' }}></i>
+                <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                 <span>Pioneered Israel's vegan movement since 1973</span>
               </li>
               <li className="flex items-start">
-                <i className="fas fa-check mt-1 mr-3" style={{ color: '#f6af0d' }}></i>
+                <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                 <span>Model for sustainable desert communities</span>
               </li>
               <li className="flex items-start">
-                <i className="fas fa-check mt-1 mr-3" style={{ color: '#f6af0d' }}></i>
+                <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                 <span>Cultural bridge between Israel and Africa</span>
               </li>
             </ul>
@@ -289,7 +290,7 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
             className="px-8 py-4 text-lg font-semibold rounded-full text-white hover:shadow-lg transition-all"
             style={{ backgroundColor: '#478c0b' }}
           >
-            <i className="fas fa-users mr-2"></i>
+            <Users className="w-5 h-5 stroke-[1.5] mr-2 inline" />
             Join Community Initiatives
           </button>
         )}
@@ -299,7 +300,7 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
             className="px-8 py-4 text-lg font-semibold rounded-full hover:shadow-lg transition-all"
             style={{ backgroundColor: '#f6af0d', color: '#3a3a1d' }}
           >
-            <i className="fas fa-calendar mr-2"></i>
+            <Calendar className="w-5 h-5 stroke-[1.5] mr-2 inline" />
             הזמן ביקור בכפר
           </button>
         )}
@@ -309,7 +310,7 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
             className="px-8 py-4 text-lg font-semibold rounded-full text-white hover:shadow-lg transition-all"
             style={{ backgroundColor: '#c23c09' }}
           >
-            <i className="fas fa-plane mr-2"></i>
+            <Plane className="w-5 h-5 stroke-[1.5] mr-2 inline" />
             Plan Your Journey
           </button>
         )}
@@ -320,14 +321,14 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
               className="px-8 py-4 text-lg font-semibold rounded-full text-white hover:shadow-lg transition-all"
               style={{ backgroundColor: '#478c0b' }}
             >
-              <i className="fas fa-info-circle mr-2"></i>
+              <Info className="w-5 h-5 stroke-[1.5] mr-2 inline" />
               Learn More
             </button>
             <button 
               className="px-8 py-4 text-lg font-semibold rounded-full hover:shadow-lg transition-all"
               style={{ backgroundColor: '#f6af0d', color: '#3a3a1d' }}
             >
-              <i className="fas fa-map-signs mr-2"></i>
+              <MapPin className="w-5 h-5 stroke-[1.5] mr-2 inline" />
               Visit Us
             </button>
           </div>

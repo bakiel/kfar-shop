@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/context/CartContext';
+import { Heart, Star, CheckCircle, Truck, Minus, Plus, Check, ShoppingCart, QrCode, Share2 } from 'lucide-react';
 
 interface ProductInfoProps {
   product: {
@@ -54,8 +55,8 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: '#3a3a1d' }}>
             {product.name}
           </h1>
-          <button className="text-gray-400 hover:text-red-500 text-2xl transition-colors">
-            <i className="far fa-heart"></i>
+          <button className="text-gray-400 hover:text-red-500 transition-colors">
+            <Heart className="w-7 h-7 stroke-[1.5]" />
           </button>
         </div>
 
@@ -79,13 +80,13 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
-              <i key={i} className={`fas fa-star ${i < product.rating ? 'text-sun-gold' : 'text-gray-300'}`}></i>
+              <Star key={i} className={`w-4 h-4 stroke-[1.5] ${i < product.rating ? 'text-sun-gold fill-sun-gold' : 'text-gray-300'}`} />
             ))}
             <span className="ml-2 text-gray-600">({product.reviewCount} reviews)</span>
           </div>
           {product.inStock ? (
-            <span className="text-green-600 font-semibold">
-              <i className="fas fa-check-circle mr-1"></i>In Stock
+            <span className="text-green-600 font-semibold inline-flex items-center gap-1">
+              <CheckCircle className="w-4 h-4 stroke-[1.5]" />In Stock
             </span>
           ) : (
             <span className="text-red-600 font-semibold">Out of Stock</span>
@@ -108,7 +109,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
         {/* Free Delivery Notice */}
         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
           <div className="flex items-center gap-2 text-green-800">
-            <i className="fas fa-truck"></i>
+            <Truck className="w-5 h-5 stroke-[1.5]" />
             <div>
               <div className="font-semibold text-sm">Free Local Delivery</div>
               <div className="text-xs">Orders over ₪50 within Dimona area</div>
@@ -130,7 +131,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
                 onClick={() => handleQuantityChange(-1)}
                 className="px-4 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
               >
-                <i className="fas fa-minus text-sm"></i>
+                <Minus className="w-4 h-4 stroke-[1.5]" />
               </button>
               <input
                 type="number"
@@ -142,7 +143,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
                 onClick={() => handleQuantityChange(1)}
                 className="px-4 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
               >
-                <i className="fas fa-plus text-sm"></i>
+                <Plus className="w-4 h-4 stroke-[1.5]" />
               </button>
             </div>
             <div className="text-sm text-gray-600">
@@ -186,30 +187,30 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
           >
             {showAddedAnimation ? (
               <>
-                <i className="fas fa-check"></i>
+                <Check className="w-5 h-5 stroke-[1.5]" />
                 Added to Cart!
               </>
             ) : (
               <>
-                <i className="fas fa-shopping-cart"></i>
+                <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
                 Add to Cart
               </>
             )}
           </button>
 
-          <button className="w-full py-3 rounded-xl font-semibold border-2 transition-all duration-300 hover:shadow-md"
+          <button className="w-full py-3 rounded-xl font-semibold border-2 transition-all duration-300 hover:shadow-md inline-flex items-center justify-center gap-2"
             style={{ borderColor: '#478c0b', color: '#478c0b' }}>
-            <i className="fas fa-qrcode mr-2"></i>
+            <QrCode className="w-5 h-5 stroke-[1.5]" />
             Quick Buy with QR
           </button>
 
           <div className="grid grid-cols-2 gap-2">
-            <button className="py-2 px-4 rounded-lg font-medium text-sm border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <i className="far fa-heart mr-1"></i>
+            <button className="py-2 px-4 rounded-lg font-medium text-sm border-2 border-gray-200 hover:border-gray-300 transition-colors inline-flex items-center gap-1">
+              <Heart className="w-4 h-4 stroke-[1.5]" />
               Wishlist
             </button>
-            <button className="py-2 px-4 rounded-lg font-medium text-sm border-2 border-gray-200 hover:border-gray-300 transition-colors">
-              <i className="fas fa-share mr-1"></i>
+            <button className="py-2 px-4 rounded-lg font-medium text-sm border-2 border-gray-200 hover:border-gray-300 transition-colors inline-flex items-center gap-1">
+              <Share2 className="w-4 h-4 stroke-[1.5]" />
               Share
             </button>
           </div>

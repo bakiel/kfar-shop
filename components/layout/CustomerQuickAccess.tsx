@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { User, ChevronDown, Gauge, ShoppingBag, QrCode, Star, Settings, Shield, Store, TrendingUp, BarChart3, LogOut, Package } from 'lucide-react';
 
 const CustomerQuickAccess = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +19,7 @@ const CustomerQuickAccess = () => {
       const token = localStorage.getItem('customerToken');
       const name = localStorage.getItem('customerName');
       const role = localStorage.getItem('userRole') as 'customer' | 'admin' | 'vendor' || 'customer';
-      
+
       if (token) {
         setIsLoggedIn(true);
         setCustomerName(name || 'Customer');
@@ -29,11 +30,11 @@ const CustomerQuickAccess = () => {
     };
 
     checkAuth();
-    
+
     // Listen for auth changes
     const handleStorageChange = () => checkAuth();
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
@@ -63,7 +64,7 @@ const CustomerQuickAccess = () => {
         href="/customer/login"
         className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-leaf-green text-white hover:bg-opacity-90 transition-all"
       >
-        <i className="fas fa-user"></i>
+        <User className="w-4 h-4 stroke-[1.5]" />
         <span className="font-medium">Login</span>
       </Link>
     );
@@ -76,12 +77,12 @@ const CustomerQuickAccess = () => {
         className="flex items-center gap-2 p-2 rounded-lg hover:bg-herbal-mint/20 transition-all"
       >
         <div className="w-8 h-8 rounded-full bg-leaf-green text-white flex items-center justify-center">
-          <i className="fas fa-user text-sm"></i>
+          <User className="w-4 h-4 stroke-[1.5]" />
         </div>
         <span className="hidden sm:block text-sm font-medium text-soil-brown">
           {customerName}
         </span>
-        <i className={`fas fa-chevron-down text-xs transition-transform ${isOpen ? 'rotate-180' : ''}`}></i>
+        <ChevronDown className={`w-3 h-3 stroke-[1.5] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
@@ -91,7 +92,7 @@ const CustomerQuickAccess = () => {
           <div className="p-4 bg-herbal-mint/10 border-b">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-leaf-green text-white flex items-center justify-center">
-                <i className="fas fa-user text-lg"></i>
+                <User className="w-5 h-5 stroke-[1.5]" />
               </div>
               <div>
                 <p className="font-semibold text-soil-brown">{customerName}</p>
@@ -109,46 +110,46 @@ const CustomerQuickAccess = () => {
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-herbal-mint/20 transition-all"
               onClick={() => setIsOpen(false)}
             >
-              <i className="fas fa-tachometer-alt text-leaf-green"></i>
+              <Gauge className="w-4 h-4 stroke-[1.5] text-leaf-green" />
               <span className="text-soil-brown">My Dashboard</span>
             </Link>
-            
+
             <Link
               href="/customer/orders"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-herbal-mint/20 transition-all"
               onClick={() => setIsOpen(false)}
             >
-              <i className="fas fa-shopping-bag text-sun-gold"></i>
+              <ShoppingBag className="w-4 h-4 stroke-[1.5] text-sun-gold" />
               <span className="text-soil-brown">My Orders</span>
             </Link>
-            
+
             <Link
               href="/customer/qr-code"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-herbal-mint/20 transition-all"
               onClick={() => setIsOpen(false)}
             >
-              <i className="fas fa-qrcode text-terra-cotta"></i>
+              <QrCode className="w-4 h-4 stroke-[1.5] text-terra-cotta" />
               <span className="text-soil-brown">My QR Code</span>
             </Link>
-            
+
             <Link
               href="/customer/rewards"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-herbal-mint/20 transition-all"
               onClick={() => setIsOpen(false)}
             >
-              <i className="fas fa-star text-sun-gold"></i>
+              <Star className="w-4 h-4 stroke-[1.5] text-sun-gold" />
               <span className="text-soil-brown">Rewards</span>
               <span className="ml-auto bg-sun-gold text-white text-xs px-2 py-1 rounded-full">
                 1,250 pts
               </span>
             </Link>
-            
+
             <Link
               href="/customer/preferences"
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-herbal-mint/20 transition-all"
               onClick={() => setIsOpen(false)}
             >
-              <i className="fas fa-cog text-gray-600"></i>
+              <Settings className="w-4 h-4 stroke-[1.5] text-gray-600" />
               <span className="text-soil-brown">Preferences</span>
             </Link>
           </div>
@@ -163,7 +164,7 @@ const CustomerQuickAccess = () => {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition-all"
                   onClick={() => setIsOpen(false)}
                 >
-                  <i className="fas fa-shield-alt text-red-600"></i>
+                  <Shield className="w-4 h-4 stroke-[1.5] text-red-600" />
                   <span className="text-red-600 font-medium">Admin Dashboard</span>
                 </Link>
                 <Link
@@ -171,7 +172,7 @@ const CustomerQuickAccess = () => {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition-all"
                   onClick={() => setIsOpen(false)}
                 >
-                  <i className="fas fa-store text-red-600"></i>
+                  <Store className="w-4 h-4 stroke-[1.5] text-red-600" />
                   <span className="text-red-600">Manage Vendors</span>
                 </Link>
                 <Link
@@ -179,7 +180,7 @@ const CustomerQuickAccess = () => {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition-all"
                   onClick={() => setIsOpen(false)}
                 >
-                  <i className="fas fa-chart-line text-red-600"></i>
+                  <TrendingUp className="w-4 h-4 stroke-[1.5] text-red-600" />
                   <span className="text-red-600">Revenue Analytics</span>
                 </Link>
               </div>
@@ -196,7 +197,7 @@ const CustomerQuickAccess = () => {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sun-gold/20 transition-all"
                   onClick={() => setIsOpen(false)}
                 >
-                  <i className="fas fa-store text-sun-gold"></i>
+                  <Store className="w-4 h-4 stroke-[1.5] text-sun-gold" />
                   <span className="text-sun-gold font-medium">Vendor Dashboard</span>
                 </Link>
                 <Link
@@ -204,7 +205,7 @@ const CustomerQuickAccess = () => {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sun-gold/20 transition-all"
                   onClick={() => setIsOpen(false)}
                 >
-                  <i className="fas fa-box text-sun-gold"></i>
+                  <Package className="w-4 h-4 stroke-[1.5] text-sun-gold" />
                   <span className="text-sun-gold">My Products</span>
                 </Link>
                 <Link
@@ -212,7 +213,7 @@ const CustomerQuickAccess = () => {
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sun-gold/20 transition-all"
                   onClick={() => setIsOpen(false)}
                 >
-                  <i className="fas fa-chart-bar text-sun-gold"></i>
+                  <BarChart3 className="w-4 h-4 stroke-[1.5] text-sun-gold" />
                   <span className="text-sun-gold">Analytics</span>
                 </Link>
               </div>
@@ -225,7 +226,7 @@ const CustomerQuickAccess = () => {
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition-all text-left"
             >
-              <i className="fas fa-sign-out-alt text-red-600"></i>
+              <LogOut className="w-4 h-4 stroke-[1.5] text-red-600" />
               <span className="text-red-600">Logout</span>
             </button>
           </div>

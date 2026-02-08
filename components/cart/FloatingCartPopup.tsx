@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ShoppingCart, X, Check } from 'lucide-react';
 
 interface FloatingCartPopupProps {
   items: any[];
@@ -42,7 +43,7 @@ export default function FloatingCartPopup({ items, onClose }: FloatingCartPopupP
           <div className="flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <i className="fas fa-shopping-cart text-2xl"></i>
+                <ShoppingCart className="w-6 h-6 stroke-[1.5]" />
                 <span className="absolute -top-2 -right-2 bg-white text-[#c23c09] text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
                   {totalItems}
                 </span>
@@ -59,7 +60,7 @@ export default function FloatingCartPopup({ items, onClose }: FloatingCartPopupP
               }}
               className="hover:bg-white/20 rounded-full p-1 transition-colors"
             >
-              <i className="fas fa-times"></i>
+              <X className="w-4 h-4 stroke-[1.5]" />
             </button>
           </div>
         </div>
@@ -127,7 +128,7 @@ export default function FloatingCartPopup({ items, onClose }: FloatingCartPopupP
         {/* Success Animation */}
         <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 pointer-events-none">
           <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm animate-bounce">
-            <i className="fas fa-check mr-1"></i>
+            <Check className="w-4 h-4 stroke-[1.5] inline mr-1" />
             Added to cart!
           </div>
         </div>

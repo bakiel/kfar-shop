@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { MapPin, Handshake, Store, ShoppingBasket, Star } from 'lucide-react';
 
 const FloatingNavigation = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -67,7 +68,7 @@ const FloatingNavigation = () => {
               The digital home of the <span className="font-semibold text-leaf-green">Village of Peace</span>
             </p>
             <p className="text-xs text-gray-700 mb-2">
-              <i className="fas fa-map-marker-alt text-sun-gold mr-1"></i>
+              <MapPin className="w-3 h-3 stroke-[1.5] text-sun-gold inline mr-1" />
               Kfar Hashalom, Dimona, Israel
             </p>
             <p className="text-xs text-gray-700 mb-4">
@@ -88,7 +89,7 @@ const FloatingNavigation = () => {
               onClick={() => scrollToSection('community-services')}
               className="w-14 h-14 bg-leaf-green text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group relative"
             >
-              <i className="fas fa-hands-helping text-lg"></i>
+              <Handshake className="w-5 h-5 stroke-[1.5]" />
               <span className="absolute right-16 top-1/2 -translate-y-1/2 bg-soil-brown text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Community Services
               </span>
@@ -98,7 +99,7 @@ const FloatingNavigation = () => {
               onClick={() => scrollToSection('village-enterprises')}
               className="w-14 h-14 bg-sun-gold text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group relative"
             >
-              <i className="fas fa-store text-lg"></i>
+              <Store className="w-5 h-5 stroke-[1.5]" />
               <span className="absolute right-16 top-1/2 -translate-y-1/2 bg-soil-brown text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Our Businesses
               </span>
@@ -108,7 +109,7 @@ const FloatingNavigation = () => {
               onClick={() => scrollToSection('featured-products')}
               className="w-14 h-14 bg-earth-flame text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group relative"
             >
-              <i className="fas fa-shopping-basket text-lg"></i>
+              <ShoppingBasket className="w-5 h-5 stroke-[1.5]" />
               <span className="absolute right-16 top-1/2 -translate-y-1/2 bg-soil-brown text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Products
               </span>
@@ -118,7 +119,7 @@ const FloatingNavigation = () => {
               onClick={() => scrollToSection('reviews')}
               className="w-14 h-14 bg-herbal-mint text-soil-brown rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center group relative"
             >
-              <i className="fas fa-star text-lg"></i>
+              <Star className="w-5 h-5 stroke-[1.5]" />
               <span className="absolute right-16 top-1/2 -translate-y-1/2 bg-soil-brown text-white text-xs px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Reviews
               </span>

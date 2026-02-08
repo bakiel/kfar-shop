@@ -6,6 +6,156 @@ import Layout from '@/components/layout/Layout';
 import { servicesData, getServicesByCategory, getActiveServices, getUpcomingEvents, getServiceStats } from '@/lib/data/services-data';
 import { useMobileDetect } from '@/hooks/useMobileDetect';
 import MobileFilterSheet from '@/components/mobile/MobileFilterSheet';
+import { Search, X, Filter, LayoutGrid, CalendarDays, Loader2, Star, Clock, MapPin, Coins, Phone, PlusCircle, Info, Ticket, RefreshCw, UserCheck, CheckCircle, Mail, UserPlus, CalendarPlus, Utensils, Sprout, Crown, Sun, IceCream, ShoppingBasket, Gift, Slice, Blend, Flame, Home, Wrench, Zap, Hammer, PaintRoller, Brush, TreeDeciduous, Sparkles, Scissors, Heart, Dumbbell, HandHeart, Leaf, Briefcase, Calculator, Scale, Laptop, Languages, GraduationCap, Store, Handshake, Flower2, Palette, Users, Wheat, Film, Music } from 'lucide-react';
+
+// Icon lookup for dynamic service/category icons from data
+const serviceIconMap: Record<string, React.ReactNode> = {
+  'fa-utensils': <Utensils className="w-5 h-5 stroke-[1.5]" />,
+  'fa-seedling': <Sprout className="w-5 h-5 stroke-[1.5]" />,
+  'fa-crown': <Crown className="w-5 h-5 stroke-[1.5]" />,
+  'fa-sun': <Sun className="w-5 h-5 stroke-[1.5]" />,
+  'fa-ice-cream': <IceCream className="w-5 h-5 stroke-[1.5]" />,
+  'fa-shopping-basket': <ShoppingBasket className="w-5 h-5 stroke-[1.5]" />,
+  'fa-gift': <Gift className="w-5 h-5 stroke-[1.5]" />,
+  'fa-bread-slice': <Slice className="w-5 h-5 stroke-[1.5]" />,
+  'fa-blender': <Blend className="w-5 h-5 stroke-[1.5]" />,
+  'fa-pepper-hot': <Flame className="w-5 h-5 stroke-[1.5]" />,
+  'fa-home': <Home className="w-5 h-5 stroke-[1.5]" />,
+  'fa-wrench': <Wrench className="w-5 h-5 stroke-[1.5]" />,
+  'fa-bolt': <Zap className="w-5 h-5 stroke-[1.5]" />,
+  'fa-hammer': <Hammer className="w-5 h-5 stroke-[1.5]" />,
+  'fa-paint-roller': <PaintRoller className="w-5 h-5 stroke-[1.5]" />,
+  'fa-broom': <Brush className="w-5 h-5 stroke-[1.5]" />,
+  'fa-tree': <TreeDeciduous className="w-5 h-5 stroke-[1.5]" />,
+  'fa-spa': <Sparkles className="w-5 h-5 stroke-[1.5]" />,
+  'fa-cut': <Scissors className="w-5 h-5 stroke-[1.5]" />,
+  'fa-heart': <Heart className="w-5 h-5 stroke-[1.5]" />,
+  'fa-dumbbell': <Dumbbell className="w-5 h-5 stroke-[1.5]" />,
+  'fa-hand-holding-heart': <HandHeart className="w-5 h-5 stroke-[1.5]" />,
+  'fa-leaf': <Leaf className="w-5 h-5 stroke-[1.5]" />,
+  'fa-briefcase': <Briefcase className="w-5 h-5 stroke-[1.5]" />,
+  'fa-calculator': <Calculator className="w-5 h-5 stroke-[1.5]" />,
+  'fa-balance-scale': <Scale className="w-5 h-5 stroke-[1.5]" />,
+  'fa-laptop': <Laptop className="w-5 h-5 stroke-[1.5]" />,
+  'fa-language': <Languages className="w-5 h-5 stroke-[1.5]" />,
+  'fa-graduation-cap': <GraduationCap className="w-5 h-5 stroke-[1.5]" />,
+  'fa-calendar-alt': <CalendarDays className="w-5 h-5 stroke-[1.5]" />,
+  'fa-store': <Store className="w-5 h-5 stroke-[1.5]" />,
+  'fa-hands': <Handshake className="w-5 h-5 stroke-[1.5]" />,
+  'fa-om': <Flower2 className="w-5 h-5 stroke-[1.5]" />,
+  'fa-palette': <Palette className="w-5 h-5 stroke-[1.5]" />,
+  'fa-users': <Users className="w-5 h-5 stroke-[1.5]" />,
+  'fa-wheat': <Wheat className="w-5 h-5 stroke-[1.5]" />,
+  'fa-film': <Film className="w-5 h-5 stroke-[1.5]" />,
+  'fa-music': <Music className="w-5 h-5 stroke-[1.5]" />,
+  'fa-calendar': <CalendarDays className="w-5 h-5 stroke-[1.5]" />,
+  'fa-chalkboard-teacher': <GraduationCap className="w-5 h-5 stroke-[1.5]" />,
+};
+
+// Large icon variant for service card headers
+const serviceIconMapLg: Record<string, React.ReactNode> = {
+  'fa-utensils': <Utensils className="w-7 h-7 stroke-[1.5]" />,
+  'fa-seedling': <Sprout className="w-7 h-7 stroke-[1.5]" />,
+  'fa-crown': <Crown className="w-7 h-7 stroke-[1.5]" />,
+  'fa-sun': <Sun className="w-7 h-7 stroke-[1.5]" />,
+  'fa-ice-cream': <IceCream className="w-7 h-7 stroke-[1.5]" />,
+  'fa-shopping-basket': <ShoppingBasket className="w-7 h-7 stroke-[1.5]" />,
+  'fa-gift': <Gift className="w-7 h-7 stroke-[1.5]" />,
+  'fa-bread-slice': <Slice className="w-7 h-7 stroke-[1.5]" />,
+  'fa-blender': <Blend className="w-7 h-7 stroke-[1.5]" />,
+  'fa-pepper-hot': <Flame className="w-7 h-7 stroke-[1.5]" />,
+  'fa-home': <Home className="w-7 h-7 stroke-[1.5]" />,
+  'fa-wrench': <Wrench className="w-7 h-7 stroke-[1.5]" />,
+  'fa-bolt': <Zap className="w-7 h-7 stroke-[1.5]" />,
+  'fa-hammer': <Hammer className="w-7 h-7 stroke-[1.5]" />,
+  'fa-paint-roller': <PaintRoller className="w-7 h-7 stroke-[1.5]" />,
+  'fa-broom': <Brush className="w-7 h-7 stroke-[1.5]" />,
+  'fa-tree': <TreeDeciduous className="w-7 h-7 stroke-[1.5]" />,
+  'fa-spa': <Sparkles className="w-7 h-7 stroke-[1.5]" />,
+  'fa-cut': <Scissors className="w-7 h-7 stroke-[1.5]" />,
+  'fa-heart': <Heart className="w-7 h-7 stroke-[1.5]" />,
+  'fa-dumbbell': <Dumbbell className="w-7 h-7 stroke-[1.5]" />,
+  'fa-hand-holding-heart': <HandHeart className="w-7 h-7 stroke-[1.5]" />,
+  'fa-leaf': <Leaf className="w-7 h-7 stroke-[1.5]" />,
+  'fa-briefcase': <Briefcase className="w-7 h-7 stroke-[1.5]" />,
+  'fa-calculator': <Calculator className="w-7 h-7 stroke-[1.5]" />,
+  'fa-balance-scale': <Scale className="w-7 h-7 stroke-[1.5]" />,
+  'fa-laptop': <Laptop className="w-7 h-7 stroke-[1.5]" />,
+  'fa-language': <Languages className="w-7 h-7 stroke-[1.5]" />,
+  'fa-graduation-cap': <GraduationCap className="w-7 h-7 stroke-[1.5]" />,
+  'fa-calendar-alt': <CalendarDays className="w-7 h-7 stroke-[1.5]" />,
+  'fa-store': <Store className="w-7 h-7 stroke-[1.5]" />,
+  'fa-hands': <Handshake className="w-7 h-7 stroke-[1.5]" />,
+  'fa-om': <Flower2 className="w-7 h-7 stroke-[1.5]" />,
+  'fa-palette': <Palette className="w-7 h-7 stroke-[1.5]" />,
+  'fa-users': <Users className="w-7 h-7 stroke-[1.5]" />,
+  'fa-wheat': <Wheat className="w-7 h-7 stroke-[1.5]" />,
+  'fa-film': <Film className="w-7 h-7 stroke-[1.5]" />,
+  'fa-music': <Music className="w-7 h-7 stroke-[1.5]" />,
+  'fa-calendar': <CalendarDays className="w-7 h-7 stroke-[1.5]" />,
+  'fa-chalkboard-teacher': <GraduationCap className="w-7 h-7 stroke-[1.5]" />,
+};
+
+// Extra-large for background decoration
+const serviceIconMapXl: Record<string, React.ReactNode> = {
+  'fa-utensils': <Utensils className="w-16 h-16 stroke-[1]" />,
+  'fa-seedling': <Sprout className="w-16 h-16 stroke-[1]" />,
+  'fa-crown': <Crown className="w-16 h-16 stroke-[1]" />,
+  'fa-sun': <Sun className="w-16 h-16 stroke-[1]" />,
+  'fa-ice-cream': <IceCream className="w-16 h-16 stroke-[1]" />,
+  'fa-shopping-basket': <ShoppingBasket className="w-16 h-16 stroke-[1]" />,
+  'fa-gift': <Gift className="w-16 h-16 stroke-[1]" />,
+  'fa-bread-slice': <Slice className="w-16 h-16 stroke-[1]" />,
+  'fa-blender': <Blend className="w-16 h-16 stroke-[1]" />,
+  'fa-pepper-hot': <Flame className="w-16 h-16 stroke-[1]" />,
+  'fa-home': <Home className="w-16 h-16 stroke-[1]" />,
+  'fa-wrench': <Wrench className="w-16 h-16 stroke-[1]" />,
+  'fa-bolt': <Zap className="w-16 h-16 stroke-[1]" />,
+  'fa-hammer': <Hammer className="w-16 h-16 stroke-[1]" />,
+  'fa-paint-roller': <PaintRoller className="w-16 h-16 stroke-[1]" />,
+  'fa-broom': <Brush className="w-16 h-16 stroke-[1]" />,
+  'fa-tree': <TreeDeciduous className="w-16 h-16 stroke-[1]" />,
+  'fa-spa': <Sparkles className="w-16 h-16 stroke-[1]" />,
+  'fa-cut': <Scissors className="w-16 h-16 stroke-[1]" />,
+  'fa-heart': <Heart className="w-16 h-16 stroke-[1]" />,
+  'fa-dumbbell': <Dumbbell className="w-16 h-16 stroke-[1]" />,
+  'fa-hand-holding-heart': <HandHeart className="w-16 h-16 stroke-[1]" />,
+  'fa-leaf': <Leaf className="w-16 h-16 stroke-[1]" />,
+  'fa-briefcase': <Briefcase className="w-16 h-16 stroke-[1]" />,
+  'fa-calculator': <Calculator className="w-16 h-16 stroke-[1]" />,
+  'fa-balance-scale': <Scale className="w-16 h-16 stroke-[1]" />,
+  'fa-laptop': <Laptop className="w-16 h-16 stroke-[1]" />,
+  'fa-language': <Languages className="w-16 h-16 stroke-[1]" />,
+  'fa-graduation-cap': <GraduationCap className="w-16 h-16 stroke-[1]" />,
+  'fa-calendar-alt': <CalendarDays className="w-16 h-16 stroke-[1]" />,
+  'fa-store': <Store className="w-16 h-16 stroke-[1]" />,
+  'fa-hands': <Handshake className="w-16 h-16 stroke-[1]" />,
+  'fa-om': <Flower2 className="w-16 h-16 stroke-[1]" />,
+  'fa-palette': <Palette className="w-16 h-16 stroke-[1]" />,
+  'fa-users': <Users className="w-16 h-16 stroke-[1]" />,
+  'fa-wheat': <Wheat className="w-16 h-16 stroke-[1]" />,
+  'fa-film': <Film className="w-16 h-16 stroke-[1]" />,
+  'fa-music': <Music className="w-16 h-16 stroke-[1]" />,
+  'fa-calendar': <CalendarDays className="w-16 h-16 stroke-[1]" />,
+  'fa-chalkboard-teacher': <GraduationCap className="w-16 h-16 stroke-[1]" />,
+};
+
+// Small icon variant for event sidebar
+const serviceIconMapSm: Record<string, React.ReactNode> = {
+  'fa-store': <Store className="w-4 h-4 stroke-[1.5]" />,
+  'fa-calendar': <CalendarDays className="w-4 h-4 stroke-[1.5]" />,
+  'fa-calendar-alt': <CalendarDays className="w-4 h-4 stroke-[1.5]" />,
+  'fa-chalkboard-teacher': <GraduationCap className="w-4 h-4 stroke-[1.5]" />,
+  'fa-palette': <Palette className="w-4 h-4 stroke-[1.5]" />,
+  'fa-music': <Music className="w-4 h-4 stroke-[1.5]" />,
+  'fa-utensils': <Utensils className="w-4 h-4 stroke-[1.5]" />,
+  'fa-hands': <Handshake className="w-4 h-4 stroke-[1.5]" />,
+  'fa-om': <Flower2 className="w-4 h-4 stroke-[1.5]" />,
+  'fa-users': <Users className="w-4 h-4 stroke-[1.5]" />,
+  'fa-film': <Film className="w-4 h-4 stroke-[1.5]" />,
+  'fa-wheat': <Wheat className="w-4 h-4 stroke-[1.5]" />,
+  'fa-spa': <Sparkles className="w-4 h-4 stroke-[1.5]" />,
+};
 
 const ServicesPage = () => {
   const { isMobile } = useMobileDetect();
@@ -256,13 +406,13 @@ const ServicesPage = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <i className="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                  <Search className="w-5 h-5 stroke-[1.5] absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      <i className="fas fa-times text-xl"></i>
+                      <X className="w-5 h-5 stroke-[1.5]" />
                     </button>
                   )}
                 </div>
@@ -274,7 +424,7 @@ const ServicesPage = () => {
                   onClick={() => setShowFilters(true)}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-gray-200"
                 >
-                  <i className="fas fa-filter"></i>
+                  <Filter className="w-4 h-4 stroke-[1.5]" />
                   <span>Filters</span>
                   {showOnlyActive && (
                     <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">1</span>
@@ -312,7 +462,7 @@ const ServicesPage = () => {
                   backgroundColor: selectedCategory === 'all' ? '#478c0b' : undefined
                 }}
               >
-                <i className="fas fa-th-large"></i>
+                <LayoutGrid className="w-4 h-4 stroke-[1.5]" />
                 <span>All Services</span>
                 <span className="bg-white/20 px-1.5 py-0.5 rounded-full text-xs">
                   {filteredServices.length}
@@ -336,7 +486,7 @@ const ServicesPage = () => {
                       backgroundColor: selectedCategory === category.id ? category.color : undefined
                     }}
                   >
-                    <i className={`fas ${category.icon}`}></i>
+                    {serviceIconMap[category.icon] || <LayoutGrid className="w-5 h-5 stroke-[1.5]" />}
                     <span className="whitespace-nowrap">{category.name}</span>
                     <span className="bg-white/20 px-1.5 py-0.5 rounded-full text-xs flex-shrink-0">
                       {activeCount}/{categoryServices.length}
@@ -357,13 +507,13 @@ const ServicesPage = () => {
                 <div className="md:col-span-1">
                   <div className="bg-white rounded-xl shadow-lg p-6 sticky" style={{ top: '120px' }}>
                     <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-                      <i className="fas fa-calendar-alt" style={{ color: '#f6af0d' }}></i>
+                      <CalendarDays className="w-5 h-5 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                       Upcoming Events
                     </h3>
                     
                     {loadingEvents ? (
                       <div className="text-center py-4">
-                        <i className="fas fa-spinner fa-spin text-gray-400"></i>
+                        <Loader2 className="w-5 h-5 stroke-[1.5] text-gray-400 animate-spin" />
                       </div>
                     ) : upcomingEvents.length > 0 ? (
                       <div className="space-y-4">
@@ -386,8 +536,8 @@ const ServicesPage = () => {
                               className="block p-4 rounded-lg border-2 border-gray-100 hover:border-yellow-400 transition-all hover:shadow-md cursor-pointer"
                             >
                               <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#f6af0d20' }}>
-                                  <i className={`fas ${eventIcon} text-sm`} style={{ color: '#f6af0d' }}></i>
+                                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#f6af0d20', color: '#f6af0d' }}>
+                                  {serviceIconMapSm[eventIcon] || <CalendarDays className="w-4 h-4 stroke-[1.5]" />}
                                 </div>
                                 <div className="flex-1">
                                   <h4 className="font-semibold text-sm" style={{ color: '#3a3a1d' }}>{eventName}</h4>
@@ -426,7 +576,7 @@ const ServicesPage = () => {
                 {isMobile && upcomingEvents.length > 0 && (
                   <div className="mb-6">
                     <h3 className="text-lg font-bold mb-3 flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-                      <i className="fas fa-calendar-alt" style={{ color: '#f6af0d' }}></i>
+                      <CalendarDays className="w-5 h-5 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                       Upcoming Events
                     </h3>
                     <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4">
@@ -445,8 +595,8 @@ const ServicesPage = () => {
                             className="flex-shrink-0 w-64 p-4 bg-white rounded-lg border-2 border-gray-100 hover:border-yellow-400 transition-all cursor-pointer"
                           >
                             <div className="flex items-center gap-3 mb-2">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f6af0d20' }}>
-                                <i className={`fas ${eventIcon} text-xs`} style={{ color: '#f6af0d' }}></i>
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#f6af0d20', color: '#f6af0d' }}>
+                                {serviceIconMapSm[eventIcon] || <CalendarDays className="w-4 h-4 stroke-[1.5]" />}
                               </div>
                               <h4 className="font-semibold text-sm line-clamp-1" style={{ color: '#3a3a1d' }}>{eventName}</h4>
                             </div>
@@ -487,13 +637,15 @@ const ServicesPage = () => {
                           >
                             {/* Background Pattern */}
                             <div className="absolute inset-0 opacity-10">
-                              <i className={`fas ${service.icon} text-6xl absolute -right-4 -top-4 transform rotate-12`}></i>
+                              <span className="absolute -right-4 -top-4 transform rotate-12">
+                                {serviceIconMapXl[service.icon] || <LayoutGrid className="w-16 h-16 stroke-[1]" />}
+                              </span>
                             </div>
                             
                             <div className="relative z-10">
                               <div className="flex items-start justify-between mb-3">
                                 <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                  <i className={`fas ${service.icon} text-2xl`}></i>
+                                  {serviceIconMapLg[service.icon] || <LayoutGrid className="w-7 h-7 stroke-[1.5]" />}
                                 </div>
                                 {service.featured && (
                                   <span className="bg-yellow-400 text-gray-800 px-3 py-1 rounded-full text-xs font-semibold">
@@ -509,10 +661,10 @@ const ServicesPage = () => {
                                 <div className="flex items-center gap-2 mt-3">
                                   <div className="flex gap-1">
                                     {[...Array(5)].map((_, i) => (
-                                      <i 
-                                        key={i} 
-                                        className={`fas fa-star text-xs ${i < Math.floor(service.rating!) ? 'text-yellow-300' : 'text-white/30'}`}
-                                      ></i>
+                                      <Star
+                                        key={i}
+                                        className={`w-3 h-3 ${i < Math.floor(service.rating!) ? 'text-yellow-300 fill-current' : 'text-white/30'}`}
+                                      />
                                     ))}
                                   </div>
                                   <span className="text-xs">({service.reviewCount} reviews)</span>
@@ -529,7 +681,7 @@ const ServicesPage = () => {
                             <div className="space-y-3 mb-4">
                               {service.operatingHours && (
                                 <div className="flex items-center gap-3 text-sm">
-                                  <i className="fas fa-clock" style={{ color: '#478c0b', width: '20px' }}></i>
+                                  <Clock className="w-5 h-5 stroke-[1.5] flex-shrink-0" style={{ color: '#478c0b' }} />
                                   <span className="text-gray-600">
                                     {service.operatingHours.sunday || 'Hours vary - contact for details'}
                                   </span>
@@ -538,14 +690,14 @@ const ServicesPage = () => {
                               
                               {service.location && (
                                 <div className="flex items-center gap-3 text-sm">
-                                  <i className="fas fa-map-marker-alt" style={{ color: '#f6af0d', width: '20px' }}></i>
+                                  <MapPin className="w-5 h-5 stroke-[1.5] flex-shrink-0" style={{ color: '#f6af0d' }} />
                                   <span className="text-gray-600">{service.location.area}</span>
                                 </div>
                               )}
                               
                               {service.priceRange && (
                                 <div className="flex items-center gap-3 text-sm">
-                                  <i className="fas fa-shekel-sign" style={{ color: '#c23c09', width: '20px' }}></i>
+                                  <Coins className="w-5 h-5 stroke-[1.5] flex-shrink-0" style={{ color: '#c23c09' }} />
                                   <span className="text-gray-600">{service.priceRange}</span>
                                 </div>
                               )}
@@ -586,15 +738,15 @@ const ServicesPage = () => {
                                   {service.contact.phone && (
                                     <a
                                       href={`tel:${service.contact.phone}`}
-                                      className="px-4 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all"
+                                      className="px-4 py-3 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all flex items-center justify-center"
                                     >
-                                      <i className="fas fa-phone"></i>
+                                      <Phone className="w-4 h-4 stroke-[1.5]" />
                                     </a>
                                   )}
                                 </>
                               ) : (
-                                <div className="flex-1 py-3 rounded-lg font-medium text-center bg-gray-100 text-gray-500">
-                                  <i className="fas fa-clock mr-2"></i>
+                                <div className="flex-1 py-3 rounded-lg font-medium text-center bg-gray-100 text-gray-500 inline-flex items-center justify-center gap-2">
+                                  <Clock className="w-4 h-4 stroke-[1.5]" />
                                   Coming Soon
                                 </div>
                               )}
@@ -606,7 +758,7 @@ const ServicesPage = () => {
                   </div>
                 ) : (
                   <div className="text-center py-16">
-                    <i className="fas fa-search text-6xl text-gray-300 mb-4"></i>
+                    <Search className="w-16 h-16 stroke-[1] text-gray-300 mb-4 mx-auto" />
                     <h3 className="text-2xl font-bold text-gray-600 mb-2">No services found</h3>
                     <p className="text-gray-500">Try adjusting your search or filters</p>
                   </div>
@@ -644,7 +796,7 @@ const ServicesPage = () => {
                   className="px-8 py-4 rounded-xl text-white font-semibold hover:shadow-lg transition-all"
                   style={{ backgroundColor: '#478c0b' }}
                 >
-                  <i className="fas fa-plus-circle mr-2"></i>
+                  <PlusCircle className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                   Add Your Service
                 </Link>
                 <Link
@@ -655,7 +807,7 @@ const ServicesPage = () => {
                     color: '#f6af0d'
                   }}
                 >
-                  <i className="fas fa-info-circle mr-2"></i>
+                  <Info className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                   Learn More
                 </Link>
               </div>
@@ -719,12 +871,12 @@ const ServicesPage = () => {
                     onClick={() => setShowEventModal(false)}
                     className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all"
                   >
-                    <i className="fas fa-times text-white"></i>
+                    <X className="w-5 h-5 stroke-[1.5] text-white" />
                   </button>
                   
                   {/* Event Category Badge */}
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-4">
-                    <i className={`fas ${selectedEvent.category_icon || 'fa-calendar'} text-sm`}></i>
+                    {serviceIconMapSm[selectedEvent.category_icon || 'fa-calendar'] || <CalendarDays className="w-4 h-4 stroke-[1.5]" />}
                     <span className="text-sm font-medium capitalize">
                       {selectedEvent.category_name || selectedEvent.category || 'Event'}
                     </span>
@@ -745,7 +897,7 @@ const ServicesPage = () => {
                   <div className="grid md:grid-cols-3 gap-4 mb-8">
                     {/* Date & Time Card */}
                     <div className="bg-gray-50 rounded-xl p-4 text-center">
-                      <i className="fas fa-calendar-alt text-2xl mb-2" style={{ color: '#f6af0d' }}></i>
+                      <CalendarDays className="w-7 h-7 stroke-[1.5] mb-2" style={{ color: '#f6af0d' }} />
                       <h4 className="font-semibold" style={{ color: '#3a3a1d' }}>Date & Time</h4>
                       <p className="text-sm font-semibold text-gray-700 mt-1">
                         {getHebrewDay(selectedEvent.start_date || selectedEvent.event?.date || 'Upcoming')}
@@ -758,7 +910,7 @@ const ServicesPage = () => {
                       </p>
                       {selectedEvent.recurrence_rule && (
                         <p className="text-xs text-green-600 mt-2">
-                          <i className="fas fa-sync mr-1"></i>
+                          <RefreshCw className="w-3 h-3 stroke-[1.5] mr-1 inline-block" />
                           {selectedEvent.recurrence_rule === 'weekly' ? 'Every week' : selectedEvent.recurrence_rule}
                         </p>
                       )}
@@ -766,7 +918,7 @@ const ServicesPage = () => {
                     
                     {/* Location Card */}
                     <div className="bg-gray-50 rounded-xl p-4 text-center">
-                      <i className="fas fa-map-marker-alt text-2xl mb-2" style={{ color: '#c23c09' }}></i>
+                      <MapPin className="w-7 h-7 stroke-[1.5] mb-2" style={{ color: '#c23c09' }} />
                       <h4 className="font-semibold" style={{ color: '#3a3a1d' }}>Location</h4>
                       <p className="text-sm text-gray-600 mt-1">
                         {selectedEvent.venue_name || 'Community Center'}
@@ -778,14 +930,14 @@ const ServicesPage = () => {
                     
                     {/* Price Card */}
                     <div className="bg-gray-50 rounded-xl p-4 text-center">
-                      <i className="fas fa-ticket-alt text-2xl mb-2" style={{ color: '#478c0b' }}></i>
+                      <Ticket className="w-7 h-7 stroke-[1.5] mb-2" style={{ color: '#478c0b' }} />
                       <h4 className="font-semibold" style={{ color: '#3a3a1d' }}>Entry</h4>
                       <p className="text-sm text-gray-600 mt-1">
                         {selectedEvent.is_free ? 'Free Entry' : (selectedEvent.price_range || selectedEvent.priceRange || 'Contact for pricing')}
                       </p>
                       {selectedEvent.registration_required && (
                         <p className="text-xs text-orange-600 mt-2">
-                          <i className="fas fa-user-check mr-1"></i>
+                          <UserCheck className="w-3 h-3 stroke-[1.5] mr-1 inline-block" />
                           Registration required
                         </p>
                       )}
@@ -808,7 +960,7 @@ const ServicesPage = () => {
                         <div className="grid md:grid-cols-2 gap-3">
                           {selectedEvent.special_features.map((feature: string, index: number) => (
                             <div key={index} className="flex items-center gap-2">
-                              <i className="fas fa-check-circle" style={{ color: '#478c0b' }}></i>
+                              <CheckCircle className="w-4 h-4 stroke-[1.5] flex-shrink-0" style={{ color: '#478c0b' }} />
                               <span className="text-gray-600">{feature}</span>
                             </div>
                           ))}
@@ -847,7 +999,7 @@ const ServicesPage = () => {
                             href={`tel:${selectedEvent.contact_phone}`}
                             className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors"
                           >
-                            <i className="fas fa-phone"></i>
+                            <Phone className="w-4 h-4 stroke-[1.5]" />
                             <span>{selectedEvent.contact_phone}</span>
                           </a>
                         )}
@@ -856,7 +1008,7 @@ const ServicesPage = () => {
                             href={`mailto:${selectedEvent.contact_email}`}
                             className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors"
                           >
-                            <i className="fas fa-envelope"></i>
+                            <Mail className="w-4 h-4 stroke-[1.5]" />
                             <span>Email</span>
                           </a>
                         )}
@@ -880,7 +1032,7 @@ const ServicesPage = () => {
                             className="px-6 py-3 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
                             style={{ backgroundColor: '#478c0b' }}
                           >
-                            <i className="fas fa-user-plus mr-2"></i>
+                            <UserPlus className="w-4 h-4 stroke-[1.5] mr-2 inline-block" />
                             Register Now
                           </button>
                         ) : (
@@ -891,7 +1043,7 @@ const ServicesPage = () => {
                               color: '#f6af0d'
                             }}
                           >
-                            <i className="fas fa-calendar-plus mr-2"></i>
+                            <CalendarPlus className="w-4 h-4 stroke-[1.5] mr-2 inline-block" />
                             Add to Calendar
                           </button>
                         )}

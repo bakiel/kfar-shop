@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { AI } from '@/lib/services/ai';
 import { SmartQRContent } from '@/lib/services/ai/types';
-import { QrCode, Download, Copy, Share2 } from 'lucide-react';
+import { QrCode, Download, Copy, Share2, Package, Store, ShoppingCart, MapPin, Handshake, ChevronUp, ChevronDown, AlertCircle, ShieldCheck, Brain } from 'lucide-react';
 
 interface SmartQRGeneratorProps {
   type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
@@ -178,14 +178,14 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
   };
 
   const getQRTypeInfo = () => {
-    const typeInfo = {
-      product: { icon: 'fa-box', color: '#478c0b', label: 'Product QR' },
-      vendor: { icon: 'fa-store', color: '#f6af0d', label: 'Vendor QR' },
-      order: { icon: 'fa-shopping-cart', color: '#c23c09', label: 'Order QR' },
-      collection: { icon: 'fa-map-marker-alt', color: '#5C6BC0', label: 'Collection QR' },
-      p2p: { icon: 'fa-handshake', color: '#00897B', label: 'P2P Exchange QR' }
+    const typeInfo: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
+      product: { icon: <Package className="w-5 h-5 stroke-[1.5]" />, color: '#478c0b', label: 'Product QR' },
+      vendor: { icon: <Store className="w-5 h-5 stroke-[1.5]" />, color: '#f6af0d', label: 'Vendor QR' },
+      order: { icon: <ShoppingCart className="w-5 h-5 stroke-[1.5]" />, color: '#c23c09', label: 'Order QR' },
+      collection: { icon: <MapPin className="w-5 h-5 stroke-[1.5]" />, color: '#5C6BC0', label: 'Collection QR' },
+      p2p: { icon: <Handshake className="w-5 h-5 stroke-[1.5]" />, color: '#00897B', label: 'P2P Exchange QR' }
     };
-    return typeInfo[type] || { icon: 'fa-qrcode', color: '#000000', label: 'QR Code' };
+    return typeInfo[type] || { icon: <QrCode className="w-5 h-5 stroke-[1.5]" />, color: '#000000', label: 'QR Code' };
   };
 
   const typeInfo = getQRTypeInfo();
@@ -199,7 +199,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
             className="w-12 h-12 rounded-lg flex items-center justify-center text-white"
             style={{ backgroundColor: typeInfo.color }}
           >
-            <i className={`fas ${typeInfo.icon} text-xl`}></i>
+            {typeInfo.icon}
           </div>
           <div>
             <h3 className="text-lg font-semibold" style={{ color: '#3a3a1d' }}>
@@ -217,7 +217,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
           onClick={() => setShowDetails(!showDetails)}
           className="text-gray-400 hover:text-gray-600 transition-colors"
         >
-          <i className={`fas fa-chevron-${showDetails ? 'up' : 'down'}`}></i>
+          {showDetails ? <ChevronUp className="w-5 h-5 stroke-[1.5]" /> : <ChevronDown className="w-5 h-5 stroke-[1.5]" />}
         </button>
       </div>
 
@@ -250,7 +250,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
                   className="flex flex-col items-center justify-center text-red-600" 
                   style={{ width: size, height: size }}
                 >
-                  <i className="fas fa-exclamation-circle text-3xl mb-2"></i>
+                  <AlertCircle className="w-8 h-8 stroke-[1.5] mb-2" />
                   <p className="text-sm">{error}</p>
                 </div>
               </div>
@@ -325,7 +325,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
             <div>
               <span className="text-gray-500">Security:</span>
               <p className="font-medium text-green-600">
-                <i className="fas fa-shield-alt mr-1"></i>
+                <ShieldCheck className="w-4 h-4 stroke-[1.5] inline mr-1" />
                 Digitally Signed
               </p>
             </div>
@@ -333,7 +333,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
             <div>
               <span className="text-gray-500">AI Features:</span>
               <p className="font-medium text-blue-600">
-                <i className="fas fa-brain mr-1"></i>
+                <Brain className="w-4 h-4 stroke-[1.5] inline mr-1" />
                 Enhanced
               </p>
             </div>

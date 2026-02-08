@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, ExternalLink, Plus, Search, Star, Eye, Pencil, Pause, Play, Trash2, Package, CheckCircle, AlertTriangle, XCircle, Save } from 'lucide-react';
 
 export default function VendorProductsPage() {
   const router = useRouter();
@@ -268,7 +269,7 @@ export default function VendorProductsPage() {
         <div className="flex items-center gap-4 mb-4">
           <Link href="/vendor/admin">
             <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Back to Dashboard">
-              <i className="fas fa-arrow-left text-[#478c0b]"></i>
+              <ArrowLeft className="w-5 h-5 stroke-[1.5] text-[#478c0b]" />
             </button>
           </Link>
           <nav className="text-sm text-gray-600">
@@ -287,13 +288,13 @@ export default function VendorProductsPage() {
           <div className="flex items-center gap-3">
             <Link href={`/store/${vendorId}`} target="_blank">
               <button className="px-4 py-2 border border-[#478c0b] text-[#478c0b] rounded-lg hover:bg-[#478c0b] hover:text-white transition-colors flex items-center gap-2">
-                <i className="fas fa-external-link-alt"></i>
+                <ExternalLink className="w-4 h-4 stroke-[1.5]" />
                 View Store
               </button>
             </Link>
             <Link href="/vendor/admin/products/add">
               <button className="px-6 py-2 bg-leaf-green text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2">
-                <i className="fas fa-plus"></i>
+                <Plus className="w-4 h-4 stroke-[1.5]" />
                 Add New Product
               </button>
             </Link>
@@ -322,7 +323,7 @@ export default function VendorProductsPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:border-leaf-green focus:outline-none"
                 />
-                <i className="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                <Search className="w-4 h-4 stroke-[1.5] absolute left-3 top-3 text-gray-400" />
               </div>
             </div>
             <select
@@ -702,7 +703,7 @@ export default function VendorProductsPage() {
                                   </>
                                 ) : (
                                   <>
-                                    <i className="fas fa-save"></i>
+                                    <Save className="w-4 h-4 stroke-[1.5]" />
                                     Save Changes
                                   </>
                                 )}
@@ -769,7 +770,7 @@ export default function VendorProductsPage() {
                           <div className="flex items-center gap-1">
                             <div className="flex" style={{ color: '#f6af0d' }}>
                               {[...Array(5)].map((_, i) => (
-                                <i key={i} className={`fas fa-star text-xs ${i < Math.floor(product.rating) ? '' : 'text-gray-300'}`}></i>
+                                <Star key={i} className={`w-3 h-3 ${i < Math.floor(product.rating) ? 'fill-current' : 'text-gray-300'}`} />
                               ))}
                             </div>
                             <span className="text-sm text-gray-500">({product.reviewCount})</span>
@@ -782,7 +783,7 @@ export default function VendorProductsPage() {
                                 className="p-2 text-gray-600 hover:text-leaf-green transition-colors"
                                 title="View Product"
                               >
-                                <i className="fas fa-eye"></i>
+                                <Eye className="w-4 h-4 stroke-[1.5]" />
                               </button>
                             </Link>
                             <button
@@ -790,21 +791,21 @@ export default function VendorProductsPage() {
                               className="p-2 text-gray-600 hover:text-leaf-green transition-colors"
                               title="Edit Product"
                             >
-                              <i className="fas fa-edit"></i>
+                              <Pencil className="w-4 h-4 stroke-[1.5]" />
                             </button>
                             <button
                               onClick={() => toggleProductStatus(product.id)}
                               className="p-2 text-gray-600 hover:text-sun-gold transition-colors"
                               title="Toggle Status"
                             >
-                              <i className={`fas fa-${product.status === 'active' ? 'pause' : 'play'}`}></i>
+                              {product.status === 'active' ? <Pause className="w-4 h-4 stroke-[1.5]" /> : <Play className="w-4 h-4 stroke-[1.5]" />}
                             </button>
                             <button
                               onClick={() => deleteProduct(product.id)}
                               className="p-2 text-gray-600 hover:text-red-500 transition-colors"
                               title="Delete Product"
                             >
-                              <i className="fas fa-trash"></i>
+                              <Trash2 className="w-4 h-4 stroke-[1.5]" />
                             </button>
                           </div>
                         </td>
@@ -819,7 +820,7 @@ export default function VendorProductsPage() {
           {/* Empty State */}
           {filteredProducts.length === 0 && (
             <div className="text-center py-12">
-              <i className="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
+              <Package className="w-10 h-10 stroke-[1.5] text-gray-300 mb-4 mx-auto" />
               <p className="text-gray-500">No products found</p>
             </div>
           )}
@@ -833,7 +834,7 @@ export default function VendorProductsPage() {
                 <p className="text-sm text-gray-600">Total Products</p>
                 <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>{products.length}</p>
               </div>
-              <i className="fas fa-box text-2xl text-gray-300"></i>
+              <Package className="w-6 h-6 stroke-[1.5] text-gray-300" />
             </div>
           </div>
           <div className="bg-white rounded-lg p-4 shadow">
@@ -844,7 +845,7 @@ export default function VendorProductsPage() {
                   {products.filter(p => p.status === 'active').length}
                 </p>
               </div>
-              <i className="fas fa-check-circle text-2xl text-green-300"></i>
+              <CheckCircle className="w-6 h-6 stroke-[1.5] text-green-300" />
             </div>
           </div>
           <div className="bg-white rounded-lg p-4 shadow">
@@ -855,7 +856,7 @@ export default function VendorProductsPage() {
                   {products.filter(p => p.stock < 10 && p.stock > 0).length}
                 </p>
               </div>
-              <i className="fas fa-exclamation-triangle text-2xl text-orange-300"></i>
+              <AlertTriangle className="w-6 h-6 stroke-[1.5] text-orange-300" />
             </div>
           </div>
           <div className="bg-white rounded-lg p-4 shadow">
@@ -866,7 +867,7 @@ export default function VendorProductsPage() {
                   {products.filter(p => p.stock === 0).length}
                 </p>
               </div>
-              <i className="fas fa-times-circle text-2xl text-red-300"></i>
+              <XCircle className="w-6 h-6 stroke-[1.5] text-red-300" />
             </div>
           </div>
         </div>

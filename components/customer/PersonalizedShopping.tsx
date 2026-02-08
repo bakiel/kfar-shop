@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
+import { Sparkles, Wand2, Package, Eye, ArrowRight, Lightbulb, Clock, PiggyBank, Leaf } from 'lucide-react';
 
 interface PersonalizedShoppingProps {
   customerId: string;
@@ -156,7 +157,7 @@ export default function PersonalizedShopping({ customerId, customerName }: Perso
           className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg p-6 text-white"
         >
           <h3 className="text-xl font-bold mb-4">
-            <i className="fas fa-sparkles mr-2" />
+            <Sparkles className="w-5 h-5 stroke-[1.5] mr-2 inline" />
             Exclusive Deals for You
           </h3>
           
@@ -195,7 +196,7 @@ export default function PersonalizedShopping({ customerId, customerName }: Perso
       <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold">
-            <i className="fas fa-magic mr-2 text-purple-600" />
+            <Wand2 className="w-5 h-5 stroke-[1.5] mr-2 text-purple-600 inline" />
             Recommended for {customerName.split(' ')[0]}
           </h3>
           <button className="text-sm text-green-600 hover:text-green-700 font-medium">
@@ -217,7 +218,7 @@ export default function PersonalizedShopping({ customerId, customerName }: Perso
                 <div className="aspect-square bg-gray-100 relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-blue-100 opacity-50" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <i className="fas fa-box text-4xl text-gray-400" />
+                    <Package className="w-10 h-10 stroke-[1.5] text-gray-400" />
                   </div>
                   
                   {product.discount && (
@@ -269,7 +270,7 @@ export default function PersonalizedShopping({ customerId, customerName }: Perso
                       href={`/product/${product.id}`}
                       className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <i className="fas fa-eye text-gray-600" />
+                      <Eye className="w-4 h-4 stroke-[1.5] text-gray-600" />
                     </Link>
                   </div>
                 </div>
@@ -285,7 +286,7 @@ export default function PersonalizedShopping({ customerId, customerName }: Perso
             className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium"
           >
             <span>View All Personalized Recommendations</span>
-            <i className="fas fa-arrow-right" />
+            <ArrowRight className="w-4 h-4 stroke-[1.5]" />
           </Link>
         </div>
       </div>
@@ -293,29 +294,29 @@ export default function PersonalizedShopping({ customerId, customerName }: Perso
       {/* Shopping Tips */}
       <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6">
         <h3 className="text-lg font-semibold mb-4">
-          <i className="fas fa-lightbulb text-yellow-500 mr-2" />
+          <Lightbulb className="w-5 h-5 stroke-[1.5] text-yellow-500 mr-2 inline" />
           Smart Shopping Tips
         </h3>
         
         <div className="grid md:grid-cols-3 gap-4 text-sm">
           <div className="flex items-start gap-3">
-            <i className="fas fa-clock text-green-600 mt-1" />
+            <Clock className="w-5 h-5 stroke-[1.5] text-green-600 mt-1 flex-shrink-0" />
             <div>
               <h4 className="font-medium">Best Time to Shop</h4>
               <p className="text-gray-600">Sunday mornings have the freshest products</p>
             </div>
           </div>
-          
+
           <div className="flex items-start gap-3">
-            <i className="fas fa-piggy-bank text-green-600 mt-1" />
+            <PiggyBank className="w-5 h-5 stroke-[1.5] text-green-600 mt-1 flex-shrink-0" />
             <div>
               <h4 className="font-medium">Save More</h4>
               <p className="text-gray-600">Bundle similar items for extra discounts</p>
             </div>
           </div>
-          
+
           <div className="flex items-start gap-3">
-            <i className="fas fa-leaf text-green-600 mt-1" />
+            <Leaf className="w-5 h-5 stroke-[1.5] text-green-600 mt-1 flex-shrink-0" />
             <div>
               <h4 className="font-medium">Go Green</h4>
               <p className="text-gray-600">Choose vendors with eco-friendly packaging</p>

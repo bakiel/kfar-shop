@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
+import { Loader2 } from 'lucide-react';
 
 type PromotionType = 'flash_sale' | 'vendor_special' | 'new_arrival' | 'limited_stock' | 'bundle_deal';
 
@@ -410,7 +411,7 @@ export default function PromotionSubmissionForm({ vendorId }: { vendorId: string
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <i className="fas fa-spinner fa-spin" />
+                  <Loader2 className="w-5 h-5 stroke-[1.5] animate-spin" />
                   Submitting...
                 </span>
               ) : (

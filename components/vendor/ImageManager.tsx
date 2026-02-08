@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { Upload, Crop, Settings, CheckCircle, AlertCircle, Pencil, Trash2, RotateCw, Info } from 'lucide-react';
 
 export interface ManagedImage {
   id: string;
@@ -42,15 +43,15 @@ export default function ImageManager({ images, onEdit, onRemove, onRetry }: Imag
   const getStatusIcon = (status: ManagedImage['status']) => {
     switch (status) {
       case 'uploading':
-        return <i className="fas fa-upload text-blue-500 animate-pulse" />;
+        return <Upload className="w-5 h-5 stroke-[1.5] text-blue-500 animate-pulse" />;
       case 'cropping':
-        return <i className="fas fa-crop text-yellow-500 animate-pulse" />;
+        return <Crop className="w-5 h-5 stroke-[1.5] text-yellow-500 animate-pulse" />;
       case 'processing':
-        return <i className="fas fa-cog text-purple-500 animate-spin" />;
+        return <Settings className="w-5 h-5 stroke-[1.5] text-purple-500 animate-spin" />;
       case 'ready':
-        return <i className="fas fa-check-circle text-green-500" />;
+        return <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500" />;
       case 'error':
-        return <i className="fas fa-exclamation-circle text-red-500" />;
+        return <AlertCircle className="w-5 h-5 stroke-[1.5] text-red-500" />;
     }
   };
 
@@ -158,14 +159,14 @@ export default function ImageManager({ images, onEdit, onRemove, onRetry }: Imag
                         onClick={() => onEdit(image.id)}
                         className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                       >
-                        <i className="fas fa-edit mr-1"></i>
+                        <Pencil className="w-4 h-4 stroke-[1.5] inline mr-1" />
                         Re-crop
                       </button>
                       <button
                         onClick={() => onRemove(image.id)}
                         className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
                       >
-                        <i className="fas fa-trash mr-1"></i>
+                        <Trash2 className="w-4 h-4 stroke-[1.5] inline mr-1" />
                         Remove
                       </button>
                     </>
@@ -176,7 +177,7 @@ export default function ImageManager({ images, onEdit, onRemove, onRetry }: Imag
                       onClick={() => onRetry(image.id)}
                       className="px-3 py-1 text-sm bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors"
                     >
-                      <i className="fas fa-redo mr-1"></i>
+                      <RotateCw className="w-4 h-4 stroke-[1.5] inline mr-1" />
                       Retry
                     </button>
                   )}
@@ -190,7 +191,7 @@ export default function ImageManager({ images, onEdit, onRemove, onRetry }: Imag
       {/* Summary */}
       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
         <div className="flex items-center gap-2 text-sm">
-          <i className="fas fa-info-circle text-blue-600"></i>
+          <Info className="w-5 h-5 stroke-[1.5] text-blue-600 flex-shrink-0" />
           <p className="text-blue-800">
             {images.filter(img => img.status === 'ready').length} of {images.length} images ready.
             All images are automatically converted to JPEG format with optimized file sizes.

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { VOPComplianceService } from '@/lib/services/vop-compliance-service';
+import { Leaf, CheckCircle, Heart, Shirt, AlertTriangle } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -79,7 +80,7 @@ export default function VOPComplianceDashboard({ products }: VOPComplianceDashbo
           VOP Dietary Compliance
         </h2>
         <div className="flex items-center gap-2">
-          <i className="fas fa-leaf text-2xl" style={{ color: '#478c0b' }}></i>
+          <Leaf className="w-6 h-6 stroke-[1.5]" style={{ color: '#478c0b' }} />
           <span className="text-sm font-medium text-gray-600">Village of Peace Standards</span>
         </div>
       </div>
@@ -146,7 +147,7 @@ export default function VOPComplianceDashboard({ products }: VOPComplianceDashbo
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h4 className="font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <i className="fas fa-check-circle text-green-600"></i>
+                <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-600" />
                 Key Principles
               </h4>
               <ul className="space-y-1 text-sm text-gray-600">
@@ -161,7 +162,7 @@ export default function VOPComplianceDashboard({ products }: VOPComplianceDashbo
             
             <div>
               <h4 className="font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <i className="fas fa-heart text-red-600"></i>
+                <Heart className="w-5 h-5 stroke-[1.5] text-red-600" />
                 Health Focus
               </h4>
               <ul className="space-y-1 text-sm text-gray-600">
@@ -182,7 +183,7 @@ export default function VOPComplianceDashboard({ products }: VOPComplianceDashbo
             {/* Dietary Section */}
             <div>
               <h4 className="font-medium text-gray-700 mb-3 flex items-center gap-2">
-                <i className="fas fa-leaf text-green-600"></i>
+                <Leaf className="w-5 h-5 stroke-[1.5] text-green-600" />
                 Food & Dietary Standards
               </h4>
               <div className="bg-green-50 rounded-lg p-4">
@@ -200,7 +201,7 @@ export default function VOPComplianceDashboard({ products }: VOPComplianceDashbo
             {/* Clothing Section */}
             <div>
               <h4 className="font-medium text-gray-700 mb-3 flex items-center gap-2">
-                <i className="fas fa-tshirt text-blue-600"></i>
+                <Shirt className="w-5 h-5 stroke-[1.5] text-blue-600" />
                 Clothing & Apparel Standards
               </h4>
               <div className="bg-blue-50 rounded-lg p-4">
@@ -233,7 +234,7 @@ export default function VOPComplianceDashboard({ products }: VOPComplianceDashbo
       {stats.needsReview > 0 && (
         <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
           <div className="flex items-start gap-3">
-            <i className="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+            <AlertTriangle className="w-5 h-5 stroke-[1.5] text-yellow-600 mt-1 flex-shrink-0" />
             <div>
               <p className="font-medium text-gray-800">
                 {stats.needsReview} product{stats.needsReview > 1 ? 's need' : ' needs'} review
@@ -250,7 +251,7 @@ export default function VOPComplianceDashboard({ products }: VOPComplianceDashbo
       {stats.complianceRate === 100 && (
         <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
           <div className="flex items-start gap-3">
-            <i className="fas fa-check-circle text-green-600 mt-1"></i>
+            <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-600 mt-1 flex-shrink-0" />
             <div>
               <p className="font-medium text-gray-800">
                 Excellent! All products are VOP compliant

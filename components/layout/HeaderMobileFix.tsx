@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { LayoutGrid, ConciergeBell, Info, Store, ArrowRight, ChevronDown, ShoppingCart, Menu, X, Home, MapPin } from 'lucide-react';
 
 const HeaderMobileFix = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,10 +17,10 @@ const HeaderMobileFix = () => {
       const scrollPosition = window.scrollY;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
-      
+
       setIsScrolled(scrollPosition > 50);
       setShowFloatingNav(scrollPosition > 300);
-      
+
       const scrollPercentage = (scrollPosition / (documentHeight - windowHeight)) * 100;
       setScrollProgress(Math.min(scrollPercentage, 100));
     };
@@ -71,8 +72,8 @@ const HeaderMobileFix = () => {
     <>
       {/* Main Header */}
       <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-500 ${
-        isScrolled 
-          ? 'bg-white shadow-2xl border-b-2 border-sun-gold/20' 
+        isScrolled
+          ? 'bg-white shadow-2xl border-b-2 border-sun-gold/20'
           : 'bg-gradient-to-b from-white/98 to-white/95 backdrop-blur-md'
       }`}>
         {/* Animated Background Pattern */}
@@ -87,8 +88,8 @@ const HeaderMobileFix = () => {
             <Link href="/" className="flex items-center gap-2 md:gap-3 group">
               <div className={`transition-all duration-500 ${isScrolled ? 'scale-90' : 'scale-100'}`}>
                 <Image
-                  src="/images/logos/kfar_logo_primary_horizontal.png" 
-                  alt="KiFar Marketplace" 
+                  src="/images/logos/kfar_logo_primary_horizontal.png"
+                  alt="KiFar Marketplace"
                   width={120}
                   height={36}
                   className="w-24 md:w-[120px] h-auto"
@@ -108,7 +109,7 @@ const HeaderMobileFix = () => {
                   <span className="text-soil-brown font-medium transition-all duration-500 inline-block group-hover:text-leaf-green transform group-hover:-translate-y-1 group-hover:scale-105">
                     Categories
                   </span>
-                  <i className="fas fa-th-large text-xs ml-1.5 inline-block opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0" style={{ color: '#478c0b' }}></i>
+                  <LayoutGrid className="w-3 h-3 stroke-[1.5] ml-1.5 inline-block opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0" style={{ color: '#478c0b' }} />
                 </span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-leaf-green to-sun-gold transition-all duration-500 group-hover:w-full" />
               </Link>
@@ -117,7 +118,7 @@ const HeaderMobileFix = () => {
                   <span className="text-soil-brown font-medium transition-all duration-500 inline-block group-hover:text-leaf-green transform group-hover:-translate-y-1 group-hover:scale-105">
                     Services
                   </span>
-                  <i className="fas fa-concierge-bell text-xs ml-1.5 inline-block opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0" style={{ color: '#478c0b' }}></i>
+                  <ConciergeBell className="w-3 h-3 stroke-[1.5] ml-1.5 inline-block opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0" style={{ color: '#478c0b' }} />
                 </span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-leaf-green to-sun-gold transition-all duration-500 group-hover:w-full" />
               </Link>
@@ -126,16 +127,16 @@ const HeaderMobileFix = () => {
                   <span className="text-soil-brown font-medium transition-all duration-500 inline-block group-hover:text-leaf-green transform group-hover:-translate-y-1 group-hover:scale-105">
                     About
                   </span>
-                  <i className="fas fa-info-circle text-xs ml-1.5 inline-block opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0" style={{ color: '#478c0b' }}></i>
+                  <Info className="w-3 h-3 stroke-[1.5] ml-1.5 inline-block opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0" style={{ color: '#478c0b' }} />
                 </span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-leaf-green to-sun-gold transition-all duration-500 group-hover:w-full" />
               </Link>
-              
+
               <Link href="/directory" className="relative group ml-2">
                 <button className="px-4 py-2 rounded-lg text-white font-medium text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-1.5" style={{ backgroundColor: '#f6af0d' }}>
-                  <i className="fas fa-store text-sm"></i>
+                  <Store className="w-4 h-4 stroke-[1.5]" />
                   <span>Marketplace</span>
-                  <i className="fas fa-arrow-right text-xs opacity-0 group-hover:opacity-100 -ml-1 group-hover:ml-0 transition-all duration-300"></i>
+                  <ArrowRight className="w-3 h-3 stroke-[1.5] opacity-0 group-hover:opacity-100 -ml-1 group-hover:ml-0 transition-all duration-300" />
                 </button>
               </Link>
             </nav>
@@ -159,25 +160,29 @@ const HeaderMobileFix = () => {
                   <option value="GBP" className="font-medium py-2">£ GBP</option>
                 </select>
                 <div className="absolute right-0 top-0 h-full px-3 flex items-center pointer-events-none border-l border-gray-200">
-                  <i className="fas fa-chevron-down text-xs transition-all duration-300 group-hover:text-sun-gold transform group-hover:rotate-180" style={{ color: '#6b7280' }}></i>
+                  <ChevronDown className="w-3 h-3 stroke-[1.5] transition-all duration-300 group-hover:text-sun-gold transform group-hover:rotate-180" style={{ color: '#6b7280' }} />
                 </div>
               </div>
 
               {/* Cart - Always Visible */}
               <button className="relative p-3 rounded-lg hover:bg-herbal-mint/20 transition-all duration-300 transform hover:scale-105 group min-w-[44px] min-h-[44px] flex items-center justify-center">
-                <i className="fas fa-shopping-cart text-lg md:text-xl text-soil-brown group-hover:text-leaf-green transition-all duration-300"></i>
+                <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 stroke-[1.5] text-soil-brown group-hover:text-leaf-green transition-all duration-300" />
                 <span className="absolute -top-1 -right-1 text-white text-xs w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center font-bold shadow-lg transition-all duration-300 group-hover:scale-110" style={{ backgroundColor: '#c23c09' }}>
                   0
                 </span>
               </button>
 
               {/* Mobile Menu Button */}
-              <button 
+              <button
                 className="lg:hidden p-3 rounded-lg hover:bg-herbal-mint/20 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center mobile-menu-button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle mobile menu"
               >
-                <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-xl text-soil-brown transition-all duration-300`}></i>
+                {mobileMenuOpen ? (
+                  <X className="w-6 h-6 stroke-[1.5] text-soil-brown transition-all duration-300" />
+                ) : (
+                  <Menu className="w-6 h-6 stroke-[1.5] text-soil-brown transition-all duration-300" />
+                )}
               </button>
             </div>
           </div>
@@ -192,18 +197,18 @@ const HeaderMobileFix = () => {
           {/* Mobile Menu Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <Image
-              src="/images/logos/kfar_logo_primary_horizontal.png" 
-              alt="KiFar Marketplace" 
+              src="/images/logos/kfar_logo_primary_horizontal.png"
+              alt="KiFar Marketplace"
               width={100}
               height={30}
               className="h-8 w-auto"
             />
-            <button 
+            <button
               onClick={() => setMobileMenuOpen(false)}
               className="p-3 rounded-lg hover:bg-gray-100 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Close mobile menu"
             >
-              <i className="fas fa-times text-xl text-soil-brown"></i>
+              <X className="w-6 h-6 stroke-[1.5] text-soil-brown" />
             </button>
           </div>
 
@@ -211,42 +216,42 @@ const HeaderMobileFix = () => {
           <div className="flex-1 overflow-y-auto py-6">
             {/* Main Navigation */}
             <nav className="px-4 space-y-2">
-              <Link 
-                href="/directory" 
+              <Link
+                href="/directory"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block"
               >
                 <div className="px-4 py-4 rounded-xl text-white font-semibold flex items-center gap-3 shadow-lg" style={{ backgroundColor: '#f6af0d' }}>
-                  <i className="fas fa-store text-lg"></i>
+                  <Store className="w-5 h-5 stroke-[1.5]" />
                   <span className="text-lg">Marketplace</span>
-                  <i className="fas fa-arrow-right ml-auto"></i>
+                  <ArrowRight className="w-5 h-5 stroke-[1.5] ml-auto" />
                 </div>
               </Link>
 
-              <Link 
-                href="/categories" 
+              <Link
+                href="/categories"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-4 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-3"
               >
-                <i className="fas fa-th-large text-lg" style={{ color: '#478c0b' }}></i>
+                <LayoutGrid className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
                 <span className="text-lg font-medium text-soil-brown">Categories</span>
               </Link>
 
-              <Link 
-                href="/services" 
+              <Link
+                href="/services"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-4 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-3"
               >
-                <i className="fas fa-concierge-bell text-lg" style={{ color: '#478c0b' }}></i>
+                <ConciergeBell className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
                 <span className="text-lg font-medium text-soil-brown">Services</span>
               </Link>
 
-              <Link 
-                href="/about" 
+              <Link
+                href="/about"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-4 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-3"
               >
-                <i className="fas fa-info-circle text-lg" style={{ color: '#478c0b' }}></i>
+                <Info className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
                 <span className="text-lg font-medium text-soil-brown">About</span>
               </Link>
             </nav>
@@ -286,7 +291,7 @@ const HeaderMobileFix = () => {
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
               <span>Village of Peace</span>
-              <span>•</span>
+              <span>-</span>
               <span>Est. 1967</span>
             </div>
           </div>
@@ -306,11 +311,11 @@ const HeaderMobileFix = () => {
                 The digital home of the <span className="font-semibold" style={{ color: '#478c0b' }}>Village of Peace</span>
               </p>
               <div className="flex items-center gap-2 text-xs mb-2" style={{ color: '#4b5563' }}>
-                <i className="fas fa-map-marker-alt" style={{ color: '#f6af0d' }}></i>
+                <MapPin className="w-3 h-3 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                 Kfar Hashalom, Dimona, Israel
               </div>
               <div className="text-xs font-bold" style={{ color: '#f6af0d' }}>
-                "The Whole Village, In Your Hand"
+                &quot;The Whole Village, In Your Hand&quot;
               </div>
             </div>
           </div>
@@ -363,13 +368,13 @@ const HeaderMobileFix = () => {
               />
             </svg>
           </div>
-          
+
           {/* Center Button with Logo */}
           <button className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center bg-white relative z-10 transition-all duration-300 border-2 group-hover:opacity-0 group-hover:scale-0" style={{ borderColor: '#f6af0d' }}>
             <Image
-              src="/images/logos/kfar_logo_africa_heritage.png" 
-              alt="KFAR Navigation" 
-              width={36} 
+              src="/images/logos/kfar_logo_africa_heritage.png"
+              alt="KFAR Navigation"
+              width={36}
               height={36}
               className="object-contain p-1 w-9 h-9 md:w-10 md:h-10"
             />
@@ -379,27 +384,27 @@ const HeaderMobileFix = () => {
         {/* Expanded State - Navigation Items */}
         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-3 bg-white rounded-full px-4 md:px-6 py-2 md:py-3 shadow-2xl opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 origin-bottom">
           <Link href="/" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item" style={{ backgroundColor: '#478c0b' }}>
-            <i className="fas fa-home text-base md:text-lg"></i>
+            <Home className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
           </Link>
 
           <Link href="/directory" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item animate-pulse" style={{ backgroundColor: '#f6af0d', animationDuration: '2s' }}>
-            <i className="fas fa-store text-base md:text-lg"></i>
+            <Store className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
           </Link>
 
           <Link href="/categories" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item" style={{ backgroundColor: '#f6af0d' }}>
-            <i className="fas fa-th-large text-base md:text-lg"></i>
+            <LayoutGrid className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
           </Link>
 
           <Link href="/services" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item" style={{ backgroundColor: '#c23c09' }}>
-            <i className="fas fa-concierge-bell text-base md:text-lg"></i>
+            <ConciergeBell className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
           </Link>
 
           <Link href="/about" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item" style={{ backgroundColor: '#cfe7c1' }}>
-            <i className="fas fa-info-circle text-base md:text-lg" style={{ color: '#3a3a1d' }}></i>
+            <Info className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" style={{ color: '#3a3a1d' }} />
           </Link>
 
           <button className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item" style={{ backgroundColor: '#478c0b' }}>
-            <i className="fas fa-shopping-cart text-base md:text-lg"></i>
+            <ShoppingCart className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
             <span className="absolute -top-1 -right-1 text-white text-xs w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center font-bold" style={{ backgroundColor: '#c23c09' }}>
               0
             </span>

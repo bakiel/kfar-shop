@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/context/CartContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { toast } from '@/components/ui/use-toast';
+import { Heart, Share, Bookmark, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 
 // Feed item types
 type FeedItemType = 'flash_sale' | 'new_arrival' | 'vendor_special' | 'kfar_announcement' | 'limited_stock' | 'bundle_deal';
@@ -412,15 +413,15 @@ export default function SpecialFeedSection() {
                       onClick={() => handleLike(feedItems[activeIndex].id)}
                       className="flex items-center gap-2 hover:scale-105 transition-transform"
                     >
-                      <i className={`${feedItems[activeIndex].interaction.hasLiked ? 'fas' : 'far'} fa-heart text-red-500`} />
+                      <Heart className={`w-5 h-5 stroke-[1.5] text-red-500 ${feedItems[activeIndex].interaction.hasLiked ? 'fill-red-500' : ''}`} />
                       <span>{feedItems[activeIndex].interaction.likes}</span>
                     </button>
                     <button className="flex items-center gap-2 hover:scale-105 transition-transform">
-                      <i className="far fa-share-square text-blue-500" />
+                      <Share className="w-5 h-5 stroke-[1.5] text-blue-500" />
                       <span>{feedItems[activeIndex].interaction.shares}</span>
                     </button>
                     <button className="flex items-center gap-2 hover:scale-105 transition-transform">
-                      <i className="far fa-bookmark text-gray-500" />
+                      <Bookmark className="w-5 h-5 stroke-[1.5] text-gray-500" />
                       <span>{t('Save')}</span>
                     </button>
                   </div>
@@ -450,13 +451,13 @@ export default function SpecialFeedSection() {
             onClick={() => setActiveIndex((prev) => (prev - 1 + feedItems.length) % feedItems.length)}
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all"
           >
-            <i className="fas fa-chevron-left" style={{ color: '#478c0b' }} />
+            <ChevronLeft className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
           </button>
           <button
             onClick={() => setActiveIndex((prev) => (prev + 1) % feedItems.length)}
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all"
           >
-            <i className="fas fa-chevron-right" style={{ color: '#478c0b' }} />
+            <ChevronRight className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
           </button>
         </div>
 
@@ -502,7 +503,7 @@ export default function SpecialFeedSection() {
             className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <span>{t('View All Special Deals')}</span>
-            <i className="fas fa-arrow-right" />
+            <ArrowRight className="w-5 h-5 stroke-[1.5]" />
           </Link>
         </div>
       </div>

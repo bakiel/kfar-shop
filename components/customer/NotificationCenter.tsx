@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { toast } from '@/components/ui/use-toast';
 import { notificationService, type Notification } from '@/lib/services/notification-service';
+import { X, BellOff, ShoppingBag, Star, Package, Store, Info, Tag, Bell, Check, Trash2 } from 'lucide-react';
 
 interface NotificationCenterProps {
   customerId: string;
@@ -107,15 +108,15 @@ export default function NotificationCenter({
   };
 
   const getNotificationIcon = (type: Notification['type']) => {
-    const icons = {
-      order: 'fa-shopping-bag',
-      reward: 'fa-star',
-      product: 'fa-box',
-      vendor: 'fa-store',
-      system: 'fa-info-circle',
-      promotion: 'fa-tag'
+    const icons: Record<string, React.ElementType> = {
+      order: ShoppingBag,
+      reward: Star,
+      product: Package,
+      vendor: Store,
+      system: Info,
+      promotion: Tag
     };
-    return icons[type] || 'fa-bell';
+    return icons[type] || Bell;
   };
 
   const getNotificationColor = (priority: Notification['priority']) => {
@@ -160,7 +161,7 @@ export default function NotificationCenter({
               onClick={onClose}
               className="text-white/80 hover:text-white transition-colors"
             >
-              <i className="fas fa-times" />
+              <X className="w-4 h-4 stroke-[1.5]" />
             </button>
           </div>
           
@@ -206,7 +207,7 @@ export default function NotificationCenter({
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center">
-              <i className="fas fa-bell-slash text-4xl text-gray-300 mb-3" />
+              <BellOff className="w-10 h-10 stroke-[1.5] text-gray-300 mb-3 mx-auto" />
               <p className="text-gray-500">
                 {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
               </p>
@@ -227,7 +228,7 @@ export default function NotificationCenter({
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                       getNotificationColor(notification.priority)
                     }`}>
-                      <i className={`fas ${getNotificationIcon(notification.type)}`} />
+                      {React.createElement(getNotificationIcon(notification.type), { className: 'w-5 h-5 stroke-[1.5]' })}
                     </div>
 
                     {/* Content */}
@@ -269,7 +270,7 @@ export default function NotificationCenter({
                               className="text-xs text-gray-400 hover:text-gray-600"
                               title="Mark as read"
                             >
-                              <i className="fas fa-check" />
+                              <Check className="w-3 h-3 stroke-[1.5]" />
                             </button>
                           )}
                           <button
@@ -277,7 +278,7 @@ export default function NotificationCenter({
                             className="text-xs text-gray-400 hover:text-red-600"
                             title="Delete"
                           >
-                            <i className="fas fa-trash" />
+                            <Trash2 className="w-3 h-3 stroke-[1.5]" />
                           </button>
                         </div>
                       </div>

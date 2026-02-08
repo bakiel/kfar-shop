@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { Search, List, Store, ShoppingCart, CreditCard, Users, ChevronUp, ChevronDown, ThumbsUp, Share2, Printer, MessageCircle, Mail } from 'lucide-react';
 
 interface FAQItem {
   id: string;
@@ -120,12 +121,20 @@ export default function HelpCenter() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [helpfulVotes, setHelpfulVotes] = useState<{ [key: string]: boolean }>({});
   
+  const categoryIcons: Record<string, React.ReactNode> = {
+    all: <List className="w-4 h-4 stroke-[1.5]" />,
+    vendor: <Store className="w-4 h-4 stroke-[1.5]" />,
+    customer: <ShoppingCart className="w-4 h-4 stroke-[1.5]" />,
+    payment: <CreditCard className="w-4 h-4 stroke-[1.5]" />,
+    community: <Users className="w-4 h-4 stroke-[1.5]" />
+  };
+
   const categories = [
-    { id: 'all', name: 'All Topics', nameHe: 'כל הנושאים', icon: 'fa-list' },
-    { id: 'vendor', name: 'For Vendors', nameHe: 'לספקים', icon: 'fa-store' },
-    { id: 'customer', name: 'For Customers', nameHe: 'ללקוחות', icon: 'fa-shopping-cart' },
-    { id: 'payment', name: 'Payments', nameHe: 'תשלומים', icon: 'fa-credit-card' },
-    { id: 'community', name: 'VOP Community', nameHe: 'קהילת כפר השלום', icon: 'fa-users' }
+    { id: 'all', name: 'All Topics', nameHe: 'כל הנושאים' },
+    { id: 'vendor', name: 'For Vendors', nameHe: 'לספקים' },
+    { id: 'customer', name: 'For Customers', nameHe: 'ללקוחות' },
+    { id: 'payment', name: 'Payments', nameHe: 'תשלומים' },
+    { id: 'community', name: 'VOP Community', nameHe: 'קהילת כפר השלום' }
   ];
   
   const filteredFAQs = FAQ_DATA.filter(faq => {
@@ -177,7 +186,7 @@ export default function HelpCenter() {
             placeholder={language === 'he' ? 'חפש שאלות...' : 'Search questions...'}
             className="w-full px-4 py-3 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:border-leaf-green"
           />
-          <i className="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+          <Search className="w-5 h-5 stroke-[1.5] absolute left-4 top-4 text-gray-400" />
         </div>
       </div>
       
@@ -193,7 +202,7 @@ export default function HelpCenter() {
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
           >
-            <i className={`fas ${cat.icon}`}></i>
+            {categoryIcons[cat.id]}
             <span>{language === 'he' ? cat.nameHe : cat.name}</span>
           </button>
         ))}
@@ -213,7 +222,7 @@ export default function HelpCenter() {
               <h3 className="font-semibold text-gray-800">
                 {language === 'he' ? faq.questionHe : faq.question}
               </h3>
-              <i className={`fas fa-chevron-${expandedItems.includes(faq.id) ? 'up' : 'down'} text-gray-400`}></i>
+              {expandedItems.includes(faq.id) ? <ChevronUp className="w-5 h-5 stroke-[1.5] text-gray-400" /> : <ChevronDown className="w-5 h-5 stroke-[1.5] text-gray-400" />}
             </button>
             
             {expandedItems.includes(faq.id) && (
@@ -236,18 +245,18 @@ export default function HelpCenter() {
                           : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                       }`}
                     >
-                      <i className="fas fa-thumbs-up mr-1"></i>
+                      <ThumbsUp className="w-4 h-4 stroke-[1.5] inline mr-1" />
                       {faq.helpful + (helpfulVotes[faq.id] ? 1 : 0)}
                     </button>
                   </div>
                   
                   <div className="flex gap-2">
                     <button className="text-sm text-leaf-green hover:underline">
-                      <i className="fas fa-share mr-1"></i>
+                      <Share2 className="w-4 h-4 stroke-[1.5] inline mr-1" />
                       {language === 'he' ? 'שתף' : 'Share'}
                     </button>
                     <button className="text-sm text-leaf-green hover:underline">
-                      <i className="fas fa-print mr-1"></i>
+                      <Printer className="w-4 h-4 stroke-[1.5] inline mr-1" />
                       {language === 'he' ? 'הדפס' : 'Print'}
                     </button>
                   </div>
@@ -270,11 +279,11 @@ export default function HelpCenter() {
         </p>
         <div className="flex justify-center gap-4">
           <button className="px-6 py-3 bg-white text-leaf-green rounded-lg font-semibold hover:bg-gray-100">
-            <i className="fab fa-whatsapp mr-2"></i>
+            <MessageCircle className="w-5 h-5 stroke-[1.5] inline mr-2" />
             WhatsApp Support
           </button>
           <button className="px-6 py-3 bg-white/20 text-white rounded-lg font-semibold hover:bg-white/30">
-            <i className="fas fa-envelope mr-2"></i>
+            <Mail className="w-5 h-5 stroke-[1.5] inline mr-2" />
             Email Us
           </button>
         </div>

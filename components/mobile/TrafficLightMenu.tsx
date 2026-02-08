@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/context/CartContext';
 import Image from 'next/image';
+import { Mic, SlidersHorizontal, ShoppingCart } from 'lucide-react';
 
 interface TrafficLightMenuProps {
   onFilterClick: () => void;
@@ -102,7 +103,7 @@ export default function TrafficLightMenu({
                 }}
                 className="w-14 h-14 bg-[#c23c09] text-white rounded-full shadow-lg flex items-center justify-center relative"
               >
-                <i className="fas fa-microphone text-lg"></i>
+                <Mic className="w-5 h-5 stroke-[1.5]" />
               </motion.button>
 
               {/* Filter Button (Yellow - Middle) */}
@@ -114,7 +115,7 @@ export default function TrafficLightMenu({
                 }}
                 className="w-14 h-14 bg-[#f6af0d] text-white rounded-full shadow-lg flex items-center justify-center relative"
               >
-                <i className="fas fa-filter text-lg"></i>
+                <SlidersHorizontal className="w-5 h-5 stroke-[1.5]" />
                 {filterCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-[#c23c09] text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                     {filterCount}
@@ -131,7 +132,7 @@ export default function TrafficLightMenu({
                 }}
                 className="w-14 h-14 bg-[#478c0b] text-white rounded-full shadow-lg flex items-center justify-center relative"
               >
-                <i className="fas fa-shopping-cart text-lg"></i>
+                <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-[#c23c09] text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                     {cartCount}

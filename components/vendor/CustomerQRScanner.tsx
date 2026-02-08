@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Html5QrcodeScanner, Html5QrcodeScanType, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { useToast } from '@/components/ui/use-toast';
+import { QrCode, Camera, AlertTriangle, X } from 'lucide-react';
 
 interface CustomerData {
   type: string;
@@ -229,7 +230,7 @@ export default function CustomerQRScanner({
         {(customer.preferences.dietary.length > 0 || customer.preferences.allergies.length > 0) && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
             <h4 className="font-semibold text-yellow-800 mb-2">
-              <i className="fas fa-exclamation-triangle mr-2" />
+              <AlertTriangle className="w-5 h-5 stroke-[1.5] flex-shrink-0" />
               Customer Preferences
             </h4>
             {customer.preferences.dietary.length > 0 && (
@@ -299,7 +300,7 @@ export default function CustomerQRScanner({
             className="text-center"
           >
             <div className="bg-white rounded-2xl shadow-xl p-8">
-              <i className="fas fa-qrcode text-6xl mb-4" style={{ color: '#478c0b' }} />
+              <QrCode className="w-16 h-16 stroke-[1.5] mb-4 mx-auto" style={{ color: '#478c0b' }} />
               <h2 className="text-2xl font-bold mb-2" style={{ color: '#3a3a1d' }}>
                 Scan Customer QR
               </h2>
@@ -312,7 +313,7 @@ export default function CustomerQRScanner({
                 className="w-full py-4 text-white rounded-xl font-semibold mb-4 hover:shadow-lg transition-all"
                 style={{ backgroundColor: '#478c0b' }}
               >
-                <i className="fas fa-camera mr-2" />
+                <Camera className="w-5 h-5 stroke-[1.5] inline mr-2" />
                 Start Scanning
               </button>
 
@@ -387,7 +388,7 @@ export default function CustomerQRScanner({
                 onClick={stopScanning}
                 className="text-gray-600 hover:text-gray-800"
               >
-                <i className="fas fa-times text-xl" />
+                <X className="w-5 h-5 stroke-[1.5]" />
               </button>
             </div>
             

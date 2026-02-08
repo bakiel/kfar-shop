@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowLeft, QrCode, DollarSign, Percent, TrendingUp, Receipt, Lightbulb } from 'lucide-react';
 import CustomerQRScanner from '@/components/vendor/CustomerQRScanner';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -73,7 +74,7 @@ export default function VendorScanCustomerPage() {
             href="/vendor/dashboard"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
-            <i className="fas fa-arrow-left" />
+            <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
             Back to Dashboard
           </Link>
           
@@ -98,7 +99,7 @@ export default function VendorScanCustomerPage() {
                 <p className="text-sm text-gray-600">Today's Scans</p>
                 <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>{stats.todayScans}</p>
               </div>
-              <i className="fas fa-qrcode text-3xl" style={{ color: '#478c0b' }} />
+              <QrCode className="w-8 h-8 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
           </motion.div>
 
@@ -113,7 +114,7 @@ export default function VendorScanCustomerPage() {
                 <p className="text-sm text-gray-600">Revenue</p>
                 <p className="text-2xl font-bold" style={{ color: '#f6af0d' }}>₪{stats.todayRevenue}</p>
               </div>
-              <i className="fas fa-shekel-sign text-3xl" style={{ color: '#f6af0d' }} />
+              <DollarSign className="w-8 h-8 stroke-[1.5]" style={{ color: '#f6af0d' }} />
             </div>
           </motion.div>
 
@@ -128,7 +129,7 @@ export default function VendorScanCustomerPage() {
                 <p className="text-sm text-gray-600">Discounts Given</p>
                 <p className="text-2xl font-bold" style={{ color: '#c23c09' }}>₪{stats.todayDiscounts}</p>
               </div>
-              <i className="fas fa-percentage text-3xl" style={{ color: '#c23c09' }} />
+              <Percent className="w-8 h-8 stroke-[1.5]" style={{ color: '#c23c09' }} />
             </div>
           </motion.div>
 
@@ -143,7 +144,7 @@ export default function VendorScanCustomerPage() {
                 <p className="text-sm text-gray-600">Avg Transaction</p>
                 <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>₪{stats.avgTransaction}</p>
               </div>
-              <i className="fas fa-chart-line text-3xl" style={{ color: '#3a3a1d' }} />
+              <TrendingUp className="w-8 h-8 stroke-[1.5]" style={{ color: '#3a3a1d' }} />
             </div>
           </motion.div>
         </div>
@@ -175,7 +176,7 @@ export default function VendorScanCustomerPage() {
               
               {recentTransactions.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
-                  <i className="fas fa-receipt text-4xl mb-3" />
+                  <Receipt className="w-10 h-10 stroke-[1.5] mb-3" />
                   <p>No transactions yet today</p>
                   <p className="text-sm mt-1">Scan a customer QR to get started</p>
                 </div>
@@ -255,7 +256,7 @@ export default function VendorScanCustomerPage() {
           className="mt-8 bg-gradient-to-br from-green-50 to-yellow-50 rounded-2xl p-6"
         >
           <h3 className="text-lg font-bold mb-3" style={{ color: '#3a3a1d' }}>
-            <i className="fas fa-lightbulb mr-2" style={{ color: '#f6af0d' }} />
+            <Lightbulb className="w-5 h-5 stroke-[1.5] inline mr-2" style={{ color: '#f6af0d' }} />
             Pro Tips
           </h3>
           <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">

@@ -2,6 +2,18 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { TrendingUp, ShoppingCart, Store, Users, Star, Headphones, Truck, Shield, Handshake, Smartphone, type LucideIcon } from 'lucide-react';
+
+const faToLucide: Record<string, LucideIcon> = {
+  'fa-store': Store,
+  'fa-users': Users,
+  'fa-star': Star,
+  'fa-headset': Headphones,
+  'fa-truck': Truck,
+  'fa-shield-alt': Shield,
+  'fa-handshake': Handshake,
+  'fa-mobile-alt': Smartphone,
+};
 
 interface Stat {
   number: string;
@@ -145,8 +157,8 @@ const StatsSection = () => {
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-16">
           <div className="inline-flex items-center gap-2 mb-4 sm:mb-6">
-            <span className="px-3 sm:px-4 py-2 rounded-full text-white text-xs sm:text-sm font-semibold shadow-lg" style={{ backgroundColor: '#c23c09' }}>
-              <i className="fas fa-chart-line mr-1 sm:mr-2"></i>
+            <span className="px-3 sm:px-4 py-2 rounded-full text-white text-xs sm:text-sm font-semibold shadow-lg inline-flex items-center gap-1 sm:gap-2" style={{ backgroundColor: '#c23c09' }}>
+              <TrendingUp className="w-4 h-4 stroke-[1.5]" />
               {t('Impact & Heritage')}
             </span>
           </div>
@@ -183,7 +195,7 @@ const StatsSection = () => {
                   className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4 md:mb-6 shadow-lg relative z-10 mx-auto"
                   style={{ background: stat.background }}
                 >
-                  <i className={`fas ${stat.icon} text-lg sm:text-xl md:text-2xl text-white`}></i>
+                  {faToLucide[stat.icon] && React.createElement(faToLucide[stat.icon], { className: 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 stroke-[1.5] text-white' })}
                 </div>
                 
                 {/* Number with Animation */}
@@ -232,7 +244,7 @@ const StatsSection = () => {
                   backgroundColor: 'rgba(207, 231, 193, 0.3)'
                 }}
               >
-                <i className={`fas ${highlight.icon} text-xl sm:text-2xl md:text-3xl mb-2 sm:mb-3 md:mb-4`} style={{ color: '#478c0b' }}></i>
+                {faToLucide[highlight.icon] && React.createElement(faToLucide[highlight.icon], { className: 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 stroke-[1.5] mb-2 sm:mb-3 md:mb-4', style: { color: '#478c0b' } })}
                 <div className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2" style={{ color: '#f6af0d' }}>
                   {highlight.value}
                 </div>
@@ -326,8 +338,8 @@ const StatsSection = () => {
           <p className="text-lg mb-6" style={{ color: '#4b5563' }}>
             {t('Experience the future of shopping with voice commerce and same-day delivery')}
           </p>
-          <button className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300" style={{ backgroundColor: '#478c0b' }}>
-            <i className="fas fa-shopping-cart mr-2"></i>
+          <button className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2" style={{ backgroundColor: '#478c0b' }}>
+            <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
             {t('Start Shopping Now')}
           </button>
         </div>

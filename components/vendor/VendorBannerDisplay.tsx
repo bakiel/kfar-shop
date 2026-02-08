@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Calendar, MapPin, ArrowRight, Clock } from 'lucide-react';
 
 interface BannerContent {
   title?: string;
@@ -221,8 +222,8 @@ export default function VendorBannerDisplay({ vendorId }: { vendorId: string }) 
                   transition={{ delay: 0.4 }}
                   className="flex items-center gap-4 text-white/90 text-sm mb-4"
                 >
-                  <span>
-                    <i className="far fa-calendar mr-2" />
+                  <span className="inline-flex items-center">
+                    <Calendar className="w-4 h-4 stroke-[1.5] mr-2" />
                     {new Date(currentBanner.content.eventDate).toLocaleDateString('en-US', {
                       weekday: 'long',
                       year: 'numeric',
@@ -233,8 +234,8 @@ export default function VendorBannerDisplay({ vendorId }: { vendorId: string }) 
                     })}
                   </span>
                   {currentBanner.content.eventLocation && (
-                    <span>
-                      <i className="fas fa-map-marker-alt mr-2" />
+                    <span className="inline-flex items-center">
+                      <MapPin className="w-4 h-4 stroke-[1.5] mr-2" />
                       {currentBanner.content.eventLocation}
                     </span>
                   )}
@@ -255,7 +256,7 @@ export default function VendorBannerDisplay({ vendorId }: { vendorId: string }) 
                       className="inline-flex items-center gap-2 bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all shadow-lg"
                     >
                       {currentBanner.content.ctaText}
-                      <i className="fas fa-arrow-right" />
+                      <ArrowRight className="w-4 h-4 stroke-[1.5]" />
                     </Link>
                   ) : (
                     <button className="bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all shadow-lg">
@@ -296,7 +297,7 @@ export default function VendorBannerDisplay({ vendorId }: { vendorId: string }) 
           {/* Mobile Timer */}
           {currentBanner.template === 'sale' && timeLeft && (
             <div className="md:hidden absolute bottom-4 left-8 bg-black/50 text-white px-4 py-2 rounded-lg text-sm">
-              <i className="far fa-clock mr-2" />
+              <Clock className="w-4 h-4 stroke-[1.5] inline mr-2" />
               Ends: {timeLeft}
             </div>
           )}

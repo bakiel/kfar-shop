@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
+import { Calendar, MapPin, Clock, Flag, Plus, Eye, MousePointer, ShoppingCart, Pencil, Trash2, Lightbulb } from 'lucide-react';
 
 // Banner templates
 const bannerTemplates = {
@@ -268,13 +269,13 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
             
             {selectedTemplate === 'event' && formData.eventDate && (
               <div className="mt-3 text-sm">
-                <p className={`${template.textColor} font-semibold`}>
-                  <i className="far fa-calendar mr-2" />
+                <p className={`${template.textColor} font-semibold flex items-center`}>
+                  <Calendar className="w-4 h-4 stroke-[1.5] mr-2" />
                   {new Date(formData.eventDate).toLocaleDateString()}
                 </p>
                 {formData.eventLocation && (
-                  <p className={`${template.textColor}`}>
-                    <i className="fas fa-map-marker-alt mr-2" />
+                  <p className={`${template.textColor} flex items-center`}>
+                    <MapPin className="w-4 h-4 stroke-[1.5] mr-2" />
                     {formData.eventLocation}
                   </p>
                 )}
@@ -293,7 +294,7 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
         {/* Timer for flash sales */}
         {selectedTemplate === 'sale' && formData.endDate && (
           <div className="absolute bottom-4 left-8 bg-black/50 text-white px-4 py-2 rounded-lg text-sm">
-            <i className="far fa-clock mr-2" />
+            <Clock className="w-4 h-4 stroke-[1.5] inline mr-2" />
             Ends: {new Date(formData.endDate).toLocaleDateString()}
           </div>
         )}
@@ -318,7 +319,7 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
             onClick={() => setIsCreating(true)}
             className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
           >
-            <i className="fas fa-plus mr-2" />
+            <Plus className="w-5 h-5 stroke-[1.5] inline mr-2" />
             Create New Banner
           </button>
         )}
@@ -582,7 +583,7 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
           
           {banners.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <i className="fas fa-flag text-4xl text-gray-400 mb-4" />
+              <Flag className="w-10 h-10 stroke-[1.5] text-gray-400 mb-4 mx-auto" />
               <p className="text-gray-500">No banners created yet</p>
               <p className="text-sm text-gray-400 mt-2">
                 Create your first banner to attract more customers!
@@ -621,16 +622,16 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
                     <div className="flex items-center gap-2">
                       {/* Analytics */}
                       <div className="text-sm text-gray-500 mr-4">
-                        <span className="mr-3">
-                          <i className="far fa-eye mr-1" />
+                        <span className="mr-3 inline-flex items-center">
+                          <Eye className="w-4 h-4 stroke-[1.5] mr-1" />
                           {banner.analytics.views}
                         </span>
-                        <span className="mr-3">
-                          <i className="far fa-hand-pointer mr-1" />
+                        <span className="mr-3 inline-flex items-center">
+                          <MousePointer className="w-4 h-4 stroke-[1.5] mr-1" />
                           {banner.analytics.clicks}
                         </span>
-                        <span>
-                          <i className="fas fa-shopping-cart mr-1" />
+                        <span className="inline-flex items-center">
+                          <ShoppingCart className="w-4 h-4 stroke-[1.5] mr-1" />
                           {banner.analytics.conversions}
                         </span>
                       </div>
@@ -654,13 +655,13 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
                         }}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                       >
-                        <i className="fas fa-edit" />
+                        <Pencil className="w-4 h-4 stroke-[1.5]" />
                       </button>
                       <button
                         onClick={() => deleteBanner(banner.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
-                        <i className="fas fa-trash" />
+                        <Trash2 className="w-4 h-4 stroke-[1.5]" />
                       </button>
                     </div>
                   </div>
@@ -674,7 +675,7 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
       {/* Tips Section */}
       <div className="mt-8 p-4 rounded-lg" style={{ backgroundColor: '#fef9ef' }}>
         <h4 className="font-semibold mb-2" style={{ color: '#3a3a1d' }}>
-          <i className="fas fa-lightbulb mr-2" style={{ color: '#f6af0d' }} />
+          <Lightbulb className="w-5 h-5 stroke-[1.5] inline mr-2" style={{ color: '#f6af0d' }} />
           Banner Best Practices
         </h4>
         <ul className="text-sm text-gray-600 space-y-1">

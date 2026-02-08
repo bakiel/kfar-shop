@@ -6,6 +6,7 @@ import { AI } from '@/lib/services/ai';
 import { SmartQRContent } from '@/lib/services/ai/types';
 import { MockAIService } from '@/lib/services/ai/mock-ai-service';
 import QRTrackingService from '@/lib/services/qr-tracking-mock';
+import { Package, Store, ShoppingCart, MapPin, Handshake, QrCode, AlertCircle, Download, Copy, Share2 } from 'lucide-react';
 
 interface SmartQRCompactFixedProps {
   type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
@@ -142,14 +143,14 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
   };
 
   const getTypeInfo = () => {
-    const typeInfo = {
-      product: { icon: 'fa-box', color: '#478c0b', label: 'Product QR' },
-      vendor: { icon: 'fa-store', color: '#f6af0d', label: 'Vendor QR' },
-      order: { icon: 'fa-shopping-cart', color: '#c23c09', label: 'Order QR' },
-      collection: { icon: 'fa-map-marker-alt', color: '#5C6BC0', label: 'Collection QR' },
-      p2p: { icon: 'fa-handshake', color: '#00897B', label: 'P2P Exchange QR' }
+    const typeInfo: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
+      product: { icon: <Package className="w-3 h-3 stroke-[1.5]" />, color: '#478c0b', label: 'Product QR' },
+      vendor: { icon: <Store className="w-3 h-3 stroke-[1.5]" />, color: '#f6af0d', label: 'Vendor QR' },
+      order: { icon: <ShoppingCart className="w-3 h-3 stroke-[1.5]" />, color: '#c23c09', label: 'Order QR' },
+      collection: { icon: <MapPin className="w-3 h-3 stroke-[1.5]" />, color: '#5C6BC0', label: 'Collection QR' },
+      p2p: { icon: <Handshake className="w-3 h-3 stroke-[1.5]" />, color: '#00897B', label: 'P2P Exchange QR' }
     };
-    return typeInfo[type] || { icon: 'fa-qrcode', color: '#000000', label: 'QR Code' };
+    return typeInfo[type] || { icon: <QrCode className="w-3 h-3 stroke-[1.5]" />, color: '#000000', label: 'QR Code' };
   };
 
   const typeInfo = getTypeInfo();
@@ -165,7 +166,7 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
             </div>
           ) : error ? (
             <div className="absolute inset-0 flex items-center justify-center bg-red-50 rounded">
-              <i className="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+              <AlertCircle className="w-6 h-6 stroke-[1.5] text-red-500" />
             </div>
           ) : qrDataUrl ? (
             <img 
@@ -181,7 +182,7 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
           className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium text-white shadow-md"
           style={{ backgroundColor: typeInfo.color }}
         >
-          <i className={`fas ${typeInfo.icon} mr-1`}></i>
+          <span className="mr-1">{typeInfo.icon}</span>
           {typeInfo.label}
         </div>
       </div>
@@ -194,7 +195,7 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
             title="Download"
           >
-            <i className="fas fa-download text-gray-700"></i>
+            <Download className="w-4 h-4 stroke-[1.5] text-gray-700" />
           </button>
           
           <button
@@ -202,7 +203,7 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors relative"
             title="Copy Link"
           >
-            <i className="fas fa-copy text-gray-700"></i>
+            <Copy className="w-4 h-4 stroke-[1.5] text-gray-700" />
             {showTooltip === 'copied' && (
               <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-green-600 text-white text-xs rounded whitespace-nowrap">
                 Copied!
@@ -216,7 +217,7 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
               className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
               title="Share"
             >
-              <i className="fas fa-share text-gray-700"></i>
+              <Share2 className="w-4 h-4 stroke-[1.5] text-gray-700" />
             </button>
           )}
         </div>

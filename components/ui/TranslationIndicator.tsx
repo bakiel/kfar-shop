@@ -1,4 +1,5 @@
 import React from 'react';
+import { Languages } from 'lucide-react';
 
 interface TranslationIndicatorProps {
   isTranslating: boolean;
@@ -18,7 +19,7 @@ export default function TranslationIndicator({
   return (
     <div className={`absolute ${positionClass} ${top} flex items-center gap-2`}>
       <div className="flex items-center gap-1 px-2 py-1 bg-leaf-green/10 rounded-full">
-        <i className="fas fa-language text-leaf-green animate-pulse text-sm"></i>
+        <Languages className="w-4 h-4 stroke-[1.5] text-leaf-green animate-pulse" />
         <span className="text-xs text-leaf-green font-medium">Translating...</span>
       </div>
     </div>
@@ -38,9 +39,9 @@ export function TranslationBadge({
         ? 'bg-leaf-green/20 border border-leaf-green/30' 
         : 'bg-gray-100 border border-gray-200'
     }`}>
-      <i className={`fas fa-language ${compact ? 'text-xs' : 'text-sm'} ${
+      <Languages className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} stroke-[1.5] ${
         active ? 'text-leaf-green' : 'text-gray-400'
-      }`}></i>
+      }`} />
       {!compact && (
         <span className={`text-xs font-medium ${
           active ? 'text-leaf-green' : 'text-gray-500'

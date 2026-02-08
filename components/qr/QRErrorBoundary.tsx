@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface QRErrorBoundaryState {
   hasError: boolean;
@@ -35,7 +36,7 @@ class QRErrorBoundary extends React.Component<QRErrorBoundaryProps, QRErrorBound
       return (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
           <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-            <i className="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+            <AlertTriangle className="w-6 h-6 stroke-[1.5] text-red-500" />
           </div>
           <h3 className="text-lg font-semibold mb-2">QR Code Error</h3>
           <p className="text-gray-600 text-sm mb-4">

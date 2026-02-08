@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Sun, Leaf, ShoppingBasket, Home, Clock, Loader2, Wand2, Users, Truck, Facebook, Instagram, MessageCircle, Youtube } from 'lucide-react';
 
 export default function EnhancedComingSoonPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -14,10 +15,10 @@ export default function EnhancedComingSoonPage() {
 
   // Vendor preview data
   const vendors = [
-    { name: "Garden of Light", type: "Vegan Deli", icon: "fa-sun", color: "#f6af0d" },
-    { name: "Teva Deli", type: "Plant-Based Meats", icon: "fa-leaf", color: "#478c0b" },
-    { name: "People Store", type: "Bulk Foods", icon: "fa-shopping-basket", color: "#c23c09" },
-    { name: "Village of Peace Shop", type: "Community Products", icon: "fa-home", color: "#3a3a1d" }
+    { name: "Garden of Light", type: "Vegan Deli", icon: <Sun className="w-8 h-8 stroke-[1.5] text-white" />, color: "#f6af0d" },
+    { name: "Teva Deli", type: "Plant-Based Meats", icon: <Leaf className="w-8 h-8 stroke-[1.5] text-white" />, color: "#478c0b" },
+    { name: "People Store", type: "Bulk Foods", icon: <ShoppingBasket className="w-8 h-8 stroke-[1.5] text-white" />, color: "#c23c09" },
+    { name: "Village of Peace Shop", type: "Community Products", icon: <Home className="w-8 h-8 stroke-[1.5] text-white" />, color: "#3a3a1d" }
   ];
 
   // Auto-rotate background images
@@ -104,7 +105,7 @@ export default function EnhancedComingSoonPage() {
               className="bg-white/10 backdrop-blur-sm rounded-lg p-2"
             />
             <div className="text-white text-sm">
-              <i className="fas fa-clock mr-2"></i>
+              <Clock className="w-4 h-4 stroke-[1.5] inline mr-2" />
               Launching Soon
             </div>
           </div>
@@ -162,7 +163,7 @@ export default function EnhancedComingSoonPage() {
                       className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
                       style={{ backgroundColor: vendor.color }}
                     >
-                      <i className={`fas ${vendor.icon} text-3xl text-white`}></i>
+                      {vendor.icon}
                     </div>
                     <h3 className="text-xl font-bold text-center mb-1" style={{ color: '#3a3a1d' }}>
                       {vendor.name}
@@ -170,7 +171,7 @@ export default function EnhancedComingSoonPage() {
                     <p className="text-center text-gray-600">{vendor.type}</p>
                     {selectedVendor === idx && isGenerating && (
                       <div className="mt-4 text-center text-sm text-gray-500">
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
+                        <Loader2 className="w-4 h-4 stroke-[1.5] animate-spin inline mr-2" />
                         Generating preview...
                       </div>
                     )}
@@ -238,21 +239,21 @@ export default function EnhancedComingSoonPage() {
             <div className="grid md:grid-cols-3 gap-8 mb-16">
               <div className="text-center">
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <i className="fas fa-leaf text-4xl text-white"></i>
+                  <Leaf className="w-10 h-10 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">100% Vegan</h3>
                 <p className="text-white/80">Every product is plant-based and cruelty-free</p>
               </div>
               <div className="text-center">
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <i className="fas fa-users text-4xl text-white"></i>
+                  <Users className="w-10 h-10 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Community First</h3>
                 <p className="text-white/80">Supporting local Village of Peace businesses</p>
               </div>
               <div className="text-center">
                 <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center bg-white/20 backdrop-blur-sm">
-                  <i className="fas fa-truck text-4xl text-white"></i>
+                  <Truck className="w-10 h-10 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Easy Delivery</h3>
                 <p className="text-white/80">Convenient shopping across Israel</p>
@@ -266,16 +267,16 @@ export default function EnhancedComingSoonPage() {
           <div className="max-w-7xl mx-auto px-4 text-center">
             <div className="flex justify-center gap-6 mb-4">
               <a href="#" className="text-white/80 hover:text-white transition-colors">
-                <i className="fab fa-facebook text-2xl"></i>
+                <Facebook className="w-6 h-6 stroke-[1.5]" />
               </a>
               <a href="#" className="text-white/80 hover:text-white transition-colors">
-                <i className="fab fa-instagram text-2xl"></i>
+                <Instagram className="w-6 h-6 stroke-[1.5]" />
               </a>
               <a href="#" className="text-white/80 hover:text-white transition-colors">
-                <i className="fab fa-whatsapp text-2xl"></i>
+                <MessageCircle className="w-6 h-6 stroke-[1.5]" />
               </a>
               <a href="#" className="text-white/80 hover:text-white transition-colors">
-                <i className="fab fa-youtube text-2xl"></i>
+                <Youtube className="w-6 h-6 stroke-[1.5]" />
               </a>
             </div>
             <p className="text-white/60 text-sm">
@@ -291,7 +292,7 @@ export default function EnhancedComingSoonPage() {
         className="fixed bottom-8 right-8 bg-sun-gold text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
         disabled={isGenerating}
       >
-        <i className={`fas ${isGenerating ? 'fa-spinner fa-spin' : 'fa-magic'} text-xl`}></i>
+        {isGenerating ? <Loader2 className="w-6 h-6 stroke-[1.5] animate-spin" /> : <Wand2 className="w-6 h-6 stroke-[1.5]" />}
       </button>
     </div>
   );

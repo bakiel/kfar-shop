@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
-import { 
-  Star, 
-  Gift, 
-  ShoppingBag, 
+import {
+  Star,
+  Gift,
+  ShoppingBag,
   Heart,
   Users,
   Sparkles,
@@ -18,7 +18,10 @@ import {
   CheckCircle,
   ArrowRight,
   Zap,
-  Globe
+  Globe,
+  UserPlus,
+  LogIn,
+  Leaf
 } from 'lucide-react';
 
 export default function JoinKFARPage() {
@@ -119,13 +122,13 @@ export default function JoinKFARPage() {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                     <Link href="/customer/dashboard">
                       <button className="px-8 py-4 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2" style={{ backgroundColor: '#478c0b' }}>
-                        <i className="fas fa-user-plus"></i>
+                        <UserPlus className="w-5 h-5 stroke-[1.5]" />
                         Create Free Account
                         <ArrowRight className="w-5 h-5" />
                       </button>
                     </Link>
                     <button className="px-8 py-4 font-semibold rounded-xl border-2 transition-all duration-300 hover:shadow-lg" style={{ borderColor: '#478c0b', color: '#478c0b', backgroundColor: 'white' }}>
-                      <i className="fas fa-sign-in-alt mr-2"></i>
+                      <LogIn className="w-5 h-5 stroke-[1.5] inline mr-2" />
                       Sign In
                     </button>
                   </div>
@@ -353,7 +356,7 @@ export default function JoinKFARPage() {
                 
                 <Link href="/customer/dashboard">
                   <button className="px-8 py-4 bg-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 text-leaf-green">
-                    <i className="fas fa-gift mr-2"></i>
+                    <Gift className="w-5 h-5 stroke-[1.5] inline mr-2" />
                     Claim Your Bonus Points
                   </button>
                 </Link>
@@ -425,7 +428,7 @@ export default function JoinKFARPage() {
             <div className="mb-8">
               <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm">
                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-                  <i className="fas fa-leaf text-lg" style={{ color: '#478c0b' }}></i>
+                  <Leaf className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
                 </div>
                 <div className="text-left">
                   <p className="font-bold">Village of Peace</p>
@@ -437,13 +440,13 @@ export default function JoinKFARPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/customer/dashboard">
                 <button className="px-8 py-4 bg-white font-semibold rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-2" style={{ color: '#478c0b' }}>
-                  <i className="fas fa-user-plus"></i>
+                  <UserPlus className="w-5 h-5 stroke-[1.5]" />
                   Create Your Account
                 </button>
               </Link>
               <Link href="/marketplace">
                 <button className="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300">
-                  <i className="fas fa-shopping-bag mr-2"></i>
+                  <ShoppingBag className="w-5 h-5 stroke-[1.5] inline mr-2" />
                   Browse Products First
                 </button>
               </Link>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
+import { AlertCircle } from 'lucide-react';
 
 interface SimpleQRProps {
   data: string;
@@ -51,7 +52,7 @@ export default function SimpleQR({ data, size = 256, className = '' }: SimpleQRP
     return (
       <div className={`flex items-center justify-center bg-gray-100 rounded ${className}`} style={{ width: size, height: size }}>
         <div className="text-center p-4">
-          <i className="fas fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
+          <AlertCircle className="w-6 h-6 stroke-[1.5] text-red-500 mb-2" />
           <p className="text-sm text-gray-600">QR Error</p>
         </div>
       </div>

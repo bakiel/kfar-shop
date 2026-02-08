@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { SmartQRCompactFixed } from '@/components/qr/SmartQRCompactFixed';
 import { useToast } from '@/components/ui/use-toast';
+import { Share2, Download, CheckCircle, Mail, Link2 } from 'lucide-react';
 
 interface CustomerProfile {
   id: string;
@@ -220,14 +221,14 @@ export default function CustomerQRCode({
             onClick={handleShare}
             className="px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all text-sm font-medium"
           >
-            <i className="fas fa-share-alt mr-2" />
+            <Share2 className="w-4 h-4 stroke-[1.5] mr-2 inline" />
             Share
           </button>
           <button
             onClick={handleDownload}
             className="px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-all text-sm font-medium"
           >
-            <i className="fas fa-download mr-2" />
+            <Download className="w-4 h-4 stroke-[1.5] mr-2 inline" />
             Save
           </button>
         </motion.div>
@@ -287,7 +288,7 @@ export default function CustomerQRCode({
         <div className="space-y-1">
           {currentTier.benefits.map((benefit, index) => (
             <div key={index} className="flex items-center gap-2 text-sm text-gray-700">
-              <i className="fas fa-check-circle text-green-500" />
+              <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 flex-shrink-0" />
               <span>{benefit}</span>
             </div>
           ))}
@@ -323,7 +324,7 @@ export default function CustomerQRCode({
             onClick={handleShare}
             className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold transition-colors"
           >
-            <i className="fas fa-share-alt mr-2" />
+            <Share2 className="w-4 h-4 stroke-[1.5] mr-2 inline" />
             Share
           </button>
           <button
@@ -331,7 +332,7 @@ export default function CustomerQRCode({
             className="flex-1 py-3 text-white rounded-lg font-semibold transition-all"
             style={{ backgroundColor: '#478c0b' }}
           >
-            <i className="fas fa-download mr-2" />
+            <Download className="w-4 h-4 stroke-[1.5] mr-2 inline" />
             Download
           </button>
         </div>
@@ -423,7 +424,7 @@ export default function CustomerQRCode({
                   window.open(`https://wa.me/?text=Check out my KFAR member QR code!`);
                 }}
               >
-                <i className="fab fa-whatsapp mr-2" />
+                <Share2 className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Share via WhatsApp
               </button>
               
@@ -434,7 +435,7 @@ export default function CustomerQRCode({
                   window.location.href = `mailto:?subject=My KFAR Member QR&body=Check out my KFAR member QR code!`;
                 }}
               >
-                <i className="fas fa-envelope mr-2" />
+                <Mail className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Share via Email
               </button>
               
@@ -450,7 +451,7 @@ export default function CustomerQRCode({
                   setShowShareModal(false);
                 }}
               >
-                <i className="fas fa-link mr-2" />
+                <Link2 className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Copy Link
               </button>
             </div>

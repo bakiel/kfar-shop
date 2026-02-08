@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, MicOff, Volume2, ShoppingCart, User, Bot } from 'lucide-react';
+import { Mic, MicOff, Volume2, ShoppingCart, User, Bot, X, Send } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -221,7 +221,7 @@ export default function EnhancedChatWidget() {
         aria-label="Open KFAR AI Assistant"
       >
         {isOpen ? (
-          <i className="fas fa-times text-white text-xl"></i>
+          <X className="w-5 h-5 stroke-[1.5] text-white" />
         ) : (
           <div className="relative">
             <Bot className="text-white text-xl" />
@@ -444,7 +444,7 @@ export default function EnhancedChatWidget() {
                     disabled={!message.trim() || isLoading}
                     className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
-                    <i className="fas fa-paper-plane text-sm"></i>
+                    <Send className="w-4 h-4 stroke-[1.5]" />
                   </button>
                 </div>
               </div>

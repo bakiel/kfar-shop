@@ -3,6 +3,47 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
+import { Home, Mountain, Wrench, BookOpen, GraduationCap, Leaf, Bird, Book, Heart, Globe, Check, MapPin, Car, Bus, Plane, Sun, Snowflake, Calendar, Hammer, Sparkles, Palette, Languages, History, Utensils, Music, Hand, Sprout, Star } from 'lucide-react';
+
+const iconMap: Record<string, React.ReactNode> = {
+  'fa-home': <Home className="w-5 h-5 stroke-[1.5]" />,
+  'fa-mountain': <Mountain className="w-5 h-5 stroke-[1.5]" />,
+  'fa-tools': <Wrench className="w-5 h-5 stroke-[1.5]" />,
+  'fa-book-open': <BookOpen className="w-5 h-5 stroke-[1.5]" />,
+  'fa-leaf': <Leaf className="w-5 h-5 stroke-[1.5]" />,
+  'fa-dove': <Bird className="w-5 h-5 stroke-[1.5]" />,
+  'fa-book': <Book className="w-5 h-5 stroke-[1.5]" />,
+  'fa-heart': <Heart className="w-5 h-5 stroke-[1.5]" />,
+  'fa-globe': <Globe className="w-5 h-5 stroke-[1.5]" />,
+  'fa-graduation-cap': <GraduationCap className="w-5 h-5 stroke-[1.5]" />,
+  'fa-hammer': <Hammer className="w-5 h-5 stroke-[1.5]" />,
+  'fa-spa': <Sparkles className="w-5 h-5 stroke-[1.5]" />,
+  'fa-palette': <Palette className="w-5 h-5 stroke-[1.5]" />,
+  'fa-language': <Languages className="w-5 h-5 stroke-[1.5]" />,
+  'fa-history': <History className="w-5 h-5 stroke-[1.5]" />,
+  'fa-utensils': <Utensils className="w-5 h-5 stroke-[1.5]" />,
+  'fa-music': <Music className="w-5 h-5 stroke-[1.5]" />,
+  'fa-praying-hands': <Hand className="w-5 h-5 stroke-[1.5]" />,
+  'fa-seedling': <Sprout className="w-5 h-5 stroke-[1.5]" />,
+};
+
+const iconMapLg: Record<string, React.ReactNode> = {
+  'fa-leaf': <Leaf className="w-12 h-12 stroke-[1.5]" />,
+  'fa-dove': <Bird className="w-12 h-12 stroke-[1.5]" />,
+  'fa-book': <Book className="w-12 h-12 stroke-[1.5]" />,
+  'fa-heart': <Heart className="w-12 h-12 stroke-[1.5]" />,
+  'fa-globe': <Globe className="w-12 h-12 stroke-[1.5]" />,
+  'fa-graduation-cap': <GraduationCap className="w-12 h-12 stroke-[1.5]" />,
+  'fa-hammer': <Hammer className="w-12 h-12 stroke-[1.5]" />,
+  'fa-spa': <Sparkles className="w-12 h-12 stroke-[1.5]" />,
+  'fa-palette': <Palette className="w-12 h-12 stroke-[1.5]" />,
+  'fa-language': <Languages className="w-8 h-8 stroke-[1.5]" />,
+  'fa-history': <History className="w-8 h-8 stroke-[1.5]" />,
+  'fa-utensils': <Utensils className="w-8 h-8 stroke-[1.5]" />,
+  'fa-music': <Music className="w-8 h-8 stroke-[1.5]" />,
+  'fa-praying-hands': <Hand className="w-8 h-8 stroke-[1.5]" />,
+  'fa-seedling': <Sprout className="w-8 h-8 stroke-[1.5]" />,
+};
 
 const AboutPage = () => {
   const [activeTab, setActiveTab] = useState('story');
@@ -42,7 +83,7 @@ const AboutPage = () => {
                 className="px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #478c0b, #3a7209)' }}
               >
-                <i className="fas fa-map-signs"></i>
+                <MapPin className="w-5 h-5 stroke-[1.5]" />
                 Explore Tours
               </button>
               <button 
@@ -50,7 +91,7 @@ const AboutPage = () => {
                 className="px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg, #f6af0d, #e09b00)', color: '#3a3a1d' }}
               >
-                <i className="fas fa-graduation-cap"></i>
+                <GraduationCap className="w-5 h-5 stroke-[1.5]" />
                 Learn Culture
               </button>
             </div>
@@ -70,7 +111,7 @@ const AboutPage = () => {
               style={{ backgroundColor: activeTab === 'story' ? '#478c0b' : 'transparent' }}
               onClick={() => showSection('story')}
             >
-              <i className="fas fa-home"></i>
+              <Home className="w-5 h-5 stroke-[1.5]" />
               <span>Our Story</span>
             </button>
             <button 
@@ -80,7 +121,7 @@ const AboutPage = () => {
               style={{ backgroundColor: activeTab === 'tourism' ? '#478c0b' : 'transparent' }}
               onClick={() => showSection('tourism')}
             >
-              <i className="fas fa-mountain"></i>
+              <Mountain className="w-5 h-5 stroke-[1.5]" />
               <span>Tourism</span>
             </button>
             <button 
@@ -90,7 +131,7 @@ const AboutPage = () => {
               style={{ backgroundColor: activeTab === 'services' ? '#478c0b' : 'transparent' }}
               onClick={() => showSection('services')}
             >
-              <i className="fas fa-tools"></i>
+              <Wrench className="w-5 h-5 stroke-[1.5]" />
               <span>Services</span>
             </button>
             <button 
@@ -100,7 +141,7 @@ const AboutPage = () => {
               style={{ backgroundColor: activeTab === 'education' ? '#478c0b' : 'transparent' }}
               onClick={() => showSection('education')}
             >
-              <i className="fas fa-book-open"></i>
+              <BookOpen className="w-5 h-5 stroke-[1.5]" />
               <span>Education</span>
             </button>
           </div>
@@ -153,7 +194,7 @@ const AboutPage = () => {
                   { year: '1983', title: 'Teva Deli Founded', description: 'Launch of Israel\'s first vegan food manufacturing company, pioneering the plant-based food industry in the country.' },
                   { year: '1990s', title: 'Cultural Recognition', description: 'Growing recognition of community contributions to Israeli society, including military service and cultural exchange programs.' },
                   { year: '2003', title: 'Official Recognition', description: 'Israeli government grants permanent residency status, officially recognizing the community\'s place in Israeli society.' },
-                  { year: '2024', title: 'Digital Marketplace Launch', description: 'KiFar Marketplace launches, bringing community businesses and culture to the global digital marketplace.' }
+                  { year: '2026', title: 'Digital Marketplace Launch', description: 'KiFar Marketplace launches, bringing community businesses and culture to the global digital marketplace.' }
                 ].map((item, index) => (
                   <div 
                     key={index}
@@ -184,7 +225,7 @@ const AboutPage = () => {
                 ].map((value, index) => (
                   <div key={index} className="text-center">
                     <div className="text-5xl mb-4" style={{ color: '#478c0b' }}>
-                      <i className={`fas ${value.icon}`}></i>
+                      {iconMapLg[value.icon] || <Leaf className="w-12 h-12 stroke-[1.5]" />}
                     </div>
                     <h4 className="text-xl font-bold mb-3">{value.title}</h4>
                     <p className="text-gray-600">{value.description}</p>
@@ -266,7 +307,7 @@ const AboutPage = () => {
                     <ul className="text-sm text-gray-600 mb-4">
                       {tour.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center mb-1">
-                          <i className="fas fa-check mr-2" style={{ color: '#478c0b' }}></i>
+                          <Check className="w-4 h-4 stroke-[1.5] mr-2 flex-shrink-0" style={{ color: '#478c0b' }} />
                           {feature}
                         </li>
                       ))}
@@ -318,19 +359,19 @@ const AboutPage = () => {
                   <h4 className="text-xl font-bold mb-4" style={{ color: '#478c0b' }}>Getting Here</h4>
                   <div className="space-y-3">
                     <div className="flex items-center">
-                      <i className="fas fa-map-marker-alt mr-3" style={{ color: '#478c0b' }}></i>
+                      <MapPin className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <span>Village of Peace, Dimona, Israel</span>
                     </div>
                     <div className="flex items-center">
-                      <i className="fas fa-car mr-3" style={{ color: '#478c0b' }}></i>
+                      <Car className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <span>1 hour drive from Beer Sheva</span>
                     </div>
                     <div className="flex items-center">
-                      <i className="fas fa-bus mr-3" style={{ color: '#478c0b' }}></i>
+                      <Bus className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <span>Public transport available from Dimona</span>
                     </div>
                     <div className="flex items-center">
-                      <i className="fas fa-plane mr-3" style={{ color: '#478c0b' }}></i>
+                      <Plane className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <span>2 hours from Ben Gurion Airport</span>
                     </div>
                   </div>
@@ -339,19 +380,19 @@ const AboutPage = () => {
                   <h4 className="text-xl font-bold mb-4" style={{ color: '#478c0b' }}>Best Time to Visit</h4>
                   <div className="space-y-3">
                     <div className="flex items-center">
-                      <i className="fas fa-sun mr-3" style={{ color: '#f6af0d' }}></i>
+                      <Sun className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#f6af0d' }} />
                       <span>Spring (March-May): Perfect weather</span>
                     </div>
                     <div className="flex items-center">
-                      <i className="fas fa-leaf mr-3" style={{ color: '#478c0b' }}></i>
+                      <Leaf className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                       <span>Fall (September-November): Harvest season</span>
                     </div>
                     <div className="flex items-center">
-                      <i className="fas fa-snowflake mr-3 text-blue-500"></i>
+                      <Snowflake className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0 text-blue-500" />
                       <span>Winter (December-February): Mild climate</span>
                     </div>
                     <div className="flex items-center">
-                      <i className="fas fa-calendar mr-3 text-purple-500"></i>
+                      <Calendar className="w-5 h-5 stroke-[1.5] mr-3 flex-shrink-0 text-purple-500" />
                       <span>Jewish holidays: Special celebrations</span>
                     </div>
                   </div>
@@ -377,7 +418,7 @@ const AboutPage = () => {
               ].map((service, index) => (
                 <div key={index} className="bg-white rounded-2xl p-6 text-center transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl border-2 border-transparent hover:border-yellow-400">
                   <div className="text-5xl mb-4" style={{ color: '#478c0b' }}>
-                    <i className={`fas ${service.icon}`}></i>
+                    {iconMapLg[service.icon] || <Wrench className="w-12 h-12 stroke-[1.5]" />}
                   </div>
                   <h3 className="text-xl font-bold mb-3">{service.title}</h3>
                   <p className="text-gray-600 mb-4">{service.description}</p>
@@ -414,7 +455,7 @@ const AboutPage = () => {
                     <div className="flex items-center mb-4">
                       <div className="flex mr-2" style={{ color: '#f6af0d' }}>
                         {[...Array(5)].map((_, i) => (
-                          <i key={i} className="fas fa-star"></i>
+                          <Star key={i} className="w-4 h-4 fill-current" />
                         ))}
                       </div>
                       <span className="text-gray-600">({provider.reviews} reviews)</span>
@@ -475,7 +516,7 @@ const AboutPage = () => {
                       'Spiritual and cultural values respected'
                     ].map((guideline, index) => (
                       <div key={index} className="flex items-start">
-                        <i className="fas fa-check mt-1 mr-3" style={{ color: '#478c0b' }}></i>
+                        <Check className="w-4 h-4 stroke-[1.5] mt-1 mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                         <span>{guideline}</span>
                       </div>
                     ))}
@@ -506,7 +547,7 @@ const AboutPage = () => {
                 ].map((program, index) => (
                   <div key={index} className="bg-gray-50 rounded-2xl p-6">
                     <div className="text-3xl mb-4" style={{ color: '#478c0b' }}>
-                      <i className={`fas ${program.icon}`}></i>
+                      {iconMapLg[program.icon] || <BookOpen className="w-8 h-8 stroke-[1.5]" />}
                     </div>
                     <h4 className="text-xl font-bold mb-3">{program.title}</h4>
                     <p className="text-gray-600 mb-4">{program.description}</p>
@@ -569,7 +610,7 @@ const AboutPage = () => {
                       'Cultural mentorship'
                     ].map((feature, index) => (
                       <div key={index} className="flex items-center">
-                        <i className="fas fa-check mr-3" style={{ color: '#478c0b' }}></i>
+                        <Check className="w-4 h-4 stroke-[1.5] mr-3 flex-shrink-0" style={{ color: '#478c0b' }} />
                         <span>{feature}</span>
                       </div>
                     ))}

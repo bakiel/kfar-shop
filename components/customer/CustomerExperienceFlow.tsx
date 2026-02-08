@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { CheckCircle, Bot } from 'lucide-react';
 
 export default function CustomerExperienceFlow() {
   const experiences = [
@@ -66,7 +67,7 @@ export default function CustomerExperienceFlow() {
             <ul className="space-y-2">
               {exp.features.map((feature, idx) => (
                 <li key={idx} className="flex items-center gap-2 text-sm text-gray-600">
-                  <i className="fas fa-check-circle text-xs" style={{ color: exp.color }} />
+                  <CheckCircle className="w-3 h-3 stroke-[1.5] flex-shrink-0" style={{ color: exp.color }} />
                   {feature}
                 </li>
               ))}
@@ -109,7 +110,7 @@ export default function CustomerExperienceFlow() {
                 <div className="flex-1 bg-gray-50 rounded-lg p-4">
                   <p className="font-semibold" style={{ color: '#3a3a1d' }}>{item.event}</p>
                   <p className="text-sm text-gray-600 mt-1">
-                    <i className="fas fa-robot mr-1" style={{ color: '#f6af0d' }} />
+                    <Bot className="w-4 h-4 stroke-[1.5] mr-1 inline" style={{ color: '#f6af0d' }} />
                     {item.ai}
                   </p>
                 </div>

@@ -7,6 +7,7 @@ import Layout from '@/components/layout/Layout';
 import { toast } from '@/components/ui/use-toast';
 import { notificationService, type Notification, type NotificationPreferences } from '@/lib/services/notification-service';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, ShoppingBag, Star, Package, Store, Info, Tag, Bell, BellOff, CheckCircle } from 'lucide-react';
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -104,16 +105,13 @@ export default function NotificationsPage() {
     }
   };
 
-  const getNotificationIcon = (type: Notification['type']) => {
-    const icons = {
-      order: 'fa-shopping-bag',
-      reward: 'fa-star',
-      product: 'fa-box',
-      vendor: 'fa-store',
-      system: 'fa-info-circle',
-      promotion: 'fa-tag'
-    };
-    return icons[type] || 'fa-bell';
+  const notificationIcons: Record<string, React.ReactNode> = {
+    order: <ShoppingBag className="w-5 h-5 stroke-[1.5]" />,
+    reward: <Star className="w-5 h-5 stroke-[1.5]" />,
+    product: <Package className="w-5 h-5 stroke-[1.5]" />,
+    vendor: <Store className="w-5 h-5 stroke-[1.5]" />,
+    system: <Info className="w-5 h-5 stroke-[1.5]" />,
+    promotion: <Tag className="w-5 h-5 stroke-[1.5]" />
   };
 
   const getNotificationColor = (type: Notification['type']) => {
@@ -167,7 +165,7 @@ export default function NotificationsPage() {
                 href="/customer/dashboard/enhanced"
                 className="text-white/80 hover:text-white"
               >
-                <i className="fas fa-arrow-left" />
+                <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
               </Link>
               <h1 className="text-2xl font-bold">Notification Center</h1>
             </div>
@@ -255,7 +253,7 @@ export default function NotificationsPage() {
                 <div className="bg-white rounded-xl shadow-lg">
                   {filteredNotifications.length === 0 ? (
                     <div className="p-12 text-center">
-                      <i className="fas fa-bell-slash text-4xl text-gray-300 mb-4" />
+                      <BellOff className="w-10 h-10 stroke-[1.5] text-gray-300 mb-4" />
                       <p className="text-gray-500">No notifications found</p>
                     </div>
                   ) : (
@@ -274,7 +272,7 @@ export default function NotificationsPage() {
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                               getNotificationColor(notification.type)
                             }`}>
-                              <i className={`fas ${getNotificationIcon(notification.type)} text-lg`} />
+                              {notificationIcons[notification.type] || <Bell className="w-5 h-5 stroke-[1.5]" />}
                             </div>
 
                             {/* Content */}
@@ -404,7 +402,7 @@ export default function NotificationsPage() {
                       <div className="space-y-3">
                         <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <i className="fas fa-shopping-bag text-green-600" />
+                            <ShoppingBag className="w-5 h-5 stroke-[1.5] text-green-600" />
                             <span>Order Updates</span>
                           </div>
                           <input
@@ -417,7 +415,7 @@ export default function NotificationsPage() {
                         
                         <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <i className="fas fa-star text-yellow-600" />
+                            <Star className="w-5 h-5 stroke-[1.5] text-yellow-600" />
                             <span>Rewards & Points</span>
                           </div>
                           <input
@@ -430,7 +428,7 @@ export default function NotificationsPage() {
                         
                         <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <i className="fas fa-box text-blue-600" />
+                            <Package className="w-5 h-5 stroke-[1.5] text-blue-600" />
                             <span>Product Recommendations</span>
                           </div>
                           <input
@@ -443,7 +441,7 @@ export default function NotificationsPage() {
                         
                         <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <i className="fas fa-store text-purple-600" />
+                            <Store className="w-5 h-5 stroke-[1.5] text-purple-600" />
                             <span>Vendor Updates</span>
                           </div>
                           <input
@@ -456,7 +454,7 @@ export default function NotificationsPage() {
                         
                         <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <i className="fas fa-tag text-red-600" />
+                            <Tag className="w-5 h-5 stroke-[1.5] text-red-600" />
                             <span>Promotions & Deals</span>
                           </div>
                           <input
@@ -472,7 +470,7 @@ export default function NotificationsPage() {
                     {/* Save Confirmation */}
                     <div className="pt-4">
                       <p className="text-sm text-gray-600 text-center">
-                        <i className="fas fa-check-circle text-green-600 mr-2" />
+                        <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-600 inline mr-2" />
                         Preferences are saved automatically
                       </p>
                     </div>

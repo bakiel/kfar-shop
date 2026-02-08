@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
-import { 
-  Sparkles, 
-  QrCode, 
-  Store, 
-  Clock, 
-  DollarSign, 
-  Globe, 
+import {
+  Sparkles,
+  QrCode,
+  Store,
+  Clock,
+  DollarSign,
+  Globe,
   ShieldCheck,
   TrendingUp,
   Users,
@@ -19,7 +19,11 @@ import {
   CheckCircle,
   BarChart,
   Languages,
-  Package
+  Package,
+  ArrowRight,
+  PlayCircle,
+  Leaf,
+  LogIn
 } from 'lucide-react';
 
 export default function BecomeAVendorPage() {
@@ -128,14 +132,14 @@ export default function BecomeAVendorPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link href="/vendor/onboarding">
                     <button className="px-8 py-4 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2" style={{ backgroundColor: '#c23c09' }}>
-                      <i className="fas fa-store"></i>
+                      <Store className="w-5 h-5 stroke-[1.5]" />
                       Start Your Store Now
-                      <i className="fas fa-arrow-right"></i>
+                      <ArrowRight className="w-5 h-5 stroke-[1.5]" />
                     </button>
                   </Link>
                   <Link href="#demo">
                     <button className="px-8 py-4 font-semibold rounded-xl border-2 transition-all duration-300" style={{ borderColor: '#478c0b', color: '#478c0b', backgroundColor: 'white' }}>
-                      <i className="fas fa-play-circle mr-2"></i>
+                      <PlayCircle className="w-5 h-5 stroke-[1.5] inline mr-2" />
                       Watch AI Demo
                     </button>
                   </Link>
@@ -147,7 +151,7 @@ export default function BecomeAVendorPage() {
                 <p className="text-sm font-medium mb-2" style={{ color: '#3a3a1d' }}>Part of the</p>
                 <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full" style={{ backgroundColor: 'white', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
                   <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: '#cfe7c1' }}>
-                    <i className="fas fa-leaf text-lg" style={{ color: '#478c0b' }}></i>
+                    <Leaf className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
                   </div>
                   <div className="text-left">
                     <p className="font-bold" style={{ color: '#3a3a1d' }}>Village of Peace</p>
@@ -248,7 +252,7 @@ export default function BecomeAVendorPage() {
             <div className="text-center mt-12">
               <Link href="/vendor/onboarding">
                 <button className="px-8 py-4 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2 mx-auto" style={{ backgroundColor: '#478c0b' }}>
-                  <i className="fas fa-bolt"></i>
+                  <Zap className="w-5 h-5 stroke-[1.5]" />
                   Get Started Now - It's Free!
                 </button>
               </Link>
@@ -269,13 +273,13 @@ export default function BecomeAVendorPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/vendor/onboarding">
                 <button className="px-8 py-4 bg-white font-semibold rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-2" style={{ color: '#478c0b' }}>
-                  <i className="fas fa-store"></i>
+                  <Store className="w-5 h-5 stroke-[1.5]" />
                   Create Your Store
                 </button>
               </Link>
               <Link href="/vendor/login">
                 <button className="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white transition-all duration-300 hover:text-soil-brown">
-                  <i className="fas fa-sign-in-alt mr-2"></i>
+                  <LogIn className="w-5 h-5 stroke-[1.5] inline mr-2" />
                   Vendor Login
                 </button>
               </Link>

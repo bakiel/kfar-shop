@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { ANALYZED_CUSTOMER_PROFILES } from '@/lib/services/customer-avatar-analyzer';
 import CustomerQRCode from './CustomerQRCode';
+import { Leaf, AlertTriangle, LayoutGrid, Film, X } from 'lucide-react';
 
 export default function CustomerProfileShowcase() {
   const [selectedProfile, setSelectedProfile] = useState<number | null>(null);
@@ -80,7 +81,7 @@ export default function CustomerProfileShowcase() {
             <div className="space-y-2 mb-4">
               {profile.preferences.dietary.length > 0 && (
                 <div className="flex items-center gap-2 text-sm">
-                  <i className="fas fa-leaf text-green-500" />
+                  <Leaf className="w-4 h-4 stroke-[1.5] text-green-500 flex-shrink-0" />
                   <span className="text-gray-600">
                     {profile.preferences.dietary.join(', ')}
                   </span>
@@ -89,7 +90,7 @@ export default function CustomerProfileShowcase() {
               
               {profile.preferences.allergies.length > 0 && (
                 <div className="flex items-center gap-2 text-sm">
-                  <i className="fas fa-exclamation-triangle text-yellow-500" />
+                  <AlertTriangle className="w-4 h-4 stroke-[1.5] text-yellow-500 flex-shrink-0" />
                   <span className="text-gray-600">
                     Allergic to: {profile.preferences.allergies.join(', ')}
                   </span>
@@ -224,7 +225,7 @@ export default function CustomerProfileShowcase() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              <i className="fas fa-th mr-2" />
+              <LayoutGrid className="w-4 h-4 stroke-[1.5] mr-2 inline" />
               Grid View
             </button>
             <button
@@ -235,7 +236,7 @@ export default function CustomerProfileShowcase() {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              <i className="fas fa-film mr-2" />
+              <Film className="w-4 h-4 stroke-[1.5] mr-2 inline" />
               Carousel View
             </button>
           </div>
@@ -271,7 +272,7 @@ export default function CustomerProfileShowcase() {
                     onClick={() => setSelectedProfile(null)}
                     className="text-gray-500 hover:text-gray-700"
                   >
-                    <i className="fas fa-times text-xl" />
+                    <X className="w-5 h-5 stroke-[1.5]" />
                   </button>
                 </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationCenter from './NotificationCenter';
 import { notificationService } from '@/lib/services/notification-service';
+import { Bell } from 'lucide-react';
 
 interface NotificationBellProps {
   customerId?: string;
@@ -65,7 +66,7 @@ export default function NotificationBell({ customerId }: NotificationBellProps) 
           transition: { duration: 0.5 }
         } : {}}
       >
-        <i className="fas fa-bell text-xl text-gray-700" />
+        <Bell className="w-5 h-5 stroke-[1.5] text-gray-700" />
         
         {/* Unread Badge */}
         <AnimatePresence>

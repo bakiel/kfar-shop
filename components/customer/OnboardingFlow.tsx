@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/components/ui/use-toast';
 import CustomerQRCode from './CustomerQRCode';
 import Image from 'next/image';
+import { Camera, ArrowRight, ArrowLeft, Check, ShoppingCart } from 'lucide-react';
 
 interface OnboardingFlowProps {
   onComplete?: (customerProfile: any) => void;
@@ -273,11 +274,11 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                     />
                   ) : (
                     <div className="w-full h-full rounded-full bg-gradient-to-br from-green-400 to-blue-400 flex items-center justify-center">
-                      <i className="fas fa-camera text-white text-3xl" />
+                      <Camera className="w-8 h-8 stroke-[1.5] text-white" />
                     </div>
                   )}
                   <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <i className="fas fa-camera text-white text-2xl" />
+                    <Camera className="w-6 h-6 stroke-[1.5] text-white" />
                   </div>
                 </div>
                 <input
@@ -344,7 +345,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
               >
                 Next Step
-                <i className="fas fa-arrow-right ml-2" />
+                <ArrowRight className="w-4 h-4 stroke-[1.5] ml-2 inline" />
               </button>
             </div>
           </motion.div>
@@ -402,7 +403,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                           }`}
                         >
                           {formData.dietary_restrictions.includes(option.id) && (
-                            <i className="fas fa-check text-white text-xs" />
+                            <Check className="w-3 h-3 stroke-[2] text-white" />
                           )}
                         </div>
                       </div>
@@ -440,7 +441,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                 onClick={handleBack}
                 className="px-6 py-3 text-gray-600 hover:text-gray-800 font-semibold transition-colors"
               >
-                <i className="fas fa-arrow-left mr-2" />
+                <ArrowLeft className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Back
               </button>
               <button
@@ -448,7 +449,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
               >
                 Next Step
-                <i className="fas fa-arrow-right ml-2" />
+                <ArrowRight className="w-4 h-4 stroke-[1.5] ml-2 inline" />
               </button>
             </div>
           </motion.div>
@@ -546,7 +547,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                 onClick={handleBack}
                 className="px-6 py-3 text-gray-600 hover:text-gray-800 font-semibold transition-colors"
               >
-                <i className="fas fa-arrow-left mr-2" />
+                <ArrowLeft className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Back
               </button>
               <button
@@ -564,7 +565,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                 ) : (
                   <>
                     Complete Registration
-                    <i className="fas fa-check" />
+                    <Check className="w-4 h-4 stroke-[1.5]" />
                   </>
                 )}
               </button>
@@ -586,7 +587,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
               transition={{ delay: 0.2, type: "spring" }}
               className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
             >
-              <i className="fas fa-check text-green-600 text-3xl" />
+              <Check className="w-8 h-8 stroke-[1.5] text-green-600" />
             </motion.div>
 
             <h2 className="text-3xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
@@ -632,7 +633,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                 className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
               >
                 Go to Dashboard
-                <i className="fas fa-arrow-right ml-2" />
+                <ArrowRight className="w-4 h-4 stroke-[1.5] ml-2 inline" />
               </button>
               
               <button
@@ -640,7 +641,7 @@ export default function OnboardingFlow({ onComplete, className = '' }: Onboardin
                 className="w-full py-4 border-2 border-green-500 text-green-600 rounded-lg font-semibold hover:bg-green-50 transition-all"
               >
                 Start Shopping
-                <i className="fas fa-shopping-cart ml-2" />
+                <ShoppingCart className="w-4 h-4 stroke-[1.5] ml-2 inline" />
               </button>
             </div>
           </motion.div>

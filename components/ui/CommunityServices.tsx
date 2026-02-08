@@ -3,6 +3,44 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { Star, CheckCircle, Clock, LayoutGrid, ChevronDown, ArrowRight, Store, Info, Shield, Users, Leaf, UtensilsCrossed, Sprout, Crown, Sun, IceCreamCone, ShoppingBasket, Gift, Sandwich, GlassWater, Home, Wrench, Zap, Hammer, PaintBucket, Brush, TreePine, Sparkles, Scissors, Heart, Dumbbell, HandHeart, Briefcase, Calculator, Scale, Laptop, Languages, GraduationCap, type LucideIcon } from 'lucide-react';
+
+const faToLucide: Record<string, LucideIcon> = {
+  'fa-utensils': UtensilsCrossed,
+  'fa-seedling': Sprout,
+  'fa-crown': Crown,
+  'fa-sun': Sun,
+  'fa-ice-cream': IceCreamCone,
+  'fa-shopping-basket': ShoppingBasket,
+  'fa-gift': Gift,
+  'fa-bread-slice': Sandwich,
+  'fa-blender': GlassWater,
+  'fa-home': Home,
+  'fa-wrench': Wrench,
+  'fa-bolt': Zap,
+  'fa-hammer': Hammer,
+  'fa-paint-roller': PaintBucket,
+  'fa-broom': Brush,
+  'fa-tree': TreePine,
+  'fa-spa': Sparkles,
+  'fa-cut': Scissors,
+  'fa-heart': Heart,
+  'fa-dumbbell': Dumbbell,
+  'fa-hand-holding-heart': HandHeart,
+  'fa-leaf': Leaf,
+  'fa-briefcase': Briefcase,
+  'fa-calculator': Calculator,
+  'fa-balance-scale': Scale,
+  'fa-laptop': Laptop,
+  'fa-language': Languages,
+  'fa-graduation-cap': GraduationCap,
+};
+
+const FaIcon = ({ icon, className, style }: { icon: string; className?: string; style?: React.CSSProperties }) => {
+  const LucideComp = faToLucide[icon];
+  if (LucideComp) return <LucideComp className={className || 'w-5 h-5 stroke-[1.5]'} style={style} />;
+  return null;
+};
 
 interface Service {
   name: string;
@@ -154,7 +192,7 @@ const CommunityServices = () => {
             color: '#478c0b',
             borderColor: 'rgba(71, 140, 11, 0.2)'
           }}>
-            <i className="fas fa-star" style={{ color: '#f6af0d' }}></i>
+            <Star className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
             <span>{activeServicesCount} {t('Active Businesses')}</span>
           </div>
           
@@ -173,7 +211,7 @@ const CommunityServices = () => {
             <div className="grid grid-cols-3 gap-8">
               <div className="text-center group hover:scale-105 transition-transform duration-300">
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg group-hover:shadow-xl transition-shadow" style={{ backgroundColor: '#478c0b' }}>
-                  <i className="fas fa-check-circle text-3xl text-white"></i>
+                  <CheckCircle className="w-8 h-8 stroke-[1.5] text-white" />
                 </div>
                 <div className="text-5xl font-bold mb-2" style={{ color: '#478c0b' }}>{activeServicesCount}</div>
                 <div className="text-xs sm:text-sm font-bold mb-1" style={{ color: '#3a3a1d' }}>{t('Active')}</div>
@@ -182,7 +220,7 @@ const CommunityServices = () => {
               
               <div className="text-center group hover:scale-105 transition-transform duration-300 border-x-2" style={{ borderColor: '#f6af0d' }}>
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg group-hover:shadow-xl transition-shadow" style={{ backgroundColor: '#f6af0d' }}>
-                  <i className="fas fa-clock text-3xl text-white"></i>
+                  <Clock className="w-8 h-8 stroke-[1.5] text-white" />
                 </div>
                 <div className="text-5xl font-bold mb-2" style={{ color: '#f6af0d' }}>{totalServicesCount - activeServicesCount}</div>
                 <div className="text-xs sm:text-sm font-bold mb-1" style={{ color: '#3a3a1d' }}>{t('Coming')}</div>
@@ -191,7 +229,7 @@ const CommunityServices = () => {
               
               <div className="text-center group hover:scale-105 transition-transform duration-300">
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg group-hover:shadow-xl transition-shadow" style={{ backgroundColor: '#c23c09' }}>
-                  <i className="fas fa-th-large text-3xl text-white"></i>
+                  <LayoutGrid className="w-8 h-8 stroke-[1.5] text-white" />
                 </div>
                 <div className="text-5xl font-bold mb-2" style={{ color: '#c23c09' }}>{totalServicesCount}</div>
                 <div className="text-xs sm:text-sm font-bold mb-1" style={{ color: '#3a3a1d' }}>{t('Total')}</div>
@@ -247,14 +285,14 @@ const CommunityServices = () => {
                          category.id === 'personal' ? '#c23c0920' :
                          '#3a3a1d20') : 'transparent'
                     }}>
-                      <i className={`fas ${category.icon} text-3xl`}
+                      <FaIcon icon={category.icon} className="w-8 h-8 stroke-[1.5]"
                          style={{
-                           color: expandedCategory === category.id ? 'white' : 
+                           color: expandedCategory === category.id ? 'white' :
                              (category.id === 'food' ? '#478c0b' :
                               category.id === 'home' ? '#f6af0d' :
                               category.id === 'personal' ? '#c23c09' :
                               '#3a3a1d')
-                         }}></i>
+                         }} />
                     </div>
                     <div>
                       <h3 className={`text-xl sm:text-2xl font-bold transition-colors duration-500 break-words ${
@@ -282,7 +320,7 @@ const CommunityServices = () => {
                     }} />
                     {/* Floating Icons */}
                     <div className="absolute top-4 right-8 opacity-20">
-                      <i className={`fas ${category.icon} text-6xl text-white transform rotate-12`}></i>
+                      <FaIcon icon={category.icon} className="w-16 h-16 stroke-[1.5] text-white rotate-12" />
                     </div>
                   </div>
                   
@@ -301,13 +339,13 @@ const CommunityServices = () => {
                       )}
                     </div>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
-                      expandedCategory === category.id 
-                        ? 'bg-white/20 text-white' 
+                      expandedCategory === category.id
+                        ? 'bg-white/20 text-white'
                         : 'bg-gray-100 text-gray-600'
                     }`}>
-                      <i className={`fas fa-chevron-down text-lg transition-transform duration-500 ${
+                      <ChevronDown className={`w-5 h-5 stroke-[1.5] transition-transform duration-500 ${
                         expandedCategory === category.id ? 'rotate-180' : ''
-                      }`}></i>
+                      }`} />
                     </div>
                   </div>
                 </button>
@@ -351,14 +389,14 @@ const CommunityServices = () => {
                                    category.id === 'personal' ? '#c23c09' :
                                    '#3a3a1d') : 'transparent'
                               }}>
-                                <i className={`fas ${service.icon} text-lg`}
+                                <FaIcon icon={service.icon} className="w-5 h-5 stroke-[1.5]"
                                    style={{
-                                     color: service.status === 'active' ? 
+                                     color: service.status === 'active' ?
                                        (category.id === 'food' ? '#478c0b' :
                                         category.id === 'home' ? '#f6af0d' :
                                         category.id === 'personal' ? '#c23c09' :
                                         '#3a3a1d') : 'inherit'
-                                   }}></i>
+                                   }} />
                               </div>
                               
                               <div className="flex-1">
@@ -384,7 +422,7 @@ const CommunityServices = () => {
                                                         category.id === 'personal' ? '#c23c09' :
                                                         '#3a3a1d'
                                        }}>
-                                    <i className="fas fa-arrow-right text-xs text-white" />
+                                    <ArrowRight className="w-3 h-3 stroke-[1.5] text-white" />
                                   </div>
                                 </div>
                               ) : (
@@ -420,7 +458,7 @@ const CommunityServices = () => {
               <div className="p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-3xl font-bold mb-2 flex items-center justify-center gap-3" style={{ color: '#3a3a1d' }}>
-                    <i className="fas fa-store text-2xl" style={{ color: '#478c0b' }}></i>
+                    <Store className="w-7 h-7 stroke-[1.5]" style={{ color: '#478c0b' }} />
                     {t('Join Our Shop')}
                   </h3>
                   <p className="text-lg text-gray-600">{t('Grow your business with us')}</p>
@@ -435,14 +473,14 @@ const CommunityServices = () => {
                   <div className="flex flex-col gap-4 mb-8">
                   <Link href="/vendor/onboarding" className="w-full">
                     <button className="w-full py-3 px-4 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 whitespace-nowrap" style={{ backgroundColor: '#c23c09' }}>
-                      <i className="fas fa-store text-lg sm:text-xl flex-shrink-0"></i>
+                      <Store className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] flex-shrink-0" />
                       {t('Join as Vendor')}
-                      <i className="fas fa-arrow-right"></i>
+                      <ArrowRight className="w-4 h-4 stroke-[1.5]" />
                     </button>
                   </Link>
                   
                   <button className="w-full py-3 px-4 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 whitespace-nowrap" style={{ backgroundColor: '#f6af0d' }}>
-                    <i className="fas fa-info-circle text-lg sm:text-xl flex-shrink-0"></i>
+                    <Info className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] flex-shrink-0" />
                     {t('Learn More')}
                   </button>
                   </div>
@@ -452,21 +490,21 @@ const CommunityServices = () => {
                 <div className="grid grid-cols-3 gap-2 sm:gap-4 pt-6 border-t border-gray-200">
                   <div className="text-center px-1">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-leaf-green/10 rounded-xl flex items-center justify-center mx-auto mb-2">
-                      <i className="fas fa-shield-alt text-leaf-green text-base sm:text-lg"></i>
+                      <Shield className="w-5 h-5 stroke-[1.5] text-leaf-green" />
                     </div>
                     <div className="text-[10px] sm:text-xs text-gray-600 font-medium break-words leading-tight">{t('Trusted Platform')}</div>
                   </div>
                   
                   <div className="text-center px-1">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-sun-gold/10 rounded-xl flex items-center justify-center mx-auto mb-2">
-                      <i className="fas fa-users text-sun-gold text-base sm:text-lg"></i>
+                      <Users className="w-5 h-5 stroke-[1.5] text-sun-gold" />
                     </div>
                     <div className="text-[10px] sm:text-xs text-gray-600 font-medium break-words leading-tight">{t('5000+ Customers')}</div>
                   </div>
                   
                   <div className="text-center px-1">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-earth-flame/10 rounded-xl flex items-center justify-center mx-auto mb-2">
-                      <i className="fas fa-leaf text-earth-flame text-base sm:text-lg"></i>
+                      <Leaf className="w-5 h-5 stroke-[1.5] text-earth-flame" />
                     </div>
                     <div className="text-[10px] sm:text-xs text-gray-600 font-medium break-words leading-tight">{t('100% Vegan')}</div>
                   </div>

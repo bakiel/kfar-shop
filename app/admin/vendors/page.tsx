@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import { vendorDataService } from '@/lib/services/vendor-data-service';
 import { AdminAuthGuard } from '@/components/admin/AdminAuthGuard';
+import { Plus, Eye, ExternalLink } from 'lucide-react';
 import '@/styles/kfar-style-system.css';
 
 export default function VendorManagementPage() {
@@ -103,7 +104,7 @@ function VendorManagementContent() {
             <option value="inactive">Inactive</option>
           </select>
           <button className="btn btn-primary">
-            <i className="fas fa-plus mr-2"></i>
+            <Plus className="w-5 h-5 stroke-[1.5] inline mr-2" />
             Add New Vendor
           </button>
         </div>
@@ -175,13 +176,13 @@ function VendorManagementContent() {
             <div className="flex gap-2">
               <Link href={`/admin/vendors/${vendor.id}`} className="flex-1">
                 <button className="btn btn-primary w-full">
-                  <i className="fas fa-eye mr-2"></i>
+                  <Eye className="w-5 h-5 stroke-[1.5] inline mr-2" />
                   View Details
                 </button>
               </Link>
               <Link href={`/store/${vendor.id}`}>
                 <button className="btn btn-outline">
-                  <i className="fas fa-external-link-alt"></i>
+                  <ExternalLink className="w-5 h-5 stroke-[1.5]" />
                 </button>
               </Link>
             </div>

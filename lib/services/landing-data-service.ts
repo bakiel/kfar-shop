@@ -3,7 +3,7 @@
  * Server-only module: queries PostgreSQL with fallback to static data layer
  */
 
-import { query } from '@/lib/db/postgres-client';
+import { query, isDbAvailable } from '@/lib/db/postgres-client';
 import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import type {
   LandingPageData,
@@ -647,6 +647,13 @@ export async function getEnrichedBundle(id: string): Promise<EnrichedBundle | nu
 }
 
 export async function getLandingPageData(): Promise<LandingPageData> {
+  // Gate: check DB availability once before running 7 parallel queries.
+  // If DB is down this returns in <2s instead of waiting for every query to timeout.
+  const dbUp = await isDbAvailable();
+  if (!dbUp) {
+    console.log('DB unreachable — using static data for landing page');
+  }
+
   const [vendors, featuredProducts, categories, flashDeals, bundles, promotions, stats] =
     await Promise.all([
       getActiveVendors(),

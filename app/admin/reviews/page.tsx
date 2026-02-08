@@ -9,7 +9,8 @@ import {
   X,
   AlertTriangle,
   Search,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Loader2
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 
@@ -116,7 +117,7 @@ export default function AdminReviewsPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-4xl mb-4" style={{ color: '#478c0b' }} />
+          <Loader2 className="w-10 h-10 stroke-[1.5] animate-spin mb-4" style={{ color: '#478c0b' }} />
           <p className="text-gray-600">Loading reviews...</p>
         </div>
       </div>

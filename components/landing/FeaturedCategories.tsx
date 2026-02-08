@@ -17,11 +17,13 @@ function CategoryCard({
   index,
   shouldReduceMotion,
   language,
+  isPriority,
 }: {
   category: LandingCategory;
   index: number;
   shouldReduceMotion: boolean | null;
   language: 'en' | 'he';
+  isPriority?: boolean;
 }) {
   const displayName =
     language === 'he' && category.nameHe ? category.nameHe : category.name;
@@ -59,6 +61,7 @@ function CategoryCard({
             fill
             sizes="(max-width: 640px) 180px, 200px"
             className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+            priority={isPriority}
           />
           {/* Gradient overlay -- strong bottom for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent group-hover:from-black/85 transition-colors duration-300" />
@@ -316,6 +319,7 @@ export default function FeaturedCategories({
                 index={i}
                 shouldReduceMotion={shouldReduceMotion}
                 language={language}
+                isPriority={i < 3}
               />
             ))}
           </div>

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/lib/context/CartContext';
+import { X, ShoppingCart, Minus, Plus, Trash2 } from 'lucide-react';
 
 interface MobileCartDrawerProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export default function MobileCartDrawer({ isOpen, onClose }: MobileCartDrawerPr
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full"
           >
-            <i className="fas fa-times text-gray-600"></i>
+            <X className="w-5 h-5 stroke-[1.5] text-gray-600" />
           </button>
         </div>
 
@@ -54,7 +55,7 @@ export default function MobileCartDrawer({ isOpen, onClose }: MobileCartDrawerPr
         <div className="flex-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 px-4">
-              <i className="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+              <ShoppingCart className="w-16 h-16 stroke-[1.5] text-gray-300 mb-4" />
               <p className="text-gray-600 text-center mb-4">Your cart is empty</p>
               <button
                 onClick={onClose}
@@ -92,14 +93,14 @@ export default function MobileCartDrawer({ isOpen, onClose }: MobileCartDrawerPr
                             onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
                             className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                           >
-                            <i className="fas fa-minus text-xs"></i>
+                            <Minus className="w-3 h-3 stroke-[1.5]" />
                           </button>
                           <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100"
                           >
-                            <i className="fas fa-plus text-xs"></i>
+                            <Plus className="w-3 h-3 stroke-[1.5]" />
                           </button>
                         </div>
                         <div className="text-right">
@@ -115,7 +116,7 @@ export default function MobileCartDrawer({ isOpen, onClose }: MobileCartDrawerPr
                       onClick={() => removeFromCart(item.id)}
                       className="text-gray-400 hover:text-red-500"
                     >
-                      <i className="fas fa-trash text-sm"></i>
+                      <Trash2 className="w-4 h-4 stroke-[1.5]" />
                     </button>
                   </div>
                 </div>

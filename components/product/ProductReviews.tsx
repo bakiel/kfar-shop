@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { productReviews, getProductReviews, getReviewStats } from '@/lib/data/review-mock-data';
 import ReviewSubmissionForm from '@/components/reviews/ReviewSubmissionForm';
+import { Star, CheckCircle, Store, ThumbsUp, Flag, PenLine } from 'lucide-react';
 
 interface ProductReviewsProps {
   productId: string;
@@ -33,10 +34,10 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
-          <i
+          <Star
             key={star}
-            className={`fas fa-star text-sm ${
-              star <= rating ? 'text-yellow-400' : 'text-gray-300'
+            className={`w-4 h-4 stroke-[1.5] ${
+              star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
             }`}
           />
         ))}
@@ -94,7 +95,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
               return (
                 <div key={rating} className="flex items-center gap-3">
                   <span className="text-sm w-3">{rating}</span>
-                  <i className="fas fa-star text-sm text-yellow-400" />
+                  <Star className="w-4 h-4 stroke-[1.5] text-yellow-400 fill-yellow-400" />
                   <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
                     <div
                       className="h-full transition-all duration-500"
@@ -156,8 +157,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
                     <h4 className="font-semibold" style={{ color: '#3a3a1d' }}>
                       {review.author.name}
                       {review.author.verified && (
-                        <i 
-                          className="fas fa-check-circle text-sm ml-2" 
+                        <CheckCircle
+                          className="w-4 h-4 stroke-[1.5] ml-2"
                           style={{ color: '#478c0b' }}
                           title="Verified Purchaser"
                         />
@@ -209,7 +210,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
             {review.vendorResponse && (
               <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: '#fef9ef' }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <i className="fas fa-store text-sm" style={{ color: '#478c0b' }} />
+                  <Store className="w-4 h-4 stroke-[1.5]" style={{ color: '#478c0b' }} />
                   <span className="font-semibold text-sm" style={{ color: '#3a3a1d' }}>
                     Vendor Response
                   </span>
@@ -224,11 +225,11 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
             {/* Helpful Button */}
             <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
               <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800">
-                <i className="far fa-thumbs-up" />
+                <ThumbsUp className="w-4 h-4 stroke-[1.5]" />
                 Helpful ({review.helpful})
               </button>
-              <button className="text-sm text-gray-600 hover:text-gray-800">
-                <i className="far fa-flag" /> Report
+              <button className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800">
+                <Flag className="w-4 h-4 stroke-[1.5]" /> Report
               </button>
             </div>
           </div>
@@ -242,7 +243,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
           className="px-8 py-3 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
           style={{ backgroundColor: '#478c0b' }}
         >
-          <i className="fas fa-pen mr-2" />
+          <PenLine className="w-4 h-4 stroke-[1.5] inline mr-2" />
           Write a Review & Earn Points
         </button>
       </div>

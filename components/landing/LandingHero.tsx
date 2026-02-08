@@ -6,6 +6,10 @@ import {
   useReducedMotion,
   useSpring,
   useInView,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useMotionTemplate,
 } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -59,7 +63,6 @@ function AnimatedCounter({
     if (isInView) springVal.set(target);
   }, [isInView, springVal, target]);
 
-  /* Subscribe to motion value and write to DOM imperatively for performance */
   useEffect(() => {
     const unsub = springVal.on('change', (v: number) => {
       if (ref.current) ref.current.textContent = `${Math.round(v)}${suffix}`;
@@ -114,6 +117,101 @@ function FulfillmentToggle({
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Hero spotlight card (first product, larger)                               */
+/* -------------------------------------------------------------------------- */
+
+function HeroSpotlightCard({
+  product,
+  shouldReduceMotion,
+}: {
+  product: LandingProduct;
+  shouldReduceMotion: boolean | null;
+}) {
+  const { t, language } = useLanguage();
+  const displayName =
+    language === 'he' && product.nameHe ? product.nameHe : product.name;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ['start end', 'end start'],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ['-5%', '5%']);
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={
+        shouldReduceMotion
+          ? {}
+          : { y: -8, boxShadow: '0 30px 60px -15px rgba(0,0,0,0.15)' }
+      }
+      className="group cursor-pointer col-span-2"
+    >
+      <Link href={`/product/${product.id}`}>
+        <div className="relative bg-white rounded-2xl overflow-hidden shadow-medium hover:shadow-strong transition-shadow duration-300 border border-kfar-cream">
+          <div className="relative h-56 sm:h-64 overflow-hidden bg-kfar-cream">
+            <motion.div className="absolute inset-0" style={{ y: imageY }}>
+              <Image
+                src={product.image}
+                alt={displayName}
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                priority
+              />
+            </motion.div>
+            {product.badge && (
+              <span className="absolute top-3 start-3 px-3 py-1 rounded-full bg-earth-flame text-white text-xs font-bold tracking-wide z-10">
+                {product.badge}
+              </span>
+            )}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="absolute bottom-3 end-3 w-10 h-10 bg-kfar-mint rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer z-10"
+              aria-label={t('Add to Cart')}
+            >
+              <ShoppingBag className="w-5 h-5 text-white stroke-[1.5]" />
+            </motion.div>
+          </div>
+          <div className="p-4">
+            <p className="text-xs text-gray-400 font-medium mb-1 truncate">
+              {product.vendorName}
+            </p>
+            <h4 className="font-bold text-soil-brown text-base leading-tight line-clamp-1 group-hover:text-kfar-mint transition-colors">
+              {displayName}
+            </h4>
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-baseline gap-2">
+                <span className="text-kfar-mint font-bold text-lg">
+                  {'\u20AA'}{product.price}
+                </span>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="text-gray-400 line-through text-sm">
+                    {'\u20AA'}{product.originalPrice}
+                  </span>
+                )}
+              </div>
+              {product.rating && (
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-sun-gold text-sun-gold stroke-[1.5]" />
+                  <span className="text-sm text-gray-500 font-medium">
+                    {product.rating.toFixed(1)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Bento product card (for the right-side grid)                              */
 /* -------------------------------------------------------------------------- */
 
@@ -122,11 +220,13 @@ function BentoProductCard({
   index,
   shouldReduceMotion,
   isRTL,
+  isPriority,
 }: {
   product: LandingProduct;
   index: number;
   shouldReduceMotion: boolean | null;
   isRTL: boolean;
+  isPriority?: boolean;
 }) {
   const { t, language } = useLanguage();
   const displayName =
@@ -137,7 +237,7 @@ function BentoProductCard({
       initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        delay: 0.6 + index * 0.1,
+        delay: 0.7 + index * 0.1,
         duration: 0.5,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
@@ -150,7 +250,6 @@ function BentoProductCard({
     >
       <Link href={`/product/${product.id}`}>
         <div className="relative bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-strong transition-shadow duration-300 border border-kfar-cream">
-          {/* Image */}
           <div className="relative h-36 sm:h-44 overflow-hidden bg-kfar-cream">
             <Image
               src={product.image}
@@ -158,14 +257,13 @@ function BentoProductCard({
               fill
               sizes="(max-width: 640px) 50vw, 25vw"
               className="object-cover group-hover:scale-105 transition-transform duration-500"
+              priority={isPriority}
             />
-            {/* Badge */}
             {product.badge && (
               <span className="absolute top-2 start-2 px-2 py-0.5 rounded-full bg-earth-flame text-white text-[11px] font-bold tracking-wide">
                 {product.badge}
               </span>
             )}
-            {/* Quick add */}
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -175,8 +273,6 @@ function BentoProductCard({
               <ShoppingBag className="w-4 h-4 text-white stroke-[1.5]" />
             </motion.div>
           </div>
-
-          {/* Info */}
           <div className="p-3">
             <p className="text-[11px] text-gray-400 font-medium mb-0.5 truncate">
               {product.vendorName}
@@ -222,12 +318,10 @@ function VendorLogoTicker({
   vendors: LandingVendor[];
   isRTL: boolean;
 }) {
-  /* Duplicate the list so the scroll loops seamlessly */
   const doubled = [...vendors, ...vendors];
 
   return (
     <div className="relative overflow-hidden py-4">
-      {/* Fade edges */}
       <div
         className="absolute inset-y-0 start-0 w-16 z-10 pointer-events-none"
         style={{
@@ -283,6 +377,46 @@ function VendorLogoTicker({
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Animated mesh gradient background                                         */
+/* -------------------------------------------------------------------------- */
+
+function MeshGradientBg({ shouldReduceMotion }: { shouldReduceMotion: boolean | null }) {
+  const x1 = useMotionValue(30);
+  const y1 = useMotionValue(20);
+  const x2 = useMotionValue(70);
+  const y2 = useMotionValue(80);
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+
+    let frame: number;
+    let t = 0;
+    const animate = () => {
+      t += 0.003;
+      x1.set(30 + Math.sin(t * 0.7) * 15);
+      y1.set(20 + Math.cos(t * 0.5) * 15);
+      x2.set(70 + Math.cos(t * 0.6) * 15);
+      y2.set(80 + Math.sin(t * 0.8) * 15);
+      frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [shouldReduceMotion, x1, y1, x2, y2]);
+
+  const bg = useMotionTemplate`
+    radial-gradient(ellipse 60% 50% at ${x1}% ${y1}%, rgba(71,140,11,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at ${x2}% ${y2}%, rgba(196,162,101,0.06) 0%, transparent 70%)
+  `;
+
+  return (
+    <motion.div
+      className="absolute inset-0 pointer-events-none"
+      style={{ backgroundImage: bg }}
+    />
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Stagger animation variants                                                */
 /* -------------------------------------------------------------------------- */
 
@@ -299,7 +433,7 @@ const staggerItem = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 };
 
@@ -316,8 +450,9 @@ export default function LandingHero({
   const shouldReduceMotion = useReducedMotion();
   const [fulfillment, setFulfillment] = useState<FulfillmentMode>('delivery');
 
-  /* Pick up to 6 featured products for bento */
-  const bentoProducts = featuredProducts.slice(0, 6);
+  /* First product is the spotlight; rest go to bento grid */
+  const spotlightProduct = featuredProducts[0];
+  const bentoProducts = featuredProducts.slice(1, 6);
 
   /* Stat tiles */
   const statTiles = [
@@ -327,7 +462,6 @@ export default function LandingHero({
       suffix: '+',
       label: t('families'),
       color: 'text-kfar-mint',
-      bg: 'bg-kfar-mint/10',
     },
     {
       icon: Package,
@@ -335,7 +469,6 @@ export default function LandingHero({
       suffix: '+',
       label: t('products'),
       color: 'text-sun-gold',
-      bg: 'bg-sun-gold/10',
     },
     {
       icon: Store,
@@ -343,7 +476,6 @@ export default function LandingHero({
       suffix: '+',
       label: t('vendors'),
       color: 'text-earth-flame',
-      bg: 'bg-earth-flame/10',
     },
     {
       icon: Clock,
@@ -351,7 +483,6 @@ export default function LandingHero({
       suffix: '+',
       label: t('years'),
       color: 'text-kfar-gold-premium',
-      bg: 'bg-kfar-gold-premium/10',
     },
   ];
 
@@ -360,14 +491,26 @@ export default function LandingHero({
       dir={isRTL ? 'rtl' : 'ltr'}
       className="relative bg-kfar-warm-white overflow-hidden"
     >
-      {/* ---- Welcome gift banner ---- */}
+      {/* Animated mesh gradient */}
+      <MeshGradientBg shouldReduceMotion={shouldReduceMotion} />
+
+      {/* ---- Welcome gift banner with shimmer ---- */}
       <motion.div
         initial={shouldReduceMotion ? {} : { opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative bg-gradient-to-r from-kfar-gold via-sun-gold to-kfar-gold-dark"
+        className="relative bg-gradient-to-r from-kfar-gold via-sun-gold to-kfar-gold-dark overflow-hidden"
       >
-        <div className="container mx-auto px-4 py-2.5 flex items-center justify-center gap-3 text-white">
+        {/* Shimmer overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 3s linear infinite',
+          }}
+        />
+        <div className="container mx-auto px-4 py-2.5 flex items-center justify-center gap-3 text-white relative z-10">
           <Gift className="w-4 h-4 stroke-[1.5] flex-shrink-0" />
           <p className="text-sm font-bold tracking-wide">
             {t('First 100 members get a welcome gift')}
@@ -383,9 +526,9 @@ export default function LandingHero({
       </motion.div>
 
       {/* ---- Main hero content ---- */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 relative">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
-          {/* ------ LEFT column: text + stats ------ */}
+          {/* ------ LEFT column: text ------ */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
@@ -404,12 +547,25 @@ export default function LandingHero({
               </span>
             </motion.div>
 
-            {/* Headline */}
+            {/* Headline — bigger, split into two lines */}
             <motion.h1
               variants={staggerItem}
-              className="text-4xl sm:text-5xl lg:text-[3.4rem] font-display font-bold leading-[1.12] text-soil-brown tracking-tight"
+              className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-[1.08] text-soil-brown"
+              style={{ letterSpacing: '-0.03em' }}
             >
-              {t('Your Community Marketplace')}
+              {language === 'he' ? (
+                <>
+                  השוק הקהילתי
+                  <br />
+                  <span className="text-leaf-green">שלך</span>
+                </>
+              ) : (
+                <>
+                  Your Community
+                  <br />
+                  <span className="text-leaf-green">Marketplace</span>
+                </>
+              )}
             </motion.h1>
 
             {/* Subtitle */}
@@ -456,36 +612,18 @@ export default function LandingHero({
                 </motion.span>
               </Link>
             </motion.div>
-
-            {/* Stat counters */}
-            <motion.div
-              variants={staggerItem}
-              className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2"
-            >
-              {statTiles.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <div
-                    key={s.label}
-                    className={`flex flex-col items-center gap-1 rounded-xl ${s.bg} border border-white/60 py-3 px-2`}
-                  >
-                    <Icon className={`w-5 h-5 ${s.color} stroke-[1.5]`} />
-                    <span className={`text-2xl font-bold ${s.color}`}>
-                      <AnimatedCounter target={s.value} suffix={s.suffix} />
-                    </span>
-                    <span className="text-[11px] font-medium text-gray-500 text-center leading-tight">
-                      {s.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </motion.div>
           </motion.div>
 
-          {/* ------ RIGHT column: Bento product grid ------ */}
+          {/* ------ RIGHT column: Spotlight + Bento product grid ------ */}
           <div className="order-1 lg:order-2">
-            {/* Desktop: 2-col bento grid */}
+            {/* Desktop: spotlight + bento */}
             <div className="hidden sm:grid grid-cols-2 gap-3">
+              {spotlightProduct && (
+                <HeroSpotlightCard
+                  product={spotlightProduct}
+                  shouldReduceMotion={shouldReduceMotion}
+                />
+              )}
               {bentoProducts.map((product, i) => (
                 <BentoProductCard
                   key={product.id}
@@ -493,6 +631,7 @@ export default function LandingHero({
                   index={i}
                   shouldReduceMotion={shouldReduceMotion}
                   isRTL={isRTL}
+                  isPriority={i === 0}
                 />
               ))}
             </div>
@@ -503,7 +642,7 @@ export default function LandingHero({
                 className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
                 style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                {bentoProducts.map((product, i) => (
+                {featuredProducts.slice(0, 6).map((product, i) => (
                   <div
                     key={product.id}
                     className="flex-shrink-0 w-[70vw] max-w-[260px] snap-start"
@@ -521,8 +660,40 @@ export default function LandingHero({
           </div>
         </div>
 
+        {/* ---- Glassmorphism stats strip ---- */}
+        <motion.div
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          className="mt-10 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/80 shadow-soft px-6 py-5"
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            {statTiles.map((s) => {
+              const Icon = s.icon;
+              return (
+                <div
+                  key={s.label}
+                  className="flex items-center gap-3"
+                >
+                  <div className={`w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center shadow-sm`}>
+                    <Icon className={`w-5 h-5 ${s.color} stroke-[1.5]`} />
+                  </div>
+                  <div>
+                    <span className={`text-2xl font-accent font-bold ${s.color}`}>
+                      <AnimatedCounter target={s.value} suffix={s.suffix} />
+                    </span>
+                    <p className="text-[11px] font-medium text-gray-500 leading-tight">
+                      {s.label}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
         {/* ---- Vendor logo ticker ---- */}
-        <div className="mt-10 border-t border-kfar-cream pt-2">
+        <div className="mt-6 border-t border-kfar-cream pt-2">
           <VendorLogoTicker vendors={vendors} isRTL={isRTL} />
         </div>
       </div>

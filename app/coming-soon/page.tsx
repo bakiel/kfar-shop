@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Leaf, Store, Truck, Facebook, Instagram, MessageCircle, Loader2 } from 'lucide-react';
 
 export default function ComingSoonPage() {
   const [heroImage, setHeroImage] = useState<string>('/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_01.jpg');
@@ -103,7 +104,7 @@ export default function ComingSoonPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" 
                      style={{ backgroundColor: '#478c0b' }}>
-                  <i className="fas fa-leaf text-2xl text-white"></i>
+                  <Leaf className="w-6 h-6 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">100% Vegan</h3>
                 <p className="text-white/80">Authentic plant-based products from our community</p>
@@ -112,7 +113,7 @@ export default function ComingSoonPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" 
                      style={{ backgroundColor: '#f6af0d' }}>
-                  <i className="fas fa-store text-2xl text-white"></i>
+                  <Store className="w-6 h-6 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Local Businesses</h3>
                 <p className="text-white/80">Supporting Village of Peace entrepreneurs</p>
@@ -121,7 +122,7 @@ export default function ComingSoonPage() {
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                 <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" 
                      style={{ backgroundColor: '#c23c09' }}>
-                  <i className="fas fa-truck text-2xl text-white"></i>
+                  <Truck className="w-6 h-6 stroke-[1.5] text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Easy Delivery</h3>
                 <p className="text-white/80">Convenient shopping and delivery options</p>
@@ -153,20 +154,20 @@ export default function ComingSoonPage() {
             {/* Social Links */}
             <div className="mt-12 flex justify-center gap-6">
               <a href="#" className="text-white/80 hover:text-white transition-colors">
-                <i className="fab fa-facebook text-2xl"></i>
+                <Facebook className="w-6 h-6 stroke-[1.5]" />
               </a>
               <a href="#" className="text-white/80 hover:text-white transition-colors">
-                <i className="fab fa-instagram text-2xl"></i>
+                <Instagram className="w-6 h-6 stroke-[1.5]" />
               </a>
               <a href="#" className="text-white/80 hover:text-white transition-colors">
-                <i className="fab fa-whatsapp text-2xl"></i>
+                <MessageCircle className="w-6 h-6 stroke-[1.5]" />
               </a>
             </div>
 
             {/* Image Generation Status */}
             {generatingImage && (
               <div className="mt-8 text-white/60 text-sm">
-                <i className="fas fa-spinner fa-spin mr-2"></i>
+                <Loader2 className="w-4 h-4 stroke-[1.5] animate-spin inline mr-2" />
                 Generating premium hero image...
               </div>
             )}

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import '@/styles/kfar-style-system.css';
+import { Store, Palette, Info, Package, Rocket, ChevronLeft, ChevronRight, Bot, X, Camera, ImageIcon, Plus, Loader2, Wand2, CheckCircle, AlertTriangle, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function VendorOnboarding() {
   const router = useRouter();
@@ -74,12 +75,20 @@ export default function VendorOnboarding() {
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
 
+  const stepIcons: Record<string, React.ReactNode> = {
+    'store': <Store className="w-4 h-4 stroke-[1.5]" />,
+    'palette': <Palette className="w-4 h-4 stroke-[1.5]" />,
+    'info': <Info className="w-4 h-4 stroke-[1.5]" />,
+    'package': <Package className="w-4 h-4 stroke-[1.5]" />,
+    'rocket': <Rocket className="w-4 h-4 stroke-[1.5]" />,
+  };
+
   const steps = [
-    { id: 1, title: 'Basic Info', description: 'Store name and category', icon: 'fa-store' },
-    { id: 2, title: 'Branding', description: 'Logo and banner', icon: 'fa-palette' },
-    { id: 3, title: 'Details', description: 'Contact and delivery', icon: 'fa-info-circle' },
-    { id: 4, title: 'Products', description: 'Your catalog', icon: 'fa-box' },
-    { id: 5, title: 'Review', description: 'Launch store', icon: 'fa-rocket' },
+    { id: 1, title: 'Basic Info', description: 'Store name and category', icon: 'store' },
+    { id: 2, title: 'Branding', description: 'Logo and banner', icon: 'palette' },
+    { id: 3, title: 'Details', description: 'Contact and delivery', icon: 'info' },
+    { id: 4, title: 'Products', description: 'Your catalog', icon: 'package' },
+    { id: 5, title: 'Review', description: 'Launch store', icon: 'rocket' },
   ];
 
   const getAIMessage = (step: number) => {
@@ -326,7 +335,7 @@ export default function VendorOnboarding() {
           onClick={() => setShowAIAssistant(!showAIAssistant)}
           className="absolute -right-3 top-8 w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center z-10 kfar-text-leaf-green"
         >
-          <i className={`fas fa-chevron-${showAIAssistant ? 'left' : 'right'} text-xs`}></i>
+          {showAIAssistant ? <ChevronLeft className="w-3 h-3 stroke-[1.5]" /> : <ChevronRight className="w-3 h-3 stroke-[1.5]" />}
         </button>
 
         {showAIAssistant && (
@@ -354,7 +363,7 @@ export default function VendorOnboarding() {
                   onClick={() => setShowAIAssistant(!showAIAssistant)}
                   className="w-8 h-8 bg-leaf-green/10 text-leaf-green rounded-full flex items-center justify-center"
                 >
-                  <i className="fas fa-robot text-sm"></i>
+                  <Bot className="w-4 h-4 stroke-[1.5]" />
                 </button>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -384,7 +393,7 @@ export default function VendorOnboarding() {
                   onClick={() => setShowAIAssistant(false)}
                   className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center"
                 >
-                  <i className="fas fa-times text-gray-500"></i>
+                  <X className="w-4 h-4 stroke-[1.5] text-gray-500" />
                 </button>
               </div>
               <div className="p-4">
@@ -406,7 +415,7 @@ export default function VendorOnboarding() {
               </div>
               <Link href="/">
                 <button className="text-gray-600 hover:text-gray-800">
-                  <i className="fas fa-times text-xl"></i>
+                  <X className="w-5 h-5 stroke-[1.5]" />
                 </button>
               </Link>
             </div>
@@ -422,7 +431,7 @@ export default function VendorOnboarding() {
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                     currentStep >= step.id ? 'bg-leaf-green text-white' : 'bg-gray-200 text-gray-500'
                   }`}>
-                    <i className={`fas ${step.icon} text-sm`}></i>
+                    {stepIcons[step.icon]}
                   </div>
                   {!isMobile && (
                     <span className={`mt-2 text-xs font-medium ${
@@ -584,12 +593,12 @@ export default function VendorOnboarding() {
                           onClick={() => setStoreData({ ...storeData, logo: null })}
                           className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full"
                         >
-                          <i className="fas fa-times text-xs"></i>
+                          <X className="w-3 h-3 stroke-[1.5]" />
                         </button>
                       </div>
                     ) : (
                       <label className="w-32 h-32 mx-auto border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-leaf-green">
-                        <i className="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                        <Camera className="w-6 h-6 stroke-[1.5] text-gray-400 mb-2" />
                         <span className="text-xs text-gray-500">Upload Logo</span>
                         <input
                           type="file"
@@ -610,12 +619,12 @@ export default function VendorOnboarding() {
                           onClick={() => setStoreData({ ...storeData, banner: null })}
                           className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full"
                         >
-                          <i className="fas fa-times text-xs"></i>
+                          <X className="w-3 h-3 stroke-[1.5]" />
                         </button>
                       </div>
                     ) : (
                       <label className="w-full border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-leaf-green" style={{ aspectRatio: '3/1', minHeight: '100px' }}>
-                        <i className="fas fa-image text-2xl text-gray-400 mb-2"></i>
+                        <ImageIcon className="w-6 h-6 stroke-[1.5] text-gray-400 mb-2" />
                         <span className="text-xs text-gray-500">Upload Banner</span>
                         <input
                           type="file"
@@ -725,7 +734,7 @@ export default function VendorOnboarding() {
                     onClick={addProduct}
                     className="px-4 py-2 bg-leaf-green text-white rounded-lg hover:bg-leaf-green-dark"
                   >
-                    <i className="fas fa-plus mr-2"></i>
+                    <Plus className="w-4 h-4 stroke-[1.5] mr-2" />
                     Add Product
                   </button>
                 </div>
@@ -733,7 +742,7 @@ export default function VendorOnboarding() {
                 <div className="space-y-4">
                   {products.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
-                      <i className="fas fa-box-open text-4xl mb-4"></i>
+                      <Package className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" />
                       <p>No products added yet. Click "Add Product" to start!</p>
                     </div>
                   ) : (
@@ -750,12 +759,12 @@ export default function VendorOnboarding() {
                           }`}>
                             {product.isAnalyzing ? (
                               <>
-                                <i className="fas fa-spinner fa-spin"></i>
+                                <Loader2 className="w-3 h-3 stroke-[1.5] animate-spin" />
                                 AI Analyzing...
                               </>
                             ) : (
                               <>
-                                <i className="fas fa-magic"></i>
+                                <Wand2 className="w-3 h-3 stroke-[1.5]" />
                                 AI Enhanced
                               </>
                             )}
@@ -770,7 +779,7 @@ export default function VendorOnboarding() {
                                 ? 'bg-green-100 text-green-800 border border-green-300' 
                                 : 'bg-red-100 text-red-800 border border-red-300'
                             }`}>
-                              <i className={`fas ${product.vopCompliance.isCompliant ? 'fa-check-circle' : 'fa-exclamation-triangle'}`}></i>
+                              {product.vopCompliance.isCompliant ? <CheckCircle className="w-3 h-3 stroke-[1.5]" /> : <AlertTriangle className="w-3 h-3 stroke-[1.5]" />}
                               {product.vopCompliance.isCompliant ? 'VOP Compliant' : 'Review Required'}
                             </div>
                           </div>
@@ -783,7 +792,7 @@ export default function VendorOnboarding() {
                                 <img src={product.image} alt="Product" className="w-full h-full object-cover rounded" />
                                 {product.isAnalyzing && (
                                   <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center">
-                                    <i className="fas fa-spinner fa-spin text-white text-xl"></i>
+                                    <Loader2 className="w-5 h-5 stroke-[1.5] text-white animate-spin" />
                                   </div>
                                 )}
                                 <button
@@ -791,12 +800,12 @@ export default function VendorOnboarding() {
                                   className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full"
                                   disabled={product.isAnalyzing}
                                 >
-                                  <i className="fas fa-times text-xs"></i>
+                                  <X className="w-3 h-3 stroke-[1.5]" />
                                 </button>
                               </div>
                             ) : (
                               <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer hover:border-green-500">
-                                <i className="fas fa-camera text-gray-400"></i>
+                                <Camera className="w-5 h-5 stroke-[1.5] text-gray-400" />
                                 <input
                                   type="file"
                                   onChange={(e) => handleFileSelect(e, 'product', product.id)}
@@ -885,8 +894,8 @@ export default function VendorOnboarding() {
                               </div>
                               
                               {product.aiEnhanced && product.description && (
-                                <div className="p-2 bg-green-50 rounded text-xs text-green-700">
-                                  <i className="fas fa-magic mr-1"></i>
+                                <div className="p-2 bg-green-50 rounded text-xs text-green-700 flex items-center gap-1">
+                                  <Wand2 className="w-3 h-3 stroke-[1.5]" />
                                   AI enhanced description
                                 </div>
                               )}
@@ -912,7 +921,7 @@ export default function VendorOnboarding() {
                                 onClick={() => removeProduct(product.id)}
                                 className="ml-auto text-red-500"
                               >
-                                <i className="fas fa-trash"></i>
+                                <Trash2 className="w-4 h-4 stroke-[1.5]" />
                               </button>
                             </div>
                           </div>
@@ -957,7 +966,7 @@ export default function VendorOnboarding() {
                     onClick={completeOnboarding}
                     className="px-8 py-3 bg-leaf-green text-white rounded-lg hover:bg-leaf-green-dark text-lg font-semibold"
                   >
-                    <i className="fas fa-rocket mr-2"></i>
+                    <Rocket className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                     Launch My Store
                   </button>
                 </div>
@@ -978,7 +987,7 @@ export default function VendorOnboarding() {
                 onClick={() => setCurrentStep(currentStep - 1)}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
               >
-                <i className="fas fa-arrow-left mr-2"></i>
+                <ArrowLeft className="w-4 h-4 stroke-[1.5] mr-2" />
                 Previous
               </button>
             )}
@@ -993,7 +1002,7 @@ export default function VendorOnboarding() {
                 }`}
               >
                 Continue
-                <i className="fas fa-arrow-right ml-2"></i>
+                <ArrowRight className="w-4 h-4 stroke-[1.5] ml-2" />
               </button>
             )}
           </div>

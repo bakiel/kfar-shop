@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import '@/styles/kfar-style-system.css';
 
 export default function AdminNotFound() {
@@ -22,7 +23,7 @@ export default function AdminNotFound() {
         
         <Link href="/admin/dashboard">
           <button className="btn btn-primary">
-            <i className="fas fa-arrow-left mr-2"></i>
+            <ArrowLeft className="w-5 h-5 stroke-[1.5] inline mr-2" />
             Back to Dashboard
           </button>
         </Link>

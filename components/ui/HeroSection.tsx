@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { QrCode, Wifi } from 'lucide-react';
+import { QrCode, Wifi, Star, ShoppingBag, ArrowRight, Store, Sparkles, Leaf } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 
 const HeroSection = () => {
@@ -61,8 +61,8 @@ const HeroSection = () => {
               <div className="space-y-3 mb-6">
                 {/* Original Badge */}
                 <div className="inline-flex items-center gap-2 animate-fade-in">
-                  <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg" style={{ backgroundColor: '#f6af0d' }}>
-                    <i className="fas fa-star mr-2"></i>
+                  <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg inline-flex items-center gap-2" style={{ backgroundColor: '#f6af0d' }}>
+                    <Star className="w-4 h-4 stroke-[1.5]" />
                     {slides[currentSlide].badge}
                   </span>
                   <span className="text-sm font-medium" style={{ color: '#3a3a1d' }}>
@@ -120,16 +120,16 @@ const HeroSection = () => {
               <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-delay-2">
                 <Link href="/marketplace">
                   <button className="w-full sm:w-auto min-h-[44px] px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-white font-semibold text-base sm:text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group" style={{ backgroundColor: '#c23c09' }}>
-                    <i className="fas fa-shopping-bag"></i>
+                    <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
                     {t('Explore Marketplace')}
-                    <i className="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform duration-300"></i>
+                    <ArrowRight className="w-4 h-4 stroke-[1.5] group-hover:translate-x-1 transition-transform duration-300" />
                   </button>
                 </Link>
                 <Link href="/become-a-vendor">
                   <button className="w-full sm:w-auto min-h-[44px] px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg border-2 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white border-purple-600">
-                    <i className="fas fa-store"></i>
+                    <Store className="w-5 h-5 stroke-[1.5]" />
                     {t('Become a Vendor')}
-                    <i className="fas fa-sparkles text-sm"></i>
+                    <Sparkles className="w-4 h-4 stroke-[1.5]" />
                   </button>
                 </Link>
               </div>
@@ -152,7 +152,7 @@ const HeroSection = () => {
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     {[...Array(5)].map((_, i) => (
-                      <i key={i} className="fas fa-star text-sm" style={{ color: '#f6af0d' }}></i>
+                      <Star key={i} className="w-4 h-4 stroke-[1.5] fill-[#f6af0d]" style={{ color: '#f6af0d' }} />
                     ))}
                   </div>
                   <p className="text-sm" style={{ color: '#6b7280' }}>
@@ -196,7 +196,7 @@ const HeroSection = () => {
                         <div className="hidden sm:block absolute -left-10 top-20 bg-white rounded-xl shadow-xl p-3 sm:p-4 transform -rotate-6 hover:rotate-0 transition-transform duration-300">
                           <div className="flex items-center gap-3">
                             <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#cfe7c1' }}>
-                              <i className="fas fa-leaf text-lg sm:text-xl" style={{ color: '#478c0b' }}></i>
+                              <Leaf className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5]" style={{ color: '#478c0b' }} />
                             </div>
                             <div>
                               <p className="font-semibold text-xs sm:text-sm" style={{ color: '#3a3a1d' }}>100% Vegan</p>
@@ -208,7 +208,7 @@ const HeroSection = () => {
                         <div className="hidden sm:block absolute -right-10 bottom-20 bg-white rounded-xl shadow-xl p-3 sm:p-4 transform rotate-6 hover:rotate-0 transition-transform duration-300">
                           <div className="flex items-center gap-3">
                             <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(246, 175, 13, 0.2)' }}>
-                              <i className="fas fa-store text-lg sm:text-xl" style={{ color: '#f6af0d' }}></i>
+                              <Store className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5]" style={{ color: '#f6af0d' }} />
                             </div>
                             <div>
                               <p className="font-semibold text-xs sm:text-sm" style={{ color: '#3a3a1d' }}>30+ Vendors</p>

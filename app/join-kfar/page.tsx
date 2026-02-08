@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Layout from '@/components/layout/Layout'
 import { useMobileDetect } from '@/hooks/useMobileDetect'
 import { motion } from 'framer-motion'
+import { CheckCircle, QrCode, Mic, Bot, Gift, Store, UserPlus, ArrowRight, TrendingUp, Megaphone, Globe, Star, Headphones } from 'lucide-react'
 
 export default function JoinKFAR() {
   const [activeTab, setActiveTab] = useState<'overview' | 'vendor' | 'customer' | 'faq'>('overview')
@@ -118,15 +119,15 @@ export default function JoinKFAR() {
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <i className="fas fa-check-circle text-leaf-green text-xl"></i>
+                      <CheckCircle className="w-5 h-5 stroke-[1.5] text-leaf-green" />
                       <span className="text-gray-700">Established in 1967</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <i className="fas fa-check-circle text-leaf-green text-xl"></i>
+                      <CheckCircle className="w-5 h-5 stroke-[1.5] text-leaf-green" />
                       <span className="text-gray-700">Supporting local entrepreneurs</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <i className="fas fa-check-circle text-leaf-green text-xl"></i>
+                      <CheckCircle className="w-5 h-5 stroke-[1.5] text-leaf-green" />
                       <span className="text-gray-700">Preserving African heritage</span>
                     </div>
                   </div>
@@ -138,19 +139,19 @@ export default function JoinKFAR() {
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4">
-                        <i className="fas fa-qrcode text-4xl mb-2" style={{ color: '#f6af0d' }}></i>
+                        <QrCode className="w-10 h-10 stroke-[1.5] mb-2 mx-auto" style={{ color: '#f6af0d' }} />
                         <p className="font-semibold">QR Payments</p>
                       </div>
                       <div className="text-center p-4">
-                        <i className="fas fa-microphone text-4xl mb-2" style={{ color: '#c23c09' }}></i>
+                        <Mic className="w-10 h-10 stroke-[1.5] mb-2 mx-auto" style={{ color: '#c23c09' }} />
                         <p className="font-semibold">Voice Shopping</p>
                       </div>
                       <div className="text-center p-4">
-                        <i className="fas fa-robot text-4xl mb-2" style={{ color: '#478c0b' }}></i>
+                        <Bot className="w-10 h-10 stroke-[1.5] mb-2 mx-auto" style={{ color: '#478c0b' }} />
                         <p className="font-semibold">AI Assistant</p>
                       </div>
                       <div className="text-center p-4">
-                        <i className="fas fa-gift text-4xl mb-2" style={{ color: '#3a3a1d' }}></i>
+                        <Gift className="w-10 h-10 stroke-[1.5] mb-2 mx-auto" style={{ color: '#3a3a1d' }} />
                         <p className="font-semibold">Rewards Program</p>
                       </div>
                     </div>
@@ -166,16 +167,16 @@ export default function JoinKFAR() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
                     href="/become-a-vendor"
-                    className="px-8 py-4 bg-leaf-green text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                    className="px-8 py-4 bg-leaf-green text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 inline-flex items-center"
                   >
-                    <i className="fas fa-store mr-2"></i>
+                    <Store className="w-5 h-5 stroke-[1.5] mr-2" />
                     Become a Vendor
                   </Link>
                   <Link
                     href="/join-as-customer"
-                    className="px-8 py-4 bg-sun-gold text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                    className="px-8 py-4 bg-sun-gold text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105 inline-flex items-center"
                   >
-                    <i className="fas fa-user-plus mr-2"></i>
+                    <UserPlus className="w-5 h-5 stroke-[1.5] mr-2" />
                     Join as Customer
                   </Link>
                 </div>
@@ -197,22 +198,22 @@ export default function JoinKFAR() {
               {/* Vendor Benefits */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-qrcode text-4xl mb-4" style={{ color: '#478c0b' }}></i>
+                  <QrCode className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#478c0b' }} />
                   <h3 className="font-bold mb-2">QR Payments</h3>
                   <p className="text-sm text-gray-600">Accept instant payments via customer QR codes</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-chart-line text-4xl mb-4" style={{ color: '#f6af0d' }}></i>
+                  <TrendingUp className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#f6af0d' }} />
                   <h3 className="font-bold mb-2">Analytics Dashboard</h3>
                   <p className="text-sm text-gray-600">Track sales, views, and customer behavior</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-ad text-4xl mb-4" style={{ color: '#c23c09' }}></i>
+                  <Megaphone className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#c23c09' }} />
                   <h3 className="font-bold mb-2">Custom Banners</h3>
                   <p className="text-sm text-gray-600">6 professional templates for promotions</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-globe text-4xl mb-4" style={{ color: '#3a3a1d' }}></i>
+                  <Globe className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#3a3a1d' }} />
                   <h3 className="font-bold mb-2">Multi-Language</h3>
                   <p className="text-sm text-gray-600">Reach customers in 3 languages</p>
                 </div>
@@ -252,7 +253,7 @@ export default function JoinKFAR() {
                   className="inline-flex items-center px-8 py-4 bg-leaf-green text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                 >
                   Start Your Digital Store Today
-                  <i className="fas fa-arrow-right ml-2"></i>
+                  <ArrowRight className="w-5 h-5 stroke-[1.5] ml-2" />
                 </Link>
               </div>
             </motion.div>
@@ -272,22 +273,22 @@ export default function JoinKFAR() {
               {/* Customer Benefits */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-qrcode text-4xl mb-4" style={{ color: '#478c0b' }}></i>
+                  <QrCode className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#478c0b' }} />
                   <h3 className="font-bold mb-2">Personal QR</h3>
                   <p className="text-sm text-gray-600">Your unique code for quick checkout</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-microphone text-4xl mb-4" style={{ color: '#f6af0d' }}></i>
+                  <Mic className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#f6af0d' }} />
                   <h3 className="font-bold mb-2">Voice Shopping</h3>
                   <p className="text-sm text-gray-600">Order in English, Hebrew, or Amharic</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-star text-4xl mb-4" style={{ color: '#c23c09' }}></i>
+                  <Star className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#c23c09' }} />
                   <h3 className="font-bold mb-2">Earn Rewards</h3>
                   <p className="text-sm text-gray-600">50-200 points per action</p>
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-                  <i className="fas fa-robot text-4xl mb-4" style={{ color: '#3a3a1d' }}></i>
+                  <Bot className="w-10 h-10 stroke-[1.5] mb-4 mx-auto" style={{ color: '#3a3a1d' }} />
                   <h3 className="font-bold mb-2">AI Assistant</h3>
                   <p className="text-sm text-gray-600">Personalized recommendations</p>
                 </div>
@@ -325,7 +326,7 @@ export default function JoinKFAR() {
                   className="inline-flex items-center px-8 py-4 bg-sun-gold text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                 >
                   Get Your QR Code Now
-                  <i className="fas fa-arrow-right ml-2"></i>
+                  <ArrowRight className="w-5 h-5 stroke-[1.5] ml-2" />
                 </Link>
               </div>
             </motion.div>
@@ -367,7 +368,7 @@ export default function JoinKFAR() {
                   className="inline-flex items-center px-6 py-3 border-2 border-leaf-green text-leaf-green rounded-full font-semibold hover:bg-leaf-green hover:text-white transition-all"
                 >
                   Contact Support
-                  <i className="fas fa-headset ml-2"></i>
+                  <Headphones className="w-5 h-5 stroke-[1.5] ml-2" />
                 </Link>
               </div>
             </motion.div>
@@ -387,16 +388,16 @@ export default function JoinKFAR() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/become-a-vendor"
-              className="px-8 py-4 bg-white text-leaf-green rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+              className="px-8 py-4 bg-white text-leaf-green rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all inline-flex items-center"
             >
-              <i className="fas fa-store mr-2"></i>
+              <Store className="w-5 h-5 stroke-[1.5] mr-2" />
               Become a Vendor
             </Link>
             <Link
               href="/join-as-customer"
-              className="px-8 py-4 border-2 border-white text-white rounded-full font-semibold text-lg hover:bg-white hover:text-leaf-green transition-all"
+              className="px-8 py-4 border-2 border-white text-white rounded-full font-semibold text-lg hover:bg-white hover:text-leaf-green transition-all inline-flex items-center"
             >
-              <i className="fas fa-user-plus mr-2"></i>
+              <UserPlus className="w-5 h-5 stroke-[1.5] mr-2" />
               Join as Customer
             </Link>
           </div>

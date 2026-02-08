@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { User, ChevronDown, Gauge, ShoppingBag, ClipboardList, LogOut, ArrowRight, ShieldCheck, Store, ShoppingCart, Package } from 'lucide-react';
 
 export default function UserAccountDropdown() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function UserAccountDropdown() {
     const token = localStorage.getItem('customerToken');
     const name = localStorage.getItem('customerName');
     const role = localStorage.getItem('userRole');
-    
+
     setIsLoggedIn(!!token);
     setUserName(name || '');
     setUserRole(role || 'customer');
@@ -24,7 +25,7 @@ export default function UserAccountDropdown() {
 
   const handleLogout = () => {
     localStorage.removeItem('customerToken');
-    localStorage.removeItem('customerName'); 
+    localStorage.removeItem('customerName');
     localStorage.removeItem('customerId');
     localStorage.removeItem('userRole');
     setIsLoggedIn(false);
@@ -45,9 +46,9 @@ export default function UserAccountDropdown() {
 
   const getRoleIcon = () => {
     switch(userRole) {
-      case 'admin': return '👑';
-      case 'vendor': return '🏪';
-      default: return '👤';
+      case 'admin': return <ShieldCheck className="w-5 h-5 stroke-[1.5]" />;
+      case 'vendor': return <Store className="w-5 h-5 stroke-[1.5]" />;
+      default: return <User className="w-5 h-5 stroke-[1.5]" />;
     }
   };
 
@@ -64,15 +65,15 @@ export default function UserAccountDropdown() {
             <span className="hidden md:block text-sm font-medium text-soil-brown">
               {userName.split(' ')[0]}
             </span>
-            <i className="fas fa-chevron-down text-xs text-soil-brown transition-transform duration-300" 
-               style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}></i>
+            <ChevronDown className="w-3 h-3 stroke-[1.5] text-soil-brown transition-transform duration-300"
+               style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <i className="fas fa-user text-xl text-soil-brown group-hover:text-leaf-green transition-all duration-300"></i>
+            <User className="w-5 h-5 stroke-[1.5] text-soil-brown group-hover:text-leaf-green transition-all duration-300" />
             <span className="hidden md:block text-sm font-medium text-soil-brown">Login</span>
-            <i className="fas fa-chevron-down text-xs text-soil-brown transition-transform duration-300" 
-               style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}></i>
+            <ChevronDown className="w-3 h-3 stroke-[1.5] text-soil-brown transition-transform duration-300"
+               style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
           </div>
         )}
       </button>
@@ -81,11 +82,11 @@ export default function UserAccountDropdown() {
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Dropdown Content */}
           <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border-2 border-green-200 z-20 overflow-hidden">
             {isLoggedIn ? (
@@ -100,44 +101,44 @@ export default function UserAccountDropdown() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="p-2">
-                  <Link 
+                  <Link
                     href={getDashboardLink()}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all"
                     onClick={() => setIsOpen(false)}
                   >
-                    <i className="fas fa-tachometer-alt text-green-600"></i>
+                    <Gauge className="w-4 h-4 stroke-[1.5] text-green-600" />
                     <span>Dashboard</span>
                   </Link>
-                  
+
                   {userRole === 'customer' && (
-                    <Link 
+                    <Link
                       href="/customer/orders"
                       className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all"
                       onClick={() => setIsOpen(false)}
                     >
-                      <i className="fas fa-shopping-bag text-purple-600"></i>
+                      <ShoppingBag className="w-4 h-4 stroke-[1.5] text-purple-600" />
                       <span>My Orders</span>
                     </Link>
                   )}
-                  
+
                   {userRole === 'vendor' && (
-                    <Link 
+                    <Link
                       href="/vendor/orders"
                       className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all"
                       onClick={() => setIsOpen(false)}
                     >
-                      <i className="fas fa-clipboard-list text-blue-600"></i>
+                      <ClipboardList className="w-4 h-4 stroke-[1.5] text-blue-600" />
                       <span>Orders</span>
                     </Link>
                   )}
-                  
-                  <button 
+
+                  <button
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 transition-all text-red-600"
                   >
-                    <i className="fas fa-sign-out-alt"></i>
+                    <LogOut className="w-4 h-4 stroke-[1.5]" />
                     <span>Logout</span>
                   </button>
                 </div>
@@ -149,48 +150,48 @@ export default function UserAccountDropdown() {
                   <div className="font-semibold text-gray-800 mb-1">Choose Your Role</div>
                   <div className="text-sm text-gray-600">Access your specialized portal</div>
                 </div>
-                
+
                 <div className="p-2">
-                  <Link 
+                  <Link
                     href="/customer/login?role=customer"
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-purple-50 transition-all group"
                     onClick={() => setIsOpen(false)}
                   >
-                    <span className="text-xl">🛒</span>
+                    <ShoppingCart className="w-5 h-5 stroke-[1.5] text-purple-500" />
                     <div>
                       <div className="font-medium text-purple-600">Customer Login</div>
                       <div className="text-xs text-gray-500">Shop & track orders</div>
                     </div>
-                    <i className="fas fa-arrow-right text-purple-400 ml-auto opacity-0 group-hover:opacity-100 transition-all"></i>
+                    <ArrowRight className="w-4 h-4 stroke-[1.5] text-purple-400 ml-auto opacity-0 group-hover:opacity-100 transition-all" />
                   </Link>
-                  
-                  <Link 
+
+                  <Link
                     href="/customer/login?role=vendor"
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-50 transition-all group"
                     onClick={() => setIsOpen(false)}
                   >
-                    <span className="text-xl">🏪</span>
+                    <Store className="w-5 h-5 stroke-[1.5] text-blue-500" />
                     <div>
                       <div className="font-medium text-blue-600">Vendor Portal</div>
                       <div className="text-xs text-gray-500">Manage your store</div>
                     </div>
-                    <i className="fas fa-arrow-right text-blue-400 ml-auto opacity-0 group-hover:opacity-100 transition-all"></i>
+                    <ArrowRight className="w-4 h-4 stroke-[1.5] text-blue-400 ml-auto opacity-0 group-hover:opacity-100 transition-all" />
                   </Link>
-                  
-                  <Link 
+
+                  <Link
                     href="/customer/login?role=admin"
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-green-50 transition-all group"
                     onClick={() => setIsOpen(false)}
                   >
-                    <span className="text-xl">👑</span>
+                    <ShieldCheck className="w-5 h-5 stroke-[1.5] text-green-500" />
                     <div>
                       <div className="font-medium text-green-600">Admin Access</div>
                       <div className="text-xs text-gray-500">Platform management</div>
                     </div>
-                    <i className="fas fa-arrow-right text-green-400 ml-auto opacity-0 group-hover:opacity-100 transition-all"></i>
+                    <ArrowRight className="w-4 h-4 stroke-[1.5] text-green-400 ml-auto opacity-0 group-hover:opacity-100 transition-all" />
                   </Link>
                 </div>
-                
+
                 {/* Demo Credentials */}
                 <div className="p-4 bg-gray-50 border-t">
                   <div className="text-xs text-gray-600 mb-2 font-medium">Demo Credentials:</div>

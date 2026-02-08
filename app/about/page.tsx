@@ -93,7 +93,7 @@ const timeline: TimelineItem[] = [
   { year: '1970s', titleEn: 'Early Settlement', titleHe: 'התיישבות ראשונה', descEn: 'Community establishes roots in Dimona with agricultural projects and early recognition efforts.', descHe: 'הקהילה מכה שורשים בדימונה עם פרויקטים חקלאיים.' },
   { year: '1983', titleEn: 'Teva Deli Founded', titleHe: 'טבע דלי נוסדה', descEn: 'Launch of Israel\'s first vegan food manufacturing company, pioneering plant-based products.', descHe: 'השקת חברת המזון הטבעוני הראשונה בישראל, חלוצת המוצרים מהצומח.' },
   { year: '2003', titleEn: 'Official Recognition', titleHe: 'הכרה רשמית', descEn: 'Israeli government grants permanent residency, recognizing the community\'s place in society.', descHe: 'ממשלת ישראל מעניקה תושבות קבע, מכירה במקומה של הקהילה בחברה.' },
-  { year: '2024', titleEn: 'Digital Marketplace', titleHe: 'שוק דיגיטלי', descEn: 'KFAR Marketplace launches, bringing community businesses to the global digital economy.', descHe: 'כפר מרקטפלייס מושק, מביא את העסקים הקהילתיים לכלכלה הדיגיטלית הגלובלית.' }
+  { year: '2026', titleEn: 'Digital Marketplace', titleHe: 'שוק דיגיטלי', descEn: 'KFAR Marketplace launches, bringing community businesses to the global digital economy.', descHe: 'כפר מרקטפלייס מושק, מביא את העסקים הקהילתיים לכלכלה הדיגיטלית הגלובלית.' }
 ];
 
 interface ValueItem {

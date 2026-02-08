@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, Wand2, Bot, Plus, X, CloudUpload } from 'lucide-react';
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -140,7 +141,7 @@ export default function AddProductPage() {
           <div className="flex items-center gap-4">
             <Link href="/vendor/admin?tab=products">
               <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <i className="fas fa-arrow-left"></i>
+                <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
               </button>
             </Link>
             <h1 className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>Add New Product</h1>
@@ -216,7 +217,7 @@ export default function AddProductPage() {
                     onClick={generateAISuggestions}
                     className="mt-2 px-4 py-2 bg-gradient-to-r from-sun-gold to-sun-gold/80 text-white rounded-lg hover:shadow-lg transition-all"
                   >
-                    <i className="fas fa-magic mr-2"></i>
+                    <Wand2 className="w-4 h-4 stroke-[1.5] inline mr-2" />
                     Generate AI Description
                   </button>
 
@@ -225,7 +226,7 @@ export default function AddProductPage() {
                     <div className="mt-4 p-4 bg-herbal-mint/20 border-l-4 border-leaf-green rounded-lg">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-robot text-leaf-green"></i>
+                          <Bot className="w-5 h-5 stroke-[1.5] text-leaf-green" />
                           <span className="font-medium">AI Suggestion</span>
                         </div>
                         <button
@@ -363,10 +364,10 @@ export default function AddProductPage() {
                   onClick={addIngredient}
                   className="px-4 py-2 bg-leaf-green text-white rounded-lg hover:bg-leaf-green/90"
                 >
-                  <i className="fas fa-plus"></i>
+                  <Plus className="w-4 h-4 stroke-[1.5]" />
                 </button>
               </div>
-              
+
               <div className="flex flex-wrap gap-2">
                 {product.ingredients.map((ingredient, index) => (
                   <span
@@ -382,7 +383,7 @@ export default function AddProductPage() {
                       }))}
                       className="text-gray-500 hover:text-red-500"
                     >
-                      <i className="fas fa-times text-xs"></i>
+                      <X className="w-3 h-3 stroke-[1.5]" />
                     </button>
                   </span>
                 ))}
@@ -511,7 +512,7 @@ export default function AddProductPage() {
                       onClick={addTag}
                       className="px-3 py-2 bg-leaf-green text-white rounded-lg hover:bg-leaf-green/90"
                     >
-                      <i className="fas fa-plus"></i>
+                      <Plus className="w-4 h-4 stroke-[1.5]" />
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -529,7 +530,7 @@ export default function AddProductPage() {
                           }))}
                           className="text-gray-500 hover:text-red-500"
                         >
-                          <i className="fas fa-times text-xs"></i>
+                          <X className="w-3 h-3 stroke-[1.5]" />
                         </button>
                       </span>
                     ))}
@@ -570,7 +571,7 @@ export default function AddProductPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed border-leaf-green rounded-lg p-8 text-center cursor-pointer hover:border-sun-gold hover:bg-sun-gold/5 transition-all"
               >
-                <i className="fas fa-cloud-upload-alt text-4xl mb-2" style={{ color: '#478c0b' }}></i>
+                <CloudUpload className="w-10 h-10 stroke-[1.5] mb-2" style={{ color: '#478c0b' }} />
                 <p className="text-gray-600">Click to upload images</p>
                 <p className="text-sm text-gray-500 mt-1">JPG, PNG up to 5MB</p>
                 <input
@@ -599,7 +600,7 @@ export default function AddProductPage() {
                         onClick={() => removeImage(index)}
                         className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <i className="fas fa-times text-xs"></i>
+                        <X className="w-3 h-3 stroke-[1.5]" />
                       </button>
                       {index === 0 && (
                         <span className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded">

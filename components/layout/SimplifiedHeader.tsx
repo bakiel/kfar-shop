@@ -8,7 +8,7 @@ import { useUserRole, useVendorOrderCount } from '@/hooks/useUserRole';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import NotificationBell from '@/components/customer/NotificationBell';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import {
   Search,
   ShoppingCart,
@@ -57,6 +57,11 @@ const SimplifiedHeader = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Scroll progress for home page progress bar
+  const { scrollYProgress } = useScroll();
+  const isHomePage = pathname === '/';
+  const progressScaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const cartCount = getCartCount();
@@ -377,6 +382,14 @@ const SimplifiedHeader = () => {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Scroll progress bar — home page only */}
+        {isHomePage && (
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 h-[2px] bg-leaf-green origin-left"
+            style={{ scaleX: progressScaleX }}
+          />
+        )}
       </header>
 
       {/* ================================================================= */}

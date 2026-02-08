@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Star, CheckCircle, Smile, Leaf, MessageCircle, MapPin, ThumbsUp, Share2, Quote } from 'lucide-react';
 
 interface Review {
   id: number;
@@ -124,21 +125,22 @@ const ReviewsSection = () => {
     }
   ];
 
+  const statsIcons = [Star, CheckCircle, Smile, Leaf];
   const stats = [
-    { value: '4.9', label: 'Average Rating', icon: 'fa-star' },
-    { value: '2,847', label: 'Verified Reviews', icon: 'fa-check-circle' },
-    { value: '98%', label: 'Satisfaction Rate', icon: 'fa-smile' },
-    { value: '100%', label: 'Vegan Products', icon: 'fa-leaf' }
+    { value: '4.9', label: 'Average Rating' },
+    { value: '2,847', label: 'Verified Reviews' },
+    { value: '98%', label: 'Satisfaction Rate' },
+    { value: '100%', label: 'Vegan Products' }
   ];
 
   const renderStars = (rating: number) => {
     return (
       <div className="flex gap-0.5">
         {[...Array(5)].map((_, i) => (
-          <i
+          <Star
             key={i}
-            className={`fas fa-star text-sm ${
-              i < rating ? 'text-yellow-400' : 'text-gray-300'
+            className={`w-4 h-4 stroke-[1.5] ${
+              i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
             }`}
           />
         ))}
@@ -170,8 +172,8 @@ const ReviewsSection = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-6">
-            <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg" style={{ backgroundColor: '#478c0b' }}>
-              <i className="fas fa-comments mr-2"></i>
+            <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg inline-flex items-center gap-2" style={{ backgroundColor: '#478c0b' }}>
+              <MessageCircle className="w-4 h-4 stroke-[1.5]" />
               Community Voice
             </span>
           </div>
@@ -194,7 +196,7 @@ const ReviewsSection = () => {
               }`}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <i className={`fas ${stat.icon} text-3xl mb-3`} style={{ color: '#f6af0d' }}></i>
+              {React.createElement(statsIcons[index], { className: 'w-8 h-8 stroke-[1.5] mb-3', style: { color: '#f6af0d' } })}
               <div className="text-3xl font-bold mb-1" style={{ color: '#3a3a1d' }}>
                 {stat.value}
               </div>
@@ -232,8 +234,8 @@ const ReviewsSection = () => {
                           {review.name}
                         </h3>
                         {review.verified && (
-                          <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{ backgroundColor: '#cfe7c1', color: '#478c0b' }}>
-                            <i className="fas fa-check-circle mr-1"></i>
+                          <span className="text-xs px-3 py-1 rounded-full font-semibold inline-flex items-center gap-1" style={{ backgroundColor: '#cfe7c1', color: '#478c0b' }}>
+                            <CheckCircle className="w-3 h-3 stroke-[1.5]" />
                             Verified Purchase
                           </span>
                         )}
@@ -243,7 +245,7 @@ const ReviewsSection = () => {
                         <span>•</span>
                         <span>{review.date}</span>
                         <span>•</span>
-                        <span><i className="fas fa-map-marker-alt mr-1"></i>{review.location}</span>
+                        <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3 stroke-[1.5]" />{review.location}</span>
                       </div>
                     </div>
                   </div>
@@ -271,21 +273,21 @@ const ReviewsSection = () => {
 
                   {/* Review Text */}
                   <blockquote className="text-lg leading-relaxed mb-6" style={{ color: '#4b5563' }}>
-                    <i className="fas fa-quote-left mr-2" style={{ color: '#f6af0d', opacity: 0.3 }}></i>
+                    <Quote className="w-4 h-4 stroke-[1.5] inline mr-2" style={{ color: '#f6af0d', opacity: 0.3 }} />
                     {review.comment}
-                    <i className="fas fa-quote-right ml-2" style={{ color: '#f6af0d', opacity: 0.3 }}></i>
+                    <Quote className="w-4 h-4 stroke-[1.5] inline ml-2 rotate-180" style={{ color: '#f6af0d', opacity: 0.3 }} />
                   </blockquote>
 
                   {/* Helpful Counter */}
                   <div className="flex items-center gap-4">
                     <button className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-md" style={{ backgroundColor: '#f3f4f6' }}>
-                      <i className="fas fa-thumbs-up" style={{ color: '#478c0b' }}></i>
+                      <ThumbsUp className="w-4 h-4 stroke-[1.5]" style={{ color: '#478c0b' }} />
                       <span className="text-sm font-semibold" style={{ color: '#3a3a1d' }}>
                         Helpful ({review.helpful})
                       </span>
                     </button>
-                    <button className="text-sm font-medium" style={{ color: '#6b7280' }}>
-                      <i className="fas fa-share-alt mr-1"></i>
+                    <button className="text-sm font-medium inline-flex items-center gap-1" style={{ color: '#6b7280' }}>
+                      <Share2 className="w-3.5 h-3.5 stroke-[1.5]" />
                       Share
                     </button>
                   </div>
@@ -355,7 +357,7 @@ const ReviewsSection = () => {
                         {review.name}
                       </h4>
                       {review.verified && (
-                        <i className="fas fa-check-circle text-sm" style={{ color: '#478c0b' }}></i>
+                        <CheckCircle className="w-4 h-4 stroke-[1.5]" style={{ color: '#478c0b' }} />
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-xs" style={{ color: '#6b7280' }}>
@@ -382,12 +384,12 @@ const ReviewsSection = () => {
 
                 {/* Footer */}
                 <div className="flex items-center justify-between text-xs">
-                  <span style={{ color: '#6b7280' }}>
-                    <i className="fas fa-map-marker-alt mr-1"></i>
+                  <span className="inline-flex items-center gap-1" style={{ color: '#6b7280' }}>
+                    <MapPin className="w-3 h-3 stroke-[1.5]" />
                     {review.location}
                   </span>
-                  <button className="font-medium hover:underline" style={{ color: '#478c0b' }}>
-                    <i className="far fa-thumbs-up mr-1"></i>
+                  <button className="font-medium hover:underline inline-flex items-center gap-1" style={{ color: '#478c0b' }}>
+                    <ThumbsUp className="w-3 h-3 stroke-[1.5]" />
                     {review.helpful}
                   </button>
                 </div>
@@ -402,12 +404,12 @@ const ReviewsSection = () => {
             Join thousands of satisfied customers from the Village of Peace community
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300" style={{ backgroundColor: '#478c0b' }}>
-              <i className="fas fa-star mr-2"></i>
+            <button className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 inline-flex items-center gap-2" style={{ backgroundColor: '#478c0b' }}>
+              <Star className="w-5 h-5 stroke-[1.5]" />
               Write a Review
             </button>
-            <button className="px-8 py-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 border-2" style={{ borderColor: '#478c0b', color: '#478c0b', backgroundColor: 'white' }}>
-              <i className="fas fa-comments mr-2"></i>
+            <button className="px-8 py-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 border-2 inline-flex items-center gap-2" style={{ borderColor: '#478c0b', color: '#478c0b', backgroundColor: 'white' }}>
+              <MessageCircle className="w-5 h-5 stroke-[1.5]" />
               View All Reviews
             </button>
           </div>

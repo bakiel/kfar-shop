@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Trash2, Loader2, FileText, Download, Plus } from 'lucide-react';
 
 interface CartItem {
   id: string;
@@ -277,7 +278,7 @@ export default function VendorPOS() {
                           onClick={() => removeFromCart(item.id)}
                           className="ml-2 text-red-500 hover:text-red-700"
                         >
-                          <i className="fas fa-trash"></i>
+                          <Trash2 className="w-4 h-4 stroke-[1.5]" />
                         </button>
                       </div>
                     </div>
@@ -396,12 +397,12 @@ export default function VendorPOS() {
                 >
                   {isGenerating ? (
                     <>
-                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      <Loader2 className="w-5 h-5 stroke-[1.5] animate-spin inline mr-2" />
                       Generating Invoice...
                     </>
                   ) : (
                     <>
-                      <i className="fas fa-file-invoice mr-2"></i>
+                      <FileText className="w-5 h-5 stroke-[1.5] inline mr-2" />
                       Generate Invoice & QR Code
                     </>
                   )}
@@ -412,14 +413,14 @@ export default function VendorPOS() {
                     onClick={downloadInvoice}
                     className="w-full px-6 py-3 bg-leaf-green text-white rounded-lg font-semibold hover:bg-green-600"
                   >
-                    <i className="fas fa-download mr-2"></i>
+                    <Download className="w-5 h-5 stroke-[1.5] inline mr-2" />
                     Download Invoice PDF
                   </button>
                   <button
                     onClick={newTransaction}
                     className="w-full px-6 py-3 bg-sun-gold text-white rounded-lg font-semibold hover:bg-yellow-600"
                   >
-                    <i className="fas fa-plus mr-2"></i>
+                    <Plus className="w-5 h-5 stroke-[1.5] inline mr-2" />
                     New Transaction
                   </button>
                 </>

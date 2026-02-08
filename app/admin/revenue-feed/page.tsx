@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Play, Pause, ShoppingCart, Calculator, Users, Trophy } from 'lucide-react';
 
 // Store data with logos
 const stores = [
@@ -287,7 +288,7 @@ export default function RevenueFeedPage() {
                     : 'bg-red-600 text-white hover:bg-red-700'
                 }`}
               >
-                <i className={`fas fa-${isPaused ? 'play' : 'pause'} mr-2`}></i>
+                {isPaused ? <Play className="w-4 h-4 stroke-[1.5] inline mr-2" /> : <Pause className="w-4 h-4 stroke-[1.5] inline mr-2" />}
                 {isPaused ? 'Resume' : 'Pause'} Feed
               </button>
               <div className="text-right">
@@ -438,7 +439,7 @@ export default function RevenueFeedPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-600">Orders Today</h3>
-              <i className="fas fa-shopping-cart text-gray-400"></i>
+              <ShoppingCart className="w-5 h-5 stroke-[1.5] text-gray-400" />
             </div>
             <p className="text-3xl font-bold text-gray-900">
               {revenueItems.filter(item => 
@@ -450,7 +451,7 @@ export default function RevenueFeedPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-600">Average Order</h3>
-              <i className="fas fa-calculator text-gray-400"></i>
+              <Calculator className="w-5 h-5 stroke-[1.5] text-gray-400" />
             </div>
             <p className="text-3xl font-bold text-gray-900">
               ₪{filteredItems.length > 0 
@@ -462,7 +463,7 @@ export default function RevenueFeedPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-600">VOP Members</h3>
-              <i className="fas fa-users text-gray-400"></i>
+              <Users className="w-5 h-5 stroke-[1.5] text-gray-400" />
             </div>
             <p className="text-3xl font-bold text-purple-600">
               {Math.round(
@@ -475,7 +476,7 @@ export default function RevenueFeedPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-600">Top Store</h3>
-              <i className="fas fa-trophy text-gray-400"></i>
+              <Trophy className="w-5 h-5 stroke-[1.5] text-gray-400" />
             </div>
             <p className="text-lg font-bold text-gray-900">
               {storeStats.sort((a, b) => b.revenue - a.revenue)[0]?.name || '-'}

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertTriangle } from 'lucide-react';
 import '@/styles/kfar-style-system.css';
 
 export default function AdminError({
@@ -17,7 +18,7 @@ export default function AdminError({
     <div className="min-h-screen flex items-center justify-center kfar-bg-cream">
       <div className="card max-w-md w-full p-8 text-center">
         <div className="w-20 h-20 mx-auto mb-6 rounded-full kfar-bg-red-50 flex items-center justify-center">
-          <i className="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+          <AlertTriangle className="w-8 h-8 stroke-[1.5] text-red-600" />
         </div>
         
         <h2 className="text-h3 font-bold kfar-text-soil mb-2">

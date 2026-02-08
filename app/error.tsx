@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
 
 export default function Error({
   error,
@@ -17,7 +18,7 @@ export default function Error({
     <div className="min-h-screen flex items-center justify-center bg-cream-base">
       <div className="text-center p-8 max-w-md">
         <h2 className="text-3xl font-bold mb-4" style={{ color: '#c23c09' }}>
-          <i className="fas fa-exclamation-triangle mr-3"></i>
+          <AlertTriangle className="w-6 h-6 stroke-[1.5] inline mr-3" />
           Something went wrong!
         </h2>
         <p className="text-gray-600 mb-6">
@@ -28,7 +29,7 @@ export default function Error({
           className="px-6 py-3 rounded-lg text-white font-semibold hover:shadow-lg transition-all duration-300"
           style={{ backgroundColor: '#478c0b' }}
         >
-          <i className="fas fa-redo mr-2"></i>
+          <RefreshCw className="w-5 h-5 stroke-[1.5] inline mr-2" />
           Try again
         </button>
       </div>

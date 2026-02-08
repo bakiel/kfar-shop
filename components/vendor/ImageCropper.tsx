@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { X, ZoomOut, ZoomIn, AlertTriangle, Info, Loader2, Check } from 'lucide-react';
 
 interface ImageCropperProps {
   image: string;
@@ -347,7 +348,7 @@ export default function ImageCropper({ image, aspectRatio, onCropComplete, onCan
             onClick={onCancel}
             className="text-gray-500 hover:text-gray-700 p-2"
           >
-            <i className="fas fa-times text-lg sm:text-xl"></i>
+            <X className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5]" />
           </button>
         </div>
 
@@ -362,7 +363,7 @@ export default function ImageCropper({ image, aspectRatio, onCropComplete, onCan
               onClick={() => handleZoom(0.9)}
               className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm"
             >
-              <i className="fas fa-search-minus mr-1 sm:mr-2"></i>
+              <ZoomOut className="w-4 h-4 stroke-[1.5] inline mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Zoom Out</span>
               <span className="sm:hidden">-</span>
             </button>
@@ -370,7 +371,7 @@ export default function ImageCropper({ image, aspectRatio, onCropComplete, onCan
               onClick={() => handleZoom(1.1)}
               className="px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm"
             >
-              <i className="fas fa-search-plus mr-1 sm:mr-2"></i>
+              <ZoomIn className="w-4 h-4 stroke-[1.5] inline mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Zoom In</span>
               <span className="sm:hidden">+</span>
             </button>
@@ -465,7 +466,7 @@ export default function ImageCropper({ image, aspectRatio, onCropComplete, onCan
                       <div className="mt-3 space-y-1">
                         {imageMetrics.warnings.map((warning, index) => (
                           <div key={index} className="flex items-start gap-2 text-amber-600">
-                            <i className="fas fa-exclamation-triangle mt-0.5 text-xs"></i>
+                            <AlertTriangle className="w-3 h-3 stroke-[1.5] mt-0.5 flex-shrink-0" />
                             <span className="text-xs">{warning}</span>
                           </div>
                         ))}
@@ -476,7 +477,7 @@ export default function ImageCropper({ image, aspectRatio, onCropComplete, onCan
 
                 <div className="bg-blue-50 p-2 sm:p-3 rounded-lg">
                   <p className="text-xs text-blue-800">
-                    <i className="fas fa-info-circle mr-1"></i>
+                    <Info className="w-3 h-3 stroke-[1.5] inline mr-1" />
                     Image will be converted to JPEG format with white background
                   </p>
                 </div>
@@ -502,12 +503,12 @@ export default function ImageCropper({ image, aspectRatio, onCropComplete, onCan
           >
             {processing ? (
               <>
-                <i className="fas fa-spinner fa-spin"></i>
+                <Loader2 className="w-5 h-5 stroke-[1.5] animate-spin" />
                 Processing...
               </>
             ) : (
               <>
-                <i className="fas fa-check"></i>
+                <Check className="w-5 h-5 stroke-[1.5]" />
                 Apply Crop
               </>
             )}

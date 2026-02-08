@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowLeft, Smartphone, Wallet, TrendingUp, CheckCircle, Truck, Headphones, Gift, Star, Check, QrCode, Store, CalendarCheck, Users, ShieldCheck } from 'lucide-react';
 import CustomerQRCode from '@/components/customer/CustomerQRCode';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -50,7 +51,7 @@ export default function CustomerQRPage() {
               href="/customer/dashboard"
               className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
             >
-              <i className="fas fa-arrow-left" />
+              <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
               <span className="hidden sm:inline">Back to Dashboard</span>
             </Link>
             <h1 className="text-xl font-bold" style={{ color: '#3a3a1d' }}>
@@ -123,14 +124,14 @@ export default function CustomerQRPage() {
                 onClick={handleAddToWallet}
                 className="bg-black text-white py-4 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-3"
               >
-                <i className="fab fa-apple text-2xl" />
+                <Smartphone className="w-6 h-6 stroke-[1.5]" />
                 <span>Add to Apple Wallet</span>
               </button>
               <button
                 onClick={handleAddToWallet}
                 className="bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-3"
               >
-                <i className="fab fa-google-pay text-2xl" />
+                <Wallet className="w-6 h-6 stroke-[1.5]" />
                 <span>Add to Google Pay</span>
               </button>
             </div>
@@ -138,7 +139,7 @@ export default function CustomerQRPage() {
             {/* Usage Stats */}
             <div className="bg-green-50 rounded-xl p-6">
               <h3 className="font-bold text-lg mb-4" style={{ color: '#3a3a1d' }}>
-                <i className="fas fa-chart-line mr-2" style={{ color: '#478c0b' }} />
+                <TrendingUp className="w-5 h-5 stroke-[1.5] inline mr-2" style={{ color: '#478c0b' }} />
                 Your QR Usage
               </h3>
               <div className="grid grid-cols-3 gap-4">
@@ -177,35 +178,35 @@ export default function CustomerQRPage() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-check-circle text-green-500 mt-1" />
+                    <CheckCircle className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                     <div>
                       <p className="font-semibold">15% Off All Purchases</p>
                       <p className="text-sm text-gray-600">Automatic discount at checkout</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-truck text-green-500 mt-1" />
+                    <Truck className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                     <div>
                       <p className="font-semibold">Free Shipping Always</p>
                       <p className="text-sm text-gray-600">No minimum order required</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-headset text-green-500 mt-1" />
+                    <Headphones className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                     <div>
                       <p className="font-semibold">Priority Support</p>
                       <p className="text-sm text-gray-600">Direct line to customer service</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-gift text-green-500 mt-1" />
+                    <Gift className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                     <div>
                       <p className="font-semibold">Birthday Surprise</p>
                       <p className="text-sm text-gray-600">Special gift on your birthday</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="fas fa-star text-green-500 mt-1" />
+                    <Star className="w-5 h-5 stroke-[1.5] text-green-500 mt-1 flex-shrink-0" />
                     <div>
                       <p className="font-semibold">Early Access</p>
                       <p className="text-sm text-gray-600">First to try new products</p>
@@ -243,19 +244,19 @@ export default function CustomerQRPage() {
                 <h4 className="font-semibold mb-3">Unlock at Platinum:</h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <i className="fas fa-check text-purple-600" />
+                    <Check className="w-4 h-4 stroke-[1.5] text-purple-600" />
                     <span>20% off all purchases</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <i className="fas fa-check text-purple-600" />
+                    <Check className="w-4 h-4 stroke-[1.5] text-purple-600" />
                     <span>VIP event invitations</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <i className="fas fa-check text-purple-600" />
+                    <Check className="w-4 h-4 stroke-[1.5] text-purple-600" />
                     <span>Personal shopping assistant</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <i className="fas fa-check text-purple-600" />
+                    <Check className="w-4 h-4 stroke-[1.5] text-purple-600" />
                     <span>Exclusive product launches</span>
                   </div>
                 </div>
@@ -265,27 +266,27 @@ export default function CustomerQRPage() {
             {/* Ways to Use QR */}
             <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                <i className="fas fa-qrcode mr-2" style={{ color: '#478c0b' }} />
+                <QrCode className="w-5 h-5 stroke-[1.5] inline mr-2" style={{ color: '#478c0b' }} />
                 Where to Use Your QR
               </h3>
               <div className="grid md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <i className="fas fa-store text-3xl mb-2" style={{ color: '#478c0b' }} />
+                  <Store className="w-8 h-8 stroke-[1.5] mb-2" style={{ color: '#478c0b' }} />
                   <p className="font-semibold">In-Store</p>
                   <p className="text-sm text-gray-600">Quick checkout</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <i className="fas fa-calendar-check text-3xl mb-2" style={{ color: '#f6af0d' }} />
+                  <CalendarCheck className="w-8 h-8 stroke-[1.5] mb-2" style={{ color: '#f6af0d' }} />
                   <p className="font-semibold">Events</p>
                   <p className="text-sm text-gray-600">Member check-in</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <i className="fas fa-users text-3xl mb-2" style={{ color: '#c23c09' }} />
+                  <Users className="w-8 h-8 stroke-[1.5] mb-2" style={{ color: '#c23c09' }} />
                   <p className="font-semibold">Referrals</p>
                   <p className="text-sm text-gray-600">Share with friends</p>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <i className="fas fa-gift text-3xl mb-2" style={{ color: '#478c0b' }} />
+                  <Gift className="w-8 h-8 stroke-[1.5] mb-2" style={{ color: '#478c0b' }} />
                   <p className="font-semibold">Rewards</p>
                   <p className="text-sm text-gray-600">Claim instantly</p>
                 </div>
@@ -363,7 +364,7 @@ export default function CustomerQRPage() {
               {/* Security Note */}
               <div className="mt-8 p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  <i className="fas fa-shield-alt mr-2" />
+                  <ShieldCheck className="w-4 h-4 stroke-[1.5] inline mr-2" />
                   <strong>Security:</strong> Your QR code contains encrypted data and changes periodically for security. 
                   Only authorized KFAR vendors can read your information.
                 </p>

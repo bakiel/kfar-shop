@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { ZoomIn, X } from 'lucide-react';
 
 interface ImageGalleryProps {
   images: string[];
@@ -31,7 +32,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
           
           {/* Zoom Icon */}
           <div className="absolute top-4 right-4 bg-white/90 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <i className="fas fa-search-plus text-gray-700"></i>
+            <ZoomIn className="w-5 h-5 stroke-[1.5] text-gray-700" />
           </div>
         </div>
 
@@ -78,7 +79,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
               onClick={() => setShowZoom(false)}
               className="absolute top-4 right-4 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
             >
-              <i className="fas fa-times text-gray-700"></i>
+              <X className="w-5 h-5 stroke-[1.5] text-gray-700" />
             </button>
           </div>
         </div>

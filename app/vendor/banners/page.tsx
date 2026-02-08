@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import VendorBannerManager from '@/components/vendor/VendorBannerManager';
 import Link from 'next/link';
+import { ArrowLeft, HelpCircle, Info } from 'lucide-react';
 
 export default function VendorBannersPage() {
   // In production, get vendorId from auth
@@ -22,7 +23,7 @@ export default function VendorBannersPage() {
             href="/vendor/dashboard"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
-            <i className="fas fa-arrow-left" />
+            <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
             Back to Dashboard
           </Link>
           
@@ -51,7 +52,7 @@ export default function VendorBannersPage() {
           className="mt-12 bg-white rounded-2xl shadow-xl p-8"
         >
           <h2 className="text-2xl font-bold mb-6" style={{ color: '#3a3a1d' }}>
-            <i className="fas fa-question-circle mr-2" style={{ color: '#478c0b' }} />
+            <HelpCircle className="w-5 h-5 stroke-[1.5] inline mr-2" style={{ color: '#478c0b' }} />
             How Banners Work
           </h2>
           
@@ -117,7 +118,7 @@ export default function VendorBannersPage() {
           
           <div className="mt-8 p-4 rounded-lg" style={{ backgroundColor: '#fef9ef' }}>
             <p className="text-sm text-gray-600">
-              <i className="fas fa-info-circle mr-2" style={{ color: '#f6af0d' }} />
+              <Info className="w-4 h-4 stroke-[1.5] inline mr-2" style={{ color: '#f6af0d' }} />
               <strong>Pro Tip:</strong> Update your banners regularly to keep customers engaged. 
               Seasonal promotions and limited-time offers typically see the highest conversion rates.
             </p>

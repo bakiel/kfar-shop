@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PromotionSubmissionForm from '@/components/vendor/PromotionSubmissionForm';
 import Link from 'next/link';
+import { ArrowLeft, Megaphone, Clock, Eye, TrendingUp, Flag, ArrowRight, Lightbulb, CheckCircle, BarChart3, Info } from 'lucide-react';
 
 export default function VendorPromotionsPage() {
   // In production, get vendorId from auth
@@ -22,7 +23,7 @@ export default function VendorPromotionsPage() {
             href="/vendor/dashboard"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
-            <i className="fas fa-arrow-left" />
+            <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
             Back to Dashboard
           </Link>
           
@@ -47,7 +48,7 @@ export default function VendorPromotionsPage() {
                 <p className="text-sm text-gray-600">Active Promotions</p>
                 <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>3</p>
               </div>
-              <i className="fas fa-bullhorn text-3xl" style={{ color: '#478c0b' }} />
+              <Megaphone className="w-8 h-8 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
           </motion.div>
 
@@ -62,7 +63,7 @@ export default function VendorPromotionsPage() {
                 <p className="text-sm text-gray-600">Pending Approval</p>
                 <p className="text-2xl font-bold" style={{ color: '#f6af0d' }}>1</p>
               </div>
-              <i className="fas fa-clock text-3xl" style={{ color: '#f6af0d' }} />
+              <Clock className="w-8 h-8 stroke-[1.5]" style={{ color: '#f6af0d' }} />
             </div>
           </motion.div>
 
@@ -77,7 +78,7 @@ export default function VendorPromotionsPage() {
                 <p className="text-sm text-gray-600">Total Views</p>
                 <p className="text-2xl font-bold" style={{ color: '#c23c09' }}>1,247</p>
               </div>
-              <i className="fas fa-eye text-3xl" style={{ color: '#c23c09' }} />
+              <Eye className="w-8 h-8 stroke-[1.5]" style={{ color: '#c23c09' }} />
             </div>
           </motion.div>
 
@@ -92,7 +93,7 @@ export default function VendorPromotionsPage() {
                 <p className="text-sm text-gray-600">Conversion Rate</p>
                 <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>18%</p>
               </div>
-              <i className="fas fa-chart-line text-3xl" style={{ color: '#3a3a1d' }} />
+              <TrendingUp className="w-8 h-8 stroke-[1.5]" style={{ color: '#3a3a1d' }} />
             </div>
           </motion.div>
         </div>
@@ -120,7 +121,7 @@ export default function VendorPromotionsPage() {
               className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white"
             >
               <h3 className="text-lg font-bold mb-3">
-                <i className="fas fa-flag mr-2" />
+                <Flag className="w-5 h-5 stroke-[1.5] mr-2" />
                 Store Banner Manager
               </h3>
               <p className="text-sm mb-4 opacity-90">
@@ -131,7 +132,7 @@ export default function VendorPromotionsPage() {
                 className="inline-flex items-center gap-2 bg-white text-green-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-all"
               >
                 Manage Banners
-                <i className="fas fa-arrow-right" />
+                <ArrowRight className="w-5 h-5 stroke-[1.5]" />
               </Link>
             </motion.div>
 
@@ -142,28 +143,28 @@ export default function VendorPromotionsPage() {
               className="bg-white rounded-xl shadow-lg p-6"
             >
               <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                <i className="fas fa-lightbulb mr-2" style={{ color: '#f6af0d' }} />
+                <Lightbulb className="w-5 h-5 stroke-[1.5] mr-2" style={{ color: '#f6af0d' }} />
                 Promotion Tips
               </h3>
               <ul className="space-y-3 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
-                  <i className="fas fa-check-circle text-green-500 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 mt-0.5 flex-shrink-0" />
                   <span>Use high-quality product images that showcase your items</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <i className="fas fa-check-circle text-green-500 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 mt-0.5 flex-shrink-0" />
                   <span>Create urgency with limited-time offers or stock quantities</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <i className="fas fa-check-circle text-green-500 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 mt-0.5 flex-shrink-0" />
                   <span>Write clear, compelling titles that grab attention</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <i className="fas fa-check-circle text-green-500 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 mt-0.5 flex-shrink-0" />
                   <span>Target specific audiences for better conversion</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <i className="fas fa-check-circle text-green-500 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 stroke-[1.5] text-green-500 mt-0.5 flex-shrink-0" />
                   <span>Schedule promotions during peak shopping hours</span>
                 </li>
               </ul>
@@ -176,7 +177,7 @@ export default function VendorPromotionsPage() {
               className="bg-gradient-to-br from-green-50 to-yellow-50 rounded-xl shadow-lg p-6"
             >
               <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                <i className="fas fa-chart-bar mr-2" style={{ color: '#478c0b' }} />
+                <BarChart3 className="w-5 h-5 stroke-[1.5] mr-2" style={{ color: '#478c0b' }} />
                 Performance Insights
               </h3>
               <div className="space-y-3">
@@ -202,7 +203,7 @@ export default function VendorPromotionsPage() {
               className="bg-white rounded-xl shadow-lg p-6"
             >
               <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                <i className="fas fa-info-circle mr-2" style={{ color: '#478c0b' }} />
+                <Info className="w-5 h-5 stroke-[1.5] mr-2" style={{ color: '#478c0b' }} />
                 Guidelines
               </h3>
               <div className="space-y-2 text-sm text-gray-600">

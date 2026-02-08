@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 import { AI } from '@/lib/services/ai';
 import { SmartQRContent } from '@/lib/services/ai/types';
 import { MockAIService } from '@/lib/services/ai/mock-ai-service';
-import { QrCode, Download, Copy, Share2, Maximize, Minimize } from 'lucide-react';
+import { QrCode, Download, Copy, Share2, Maximize, Minimize, Package, Store, ShoppingCart, MapPin, Handshake, ChevronUp, ChevronDown, AlertCircle, Info, ShieldCheck, Brain } from 'lucide-react';
 import QRTrackingService from '@/lib/services/qr-tracking-mock';
 
 interface SmartQRGeneratorCompactProps {
@@ -255,14 +255,14 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
   };
 
   const getQRTypeInfo = () => {
-    const typeInfo = {
-      product: { icon: 'fa-box', color: '#478c0b', label: 'Product QR' },
-      vendor: { icon: 'fa-store', color: '#f6af0d', label: 'Vendor QR' },
-      order: { icon: 'fa-shopping-cart', color: '#c23c09', label: 'Order QR' },
-      collection: { icon: 'fa-map-marker-alt', color: '#5C6BC0', label: 'Collection QR' },
-      p2p: { icon: 'fa-handshake', color: '#00897B', label: 'P2P Exchange QR' }
+    const typeInfo: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
+      product: { icon: <Package className="w-5 h-5 stroke-[1.5]" />, color: '#478c0b', label: 'Product QR' },
+      vendor: { icon: <Store className="w-5 h-5 stroke-[1.5]" />, color: '#f6af0d', label: 'Vendor QR' },
+      order: { icon: <ShoppingCart className="w-5 h-5 stroke-[1.5]" />, color: '#c23c09', label: 'Order QR' },
+      collection: { icon: <MapPin className="w-5 h-5 stroke-[1.5]" />, color: '#5C6BC0', label: 'Collection QR' },
+      p2p: { icon: <Handshake className="w-5 h-5 stroke-[1.5]" />, color: '#00897B', label: 'P2P Exchange QR' }
     };
-    return typeInfo[type] || { icon: 'fa-qrcode', color: '#000000', label: 'QR Code' };
+    return typeInfo[type] || { icon: <QrCode className="w-5 h-5 stroke-[1.5]" />, color: '#000000', label: 'QR Code' };
   };
 
   const typeInfo = getQRTypeInfo();
@@ -318,7 +318,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
                 className="absolute inset-0 flex items-center justify-center bg-red-50 rounded"
                 style={{ width: responsiveSize, height: responsiveSize }}
               >
-                <i className="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                <AlertCircle className="w-6 h-6 stroke-[1.5] text-red-500" />
               </div>
             )}
             
@@ -398,7 +398,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
               className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium text-white shadow-md"
               style={{ backgroundColor: typeInfo.color }}
             >
-              <i className={`fas ${typeInfo.icon} mr-1`}></i>
+              <span className="mr-1 inline-flex">{typeInfo.icon}</span>
               {typeInfo.label}
             </div>
           </div>
@@ -417,7 +417,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-white flex-shrink-0"
             style={{ backgroundColor: typeInfo.color }}
           >
-            <i className={`fas ${typeInfo.icon} text-lg sm:text-xl`}></i>
+            {typeInfo.icon}
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-semibold" style={{ color: '#3a3a1d' }}>
@@ -443,7 +443,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
             onClick={() => setShowDetails(!showDetails)}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <i className={`fas fa-chevron-${showDetails ? 'up' : 'down'}`}></i>
+            {showDetails ? <ChevronUp className="w-5 h-5 stroke-[1.5]" /> : <ChevronDown className="w-5 h-5 stroke-[1.5]" />}
           </button>
         </div>
       </div>
@@ -478,7 +478,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
                   className="flex flex-col items-center justify-center text-red-600" 
                   style={{ width: responsiveSize, height: responsiveSize }}
                 >
-                  <i className="fas fa-exclamation-circle text-3xl mb-2"></i>
+                  <AlertCircle className="w-8 h-8 stroke-[1.5] mb-2" />
                   <p className="text-sm">{error}</p>
                 </div>
               </div>
@@ -537,7 +537,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
             onClick={() => setShowDetails(!showDetails)}
             className="flex flex-col items-center justify-center py-2 sm:py-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <i className={`fas fa-info-circle text-lg sm:text-xl mb-1 text-gray-600`}></i>
+            <Info className="w-5 h-5 stroke-[1.5] mb-1 text-gray-600" />
             <span className="text-xs sm:text-sm font-medium text-gray-700">Details</span>
           </button>
         )}
@@ -566,7 +566,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
             <div>
               <span className="text-gray-500">Security:</span>
               <p className="font-medium text-green-600">
-                <i className="fas fa-shield-alt mr-1"></i>
+                <ShieldCheck className="w-4 h-4 stroke-[1.5] inline mr-1" />
                 Digitally Signed
               </p>
             </div>
@@ -574,7 +574,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
             <div>
               <span className="text-gray-500">AI Features:</span>
               <p className="font-medium text-blue-600">
-                <i className="fas fa-brain mr-1"></i>
+                <Brain className="w-4 h-4 stroke-[1.5] inline mr-1" />
                 Enhanced
               </p>
             </div>

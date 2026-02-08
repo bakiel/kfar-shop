@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { ArrowLeft, Brain, Leaf, Star, Sprout, Wheat, AlertTriangle } from 'lucide-react';
 import CustomerProfileShowcase from '@/components/customer/CustomerProfileShowcase';
 import { ANALYZED_CUSTOMER_PROFILES } from '@/lib/services/customer-avatar-analyzer';
 
@@ -44,7 +45,7 @@ export default function AdminCustomerProfilesPage() {
             href="/admin/dashboard"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
           >
-            <i className="fas fa-arrow-left" />
+            <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
             Back to Admin Dashboard
           </Link>
           
@@ -156,7 +157,7 @@ export default function AdminCustomerProfilesPage() {
               {/* AI Analysis Insights */}
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                  <i className="fas fa-brain mr-2" style={{ color: '#3b82f6' }} />
+                  <Brain className="w-5 h-5 stroke-[1.5] inline mr-2" style={{ color: '#3b82f6' }} />
                   AI Vision Analysis Insights
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
@@ -206,20 +207,20 @@ export default function AdminCustomerProfilesPage() {
                   Dietary Preferences Analysis
                 </h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {Object.entries(stats.dietaryPreferences).map(([pref, count]) => (
+                  {Object.entries(stats.dietaryPreferences).map(([pref, count]) => {
+                    const DietaryIcon = pref === 'vegan' ? Leaf :
+                      pref === 'kosher' ? Star :
+                      pref === 'organic' ? Sprout :
+                      Wheat;
+                    return (
                     <div key={pref} className="bg-green-50 rounded-lg p-4 text-center">
-                      <i className={`fas ${
-                        pref === 'vegan' ? 'fa-leaf' :
-                        pref === 'kosher' ? 'fa-star-of-david' :
-                        pref === 'organic' ? 'fa-seedling' :
-                        'fa-bread-slice'
-                      } text-2xl mb-2`} style={{ color: '#478c0b' }} />
+                      <DietaryIcon className="w-6 h-6 stroke-[1.5] mb-2 mx-auto" style={{ color: '#478c0b' }} />
                       <p className="font-semibold capitalize">
                         {pref.replace(/([A-Z])/g, ' $1').trim()}
                       </p>
                       <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>{count}</p>
                     </div>
-                  ))}
+                  );})}
                 </div>
               </div>
 
@@ -233,7 +234,7 @@ export default function AdminCustomerProfilesPage() {
                     {Object.entries(stats.commonAllergies).map(([allergy, count]) => (
                       <div key={allergy} className="flex items-center justify-between p-3 bg-white rounded-lg">
                         <div className="flex items-center gap-3">
-                          <i className="fas fa-exclamation-triangle text-yellow-500" />
+                          <AlertTriangle className="w-5 h-5 stroke-[1.5] text-yellow-500" />
                           <span className="font-medium capitalize">{allergy}</span>
                         </div>
                         <span className="text-xl font-bold">{count}</span>

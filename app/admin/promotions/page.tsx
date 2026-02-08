@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
+import { Loader2, Clock, CheckCircle, DollarSign, Store, Check, X } from 'lucide-react';
 
 interface Promotion {
   id: string;
@@ -105,7 +106,7 @@ export default function AdminPromotionsPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-4xl mb-4" style={{ color: '#478c0b' }} />
+          <Loader2 className="w-10 h-10 stroke-[1.5] animate-spin mb-4" style={{ color: '#478c0b' }} />
           <p className="text-gray-600">Loading promotions...</p>
         </div>
       </div>
@@ -139,7 +140,7 @@ export default function AdminPromotionsPage() {
                   {promotions.filter(p => p.status === 'pending_approval').length}
                 </p>
               </div>
-              <i className="fas fa-clock text-3xl text-yellow-600" />
+              <Clock className="w-8 h-8 stroke-[1.5] text-yellow-600" />
             </div>
           </motion.div>
 
@@ -156,7 +157,7 @@ export default function AdminPromotionsPage() {
                   {promotions.filter(p => p.status === 'active').length}
                 </p>
               </div>
-              <i className="fas fa-check-circle text-3xl text-green-600" />
+              <CheckCircle className="w-8 h-8 stroke-[1.5] text-green-600" />
             </div>
           </motion.div>
 
@@ -173,7 +174,7 @@ export default function AdminPromotionsPage() {
                   ₪{promotions.reduce((sum, p) => sum + (p.budget || 0), 0)}
                 </p>
               </div>
-              <i className="fas fa-shekel-sign text-3xl" style={{ color: '#478c0b' }} />
+              <DollarSign className="w-8 h-8 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
           </motion.div>
 
@@ -190,7 +191,7 @@ export default function AdminPromotionsPage() {
                   {new Set(promotions.map(p => p.vendorId)).size}
                 </p>
               </div>
-              <i className="fas fa-store text-3xl text-purple-600" />
+              <Store className="w-8 h-8 stroke-[1.5] text-purple-600" />
             </div>
           </motion.div>
         </div>
@@ -312,13 +313,13 @@ export default function AdminPromotionsPage() {
                       onClick={() => handleApproval(promotion.id, 'approve', 5)}
                       className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                     >
-                      <i className="fas fa-check" />
+                      <Check className="w-4 h-4 stroke-[1.5]" />
                     </button>
                     <button
                       onClick={() => handleApproval(promotion.id, 'reject')}
                       className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
                     >
-                      <i className="fas fa-times" />
+                      <X className="w-4 h-4 stroke-[1.5]" />
                     </button>
                   </div>
                 )}
@@ -350,7 +351,7 @@ export default function AdminPromotionsPage() {
                     onClick={() => setSelectedPromotion(null)}
                     className="text-gray-400 hover:text-gray-600"
                   >
-                    <i className="fas fa-times text-xl" />
+                    <X className="w-5 h-5 stroke-[1.5]" />
                   </button>
                 </div>
 

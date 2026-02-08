@@ -290,7 +290,7 @@ const Footer = () => {
                 </div>
                 <div className="flex items-center gap-2.5 text-gray-400 text-sm">
                   <Phone className="w-4 h-4 flex-shrink-0 stroke-[1.5]" style={{ color: '#f6af0d' }} />
-                  <span dir="ltr">+972-8-XXX-XXXX</span>
+                  <span dir="ltr">+972 50-799-0372</span>
                 </div>
               </div>
 

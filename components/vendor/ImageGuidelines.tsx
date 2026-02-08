@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Camera, Crop, Palette, ImageIcon, X, Check, CheckCircle, XCircle, AlertCircle, ThumbsUp, ArrowRight, Lightbulb, Loader2, Bot } from 'lucide-react';
 
 interface ImageGuidelinesProps {
   imageUrl?: string;
@@ -75,7 +76,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
 
   const guidelines = [
     {
-      icon: 'fa-camera',
+      icon: <Camera className="w-5 h-5 stroke-[1.5]" />,
       title: 'Photography Tips',
       items: [
         'Use natural daylight or soft studio lighting',
@@ -85,7 +86,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
       ]
     },
     {
-      icon: 'fa-crop',
+      icon: <Crop className="w-5 h-5 stroke-[1.5]" />,
       title: 'Composition',
       items: [
         'Center your product in the frame',
@@ -95,7 +96,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
       ]
     },
     {
-      icon: 'fa-palette',
+      icon: <Palette className="w-5 h-5 stroke-[1.5]" />,
       title: 'Background & Colors',
       items: [
         'Use a clean, white or neutral background',
@@ -105,7 +106,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
       ]
     },
     {
-      icon: 'fa-image',
+      icon: <ImageIcon className="w-5 h-5 stroke-[1.5]" />,
       title: 'Technical Requirements',
       items: [
         'Minimum resolution: 800x800 pixels',
@@ -134,7 +135,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
-          <i className="fas fa-camera-retro mr-2 text-[#478c0b]"></i>
+          <Camera className="w-6 h-6 stroke-[1.5] inline mr-2 text-[#478c0b]" />
           Product Photography Guidelines
         </h2>
         {onClose && (
@@ -142,7 +143,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
-            <i className="fas fa-times text-xl"></i>
+            <X className="w-5 h-5 stroke-[1.5]" />
           </button>
         )}
       </div>
@@ -151,25 +152,23 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
       {imageUrl && analysis && (
         <div className="mb-8 p-4 bg-gray-50 rounded-lg">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <i className="fas fa-robot text-[#478c0b]"></i>
+            <Bot className="w-5 h-5 stroke-[1.5] text-[#478c0b]" />
             AI Image Analysis
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className={`text-3xl ${
+                <div className={`${
                   analysis.quality === 'excellent' ? 'text-green-600' :
                   analysis.quality === 'good' ? 'text-blue-600' :
                   analysis.quality === 'fair' ? 'text-yellow-600' :
                   'text-red-600'
                 }`}>
-                  <i className={`fas fa-${
-                    analysis.quality === 'excellent' ? 'check-circle' :
-                    analysis.quality === 'good' ? 'thumbs-up' :
-                    analysis.quality === 'fair' ? 'exclamation-circle' :
-                    'times-circle'
-                  }`}></i>
+                  {analysis.quality === 'excellent' ? <CheckCircle className="w-8 h-8 stroke-[1.5]" /> :
+                   analysis.quality === 'good' ? <ThumbsUp className="w-8 h-8 stroke-[1.5]" /> :
+                   analysis.quality === 'fair' ? <AlertCircle className="w-8 h-8 stroke-[1.5]" /> :
+                   <XCircle className="w-8 h-8 stroke-[1.5]" />}
                 </div>
                 <div>
                   <p className="font-semibold capitalize">{analysis.quality} Quality</p>
@@ -183,7 +182,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
               <ul className="space-y-1">
                 {analysis.suggestions.map((suggestion, index) => (
                   <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                    <i className="fas fa-arrow-right text-xs mt-1 text-[#478c0b]"></i>
+                    <ArrowRight className="w-3 h-3 stroke-[1.5] mt-1 text-[#478c0b] flex-shrink-0" />
                     {suggestion}
                   </li>
                 ))}
@@ -198,13 +197,13 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
         {guidelines.map((section, index) => (
           <div key={index} className="border border-gray-200 rounded-lg p-4">
             <h3 className="font-semibold mb-3 flex items-center gap-2 text-[#478c0b]">
-              <i className={`fas ${section.icon}`}></i>
+              {section.icon}
               {section.title}
             </h3>
             <ul className="space-y-2">
               {section.items.map((item, itemIndex) => (
                 <li key={itemIndex} className="text-sm text-gray-600 flex items-start gap-2">
-                  <i className="fas fa-check text-xs mt-1 text-green-600"></i>
+                  <Check className="w-3 h-3 stroke-[1.5] mt-1 text-green-600 flex-shrink-0" />
                   {item}
                 </li>
               ))}
@@ -222,23 +221,27 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
               example.type === 'good' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
             }`}>
               <div className="flex items-center gap-2 mb-3">
-                <i className={`fas fa-${example.type === 'good' ? 'check' : 'times'}-circle text-2xl ${
-                  example.type === 'good' ? 'text-green-600' : 'text-red-600'
-                }`}></i>
+                {example.type === 'good' ? (
+                  <CheckCircle className="w-6 h-6 stroke-[1.5] text-green-600" />
+                ) : (
+                  <XCircle className="w-6 h-6 stroke-[1.5] text-red-600" />
+                )}
                 <p className="font-semibold">{example.description}</p>
               </div>
               
               {/* Placeholder for example image */}
               <div className="bg-white rounded-lg h-48 mb-3 flex items-center justify-center border-2 border-dashed border-gray-300">
-                <i className="fas fa-image text-4xl text-gray-400"></i>
+                <ImageIcon className="w-10 h-10 stroke-[1.5] text-gray-400" />
               </div>
               
               <ul className="space-y-1">
                 {example.tips.map((tip, tipIndex) => (
                   <li key={tipIndex} className="text-sm text-gray-600 flex items-start gap-2">
-                    <i className={`fas fa-${example.type === 'good' ? 'check' : 'times'} text-xs mt-1 ${
-                      example.type === 'good' ? 'text-green-600' : 'text-red-600'
-                    }`}></i>
+                    {example.type === 'good' ? (
+                      <Check className="w-3 h-3 stroke-[1.5] mt-1 text-green-600 flex-shrink-0" />
+                    ) : (
+                      <X className="w-3 h-3 stroke-[1.5] mt-1 text-red-600 flex-shrink-0" />
+                    )}
                     {tip}
                   </li>
                 ))}
@@ -251,7 +254,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
       {/* Pro Tips */}
       <div className="mt-8 p-4 bg-blue-50 rounded-lg">
         <h4 className="font-semibold mb-2 text-blue-800">
-          <i className="fas fa-lightbulb mr-2"></i>
+          <Lightbulb className="w-5 h-5 stroke-[1.5] inline mr-2" />
           Pro Tips
         </h4>
         <ul className="space-y-2 text-sm text-blue-700">
@@ -265,7 +268,7 @@ export default function ImageGuidelines({ imageUrl, onClose }: ImageGuidelinesPr
       {analyzing && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 flex items-center gap-3">
-            <i className="fas fa-spinner fa-spin text-2xl text-[#478c0b]"></i>
+            <Loader2 className="w-6 h-6 stroke-[1.5] text-[#478c0b] animate-spin" />
             <p>Analyzing image quality...</p>
           </div>
         </div>

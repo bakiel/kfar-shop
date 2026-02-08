@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X, Store, ShieldCheck, User, UserCircle, Languages, ChevronDown } from 'lucide-react';
 import { useUserRole, useVendorOrderCount } from '@/hooks/useUserRole';
 import { getMenuConfig } from '@/lib/config/menu-config';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { usePathname } from 'next/navigation';
+import { FaIcon } from '@/lib/utils/icon-map';
 
 interface MenuDropdownProps {
   isOpen: boolean;
@@ -77,6 +79,15 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
     window.location.reload();
   };
 
+  const getRoleIcon = () => {
+    switch (role) {
+      case 'vendor': return <Store className="w-5 h-5 stroke-[1.5]" />;
+      case 'admin': return <ShieldCheck className="w-5 h-5 stroke-[1.5]" />;
+      case 'customer': return <User className="w-5 h-5 stroke-[1.5]" />;
+      default: return <UserCircle className="w-5 h-5 stroke-[1.5]" />;
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -108,20 +119,20 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
                   className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                   aria-label="Close menu"
                 >
-                  <i className="fas fa-times text-xl"></i>
+                  <X className="w-5 h-5 stroke-[1.5]" />
                 </button>
               </div>
-              
+
               {/* User Info */}
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <i className={`fas ${role === 'vendor' ? 'fa-store' : role === 'admin' ? 'fa-user-shield' : role === 'customer' ? 'fa-user' : 'fa-user-circle'} text-xl`}></i>
+                  {getRoleIcon()}
                 </div>
                 <div>
                   <p className="font-medium">
-                    {role === 'guest' ? 'Welcome Guest' : 
-                     role === 'vendor' ? 'Vendor Portal' : 
-                     role === 'admin' ? 'Admin Panel' : 
+                    {role === 'guest' ? 'Welcome Guest' :
+                     role === 'vendor' ? 'Vendor Portal' :
+                     role === 'admin' ? 'Admin Panel' :
                      'Customer Account'}
                   </p>
                   <p className="text-sm opacity-90">
@@ -138,7 +149,7 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
                   {/* Section Title */}
                   <div className="px-6 mb-2">
                     <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                      {section.icon && <i className={`fas ${section.icon} text-xs`}></i>}
+                      {section.icon && <FaIcon icon={section.icon} className="w-3 h-3 stroke-[1.5]" />}
                       {language === 'he' && section.titleHe ? section.titleHe : section.title}
                     </h3>
                   </div>
@@ -156,7 +167,7 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
                             onClick={() => onClose()}
                           >
                             {item.icon && (
-                              <i className={`fas ${item.icon} w-5 text-center text-gray-600 group-hover:text-leaf-green transition-colors`}></i>
+                              <FaIcon icon={item.icon} className="w-4 h-4 stroke-[1.5] text-gray-600 group-hover:text-leaf-green transition-colors" />
                             )}
                             <span className="flex-1 text-gray-700 group-hover:text-leaf-green transition-colors">
                               {language === 'he' && item.labelHe ? item.labelHe : item.label}
@@ -173,7 +184,7 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
                             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-herbal-mint/10 transition-colors group text-left"
                           >
                             {item.icon && (
-                              <i className={`fas ${item.icon} w-5 text-center text-gray-600 group-hover:text-leaf-green transition-colors`}></i>
+                              <FaIcon icon={item.icon} className="w-4 h-4 stroke-[1.5] text-gray-600 group-hover:text-leaf-green transition-colors" />
                             )}
                             <span className="flex-1 text-gray-700 group-hover:text-leaf-green transition-colors">
                               {language === 'he' && item.labelHe ? item.labelHe : item.label}
@@ -197,7 +208,7 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                     Preferences
                   </h3>
-                  
+
                   {/* Language Toggle */}
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm text-gray-700">Language</span>
@@ -205,7 +216,7 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
                       onClick={handleLanguageToggle}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
                     >
-                      <i className="fas fa-language text-sm"></i>
+                      <Languages className="w-4 h-4 stroke-[1.5]" />
                       <span className="text-sm font-medium">
                         {language === 'en' ? 'EN' : 'עב'}
                       </span>
@@ -228,7 +239,7 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
                       </select>
                       {/* Custom arrow */}
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                        <i className="fas fa-chevron-down text-xs text-gray-600"></i>
+                        <ChevronDown className="w-3 h-3 stroke-[1.5] text-gray-600" />
                       </div>
                     </div>
                   </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Leaf, Globe, UtensilsCrossed, CheckCircle, Info, Flame, Snowflake, Package } from 'lucide-react';
 
 interface ProductTabsProps {
   ingredients: string[];
@@ -19,10 +20,15 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('ingredients');
 
+  const tabIcons: Record<string, React.ReactNode> = {
+    ingredients: <Leaf className="w-4 h-4 stroke-[1.5] mr-2 inline" />,
+    cultural: <Globe className="w-4 h-4 stroke-[1.5] mr-2 inline" />,
+    preparation: <UtensilsCrossed className="w-4 h-4 stroke-[1.5] mr-2 inline" />
+  };
   const tabs = [
-    { id: 'ingredients', label: 'Ingredients & Nutrition', icon: 'fa-leaf' },
-    { id: 'cultural', label: 'Cultural Significance', icon: 'fa-globe-africa' },
-    { id: 'preparation', label: 'Preparation & Storage', icon: 'fa-utensils' }
+    { id: 'ingredients', label: 'Ingredients & Nutrition' },
+    { id: 'cultural', label: 'Cultural Significance' },
+    { id: 'preparation', label: 'Preparation & Storage' }
   ];
 
   return (
@@ -39,7 +45,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
                 : 'border-transparent text-gray-600 hover:text-gray-800'
             }`}
           >
-            <i className={`fas ${tab.icon} mr-2`}></i>
+            {tabIcons[tab.id]}
             <span className="hidden sm:inline">{tab.label}</span>
             <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
           </button>
@@ -58,7 +64,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
               <ul className="space-y-2">
                 {ingredients.map((ingredient, index) => (
                   <li key={index} className="flex items-start gap-2 text-gray-600">
-                    <i className="fas fa-check-circle text-leaf-green mt-0.5 text-sm"></i>
+                    <CheckCircle className="w-4 h-4 stroke-[1.5] text-leaf-green mt-0.5" />
                     <span>{ingredient}</span>
                   </li>
                 ))}
@@ -88,7 +94,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
             </p>
             <div className="mt-6 p-4 bg-herbal-mint/20 rounded-lg border border-leaf-green/20">
               <h5 className="font-semibold mb-2 flex items-center gap-2" style={{ color: '#478c0b' }}>
-                <i className="fas fa-info-circle"></i>
+                <Info className="w-4 h-4 stroke-[1.5]" />
                 Did You Know?
               </h5>
               <p className="text-sm text-gray-600">
@@ -104,7 +110,7 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <h4 className="font-semibold mb-3 text-lg flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-                <i className="fas fa-fire text-earth-flame"></i>
+                <Flame className="w-5 h-5 stroke-[1.5] text-earth-flame" />
                 Preparation:
               </h4>
               <ul className="space-y-2">
@@ -120,13 +126,13 @@ const ProductTabs: React.FC<ProductTabsProps> = ({
             </div>
             <div>
               <h4 className="font-semibold mb-3 text-lg flex items-center gap-2" style={{ color: '#3a3a1d' }}>
-                <i className="fas fa-snowflake text-blue-500"></i>
+                <Snowflake className="w-5 h-5 stroke-[1.5] text-blue-500" />
                 Storage:
               </h4>
               <ul className="space-y-2">
                 {storage.map((item, index) => (
                   <li key={index} className="flex items-start gap-2 text-gray-600">
-                    <i className="fas fa-box text-sun-gold mt-0.5 text-sm"></i>
+                    <Package className="w-4 h-4 stroke-[1.5] text-sun-gold mt-0.5" />
                     <span>{item}</span>
                   </li>
                 ))}
