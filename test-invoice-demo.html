@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KFAR Invoice Test - Multi-Vendor POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-6">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h1 class="text-3xl font-bold mb-2 text-green-700">KFAR Marketplace Invoice System</h1>
+            <p class="text-gray-600 mb-8">Multi-Vendor POS Checkout Demo</p>
+            
+            <!-- Order Summary -->
+            <div class="bg-gradient-to-r from-green-50 to-yellow-50 p-6 rounded-lg mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">🛒 Order Summary</h2>
+                <div id="orderItems" class="space-y-4">
+                    <!-- Items will be populated here -->
+                </div>
+                
+                <div class="border-t mt-4 pt-4">
+                    <div class="flex justify-between text-sm mb-2">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">₪0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span>VAT (17%):</span>
+                        <span id="vat">₪0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm mb-3">
+                        <span>Delivery:</span>
+                        <span id="delivery">₪15.00</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold">
+                        <span>Total:</span>
+                        <span id="total">₪0.00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Info -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="font-semibold mb-3">Customer Details</h3>
+                    <input type="text" id="customerName" placeholder="Full Name" class="w-full p-2 border rounded mb-2" value="Sarah Cohen">
+                    <input type="email" id="customerEmail" placeholder="Email" class="w-full p-2 border rounded mb-2" value="sarah@example.com">
+                    <input type="tel" id="customerPhone" placeholder="Phone" class="w-full p-2 border rounded" value="052-1234567">
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-3">Delivery Options</h3>
+                    <select id="deliveryMethod" class="w-full p-2 border rounded mb-2">
+                        <option>Home Delivery</option>
+                        <option>Store Pickup</option>
+                        <option>Community Center</option>
+                    </select>
+                    <select id="paymentMethod" class="w-full p-2 border rounded">
+                        <option>Credit Card</option>
+                        <option>Bank Transfer</option>
+                        <option>Braysheet Tokens</option>
+                        <option>Cash on Delivery</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Generate Invoice Buttons -->
+            <div class="flex gap-4 mb-6">
+                <button onclick="generateInvoice('standard')" class="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                    <i class="fas fa-file-invoice mr-2"></i>
+                    Generate Standard Invoice
+                </button>
+                <button onclick="generateInvoice('enhanced')" class="flex-1 bg-gradient-to-r from-green-600 to-yellow-500 text-white py-3 px-6 rounded-lg hover:from-green-700 hover:to-yellow-600 transition-all font-semibold">
+                    <i class="fas fa-store mr-2"></i>
+                    Generate Multi-Vendor POS Invoice
+                </button>
+            </div>
+            
+            <!-- Invoice Preview -->
+            <div id="invoiceResult" class="hidden">
+                <h3 class="text-lg font-semibold mb-3">📄 Invoice Generated Successfully!</h3>
+                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                    <p class="text-sm text-gray-600 mb-2">Invoice Number: <span id="invoiceNumber" class="font-mono font-bold"></span></p>
+                    <p class="text-sm text-gray-600 mb-4">Total: <span id="invoiceTotal" class="font-bold"></span></p>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="downloadPDF()" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-download mr-2"></i>
+                            Download PDF
+                        </button>
+                        <button onclick="viewPDF()" class="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-eye mr-2"></i>
+                            View PDF
+                        </button>
+                        <button onclick="sendWhatsApp()" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors">
+                            <i class="fab fa-whatsapp mr-2"></i>
+                            Send to WhatsApp
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- QR Code Display -->
+                <div class="text-center">
+                    <p class="text-sm text-gray-600 mb-2">Scan to Pay:</p>
+                    <img id="qrCode" src="" alt="QR Code" class="mx-auto border-2 border-gray-300 rounded">
+                </div>
+            </div>
+            
+            <!-- Status Messages -->
+            <div id="statusMessage" class="mt-4"></div>
+        </div>
+        
+        <!-- Vendor Logos -->
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-500 mb-3">Fulfilling vendors:</p>
+            <div class="flex justify-center gap-4 flex-wrap">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-seedling text-green-600 text-xl"></i>
+                    </div>
+                    <p class="text-xs">Teva Deli</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-sun text-yellow-600 text-xl"></i>
+                    </div>
+                    <p class="text-xs">Garden of Light</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-crown text-purple-600 text-xl"></i>
+                    </div>
+                    <p class="text-xs">Queen's Cuisine</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-coffee text-red-600 text-xl"></i>
+                    </div>
+                    <p class="text-xs">Gahn Delight</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-home text-blue-600 text-xl"></i>
+                    </div>
+                    <p class="text-xs">VOP Shop</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-store text-orange-600 text-xl"></i>
+                    </div>
+                    <p class="text-xs">People's Store</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Cart items will be populated from real database/local data
+        let cartItems = [];
+        let currentInvoiceData = null;
+        
+        // Initialize the page
+        async function init() {
+            await loadRealProducts();
+            displayItems();
+            calculateTotals();
+        }
+        
+        // Load real products from the API
+        async function loadRealProducts() {
+            try {
+                const response = await fetch('http://localhost:3000/api/vendors/products');
+                const data = await response.json();
+                
+                if (data.success && data.vendors) {
+                    // Create a realistic cart from actual vendors
+                    cartItems = [];
+                    
+                    // Get sample products from each vendor
+                    data.vendors.forEach(vendor => {
+                        if (vendor.products && vendor.products.length > 0) {
+                            // Add 1-2 products from each vendor
+                            const numProducts = Math.min(vendor.products.length, Math.random() > 0.5 ? 2 : 1);
+                            for (let i = 0; i < numProducts; i++) {
+                                const product = vendor.products[i];
+                                cartItems.push({
+                                    name: product.name,
+                                    vendor: vendor.name,
+                                    vendorId: vendor.id,
+                                    price: parseFloat(product.price) || 35,
+                                    quantity: Math.floor(Math.random() * 3) + 1
+                                });
+                            }
+                        }
+                    });
+                    
+                    console.log(`Loaded ${cartItems.length} items from ${data.source} source`);
+                }
+                
+                // If no products loaded, use fallback data
+                if (cartItems.length === 0) {
+                    cartItems = [
+                        { name: "Classic Vegan Schnitzel", vendor: "Teva Deli", vendorId: "teva-deli", price: 45, quantity: 2 },
+                        { name: "Cashew Cream Cheese", vendor: "Garden of Light", vendorId: "garden-of-light", price: 32, quantity: 1 },
+                        { name: "BBQ Pulled Jackfruit", vendor: "Queens Cuisine", vendorId: "queens-cuisine", price: 38, quantity: 1 },
+                        { name: "Ethiopian Injera Bread", vendor: "Gahn Delight", vendorId: "gahn-delight", price: 25, quantity: 3 },
+                        { name: "Fresh Organic Vegetables", vendor: "VOP Shop", vendorId: "vop-shop", price: 65, quantity: 1 },
+                        { name: "Sprouted Grain Bread", vendor: "People Store", vendorId: "people-store", price: 28, quantity: 2 },
+                    ];
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                // Use fallback data
+                cartItems = [
+                    { name: "Classic Vegan Schnitzel", vendor: "Teva Deli", vendorId: "teva-deli", price: 45, quantity: 2 },
+                    { name: "Cashew Cream Cheese", vendor: "Garden of Light", vendorId: "garden-of-light", price: 32, quantity: 1 },
+                    { name: "BBQ Pulled Jackfruit", vendor: "Queens Cuisine", vendorId: "queens-cuisine", price: 38, quantity: 1 },
+                    { name: "Ethiopian Injera Bread", vendor: "Gahn Delight", vendorId: "gahn-delight", price: 25, quantity: 3 },
+                    { name: "Fresh Organic Vegetables", vendor: "VOP Shop", vendorId: "vop-shop", price: 65, quantity: 1 },
+                    { name: "Sprouted Grain Bread", vendor: "People Store", vendorId: "people-store", price: 28, quantity: 2 },
+                ];
+            }
+        }
+        
+        function displayItems() {
+            const container = document.getElementById('orderItems');
+            const itemsByVendor = {};
+            
+            cartItems.forEach(item => {
+                if (!itemsByVendor[item.vendor]) {
+                    itemsByVendor[item.vendor] = [];
+                }
+                itemsByVendor[item.vendor].push(item);
+            });
+            
+            let html = '';
+            Object.entries(itemsByVendor).forEach(([vendor, items]) => {
+                html += `<div class="mb-4">
+                    <h3 class="font-semibold text-sm text-gray-700 mb-2">📦 ${vendor}</h3>`;
+                items.forEach(item => {
+                    const total = item.price * item.quantity;
+                    html += `
+                        <div class="flex justify-between items-center py-2 px-3 bg-gray-50 rounded mb-1">
+                            <div class="flex-1">
+                                <span class="text-sm">${item.name}</span>
+                                <span class="text-xs text-gray-500 ml-2">x${item.quantity}</span>
+                            </div>
+                            <span class="text-sm font-medium">₪${total.toFixed(2)}</span>
+                        </div>`;
+                });
+                html += `</div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function calculateTotals() {
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const vat = subtotal * 0.17;
+            const delivery = 15;
+            const total = subtotal + vat + delivery;
+            
+            document.getElementById('subtotal').textContent = `₪${subtotal.toFixed(2)}`;
+            document.getElementById('vat').textContent = `₪${vat.toFixed(2)}`;
+            document.getElementById('delivery').textContent = `₪${delivery.toFixed(2)}`;
+            document.getElementById('total').textContent = `₪${total.toFixed(2)}`;
+        }
+        
+        async function generateInvoice(type = 'enhanced') {
+            const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const vat = subtotal * 0.17;
+            const delivery = 15;
+            const total = subtotal + vat + delivery;
+            
+            // Group items by vendor for enhanced invoice
+            const itemsByVendor = {};
+            cartItems.forEach(item => {
+                if (!itemsByVendor[item.vendor]) {
+                    itemsByVendor[item.vendor] = [];
+                }
+                itemsByVendor[item.vendor].push({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    vendorName: item.vendor
+                });
+            });
+            
+            const invoiceData = {
+                orderId: `ORD-${Date.now()}`,
+                vendorName: "KFAR Marketplace",
+                vendorId: "kfar-marketplace",
+                itemsByVendor: type === 'enhanced' ? itemsByVendor : undefined,
+                customer: {
+                    name: document.getElementById('customerName').value || 'Guest Customer',
+                    email: document.getElementById('customerEmail').value || 'customer@example.com',
+                    phone: document.getElementById('customerPhone').value || '052-0000000',
+                    address: "Village of Peace, Dimona"
+                },
+                items: cartItems.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    vendorName: item.vendor
+                })),
+                subtotal: subtotal,
+                vat: vat,
+                deliveryFee: delivery,
+                total: total,
+                paymentMethod: document.getElementById('paymentMethod').value,
+                deliveryMethod: document.getElementById('deliveryMethod').value,
+                language: 'en'
+            };
+            
+            try {
+                showStatus('Generating invoice...', 'info');
+                
+                const endpoint = type === 'enhanced' 
+                    ? 'http://localhost:3000/api/invoice/generate-enhanced'
+                    : 'http://localhost:3000/api/invoice/generate';
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(invoiceData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentInvoiceData = result;
+                    displayInvoiceResult(result.invoice);
+                    showStatus(`✅ ${type === 'enhanced' ? 'Multi-vendor POS' : 'Standard'} invoice generated successfully!`, 'success');
+                } else {
+                    showStatus('❌ Failed to generate invoice: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        function displayInvoiceResult(invoice) {
+            document.getElementById('invoiceNumber').textContent = invoice.invoiceNumber;
+            document.getElementById('invoiceTotal').textContent = `₪${invoice.total.toFixed(2)}`;
+            document.getElementById('qrCode').src = invoice.qrCode;
+            document.getElementById('invoiceResult').classList.remove('hidden');
+        }
+        
+        function downloadPDF() {
+            if (!currentInvoiceData) return;
+            
+            const link = document.createElement('a');
+            link.href = currentInvoiceData.downloadUrl;
+            link.download = `KFAR_Invoice_${currentInvoiceData.invoice.invoiceNumber}.pdf`;
+            link.click();
+            showStatus('✅ PDF downloaded successfully!', 'success');
+        }
+        
+        function viewPDF() {
+            if (!currentInvoiceData) return;
+            
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <html>
+                <head><title>Invoice ${currentInvoiceData.invoice.invoiceNumber}</title></head>
+                <body style="margin:0;">
+                    <embed src="${currentInvoiceData.downloadUrl}" type="application/pdf" width="100%" height="100%">
+                </body>
+                </html>
+            `);
+            showStatus('📄 PDF opened in new tab', 'info');
+        }
+        
+        function sendWhatsApp() {
+            const phone = document.getElementById('customerPhone').value.replace(/\D/g, '');
+            const message = `Your KFAR invoice ${currentInvoiceData.invoice.invoiceNumber} is ready! Total: ₪${currentInvoiceData.invoice.total.toFixed(2)}`;
+            const whatsappUrl = `https://wa.me/972${phone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+            showStatus('📱 Opening WhatsApp...', 'info');
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            const colors = {
+                success: 'bg-green-100 text-green-800 border-green-300',
+                error: 'bg-red-100 text-red-800 border-red-300',
+                info: 'bg-blue-100 text-blue-800 border-blue-300'
+            };
+            
+            statusDiv.className = `p-3 rounded-lg border ${colors[type]} mt-4`;
+            statusDiv.textContent = message;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.className = 'mt-4';
+                    statusDiv.textContent = '';
+                }, 5000);
+            }
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

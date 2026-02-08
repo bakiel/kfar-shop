@@ -1,0 +1,323 @@
+{
+  "id": "quintessence",
+  "name": "Quintessence",
+  "vendorName": "Quintessence",
+  "description": "Artisanal fermented foods and non-dairy products with live cultures",
+  "logo": "/images/vendors/quintessence_logo.jpg",
+  "categories": [
+    "fermented-foods",
+    "dairy-alternatives",
+    "probiotics"
+  ],
+  "specialties": [
+    "kimchi",
+    "non-dairy-yogurt",
+    "fermented-vegetables",
+    "live-cultures"
+  ],
+  "products": [
+    {
+      "id": "qt-001",
+      "name": "Quintessence Spicy Kimchi",
+      "nameHe": "קימצ'י חריף קווינטסנס",
+      "description": "Traditional Korean-style spicy fermented kimchi with napa cabbage, gochugaru, and authentic seasonings",
+      "price": 26,
+      "category": "fermented-foods",
+      "image": "/images/vendors/Peoples Store - Quintessence Spicy Kimchi Fermented.jpg",
+      "tags": [
+        "fermented",
+        "spicy",
+        "korean",
+        "probiotic",
+        "authentic"
+      ],
+      "badge": "Authentic Korean",
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-002",
+      "name": "Quintessence Strawberry Non-Dairy Yogurt",
+      "nameHe": "יוגורט טבעוני תות קווינטסנס",
+      "description": "Fermented non-dairy yogurt with real strawberries, coconut base, live active cultures",
+      "price": 18,
+      "category": "dairy-alternatives",
+      "image": "/images/vendors/Peoples Store - Quintessence Strawberry Non-Dairy Yogurt.jpg",
+      "tags": [
+        "non-dairy",
+        "yogurt",
+        "strawberry",
+        "probiotic",
+        "vegan"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-003",
+      "name": "Quintessence Sweet & Sour Ginger - 3 Pack",
+      "nameHe": "ג'ינג'ר חמוץ מתוק קווינטסנס - שלישייה",
+      "description": "Fermented sweet and sour ginger with live cultures, perfect accompaniment to meals",
+      "price": 54,
+      "originalPrice": 65,
+      "category": "fermented-foods",
+      "image": "/images/vendors/Peoples Store - Quintessence Sweet and Sour Ginger 3-Pack.jpg",
+      "tags": [
+        "fermented",
+        "ginger",
+        "sweet-sour",
+        "probiotic",
+        "value-pack"
+      ],
+      "badge": "Value Pack",
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-004",
+      "name": "Wan Ja Shan Naturally Brewed Tamari",
+      "nameHe": "רוטב סויה טמרי וואן ג'ה שאן",
+      "description": "Premium naturally brewed tamari soy sauce, gluten-free alternative to traditional soy sauce",
+      "price": 24,
+      "category": "asian-ingredients",
+      "image": "/images/vendors/Peoples Store - Wan Ja Shan Tamari Soy Sauce Naturally Brewed.jpg",
+      "tags": [
+        "tamari",
+        "gluten-free",
+        "soy-sauce",
+        "asian",
+        "naturally-brewed"
+      ],
+      "badge": "Gluten-Free",
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-005",
+      "name": "Quintessence Plain Non-Dairy Yogurt",
+      "nameHe": "יוגורט טבעוני טבעי קווינטסנס",
+      "description": "Creamy plain non-dairy yogurt with live active cultures, perfect for smoothies or toppings",
+      "price": 16,
+      "category": "dairy-alternatives",
+      "image": "/images/vendors/Peoples Store - Quintessence Plain Non-Dairy Yogurt.jpg",
+      "tags": [
+        "non-dairy",
+        "yogurt",
+        "plain",
+        "probiotic",
+        "vegan"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-006",
+      "name": "Quintessence Blueberry Non-Dairy Yogurt",
+      "nameHe": "יוגורט טבעוני אוכמניות קווינטסנס",
+      "description": "Rich blueberry non-dairy yogurt with real fruit pieces and live cultures",
+      "price": 18,
+      "category": "dairy-alternatives",
+      "image": "/images/vendors/Peoples Store - Quintessence Blueberry Non-Dairy Yogurt.jpg",
+      "tags": [
+        "non-dairy",
+        "yogurt",
+        "blueberry",
+        "probiotic",
+        "vegan"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-007",
+      "name": "Quintessence Pineapple Non-Dairy Yogurt",
+      "nameHe": "יוגורט טבעוני אננס קווינטסנס",
+      "description": "Tropical pineapple non-dairy yogurt with chunks of real pineapple",
+      "price": 18,
+      "category": "dairy-alternatives",
+      "image": "/images/vendors/Peoples Store - Quintessence Pineapple Non-Dairy Yogurt.jpg",
+      "tags": [
+        "non-dairy",
+        "yogurt",
+        "pineapple",
+        "probiotic",
+        "vegan"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-008",
+      "name": "Quintessence Organic Kosher Dill Pickles",
+      "nameHe": "מלפפונים חמוצים כשרים אורגניים קווינטסנס",
+      "description": "Organic kosher dill pickles fermented with traditional methods",
+      "price": 22,
+      "category": "fermented-foods",
+      "image": "/images/vendors/Peoples Store - Quintessence Organic Kosher Dill Pickles.jpg",
+      "tags": [
+        "pickles",
+        "organic",
+        "kosher",
+        "fermented",
+        "dill"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-009",
+      "name": "Quintessence Organic Spicy Sauerkraut",
+      "nameHe": "כרוב כבוש חריף אורגני קווינטסנס",
+      "description": "Organic fermented sauerkraut with a spicy kick, rich in probiotics",
+      "price": 24,
+      "category": "fermented-foods",
+      "image": "/images/vendors/Peoples Store - Quintessence Organic Spicy Sauerkraut.jpg",
+      "tags": [
+        "sauerkraut",
+        "organic",
+        "spicy",
+        "fermented",
+        "probiotic"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-010",
+      "name": "Quintessence Fermented Hot Peppers",
+      "nameHe": "פלפלים חריפים מותססים קווינטסנס",
+      "description": "Fiery fermented hot peppers with complex flavors from natural fermentation",
+      "price": 26,
+      "category": "fermented-foods",
+      "image": "/images/vendors/Peoples Store - Quintessence Fermented Hot Peppers.jpg",
+      "tags": [
+        "hot-peppers",
+        "fermented",
+        "spicy",
+        "condiment",
+        "probiotic"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-011",
+      "name": "Quintessence Fermented Okra with Live Culture",
+      "nameHe": "במיה מותססת עם תרביות חיות קווינטסנס",
+      "description": "Uniquely fermented okra pods with live cultures, crunchy and tangy",
+      "price": 28,
+      "category": "fermented-foods",
+      "image": "/images/vendors/Peoples Store - Quintessence Fermented Okra with Live Culture.jpg",
+      "tags": [
+        "okra",
+        "fermented",
+        "live-culture",
+        "unique",
+        "probiotic"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-012",
+      "name": "Quintessence Organic Cucumber Relish",
+      "nameHe": "רליש מלפפונים אורגני קווינטסנס",
+      "description": "Organic cucumber relish with a perfect balance of sweet and tangy",
+      "price": 20,
+      "category": "condiments",
+      "image": "/images/vendors/Peoples Store - Quintessence Organic Cucumber Relish.jpg",
+      "tags": [
+        "relish",
+        "organic",
+        "cucumber",
+        "condiment",
+        "sweet-tangy"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    },
+    {
+      "id": "qt-013",
+      "name": "Quintessence Organic Spicy Relish",
+      "nameHe": "רליש חריף אורגני קווינטסנס",
+      "description": "Organic spicy relish with jalapeños and aromatic spices",
+      "price": 22,
+      "category": "condiments",
+      "image": "/images/vendors/Peoples Store - Quintessence Organic Spicy Relish.jpg",
+      "tags": [
+        "relish",
+        "organic",
+        "spicy",
+        "condiment",
+        "jalapeño"
+      ],
+      "vendorId": "quintessence",
+      "vendorName": "Quintessence",
+      "inStock": true,
+      "isVegan": true,
+      "isKosher": true,
+      "status": "published"
+    }
+  ],
+  "vendorTags": [
+    "fermented",
+    "probiotic",
+    "artisanal",
+    "non-dairy",
+    "live-culture"
+  ],
+  "analytics": {
+    "totalSales": 0,
+    "totalRevenue": 0,
+    "averageRating": 4.8,
+    "reviewCount": 45
+  }
+}

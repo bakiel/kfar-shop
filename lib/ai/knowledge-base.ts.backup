@@ -1,0 +1,599 @@
+// lib/ai/knowledge-base.ts
+import { createRetriever } from 'ai';
+import { embedMany, embed } from 'ai';
+import { aiModels } from './vercel-ai-integration';
+
+// Knowledge base types
+export interface KnowledgeDocument {
+  id: string;
+  type: 'product' | 'vendor' | 'policy' | 'faq' | 'community' | 'recipe' | 'general';
+  title: string;
+  content: string;
+  metadata: Record<string, any>;
+  embedding?: number[];
+  lastUpdated: Date;
+}
+
+export class KFARKnowledgeBase {
+  private documents: Map<string, KnowledgeDocument> = new Map();
+  private embeddings: Map<string, number[]> = new Map();
+  private initialized = false;
+
+  // Initialize knowledge base with all site information
+  async initialize() {
+    if (this.initialized) return;
+
+    console.log('🧠 Initializing KFAR Knowledge Base...');
+
+    // Load all knowledge sources
+    await Promise.all([
+      this.loadProductKnowledge(),
+      this.loadVendorKnowledge(),
+      this.loadCommunityKnowledge(),
+      this.loadPolicyKnowledge(),
+      this.loadFAQKnowledge(),
+      this.loadRecipeKnowledge(),
+    ]);
+
+    // Generate embeddings for semantic search
+    await this.generateEmbeddings();
+
+    this.initialized = true;
+    console.log(`✅ Knowledge base initialized with ${this.documents.size} documents`);
+  }
+
+  // Load product information
+  private async loadProductKnowledge() {
+    try {
+      // Fetch all products from API
+      const response = await fetch('/api/products');
+      const data = await response.json();
+
+      if (data.products) {
+        for (const product of data.products) {
+          const doc: KnowledgeDocument = {
+            id: `product_${product.id}`,
+            type: 'product',
+            title: product.name,
+            content: this.formatProductContent(product),
+            metadata: {
+              vendorId: product.vendorId,
+              vendorName: product.vendor,
+              price: product.price,
+              category: product.category,
+              tags: product.tags,
+              inStock: product.inStock,
+              kosher: product.kosher,
+              organic: product.organic,
+              glutenFree: product.glutenFree,
+            },
+            lastUpdated: new Date(),
+          };
+          this.documents.set(doc.id, doc);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
+  }
+
+  // Load vendor information
+  private async loadVendorKnowledge() {
+    const vendors = [
+      {
+        id: 'teva-deli',
+        name: 'Teva Deli',
+        description: 'Israeli vegan deli specializing in plant-based meat alternatives',
+        content: `Teva Deli is a premier Israeli vegan deli offering 46 different plant-based meat alternatives. 
+        They specialize in seitan and tofu-based products including schnitzel, shawarma, burgers, and traditional Israeli dishes.
+        All products are 100% vegan, kosher certified, and made with high-quality ingredients.
+        Popular items: Vegan Schnitzel (₪28), Seitan Shawarma (₪32), Plant-Based Kebabs (₪35).
+        Located in the Village of Peace community, serving customers for over 15 years.`,
+        products: 46,
+        specialties: ['seitan', 'tofu', 'meat alternatives', 'Israeli cuisine'],
+      },
+      {
+        id: 'people-store',
+        name: 'People Store',
+        description: 'Community market with organic groceries and household items',
+        content: `People Store is the Village of Peace community's main grocery outlet, offering 23 organic and natural products.
+        They stock bulk grains, organic flours, specialty Asian ingredients, fermented foods from Quintessence, and eco-friendly household items.
+        Features include: Bulk buying options, zero-waste shopping, community-sourced products.
+        Popular items: Organic Maple Syrup (₪45), Sesame Oil (₪38), Fermented Vegetables (₪25-35).
+        Supports local farmers and sustainable agriculture practices.`,
+        products: 23,
+        specialties: ['organic', 'bulk foods', 'fermented', 'eco-friendly'],
+      },
+      {
+        id: 'queens-cuisine',
+        name: "Queen's Cuisine",
+        description: 'Plant-based catering and prepared meals',
+        content: `Queen's Cuisine offers gourmet plant-based alternatives to traditional meat dishes.
+        Specializing in vegan burgers, kebabs, meatballs, and Middle Eastern cuisine.
+        All items are prepared fresh with whole food ingredients, no artificial additives.
+        Popular items: Vegan Burger Patties (₪35/4-pack), Seitan Kebabs (₪42), Plant-Based Meatballs (₪38).
+        Offers catering services for events and celebrations in the community.`,
+        products: 12,
+        specialties: ['burgers', 'prepared meals', 'catering', 'Middle Eastern'],
+      },
+      {
+        id: 'gahn-delight',
+        name: 'Gahn Delight',
+        description: 'Artisanal vegan ice cream and frozen desserts',
+        content: `Gahn Delight creates premium vegan ice cream using coconut, cashew, and oat bases.
+        8 unique flavors including Chocolate Tahini Swirl, Pistachio Rose, Passion Mango, and Date Caramel.
+        All products are refined sugar-free, using natural sweeteners like dates and maple syrup.
+        Popular items: Ice Cream Cups (₪25), Popsicles (₪18), Sundaes (₪35), Parfaits (₪42).
+        Small-batch production ensures freshness and quality.`,
+        products: 8,
+        specialties: ['ice cream', 'desserts', 'sugar-free', 'frozen treats'],
+      },
+      {
+        id: 'garden-of-light',
+        name: 'Garden of Light',
+        description: 'Fresh salads and healthy prepared foods',
+        content: `Garden of Light focuses on fresh, raw, and living foods for optimal health.
+        Daily prepared salads, smoothie bowls, cold-pressed juices, and raw desserts.
+        Uses organic produce from community gardens and local farms.
+        Popular items: Rainbow Salad Bowl (₪32), Green Goddess Smoothie (₪28), Raw Lasagna (₪45).
+        Educational workshops on raw food preparation and nutrition.`,
+        products: 15,
+        specialties: ['salads', 'raw food', 'juices', 'healthy meals'],
+      },
+      {
+        id: 'vop-shop',
+        name: 'VOP Shop',
+        description: 'Village of Peace merchandise and cultural items',
+        content: `VOP Shop offers community merchandise, books, music, and cultural items from the Village of Peace.
+        Products include organic cotton clothing, handmade crafts, educational materials, and spiritual books.
+        Supports community artists and creators.
+        Popular items: Community T-Shirts (₪65), Handwoven Baskets (₪120), Hebrew Israelite Music CDs (₪45).
+        Proceeds support community development projects.`,
+        products: 20,
+        specialties: ['merchandise', 'books', 'music', 'crafts', 'cultural items'],
+      },
+    ];
+
+    for (const vendor of vendors) {
+      const doc: KnowledgeDocument = {
+        id: `vendor_${vendor.id}`,
+        type: 'vendor',
+        title: vendor.name,
+        content: vendor.content,
+        metadata: {
+          vendorId: vendor.id,
+          productCount: vendor.products,
+          specialties: vendor.specialties,
+        },
+        lastUpdated: new Date(),
+      };
+      this.documents.set(doc.id, doc);
+    }
+  }
+
+  // Load community information
+  private async loadCommunityKnowledge() {
+    const communityInfo = {
+      id: 'vop-community',
+      title: 'Village of Peace Community',
+      content: `The Village of Peace (Kfar Hashalom) in Dimona, Israel, is a vegan community established in 1967 by Ben Ammi Ben-Israel.
+      
+      HISTORY: The community began when African Americans claiming descent from ancient Israelites migrated from the United States to Israel. 
+      They established a self-sufficient community based on vegan principles, sustainable living, and spiritual development.
+      
+      LIFESTYLE: 100% plant-based diet for over 50 years, no smoking or alcohol, regular exercise, communal living principles.
+      The community has been recognized for having one of the lowest rates of chronic diseases in the world.
+      
+      VALUES: Environmental sustainability, holistic health, spiritual growth, cultural preservation, self-sufficiency.
+      
+      ACHIEVEMENTS: International recognition for sustainable practices, successful vegan businesses, cultural contributions to Israeli society.
+      Members serve in the Israeli military and are integrated into Israeli society while maintaining their unique culture.
+      
+      ECONOMY: The community operates various businesses including organic agriculture, vegan food production, textile manufacturing, 
+      and this marketplace which serves both community members and the wider public interested in healthy vegan products.
+      
+      VISITORS: The community welcomes visitors for tours, vegan cooking workshops, and cultural exchanges.
+      Annual festivals celebrate harvest, culture, and healthy living.`,
+      metadata: {
+        established: 1967,
+        location: 'Dimona, Israel',
+        population: 'Approximately 3,000 members',
+        languages: ['Hebrew', 'English'],
+      },
+    };
+
+    const doc: KnowledgeDocument = {
+      id: communityInfo.id,
+      type: 'community',
+      title: communityInfo.title,
+      content: communityInfo.content,
+      metadata: communityInfo.metadata,
+      lastUpdated: new Date(),
+    };
+    this.documents.set(doc.id, doc);
+  }
+
+  // Load policies and shipping information
+  private async loadPolicyKnowledge() {
+    const policies = [
+      {
+        id: 'shipping-policy',
+        title: 'Shipping and Delivery Policy',
+        content: `KFAR Marketplace Shipping Information:
+        
+        LOCAL DELIVERY (Dimona area): Same-day delivery for orders placed before 2 PM. Free delivery for orders over ₪150.
+        Delivery fee: ₪15 for orders under ₪150.
+        
+        NATIONWIDE SHIPPING: Available throughout Israel via courier service.
+        Standard shipping (3-5 business days): ₪25
+        Express shipping (1-2 business days): ₪45
+        Free shipping on orders over ₪300.
+        
+        PICKUP OPTIONS: 
+        - Village of Peace Community Center: Sunday-Thursday 9:00-17:00, Friday 9:00-14:00
+        - Partner locations in Beer Sheva, Tel Aviv, and Jerusalem
+        
+        INTERNATIONAL: Currently not available. Planning to expand to Europe in 2024.
+        
+        PACKAGING: All orders use eco-friendly, biodegradable packaging materials.
+        Cold items shipped with recyclable ice packs.`,
+      },
+      {
+        id: 'return-policy',
+        title: 'Return and Refund Policy',
+        content: `KFAR Marketplace Return Policy:
+        
+        FRESH PRODUCTS: Due to food safety, we cannot accept returns on perishable items.
+        Quality issues must be reported within 24 hours with photos.
+        
+        NON-PERISHABLE ITEMS: 14-day return policy for unopened, unused items.
+        Original packaging required. Customer pays return shipping.
+        
+        DAMAGED ITEMS: Report within 48 hours of delivery with photos.
+        Full refund or replacement at customer's choice.
+        
+        REFUNDS: Processed within 5-7 business days after approval.
+        Original payment method used for all refunds.
+        
+        CONTACT: customer@kfarmarketplace.com or WhatsApp +972-XX-XXX-XXXX`,
+      },
+      {
+        id: 'kosher-vegan-policy',
+        title: 'Kosher and Vegan Certification',
+        content: `All products in KFAR Marketplace are 100% vegan - no animal products whatsoever.
+        
+        VEGAN STANDARDS: No meat, dairy, eggs, honey, or any animal-derived ingredients.
+        No testing on animals. Cruelty-free production methods.
+        
+        KOSHER CERTIFICATION: Many products have official kosher certification.
+        Products marked with ⓚ symbol are certified kosher.
+        Certification from recognized Israeli kosher authorities.
+        
+        ORGANIC: Products marked as organic are certified by international standards.
+        No pesticides, GMOs, or synthetic fertilizers.
+        
+        ALLERGENS: Clearly marked on all products. Common allergens include:
+        nuts, soy, gluten, sesame. Always check product descriptions.`,
+      },
+    ];
+
+    for (const policy of policies) {
+      const doc: KnowledgeDocument = {
+        id: policy.id,
+        type: 'policy',
+        title: policy.title,
+        content: policy.content,
+        metadata: {},
+        lastUpdated: new Date(),
+      };
+      this.documents.set(doc.id, doc);
+    }
+  }
+
+  // Load FAQ information
+  private async loadFAQKnowledge() {
+    const faqs = [
+      {
+        question: "What makes KFAR Marketplace special?",
+        answer: "We're the only 100% vegan marketplace in Israel directly operated by the Village of Peace community. With over 50 years of vegan living experience, we offer authentic, healthy products you won't find elsewhere.",
+      },
+      {
+        question: "How do I know products are really vegan?",
+        answer: "Every single product is verified vegan by our community standards. We've been strictly vegan since 1967 - no exceptions. Many items are also certified kosher.",
+      },
+      {
+        question: "Can I visit the Village of Peace?",
+        answer: "Yes! We offer guided tours, vegan cooking workshops, and cultural programs. Contact us to schedule a visit. Tours available Sunday-Thursday.",
+      },
+      {
+        question: "Do you offer wholesale for restaurants?",
+        answer: "Yes, we have special wholesale pricing for restaurants, cafes, and stores. Minimum order ₪500. Contact business@kfarmarketplace.com for details.",
+      },
+      {
+        question: "What payment methods do you accept?",
+        answer: "We accept all major credit cards, PayPal, Bit, and bank transfers. Cash on delivery available for local Dimona orders.",
+      },
+      {
+        question: "Are your prices competitive?",
+        answer: "Our prices reflect the quality of truly healthy, organic, vegan products. We offer weekly specials and bulk discounts. Join our newsletter for exclusive deals.",
+      },
+      {
+        question: "Can I order custom products?",
+        answer: "Yes! Teva Deli and Queen's Cuisine offer custom orders for events. Garden of Light can prepare special raw food platters. Contact vendors directly through the marketplace.",
+      },
+    ];
+
+    for (const faq of faqs) {
+      const doc: KnowledgeDocument = {
+        id: `faq_${this.generateId(faq.question)}`,
+        type: 'faq',
+        title: faq.question,
+        content: `Question: ${faq.question}\n\nAnswer: ${faq.answer}`,
+        metadata: {},
+        lastUpdated: new Date(),
+      };
+      this.documents.set(doc.id, doc);
+    }
+  }
+
+  // Load recipe knowledge
+  private async loadRecipeKnowledge() {
+    const recipes = [
+      {
+        id: 'hummus-bowl',
+        title: 'KFAR Ultimate Hummus Bowl',
+        content: `A complete meal featuring our vendors' best products:
+        
+        INGREDIENTS:
+        - People Store organic chickpeas (₪18)
+        - People Store tahini (₪25)
+        - Teva Deli vegan shawarma (₪32)
+        - Garden of Light fresh vegetable salad (₪28)
+        - People Store pita bread (₪12)
+        
+        PREPARATION:
+        1. Prepare hummus with chickpeas, tahini, lemon, garlic
+        2. Warm the vegan shawarma with Middle Eastern spices
+        3. Arrange in bowl with fresh salad
+        4. Serve with warm pita
+        
+        Total cost: ₪115 (serves 4)`,
+      },
+      {
+        id: 'ice-cream-sundae',
+        title: 'Celebration Sundae',
+        content: `Decadent dessert using Gahn Delight products:
+        
+        INGREDIENTS:
+        - Gahn Delight Chocolate Tahini ice cream (₪25)
+        - Gahn Delight Date Caramel sundae (₪35)
+        - People Store organic walnuts (₪22)
+        - VOP Shop carob chips (₪18)
+        
+        ASSEMBLY:
+        Layer ice cream with toppings, drizzle with date caramel.
+        Perfect for special occasions!`,
+      },
+    ];
+
+    for (const recipe of recipes) {
+      const doc: KnowledgeDocument = {
+        id: `recipe_${recipe.id}`,
+        type: 'recipe',
+        title: recipe.title,
+        content: recipe.content,
+        metadata: {},
+        lastUpdated: new Date(),
+      };
+      this.documents.set(doc.id, doc);
+    }
+  }
+
+  // Format product content for knowledge base
+  private formatProductContent(product: any): string {
+    return `${product.name} by ${product.vendor}
+    
+    Price: ₪${product.price}
+    Category: ${product.category || 'General'}
+    
+    Description: ${product.description || 'Delicious vegan product from KFAR Marketplace'}
+    
+    Dietary Info:
+    - 100% Vegan ✓
+    ${product.kosher ? '- Kosher Certified ⓚ' : ''}
+    ${product.organic ? '- Organic 🌱' : ''}
+    ${product.glutenFree ? '- Gluten-Free' : ''}
+    ${product.sugarFree ? '- Sugar-Free' : ''}
+    
+    ${product.ingredients ? `Ingredients: ${product.ingredients}` : ''}
+    ${product.allergens ? `Allergens: ${product.allergens}` : ''}
+    
+    Vendor: ${product.vendor} - ${this.getVendorDescription(product.vendorId)}`;
+  }
+
+  // Get vendor description helper
+  private getVendorDescription(vendorId: string): string {
+    const descriptions: Record<string, string> = {
+      'teva-deli': 'Israeli vegan deli with meat alternatives',
+      'people-store': 'Community market with organic groceries',
+      'queens-cuisine': 'Plant-based catering and prepared meals',
+      'gahn-delight': 'Artisanal vegan ice cream',
+      'garden-of-light': 'Fresh salads and raw foods',
+      'vop-shop': 'Community merchandise and cultural items',
+    };
+    return descriptions[vendorId] || 'KFAR Marketplace vendor';
+  }
+
+  // Generate embeddings for semantic search
+  private async generateEmbeddings() {
+    try {
+      const documents = Array.from(this.documents.values());
+      const texts = documents.map(doc => `${doc.title}\n${doc.content}`);
+      
+      // Generate embeddings in batches
+      const batchSize = 100;
+      for (let i = 0; i < texts.length; i += batchSize) {
+        const batch = texts.slice(i, i + batchSize);
+        const { embeddings } = await embedMany({
+          model: aiModels.default,
+          values: batch,
+        });
+        
+        // Store embeddings
+        embeddings.forEach((embedding, index) => {
+          const doc = documents[i + index];
+          this.embeddings.set(doc.id, embedding);
+        });
+      }
+    } catch (error) {
+      console.error('Error generating embeddings:', error);
+    }
+  }
+
+  // Search knowledge base with semantic similarity
+  async search(query: string, options?: {
+    type?: KnowledgeDocument['type'];
+    limit?: number;
+    threshold?: number;
+  }): Promise<KnowledgeDocument[]> {
+    const { type, limit = 5, threshold = 0.7 } = options || {};
+
+    try {
+      // Generate embedding for query
+      const { embedding: queryEmbedding } = await embed({
+        model: aiModels.default,
+        value: query,
+      });
+
+      // Calculate similarities
+      const similarities: Array<{ doc: KnowledgeDocument; score: number }> = [];
+      
+      for (const [docId, doc] of this.documents) {
+        if (type && doc.type !== type) continue;
+        
+        const docEmbedding = this.embeddings.get(docId);
+        if (!docEmbedding) continue;
+        
+        // Cosine similarity
+        const score = this.cosineSimilarity(queryEmbedding, docEmbedding);
+        if (score >= threshold) {
+          similarities.push({ doc, score });
+        }
+      }
+
+      // Sort by similarity and return top results
+      return similarities
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map(({ doc }) => doc);
+    } catch (error) {
+      console.error('Search error:', error);
+      // Fallback to keyword search
+      return this.keywordSearch(query, { type, limit });
+    }
+  }
+
+  // Fallback keyword search
+  private keywordSearch(query: string, options?: {
+    type?: KnowledgeDocument['type'];
+    limit?: number;
+  }): KnowledgeDocument[] {
+    const { type, limit = 5 } = options || {};
+    const queryLower = query.toLowerCase();
+    const results: Array<{ doc: KnowledgeDocument; score: number }> = [];
+
+    for (const doc of this.documents.values()) {
+      if (type && doc.type !== type) continue;
+      
+      const titleScore = doc.title.toLowerCase().includes(queryLower) ? 2 : 0;
+      const contentScore = doc.content.toLowerCase().includes(queryLower) ? 1 : 0;
+      const score = titleScore + contentScore;
+      
+      if (score > 0) {
+        results.push({ doc, score });
+      }
+    }
+
+    return results
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map(({ doc }) => doc);
+  }
+
+  // Calculate cosine similarity between vectors
+  private cosineSimilarity(a: number[], b: number[]): number {
+    let dotProduct = 0;
+    let normA = 0;
+    let normB = 0;
+    
+    for (let i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+    
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  }
+
+  // Generate unique ID from text
+  private generateId(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  // Get context for chat
+  async getContextForQuery(query: string): Promise<string> {
+    const relevantDocs = await this.search(query, { limit: 3 });
+    
+    if (relevantDocs.length === 0) {
+      return 'No specific context found.';
+    }
+
+    return relevantDocs
+      .map(doc => `${doc.title}:\n${doc.content}`)
+      .join('\n\n---\n\n');
+  }
+
+  // Get all documents by type
+  getDocumentsByType(type: KnowledgeDocument['type']): KnowledgeDocument[] {
+    return Array.from(this.documents.values()).filter(doc => doc.type === type);
+  }
+
+  // Get document by ID
+  getDocument(id: string): KnowledgeDocument | undefined {
+    return this.documents.get(id);
+  }
+
+  // Update document
+  async updateDocument(id: string, updates: Partial<KnowledgeDocument>) {
+    const doc = this.documents.get(id);
+    if (!doc) return;
+
+    const updated = {
+      ...doc,
+      ...updates,
+      lastUpdated: new Date(),
+    };
+    
+    this.documents.set(id, updated);
+    
+    // Regenerate embedding if content changed
+    if (updates.content || updates.title) {
+      const { embedding } = await embed({
+        model: aiModels.default,
+        value: `${updated.title}\n${updated.content}`,
+      });
+      this.embeddings.set(id, embedding);
+    }
+  }
+}
+
+// Singleton instance
+export const kfarKnowledgeBase = new KFARKnowledgeBase();
+
+// Initialize on first import
+if (typeof window !== 'undefined') {
+  kfarKnowledgeBase.initialize().catch(console.error);
+}

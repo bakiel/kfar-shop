@@ -1,0 +1,16 @@
+{
+  "name": "kfar-marketplace-voice",
+  "displayName": "KFAR Marketplace - Voice Shopping (MAIN APP)",
+  "version": "1.0.0",
+  "description": "Main KFAR marketplace app with voice shopping - NO DEMO MODE",
+  "activeProject": true,
+  "lastModified": "2025-06-21",
+  "runCommand": "npm run dev",
+  "defaultPort": 3008,
+  "features": [
+    "Voice-enabled shopping",
+    "No demo badge",
+    "Mobile optimized",
+    "KFAR pronunciation system"
+  ]
+}

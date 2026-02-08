@@ -1,0 +1,11 @@
+# Ignore files that cause build errors
+app/api/webhooks/sms/route.ts.bak
+app/api/webhooks/whatsapp/route.ts.bak
+app/api/vendor/welcome-package/route.ts.bak
+services/twilioService.ts
+services/upstashService.ts
+.env.example
+.env.development
+node_modules
+.next
+.git

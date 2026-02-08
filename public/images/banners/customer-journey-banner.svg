@@ -1,0 +1,66 @@
+<svg width="1920" height="400" viewBox="0 0 1920 400" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="journey-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#cfe7c1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#478c0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f6af0d;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Pattern for journey path -->
+    <pattern id="dots" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+      <circle cx="25" cy="25" r="3" fill="white" opacity="0.2"/>
+    </pattern>
+  </defs>
+  
+  <!-- Main background -->
+  <rect width="1920" height="400" fill="url(#journey-gradient)"/>
+  
+  <!-- Pattern overlay -->
+  <rect width="1920" height="400" fill="url(#dots)"/>
+  
+  <!-- Journey path -->
+  <path d="M100,300 Q480,200 960,250 T1820,200" stroke="white" stroke-width="4" fill="none" opacity="0.3" stroke-dasharray="10,5"/>
+  
+  <!-- Journey milestones -->
+  <g transform="translate(200, 280)">
+    <circle cx="0" cy="0" r="40" fill="white" opacity="0.2"/>
+    <circle cx="0" cy="0" r="25" fill="white" opacity="0.4"/>
+    <text x="0" y="5" text-anchor="middle" fill="white" font-size="20" font-weight="bold">1</text>
+  </g>
+  
+  <g transform="translate(640, 230)">
+    <circle cx="0" cy="0" r="40" fill="white" opacity="0.2"/>
+    <circle cx="0" cy="0" r="25" fill="white" opacity="0.4"/>
+    <text x="0" y="5" text-anchor="middle" fill="white" font-size="20" font-weight="bold">2</text>
+  </g>
+  
+  <g transform="translate(1280, 250)">
+    <circle cx="0" cy="0" r="40" fill="white" opacity="0.2"/>
+    <circle cx="0" cy="0" r="25" fill="white" opacity="0.4"/>
+    <text x="0" y="5" text-anchor="middle" fill="white" font-size="20" font-weight="bold">3</text>
+  </g>
+  
+  <g transform="translate(1720, 200)">
+    <circle cx="0" cy="0" r="40" fill="white" opacity="0.2"/>
+    <circle cx="0" cy="0" r="25" fill="white" opacity="0.4"/>
+    <text x="0" y="5" text-anchor="middle" fill="white" font-size="20" font-weight="bold">4</text>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="100" r="60" fill="white" opacity="0.05"/>
+  <circle cx="1820" cy="350" r="80" fill="white" opacity="0.05"/>
+  
+  <!-- Community icons -->
+  <g transform="translate(300, 100)">
+    <path d="M0,0 L20,0 L20,20 L0,20 Z M25,0 L45,0 L45,20 L25,20 Z M0,25 L20,25 L20,45 L0,45 Z M25,25 L45,25 L45,45 L25,45 Z" fill="white" opacity="0.15"/>
+  </g>
+  
+  <!-- Star icon -->
+  <g transform="translate(1600, 100)">
+    <path d="M25,5 L30,20 L45,20 L33,30 L38,45 L25,35 L12,45 L17,30 L5,20 L20,20 Z" fill="white" opacity="0.2"/>
+  </g>
+  
+  <!-- Wave at bottom -->
+  <path d="M0,350 C320,330 640,370 960,350 C1280,330 1600,370 1920,350 L1920,400 L0,400 Z" fill="white" opacity="0.1"/>
+</svg>

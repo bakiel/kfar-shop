@@ -1,0 +1,26 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#4A148C"/>
+  
+  <!-- Inner decorative circle -->
+  <circle cx="100" cy="100" r="85" fill="none" stroke="#7B1FA2" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Q Letter stylized -->
+  <g transform="translate(100,100)">
+    <!-- Main Q shape -->
+    <path d="M -30,-40 Q -40,-40 -40,-30 L -40,30 Q -40,40 -30,40 L 30,40 Q 40,40 40,30 L 40,-30 Q 40,-40 30,-40 L -30,-40 Z" 
+          fill="none" stroke="white" stroke-width="8"/>
+    <!-- Q tail -->
+    <line x1="25" y1="25" x2="45" y2="45" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Brand name -->
+  <text x="100" y="160" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">
+    QUINTESSENCE
+  </text>
+  
+  <!-- Tagline -->
+  <text x="100" y="175" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#FFB74D">
+    Live Cultures • Fermented Foods
+  </text>
+</svg>

@@ -1,0 +1,84 @@
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sun-gold: #ffbb00;
+  --earth-flame: #ff6600;
+  --leaf-green: #478c0b;
+  --forest-green: #3a3a1d;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Animation for badges */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+/* Badge specific styles */
+.new-store-badge {
+  background: linear-gradient(135deg, #ff6600 0%, #ffbb00 100%);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Accessibility improvements */
+.new-store-badge:focus {
+  outline: 2px solid #ff6600;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .new-store-badge {
+    background: #ff0000;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Vendor card hover effects */
+.vendor-card {
+  transition: all 0.3s ease;
+}
+
+.vendor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Demo mode override for test pages */
+.test-page-no-demo {
+  --demo-display: none !important;
+}

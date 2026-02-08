@@ -1,0 +1,28 @@
+{
+  "name": "KFAR Marketplace",
+  "short_name": "KFAR",
+  "description": "Authentic vegan products and services from the Village of Peace",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#10b981",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/images/logos/kfar_icon_leaf_green.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/images/logos/kfar_icon_leaf_green.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}
