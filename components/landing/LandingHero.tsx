@@ -588,12 +588,12 @@ export default function LandingHero({
             </motion.div>
 
             {/* CTA buttons */}
-            <motion.div variants={staggerItem} className="flex flex-col xs:flex-row flex-wrap gap-3">
-              <Link href="/marketplace" className="flex-1 xs:flex-initial">
+            <motion.div variants={staggerItem} className="flex flex-col sm:flex-row flex-wrap gap-3">
+              <Link href="/marketplace">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 py-3.5 sm:py-3 rounded-full bg-kfar-mint text-white font-semibold shadow-glow-green hover:bg-kfar-mint-dark transition-colors cursor-pointer text-sm sm:text-base"
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full bg-kfar-mint text-white font-semibold shadow-glow-green hover:bg-kfar-mint-dark transition-colors cursor-pointer text-sm sm:text-base"
                 >
                   <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
                   {t('Shop Now')}
@@ -601,11 +601,11 @@ export default function LandingHero({
                 </motion.span>
               </Link>
 
-              <Link href="/vendors" className="flex-1 xs:flex-initial">
+              <Link href="/vendors">
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center gap-2 w-full xs:w-auto px-6 py-3.5 sm:py-3 rounded-full border-2 border-kfar-gold text-kfar-gold-dark font-semibold hover:bg-kfar-gold/10 transition-colors cursor-pointer text-sm sm:text-base"
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full border-2 border-kfar-gold text-kfar-gold-dark font-semibold hover:bg-kfar-gold/10 transition-colors cursor-pointer text-sm sm:text-base"
                 >
                   <Store className="w-5 h-5 stroke-[1.5]" />
                   {t('Explore Vendors')}
