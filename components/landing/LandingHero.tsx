@@ -533,7 +533,7 @@ export default function LandingHero({
             variants={staggerContainer}
             initial="hidden"
             animate="show"
-            className="order-1 lg:order-1 flex flex-col gap-4 sm:gap-6"
+            className="order-1 lg:order-1 flex flex-col gap-4 sm:gap-6 min-w-0"
           >
             {/* Heritage badges */}
             <motion.div variants={staggerItem} className="flex flex-wrap gap-2">
@@ -615,7 +615,7 @@ export default function LandingHero({
           </motion.div>
 
           {/* ------ RIGHT column: Spotlight + Bento product grid ------ */}
-          <div className="order-2 lg:order-2">
+          <div className="order-2 lg:order-2 min-w-0">
             {/* Desktop: spotlight + bento */}
             <div className="hidden sm:grid grid-cols-2 gap-3">
               {spotlightProduct && (
