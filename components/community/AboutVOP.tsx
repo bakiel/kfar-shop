@@ -149,7 +149,7 @@ export default function AboutVOP({ audience = 'all', compact = false }: AboutVOP
           
           <div className="relative h-64 md:h-auto">
             <Image
-              src="/images/community/village_of_peace_community_authentic_dimona_israel_50.jpg"
+              src="/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_50.jpg"
               alt="Village of Peace Community"
               fill
               className="object-cover"

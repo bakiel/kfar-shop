@@ -81,19 +81,19 @@ export default function TourismPage() {
       name: 'Community Guesthouse',
       price: '₪200/night',
       features: ['Private room', 'Shared kitchen', 'Community meals', 'WiFi'],
-      image: '/images/community/village_of_peace_community_authentic_dimona_israel_17.jpg'
+      image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_17.jpg'
     },
     {
       name: 'Family Homestay',
       price: '₪150/night',
       features: ['Family integration', 'Home-cooked meals', 'Cultural immersion', 'Language practice'],
-      image: '/images/community/village_of_peace_community_authentic_dimona_israel_30.jpg'
+      image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_30.jpg'
     },
     {
       name: 'Desert Camping',
       price: '₪80/night',
       features: ['Eco-camping', 'Desert views', 'Campfire gatherings', 'Star gazing'],
-      image: '/images/community/village_of_peace_community_authentic_dimona_israel_40.jpg'
+      image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_40.jpg'
     }
   ];
 
@@ -105,7 +105,7 @@ export default function TourismPage() {
         <div 
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: `url('/images/community/village_of_peace_community_authentic_dimona_israel_50.jpg')`,
+            backgroundImage: `url('/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_50.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
@@ -194,7 +194,7 @@ export default function TourismPage() {
                 <div 
                   className="h-48 bg-cover bg-center"
                   style={{ 
-                    backgroundImage: `url('/images/community/village_of_peace_community_authentic_dimona_israel_${
+                    backgroundImage: `url('/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_${
                       key === 'heritage' ? '14' : key === 'cooking' ? '18' : key === 'farm' ? '25' : '45'
                     }.jpg')` 
                   }}

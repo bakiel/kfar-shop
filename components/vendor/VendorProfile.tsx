@@ -18,27 +18,27 @@ interface VendorProfileProps {
 const vendorOwners: Record<string, { name: string; image: string; bio: string }> = {
   'teva-deli': {
     name: 'Immanuel Rivers',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_07.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_07.jpg',
     bio: 'Founded Teva Deli 15 years ago to bring authentic plant-based alternatives to traditional Israeli favorites.'
   },
   'queens-cuisine': {
     name: 'Koliyah Baht-Israel',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_06.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_06.jpg',
     bio: 'Master chef specializing in Middle Eastern vegan cuisine, bringing 20+ years of culinary expertise.'
   },
   'gahn-delight': {
     name: 'Ahmeeteeyah Cohen',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_04.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_04.jpg',
     bio: 'Artisan ice cream maker creating unique dairy-free frozen desserts with love and creativity.'
   },
   'people-store': {
     name: 'Nathaniel Ben-Israel',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_10.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_10.jpg',
     bio: 'Managing the People Store for over a decade, sourcing the finest organic products for our community.'
   },
   'garden-of-light': {
     name: 'Elishai Young',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_03.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_03.jpg',
     bio: 'Holistic nutrition expert bringing healing through food with premium vegan deli selections.'
   }
 };

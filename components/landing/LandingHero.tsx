@@ -6,17 +6,15 @@ import {
   useReducedMotion,
   useSpring,
   useInView,
-  useScroll,
-  useTransform,
   useMotionValue,
   useMotionTemplate,
+  AnimatePresence,
 } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowRight,
   ShoppingBag,
-  Star,
   Users,
   Package,
   Store,
@@ -25,7 +23,6 @@ import {
   MapPin,
   Gift,
   Leaf,
-  ChevronRight,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import type {
@@ -117,261 +114,86 @@ function FulfillmentToggle({
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Hero spotlight card (first product, larger)                               */
+/*  Rotating hero images                                                       */
 /* -------------------------------------------------------------------------- */
 
-function HeroSpotlightCard({
-  product,
-  shouldReduceMotion,
-}: {
-  product: LandingProduct;
-  shouldReduceMotion: boolean | null;
-}) {
-  const { t, language } = useLanguage();
-  const displayName =
-    language === 'he' && product.nameHe ? product.nameHe : product.name;
-  const cardRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ['start end', 'end start'],
-  });
-  const imageY = useTransform(scrollYProgress, [0, 1], ['-5%', '5%']);
+const heroImages = [
+  {
+    src: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_03.jpg',
+    alt: 'Community members at the Village of Peace market',
+  },
+  {
+    src: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_02.jpg',
+    alt: 'Young dancers in vibrant red and black at the Village of Peace',
+  },
+  {
+    src: '/images/community/food/1.jpg',
+    alt: 'Fresh plant-based food from KFAR vendors',
+  },
+  {
+    src: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_65.jpg',
+    alt: 'Happy children of the Village of Peace community',
+  },
+  {
+    src: '/images/community/agriculture/1.jpg',
+    alt: 'Organic farming at the Village of Peace',
+  },
+  {
+    src: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_66.jpg',
+    alt: 'Women dancing joyfully at a Village of Peace celebration',
+  },
+];
+
+function RotatingHeroImage({ shouldReduceMotion }: { shouldReduceMotion: boolean | null }) {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [shouldReduceMotion]);
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-      whileHover={
-        shouldReduceMotion
-          ? {}
-          : { y: -8, boxShadow: '0 30px 60px -15px rgba(0,0,0,0.15)' }
-      }
-      className="group cursor-pointer col-span-2"
-    >
-      <Link href={`/product/${product.id}`}>
-        <div className="relative bg-white rounded-2xl overflow-hidden shadow-medium hover:shadow-strong transition-shadow duration-300 border border-kfar-cream">
-          <div className="relative h-56 sm:h-64 overflow-hidden bg-kfar-cream">
-            <motion.div className="absolute inset-0" style={{ y: imageY }}>
-              <Image
-                src={product.image}
-                alt={displayName}
-                fill
-                sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
-                priority
-              />
-            </motion.div>
-            {product.badge && (
-              <span className="absolute top-3 start-3 px-3 py-1 rounded-full bg-earth-flame text-white text-xs font-bold tracking-wide z-10">
-                {product.badge}
-              </span>
-            )}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="absolute bottom-3 end-3 w-10 h-10 bg-kfar-mint rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer z-10"
-              aria-label={t('Add to Cart')}
-            >
-              <ShoppingBag className="w-5 h-5 text-white stroke-[1.5]" />
-            </motion.div>
-          </div>
-          <div className="p-4">
-            <p className="text-xs text-gray-400 font-medium mb-1 truncate">
-              {product.vendorName}
-            </p>
-            <h4 className="font-bold text-soil-brown text-base leading-tight line-clamp-1 group-hover:text-kfar-mint transition-colors">
-              {displayName}
-            </h4>
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-kfar-mint font-bold text-lg">
-                  {'\u20AA'}{product.price}
-                </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-gray-400 line-through text-sm">
-                    {'\u20AA'}{product.originalPrice}
-                  </span>
-                )}
-              </div>
-              {product.rating && (
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 fill-sun-gold text-sun-gold stroke-[1.5]" />
-                  <span className="text-sm text-gray-500 font-medium">
-                    {product.rating.toFixed(1)}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
-  );
-}
+    <div className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-strong">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="absolute inset-0"
+        >
+          <Image
+            src={heroImages[current].src}
+            alt={heroImages[current].alt}
+            fill
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover"
+            priority={current === 0}
+          />
+          {/* Subtle gradient overlay for polish */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+        </motion.div>
+      </AnimatePresence>
 
-/* -------------------------------------------------------------------------- */
-/*  Bento product card (for the right-side grid)                              */
-/* -------------------------------------------------------------------------- */
-
-function BentoProductCard({
-  product,
-  index,
-  shouldReduceMotion,
-  isRTL,
-  isPriority,
-}: {
-  product: LandingProduct;
-  index: number;
-  shouldReduceMotion: boolean | null;
-  isRTL: boolean;
-  isPriority?: boolean;
-}) {
-  const { t, language } = useLanguage();
-  const displayName =
-    language === 'he' && product.nameHe ? product.nameHe : product.name;
-
-  return (
-    <motion.div
-      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        delay: 0.7 + index * 0.1,
-        duration: 0.5,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-      whileHover={
-        shouldReduceMotion
-          ? {}
-          : { y: -8, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.12)' }
-      }
-      className="group cursor-pointer"
-    >
-      <Link href={`/product/${product.id}`}>
-        <div className="relative bg-white rounded-2xl overflow-hidden shadow-soft hover:shadow-strong transition-shadow duration-300 border border-kfar-cream">
-          <div className="relative h-36 sm:h-44 overflow-hidden bg-kfar-cream">
-            <Image
-              src={product.image}
-              alt={displayName}
-              fill
-              sizes="(max-width: 640px) 50vw, 25vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              priority={isPriority}
-            />
-            {product.badge && (
-              <span className="absolute top-2 start-2 px-2 py-0.5 rounded-full bg-earth-flame text-white text-[11px] font-bold tracking-wide">
-                {product.badge}
-              </span>
-            )}
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="absolute bottom-2 end-2 w-9 h-9 bg-kfar-mint rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md cursor-pointer"
-              aria-label={t('Add to Cart')}
-            >
-              <ShoppingBag className="w-4 h-4 text-white stroke-[1.5]" />
-            </motion.div>
-          </div>
-          <div className="p-3">
-            <p className="text-[11px] text-gray-400 font-medium mb-0.5 truncate">
-              {product.vendorName}
-            </p>
-            <h4 className="font-bold text-soil-brown text-sm leading-tight line-clamp-1 group-hover:text-kfar-mint transition-colors">
-              {displayName}
-            </h4>
-            <div className="flex items-center justify-between mt-1.5">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-kfar-mint font-bold text-base">
-                  {'\u20AA'}{product.price}
-                </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-gray-400 line-through text-xs">
-                    {'\u20AA'}{product.originalPrice}
-                  </span>
-                )}
-              </div>
-              {product.rating && (
-                <div className="flex items-center gap-0.5">
-                  <Star className="w-3.5 h-3.5 fill-sun-gold text-sun-gold stroke-[1.5]" />
-                  <span className="text-xs text-gray-500 font-medium">
-                    {product.rating.toFixed(1)}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Vendor logo ticker (auto-scrolling)                                       */
-/* -------------------------------------------------------------------------- */
-
-function VendorLogoTicker({
-  vendors,
-  isRTL,
-}: {
-  vendors: LandingVendor[];
-  isRTL: boolean;
-}) {
-  const doubled = [...vendors, ...vendors];
-
-  return (
-    <div className="relative overflow-hidden py-4">
-      <div
-        className="absolute inset-y-0 start-0 w-16 z-10 pointer-events-none"
-        style={{
-          background: `linear-gradient(${isRTL ? 'to left' : 'to right'}, #FDFBF7, transparent)`,
-        }}
-      />
-      <div
-        className="absolute inset-y-0 end-0 w-16 z-10 pointer-events-none"
-        style={{
-          background: `linear-gradient(${isRTL ? 'to right' : 'to left'}, #FDFBF7, transparent)`,
-        }}
-      />
-
-      <motion.div
-        className="flex gap-8 items-center"
-        animate={{
-          x: isRTL ? ['0%', '50%'] : ['0%', '-50%'],
-        }}
-        transition={{
-          x: {
-            repeat: Infinity,
-            repeatType: 'loop',
-            duration: 30,
-            ease: 'linear',
-          },
-        }}
-      >
-        {doubled.map((vendor, i) => (
-          <Link
-            key={`${vendor.id}-${i}`}
-            href={`/vendor/${vendor.slug}`}
-            className="flex-shrink-0 cursor-pointer group"
-          >
-            <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/80 border border-kfar-cream hover:border-kfar-gold/40 transition-colors">
-              <div className="relative w-8 h-8 rounded-full overflow-hidden bg-kfar-cream flex-shrink-0">
-                <Image
-                  src={vendor.logo}
-                  alt={vendor.name}
-                  fill
-                  sizes="32px"
-                  className="object-cover"
-                />
-              </div>
-              <span className="text-sm font-semibold text-soil-brown whitespace-nowrap group-hover:text-kfar-mint transition-colors">
-                {vendor.name}
-              </span>
-            </div>
-          </Link>
+      {/* Image dots indicator */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+        {heroImages.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
+              i === current
+                ? 'bg-white w-5'
+                : 'bg-white/50 hover:bg-white/70'
+            }`}
+            aria-label={`View image ${i + 1}`}
+          />
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -442,17 +264,11 @@ const staggerItem = {
 /* -------------------------------------------------------------------------- */
 
 export default function LandingHero({
-  featuredProducts,
-  vendors,
   stats,
 }: LandingHeroProps) {
   const { language, t, isRTL } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
   const [fulfillment, setFulfillment] = useState<FulfillmentMode>('delivery');
-
-  /* First product is the spotlight; rest go to bento grid */
-  const spotlightProduct = featuredProducts[0];
-  const bentoProducts = featuredProducts.slice(1, 6);
 
   /* Stat tiles */
   const statTiles = [
@@ -526,8 +342,8 @@ export default function LandingHero({
       </motion.div>
 
       {/* ---- Main hero content ---- */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-16 relative">
-        <div className="grid lg:grid-cols-2 gap-6 sm:gap-10 lg:gap-14 items-start">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 relative">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-14 items-center">
           {/* ------ LEFT column: text ------ */}
           <motion.div
             variants={staggerContainer}
@@ -547,7 +363,7 @@ export default function LandingHero({
               </span>
             </motion.div>
 
-            {/* Headline — bigger, split into two lines */}
+            {/* Headline */}
             <motion.h1
               variants={staggerItem}
               className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.08] text-soil-brown"
@@ -614,56 +430,17 @@ export default function LandingHero({
             </motion.div>
           </motion.div>
 
-          {/* ------ RIGHT column: Spotlight + Bento product grid ------ */}
-          <div className="order-2 lg:order-2 min-w-0">
-            {/* Desktop: spotlight + bento */}
-            <div className="hidden sm:grid grid-cols-2 gap-3">
-              {spotlightProduct && (
-                <HeroSpotlightCard
-                  product={spotlightProduct}
-                  shouldReduceMotion={shouldReduceMotion}
-                />
-              )}
-              {bentoProducts.map((product, i) => (
-                <BentoProductCard
-                  key={product.id}
-                  product={product}
-                  index={i}
-                  shouldReduceMotion={shouldReduceMotion}
-                  isRTL={isRTL}
-                  isPriority={i === 0}
-                />
-              ))}
+          {/* ------ RIGHT column: Rotating hero image ------ */}
+          <motion.div
+            className="order-2 lg:order-2 min-w-0"
+            initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <div className="relative h-[280px] sm:h-[360px] lg:h-[420px]">
+              <RotatingHeroImage shouldReduceMotion={shouldReduceMotion} />
             </div>
-
-            {/* Mobile: horizontal scroll */}
-            <div className="sm:hidden -mx-4 px-4">
-              <div
-                className="flex gap-3 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
-                style={{ WebkitOverflowScrolling: 'touch' }}
-              >
-                {featuredProducts.slice(0, 6).map((product, i) => (
-                  <div
-                    key={product.id}
-                    className="flex-shrink-0 w-[62vw] max-w-[240px] snap-start"
-                  >
-                    <BentoProductCard
-                      product={product}
-                      index={i}
-                      shouldReduceMotion={shouldReduceMotion}
-                      isRTL={isRTL}
-                    />
-                  </div>
-                ))}
-              </div>
-              {/* Scroll hint */}
-              <div className="flex justify-center gap-1.5 mt-2">
-                {featuredProducts.slice(0, 6).map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full ${i === 0 ? 'bg-kfar-mint' : 'bg-gray-300'}`} />
-                ))}
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* ---- Glassmorphism stats strip ---- */}
@@ -681,7 +458,7 @@ export default function LandingHero({
                   key={s.label}
                   className="flex items-center gap-3"
                 >
-                  <div className={`w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center shadow-sm`}>
+                  <div className="w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center shadow-sm">
                     <Icon className={`w-5 h-5 ${s.color} stroke-[1.5]`} />
                   </div>
                   <div>
@@ -697,11 +474,6 @@ export default function LandingHero({
             })}
           </div>
         </motion.div>
-
-        {/* ---- Vendor logo ticker ---- */}
-        <div className="mt-6 border-t border-kfar-cream pt-2">
-          <VendorLogoTicker vendors={vendors} isRTL={isRTL} />
-        </div>
       </div>
     </section>
   );

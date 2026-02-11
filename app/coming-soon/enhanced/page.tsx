@@ -11,7 +11,7 @@ export default function EnhancedComingSoonPage() {
   const [selectedVendor, setSelectedVendor] = useState(0);
 
   // Community images slideshow
-  const communityImages = Array.from({ length: 27 }, (_, i) => `/images/community/${i + 1}.jpg`);
+  const communityImages = Array.from({ length: 25 }, (_, i) => `/images/community/${i + 1}.jpg`);
 
   // Vendor preview data
   const vendors = [

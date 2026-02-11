@@ -206,7 +206,7 @@ export const reviewAuthors: ReviewAuthor[] = [
   {
     id: 'auth-022',
     name: 'Lisa Anderson',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_22.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_19.jpg',
     location: 'Sydney, Australia',
     memberType: 'visitor',
     verified: true

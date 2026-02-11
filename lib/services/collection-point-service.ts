@@ -536,7 +536,7 @@ export class CollectionPointService {
         phone: '+972-50-345-6789'
       },
       images: {
-        main: '/images/community/plaza.jpg',
+        main: '/images/community/5.jpg',
         gallery: []
       },
       stats: {

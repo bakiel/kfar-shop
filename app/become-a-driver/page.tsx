@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { Truck, Clock, Users, DollarSign, MapPin, ArrowRight, CheckCircle } from 'lucide-react';
 import EnhancedLayout from '@/components/layout/EnhancedLayout';
 import { useLanguage } from '@/lib/context/LanguageContext';
@@ -61,12 +62,15 @@ export default function BecomeADriverPage() {
         {/* Hero Section */}
         <section
           className="relative py-24 md:py-32 text-white overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #478c0b 0%, #2D5A27 60%, #3a3a1d 100%)' }}
         >
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-64 h-64 rounded-full bg-[#f6af0d] blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-48 h-48 rounded-full bg-[#478c0b] blur-3xl" />
-          </div>
+          <Image
+            src="/images/community/delivery_driver_2.jpg"
+            alt="KFAR delivery driver handing fresh produce to a family"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2D5A27]/95 via-[#2D5A27]/70 to-[#478c0b]/50" />
           <motion.div
             className="container mx-auto px-4 relative z-10 text-center"
             variants={container}

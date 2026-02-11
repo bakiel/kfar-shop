@@ -193,7 +193,7 @@ export const serviceProviders: ServiceProvider[] = [
     description: "30+ years experience in traditional woodworking and modern construction",
     rating: 5,
     reviews: 47,
-    image: "/images/community/service-provider-1.jpg"
+    image: "/images/community/10.jpg"
   },
   {
     id: "miriam",
@@ -203,7 +203,7 @@ export const serviceProviders: ServiceProvider[] = [
     description: "Natural healing, herbal medicine, and spiritual wellness guidance",
     rating: 5,
     reviews: 63,
-    image: "/images/community/service-provider-2.jpg"
+    image: "/images/community/11.jpg"
   },
   {
     id: "david",
@@ -213,7 +213,7 @@ export const serviceProviders: ServiceProvider[] = [
     description: "Biblical Hebrew and modern Hebrew instruction for all levels",
     rating: 5,
     reviews: 28,
-    image: "/images/community/service-provider-3.jpg"
+    image: "/images/community/12.jpg"
   }
 ];
 

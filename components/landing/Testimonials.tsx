@@ -54,7 +54,7 @@ const testimonials = [
     roleHe: 'אם צעירה',
     quoteEn: 'Having delivery right to my door is amazing. With two little ones, KFAR saves me so much time while supporting our vendors.',
     quoteHe: 'משלוח ישירות לדלת זה מדהים. עם שני ילדים קטנים, כפר חוסך לי המון זמן תוך תמיכה בספקים שלנו.',
-    avatar: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_22.jpg',
+    avatar: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_19.jpg',
     rating: 5,
     date: '2024-12',
     borderColor: 'border-l-leaf-green',

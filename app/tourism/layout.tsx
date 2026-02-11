@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Visit Village of Peace - Authentic Cultural Tourism",
     description: "Immerse yourself in 55 years of heritage, taste delicious vegan cuisine, and experience sustainable living in Israel's most unique community.",
-    images: ['/images/community/village_of_peace_community_authentic_dimona_israel_14.jpg'],
+    images: ['/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_14.jpg'],
   },
 };
 

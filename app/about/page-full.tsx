@@ -175,7 +175,7 @@ const AboutPage = () => {
                 </div>
                 <div className="relative h-96 rounded-2xl overflow-hidden">
                   <Image
-                    src="/images/community/village_of_peace_community_authentic_dimona_israel_20.jpg" 
+                    src="/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_20.jpg" 
                     alt="Community Life" 
                     fill
                     className="object-cover"
@@ -270,7 +270,7 @@ const AboutPage = () => {
               {[
                 {
                   title: 'Heritage Walking Tour',
-                  image: '/images/community/village_of_peace_community_authentic_dimona_israel_14.jpg',
+                  image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_14.jpg',
                   description: 'Explore 55+ years of VOP history with community elders sharing authentic stories and traditions.',
                   price: '₪120',
                   duration: '3 hours',
@@ -278,7 +278,7 @@ const AboutPage = () => {
                 },
                 {
                   title: 'Vegan Cooking Workshop',
-                  image: '/images/community/village_of_peace_community_authentic_dimona_israel_15.jpg',
+                  image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_15.jpg',
                   description: 'Learn traditional vegan recipes and modern techniques from community chefs.',
                   price: '₪180',
                   duration: '4 hours',
@@ -286,7 +286,7 @@ const AboutPage = () => {
                 },
                 {
                   title: 'Organic Farm Experience',
-                  image: '/images/community/village_of_peace_community_authentic_dimona_israel_16.jpg',
+                  image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_16.jpg',
                   description: 'Work alongside community farmers and learn sustainable agriculture practices.',
                   price: '₪150',
                   duration: '5 hours',
@@ -328,9 +328,9 @@ const AboutPage = () => {
               <h3 className="text-3xl font-bold mb-6 text-center" style={{ color: '#3a3a1d' }}>Accommodation Options</h3>
               <div className="grid md:grid-cols-3 gap-6">
                 {[
-                  { type: 'Community Guesthouse', description: 'Comfortable rooms within the village community', price: '₪200/night', image: '/images/community/village_of_peace_community_authentic_dimona_israel_17.jpg' },
-                  { type: 'Family Homestay', description: 'Stay with VOP families for authentic experience', price: '₪150/night', image: '/images/community/village_of_peace_community_authentic_dimona_israel_18.jpg' },
-                  { type: 'Desert Camping', description: 'Eco-friendly camping under the stars', price: '₪80/night', image: '/images/community/village_of_peace_community_authentic_dimona_israel_19.jpg' }
+                  { type: 'Community Guesthouse', description: 'Comfortable rooms within the village community', price: '₪200/night', image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_17.jpg' },
+                  { type: 'Family Homestay', description: 'Stay with VOP families for authentic experience', price: '₪150/night', image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_18.jpg' },
+                  { type: 'Desert Camping', description: 'Eco-friendly camping under the stars', price: '₪80/night', image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_19.jpg' }
                 ].map((option, index) => (
                   <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300">
                     <div className="relative h-32">
@@ -624,7 +624,7 @@ const AboutPage = () => {
                 </div>
                 <div className="relative h-64 rounded-2xl overflow-hidden">
                   <Image
-                    src="/images/community/village_of_peace_community_authentic_dimona_israel_21.jpg" 
+                    src="/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_21.jpg" 
                     alt="Cultural Exchange" 
                     fill
                     className="object-cover"
