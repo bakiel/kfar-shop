@@ -3,9 +3,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Truck, Clock, Users, DollarSign, MapPin, ArrowRight, CheckCircle } from 'lucide-react';
+import { Truck, Clock, Users, DollarSign, MapPin, ArrowRight, CheckCircle, FileText } from 'lucide-react';
 import EnhancedLayout from '@/components/layout/EnhancedLayout';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import DriverApplicationForm from '@/components/delivery/DriverApplicationForm';
 import '@/styles/kfar-style-system.css';
 
 const container = {
@@ -18,7 +19,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const } }
 };
 
 const benefits = [
@@ -53,8 +54,12 @@ const requirements = [
   { en: 'Knowledge of Dimona and surrounding areas', he: 'היכרות עם דימונה והסביבה' }
 ];
 
+function scrollToForm() {
+  document.getElementById('application-form')?.scrollIntoView({ behavior: 'smooth' });
+}
+
 export default function BecomeADriverPage() {
-  const { language, t, isRTL } = useLanguage();
+  const { language, isRTL } = useLanguage();
 
   return (
     <EnhancedLayout>
@@ -88,9 +93,9 @@ export default function BecomeADriverPage() {
                 ? 'הצטרף לצוות המשלוחים שלנו ועזור להביא מוצרים טריים לקהילה'
                 : 'Join our delivery team and help bring fresh products to the community'}
             </motion.p>
-            <motion.a
+            <motion.button
               variants={item}
-              href="mailto:drivers@kfrmarketplace.com?subject=Driver%20Application"
+              onClick={scrollToForm}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-lg cursor-pointer"
               style={{ background: '#f6af0d', color: '#3a3a1d' }}
               whileHover={{ scale: 1.02, boxShadow: '0 10px 30px rgba(246,175,13,0.4)' }}
@@ -98,7 +103,7 @@ export default function BecomeADriverPage() {
             >
               {language === 'he' ? 'הגש מועמדות עכשיו' : 'Apply Now'}
               <ArrowRight className="w-5 h-5 stroke-[1.5]" />
-            </motion.a>
+            </motion.button>
           </motion.div>
         </section>
 
@@ -236,6 +241,32 @@ export default function BecomeADriverPage() {
           </div>
         </section>
 
+        {/* Application Form Section */}
+        <section id="application-form" className="py-16 md:py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <motion.div
+              className="text-center mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[#478c0b]/10 mb-4">
+                <FileText className="w-7 h-7 stroke-[1.5] text-[#478c0b]" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#3a3a1d] mb-3">
+                {language === 'he' ? 'טופס הגשת מועמדות' : 'Application Form'}
+              </h2>
+              <p className="text-[#3a3a1d]/60 max-w-xl mx-auto">
+                {language === 'he'
+                  ? 'מלא את הטופס ונחזור אליך תוך 2-3 ימי עסקים'
+                  : 'Fill out the form and we\'ll get back to you within 2-3 business days'}
+              </p>
+            </motion.div>
+            <DriverApplicationForm />
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-16 md:py-24" style={{ background: 'linear-gradient(135deg, #478c0b, #2D5A27)' }}>
           <motion.div
@@ -254,8 +285,8 @@ export default function BecomeADriverPage() {
                 ? 'הצטרף לצוות הנהגים שלנו היום והתחל להרוויח תוך שירות הקהילה'
                 : 'Join our driver team today and start earning while serving the community'}
             </p>
-            <motion.a
-              href="mailto:drivers@kfrmarketplace.com?subject=Driver%20Application"
+            <motion.button
+              onClick={scrollToForm}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-lg cursor-pointer"
               style={{ background: '#f6af0d', color: '#3a3a1d' }}
               whileHover={{ scale: 1.02 }}
@@ -263,7 +294,7 @@ export default function BecomeADriverPage() {
             >
               {language === 'he' ? 'הגש מועמדות עכשיו' : 'Apply Now'}
               <ArrowRight className="w-5 h-5 stroke-[1.5]" />
-            </motion.a>
+            </motion.button>
           </motion.div>
         </section>
       </div>
