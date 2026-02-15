@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { query, transaction } from '@/lib/db/postgres-client';
+import { sendTransactional } from '@/lib/services/email/email-service';
 
 // Types
 export interface AuthUser {
@@ -23,6 +25,7 @@ export interface LoginResult {
   user?: AuthUser;
   tokens?: TokenPair;
   error?: string;
+  message?: string;
 }
 
 // Secrets - MUST be set via environment variables (no fallback)
@@ -91,7 +94,7 @@ export function verifyRefreshToken(token: string): { userId: string } | null {
 export async function login(email: string, password: string): Promise<LoginResult> {
   try {
     const { rows } = await query<any>(
-      'SELECT id, email, password_hash, role, vendor_id, customer_id, display_name, is_active FROM users WHERE email = $1',
+      'SELECT id, email, password_hash, role, vendor_id, customer_id, display_name, is_active, email_verified FROM users WHERE email = $1',
       [email.toLowerCase().trim()]
     );
 
@@ -108,6 +111,11 @@ export async function login(email: string, password: string): Promise<LoginResul
     const passwordValid = await bcrypt.compare(password, dbUser.password_hash);
     if (!passwordValid) {
       return { success: false, error: 'Invalid email or password' };
+    }
+
+    // Customers must verify email before logging in (admin/vendor pre-verified)
+    if (dbUser.role === 'customer' && !dbUser.email_verified) {
+      return { success: false, error: 'Please verify your email before logging in. Check your inbox for the verification link.' };
     }
 
     const user: AuthUser = {
@@ -160,6 +168,9 @@ export async function registerCustomer(data: {
 
     const passwordHash = await bcrypt.hash(data.password, 10);
 
+    // Generate email verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
     const result = await transaction(async (client) => {
       // Create customer record
       const { rows: customerRows } = await client.query(
@@ -170,12 +181,12 @@ export async function registerCustomer(data: {
       );
       const customerId = customerRows[0].id;
 
-      // Create user record
+      // Create user record (email_verified = false, store verification token)
       const { rows: userRows } = await client.query(
-        `INSERT INTO users (email, password_hash, role, customer_id, display_name)
-         VALUES ($1, $2, 'customer', $3, $4)
+        `INSERT INTO users (email, password_hash, role, customer_id, display_name, email_verified, verification_token, verification_token_expires)
+         VALUES ($1, $2, 'customer', $3, $4, false, $5, NOW() + INTERVAL '24 hours')
          RETURNING id, email, role, customer_id, display_name, is_active`,
-        [data.email.toLowerCase().trim(), passwordHash, customerId, data.name]
+        [data.email.toLowerCase().trim(), passwordHash, customerId, data.name, verificationToken]
       );
       const dbUser = userRows[0];
 
@@ -196,28 +207,17 @@ export async function registerCustomer(data: {
       return dbUser;
     });
 
-    const user: AuthUser = {
-      id: result.id,
-      email: result.email,
-      role: result.role,
-      customerId: result.customer_id,
-      displayName: result.display_name || data.name,
-      isActive: true,
-    };
-
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    await query(
-      `INSERT INTO user_sessions (user_id, refresh_token, expires_at)
-       VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
-      [user.id, refreshToken]
-    );
+    // Send verification email (fire-and-forget)
+    const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com'}/api/auth/verify?token=${verificationToken}`;
+    sendTransactional(data.email.toLowerCase().trim(), 'welcome', {
+      customer_name: data.name,
+      verification_url: verifyUrl,
+      verification_link: `<a href="${verifyUrl}" style="display:inline-block;padding:12px 24px;background:#2D5A27;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;">Verify Email</a>`,
+    }).catch(err => console.error('Failed to send verification email:', err));
 
     return {
       success: true,
-      user,
-      tokens: { accessToken, refreshToken },
+      message: 'Registration successful. Please check your email to verify your account.',
     };
   } catch (error) {
     console.error('Registration error:', error);
@@ -324,6 +324,159 @@ export async function getUserById(userId: string): Promise<AuthUser | null> {
     };
   } catch {
     return null;
+  }
+}
+
+// Verify email with token
+export async function verifyEmail(token: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { rows } = await query<any>(
+      `SELECT id, email_verified FROM users WHERE verification_token = $1 AND verification_token_expires > NOW()`,
+      [token]
+    );
+
+    if (rows.length === 0) {
+      return { success: false, error: 'Invalid or expired verification link. Please register again.' };
+    }
+
+    if (rows[0].email_verified) {
+      return { success: true }; // Already verified
+    }
+
+    await query(
+      `UPDATE users SET email_verified = true, verification_token = NULL, verification_token_expires = NULL WHERE id = $1`,
+      [rows[0].id]
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error('Email verification error:', error);
+    return { success: false, error: 'Verification failed' };
+  }
+}
+
+// Request password reset - generates token and sends email
+export async function requestPasswordReset(email: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { rows } = await query<any>(
+      'SELECT id, display_name FROM users WHERE email = $1 AND is_active = true',
+      [email.toLowerCase().trim()]
+    );
+
+    // Always return success to prevent email enumeration
+    if (rows.length === 0) {
+      return { success: true };
+    }
+
+    const userId = rows[0].id;
+    const displayName = rows[0].display_name || 'Customer';
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // Invalidate any existing reset tokens for this user
+    await query(
+      'UPDATE password_reset_tokens SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL',
+      [userId]
+    );
+
+    // Create new reset token (1 hour expiry)
+    await query(
+      `INSERT INTO password_reset_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, NOW() + INTERVAL '1 hour')`,
+      [userId, resetToken]
+    );
+
+    // Send password reset email (fire-and-forget)
+    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com'}/reset-password?token=${resetToken}`;
+    sendTransactional(email.toLowerCase().trim(), 'status_update', {
+      customer_name: displayName,
+      subject: 'Password Reset Request',
+      status_message: 'Password Reset',
+      details_html: `
+        <p>We received a request to reset your password. Click the button below to set a new password:</p>
+        <p style="text-align:center;margin:24px 0;">
+          <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#2D5A27;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;">Reset Password</a>
+        </p>
+        <p style="color:#666;font-size:13px;">This link expires in 1 hour. If you did not request this, please ignore this email.</p>
+      `,
+    }).catch(err => console.error('Failed to send password reset email:', err));
+
+    return { success: true };
+  } catch (error) {
+    console.error('Password reset request error:', error);
+    return { success: false, error: 'Failed to process request' };
+  }
+}
+
+// Reset password with token
+export async function resetPassword(token: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Find valid token
+    const { rows } = await query<any>(
+      `SELECT id, user_id FROM password_reset_tokens
+       WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL`,
+      [token]
+    );
+
+    if (rows.length === 0) {
+      return { success: false, error: 'Invalid or expired reset link. Please request a new one.' };
+    }
+
+    const { id: tokenId, user_id: userId } = rows[0];
+
+    // Validate password
+    if (!newPassword || newPassword.length < 8) {
+      return { success: false, error: 'Password must be at least 8 characters' };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    // Update password and mark token as used
+    await query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, userId]);
+    await query('UPDATE password_reset_tokens SET used_at = NOW() WHERE id = $1', [tokenId]);
+
+    // Invalidate all sessions (force re-login with new password)
+    await query('DELETE FROM user_sessions WHERE user_id = $1', [userId]);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Password reset error:', error);
+    return { success: false, error: 'Password reset failed' };
+  }
+}
+
+// Resend verification email
+export async function resendVerification(email: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { rows } = await query<any>(
+      'SELECT id, display_name, email_verified FROM users WHERE email = $1',
+      [email.toLowerCase().trim()]
+    );
+
+    if (rows.length === 0) {
+      return { success: true }; // Don't reveal if email exists
+    }
+
+    if (rows[0].email_verified) {
+      return { success: false, error: 'Email is already verified. You can log in.' };
+    }
+
+    const newToken = crypto.randomBytes(32).toString('hex');
+    await query(
+      `UPDATE users SET verification_token = $1, verification_token_expires = NOW() + INTERVAL '24 hours' WHERE id = $2`,
+      [newToken, rows[0].id]
+    );
+
+    const verifyUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com'}/api/auth/verify?token=${newToken}`;
+    sendTransactional(email.toLowerCase().trim(), 'welcome', {
+      customer_name: rows[0].display_name || 'Customer',
+      verification_url: verifyUrl,
+      verification_link: `<a href="${verifyUrl}" style="display:inline-block;padding:12px 24px;background:#2D5A27;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;">Verify Email</a>`,
+    }).catch(err => console.error('Failed to resend verification email:', err));
+
+    return { success: true };
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    return { success: false, error: 'Failed to resend verification email' };
   }
 }
 

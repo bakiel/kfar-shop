@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
 import { sendTransactional } from '@/lib/services/email/email-service';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,6 +45,16 @@ interface OrderCreateBody {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit order creation
+    const ip = getClientIp(request.headers);
+    const limit = checkRateLimit(`order:${ip}`, RATE_LIMITS.order);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Too many orders. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil(limit.retryAfterMs / 1000)) } }
+      );
+    }
+
     const body: OrderCreateBody = await request.json();
 
     // Validate required fields
