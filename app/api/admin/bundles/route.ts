@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductById } from '@/lib/data/wordpress-style-data-layer';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 // In-memory mock bundles -- used as primary source and as fallback
 const mockBundles: any[] = [
@@ -71,9 +72,20 @@ function enrichBundle(bundle: any) {
   };
 }
 
+function requireAdmin(request: NextRequest) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  const user = token ? verifyAccessToken(token) : null;
+  if (!user || user.role !== 'admin') return null;
+  return user;
+}
+
 // GET -- list all bundles
 export async function GET(request: NextRequest) {
   try {
+    if (!requireAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const bundleId = searchParams.get('id');
@@ -145,6 +157,10 @@ export async function GET(request: NextRequest) {
 // POST -- create a new bundle
 export async function POST(request: NextRequest) {
   try {
+    if (!requireAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { name, nameHe, description, products, price, originalPrice, image, status } = body;
 
@@ -328,6 +344,9 @@ export async function PATCH(request: NextRequest) {
 // DELETE -- remove a bundle
 export async function DELETE(request: NextRequest) {
   try {
+    if (!requireAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

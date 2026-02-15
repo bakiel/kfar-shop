@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import { db, isDbAvailable } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 // Mock orders -- used as fallback when DB is unavailable
 const mockOrders = [
@@ -154,6 +155,12 @@ const VALID_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancel
 
 export async function GET(request: NextRequest) {
   try {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const vendorId = searchParams.get('vendorId');

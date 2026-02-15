@@ -82,15 +82,15 @@ export async function POST(request: NextRequest) {
       country: body.customer.country || 'Israel',
     });
 
-    // Create order
+    // Create order (columns match actual DB schema)
     const { rows: orderRows } = await query(
       `INSERT INTO orders (
         order_number, customer_name, customer_email, customer_phone,
-        total_amount, subtotal, delivery_fee, payment_method,
-        status, payment_status, delivery_method,
-        shipping_address, delivery_address, items, notes,
+        total, subtotal, delivery_fee, payment_method,
+        status, payment_status,
+        delivery_address, items, delivery_notes,
         created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
       RETURNING *`,
       [
         orderNumber,
@@ -103,8 +103,6 @@ export async function POST(request: NextRequest) {
         body.paymentMethod || 'cash',
         'pending',
         'pending',
-        body.deliveryMethod || 'pickup',
-        addressJson,
         addressJson,
         JSON.stringify(body.items),
         body.notes || null,
@@ -120,29 +118,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create order items
-    for (const item of body.items) {
-      try {
-        await query(
-          `INSERT INTO order_items (
-            order_id, product_name, quantity, unit_price, total_price, vendor_name
-          ) VALUES ($1, $2, $3, $4, $5, $6)`,
-          [
-            order.id,
-            item.name,
-            item.quantity,
-            item.price,
-            item.quantity * item.price,
-            item.vendorName || 'Unknown',
-          ]
-        );
-      } catch (itemError) {
-        console.error('Warning: Failed to save order item:', itemError);
-        // Non-critical - order is still valid
-      }
-    }
-
-    console.log('Order created:', orderNumber, 'ID:', order.id);
+    // Items are stored as JSONB in orders.items column (no separate order_items table)
+    console.log('Order created:', orderNumber, 'ID:', order.id, 'Items:', body.items.length);
 
     // --- Send email notifications (fire-and-forget, don't block response) ---
     const emailPromises: Promise<any>[] = [];
@@ -235,7 +212,7 @@ export async function POST(request: NextRequest) {
         orderNumber: order.order_number,
         status: order.status,
         paymentStatus: order.payment_status,
-        totalAmount: order.total_amount,
+        totalAmount: order.total,
         customerName: order.customer_name,
         customerEmail: order.customer_email,
         createdAt: order.created_at,

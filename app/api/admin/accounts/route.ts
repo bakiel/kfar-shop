@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import { db, isDbAvailable } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 // Mock customer data -- used when DB is unavailable
 const mockCustomers = [
@@ -112,6 +113,12 @@ const mockCustomers = [
 
 export async function GET(request: NextRequest) {
   try {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'customers', 'vendors', or null (both)
     const search = searchParams.get('search')?.toLowerCase();

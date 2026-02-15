@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { registerCustomer } from '@/lib/services/auth-service';
 import { sendTransactional } from '@/lib/services/email/email-service';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request.headers);
+    const limit = checkRateLimit(`register:${ip}`, RATE_LIMITS.register);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil(limit.retryAfterMs / 1000)) } }
+      );
+    }
+
     const { email, password, name, phone } = await request.json();
 
     if (!email || !password || !name) {

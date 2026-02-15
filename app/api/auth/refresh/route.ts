@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { refreshAccessToken } from '@/lib/services/auth-service';
+import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request.headers);
+    const limit = checkRateLimit(`refresh:${ip}`, RATE_LIMITS.refresh);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil(limit.retryAfterMs / 1000)) } }
+      );
+    }
+
     const refreshToken = request.cookies.get('refreshToken')?.value;
 
     if (!refreshToken) {
