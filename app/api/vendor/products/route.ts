@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     const { rows } = await query(
       `INSERT INTO products (
         id, vendor_id, name, name_he, description, description_he,
-        price, category, image, images, tags, status,
+        price, category, image_url, image_gallery, tags, status,
         stock_quantity, unit, view_count, created_at, updated_at
       ) VALUES (
         $1, $2, $3, $4, $5, $6,
@@ -133,8 +133,8 @@ export async function POST(request: NextRequest) {
         body.description_he || null,
         price,
         category,
-        body.image || null,
-        body.images ? JSON.stringify(body.images) : null,
+        body.image || body.image_url || null,
+        body.images || body.image_gallery ? `{${(body.images || body.image_gallery).join(',')}}` : null,
         body.tags ? JSON.stringify(body.tags) : null,
         body.status || 'draft',
         body.stock_quantity || 0,

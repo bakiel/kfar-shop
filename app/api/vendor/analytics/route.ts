@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
            p.id,
            p.name,
            p.price,
-           p.image,
+           p.image_url,
            COALESCE(p.view_count, 0) as views,
            COUNT(o.id) as order_appearances
          FROM products p
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
            AND o.items::text LIKE CONCAT('%', p.id, '%')
            AND o.status IN ('completed', 'ready', 'processing')
          WHERE p.vendor_id = $1 AND p.status != 'archived'
-         GROUP BY p.id, p.name, p.price, p.image, p.view_count
+         GROUP BY p.id, p.name, p.price, p.image_url, p.view_count
          ORDER BY order_appearances DESC, views DESC
          LIMIT 10`,
         [vendorId]
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
           id: row.id,
           name: row.name,
           price: parseFloat(row.price),
-          image: row.image,
+          image: row.image_url,
           views: parseInt(row.views),
           orderAppearances: parseInt(row.order_appearances),
         })),

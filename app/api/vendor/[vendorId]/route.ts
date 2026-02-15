@@ -80,7 +80,7 @@ export async function GET(
           nameHe: p.name_he || p.name,
           description: p.description,
           price: p.price,
-          image: p.image,
+          image: p.image_url,
           category: p.category,
           inStock: p.in_stock,
           isVegan: p.is_vegan,
