@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error('POST /api/auth/login error:', error);
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 }

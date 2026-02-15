@@ -11,7 +11,7 @@ export interface CRMCustomer {
   points: number;
   total_orders: number;
   total_spent: number;
-  last_order_date: string | null;
+  last_order_at: string | null;
   tags: string[];
   notes: string | null;
   addresses: any;
@@ -126,7 +126,7 @@ export async function getCustomers(opts: CustomerListOptions = {}) {
   const offset = (page - 1) * limit;
   const dataSql = `
     SELECT DISTINCT c.id, c.name, c.email, c.phone, c.loyalty_tier,
-           c.points, c.total_orders, c.total_spent, c.last_order_date,
+           c.points, c.total_orders, c.total_spent, c.last_order_at,
            c.tags, c.notes, c.addresses, c.created_at, c.updated_at
     FROM customers c
     ${segmentJoin}
@@ -151,7 +151,7 @@ export async function getCustomers(opts: CustomerListOptions = {}) {
 export async function getCustomerById(id: string): Promise<CRMCustomer | null> {
   const { rows } = await query<CRMCustomer>(
     `SELECT c.id, c.name, c.email, c.phone, c.loyalty_tier,
-            c.points, c.total_orders, c.total_spent, c.last_order_date,
+            c.points, c.total_orders, c.total_spent, c.last_order_at,
             c.tags, c.notes, c.addresses, c.created_at, c.updated_at
      FROM customers c
      WHERE c.id = $1`,
@@ -305,7 +305,7 @@ export async function getSegmentCustomers(
 
   const { rows } = await query<CRMCustomer>(
     `SELECT c.id, c.name, c.email, c.phone, c.loyalty_tier,
-            c.points, c.total_orders, c.total_spent, c.last_order_date,
+            c.points, c.total_orders, c.total_spent, c.last_order_at,
             c.tags, c.notes, c.addresses, c.created_at, c.updated_at
      FROM customers c
      INNER JOIN customer_segment_members csm ON csm.customer_id = c.id
@@ -358,7 +358,7 @@ export async function getCustomerStats(): Promise<CustomerStats> {
   // Active shoppers (ordered in last 30 days)
   const { rows: activeRows } = await query<{ count: number }>(
     `SELECT COUNT(*)::int as count FROM customers
-     WHERE last_order_date >= CURRENT_DATE - INTERVAL '30 days'`
+     WHERE last_order_at >= CURRENT_DATE - INTERVAL '30 days'`
   );
 
   // By tier
