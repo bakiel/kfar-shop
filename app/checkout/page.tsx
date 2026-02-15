@@ -61,7 +61,7 @@ export default function EnhancedCheckoutPage() {
     deliveryPrice: 0,
     
     // Payment Method
-    paymentMethod: 'braysheet',
+    paymentMethod: 'cash',
     
     // Currency
     currency: 'ILS'
@@ -104,10 +104,10 @@ export default function EnhancedCheckoutPage() {
   ];
 
   const paymentMethods = [
-    { id: 'braysheet', name: 'Braysheet Token', icon: 'fa-coins', description: 'Community digital currency' },
-    { id: 'qr', name: 'QR Code Payment', icon: 'fa-qrcode', description: 'Scan with your mobile banking app' },
-    { id: 'card', name: 'Credit Card', icon: 'fa-credit-card', description: 'Visa, Mastercard, American Express' },
-    { id: 'bank', name: 'Bank Transfer', icon: 'fa-university', description: 'Direct bank transfer' }
+    { id: 'cash', name: language === 'he' ? 'תשלום במזומן' : 'Cash on Delivery', icon: 'fa-money', description: language === 'he' ? 'שלם במזומן בעת האיסוף או המשלוח' : 'Pay cash when you pick up or receive your order' },
+    { id: 'braysheet', name: 'Braysheet Token', icon: 'fa-coins', description: language === 'he' ? 'מטבע דיגיטלי קהילתי' : 'Community digital currency' },
+    { id: 'card', name: language === 'he' ? 'כרטיס אשראי' : 'Credit Card', icon: 'fa-credit-card', description: language === 'he' ? 'ויזה, מאסטרקארד' : 'Visa, Mastercard, American Express' },
+    { id: 'bank', name: language === 'he' ? 'העברה בנקאית' : 'Bank Transfer', icon: 'fa-university', description: language === 'he' ? 'העברה ישירה' : 'Direct bank transfer' }
   ];
 
   useEffect(() => {
@@ -1016,22 +1016,49 @@ Contact: 052-KFAR-MKT`;
     // Save order to database and get real order ID
     let realOrderId = null;
     try {
-      const response = await fetch('/api/orders', {
+      const accessToken = sessionStorage.getItem('kfar_access_token');
+      const response = await fetch('/api/orders/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
         body: JSON.stringify(orderData)
       });
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Order saved:', result.orderId);
-        realOrderId = result.orderId;
+        console.log('Order saved:', result.order?.id || result.orderId);
+        realOrderId = result.order?.id || result.orderId;
+        if (result.order?.order_number) {
+          setOrderNumber(result.order.order_number);
+        }
       } else {
         console.error('Failed to save order');
       }
     } catch (error) {
       console.error('Error saving order:', error);
       // Continue anyway - don't block checkout
+    }
+
+    // For credit card payments, redirect to YPAY
+    if (formData.paymentMethod === 'card' && realOrderId) {
+      try {
+        const payRes = await fetch('/api/payment/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: realOrderId, amount: calculateTotals().total })
+        });
+        if (payRes.ok) {
+          const payData = await payRes.json();
+          if (payData.redirectUrl) {
+            window.location.href = payData.redirectUrl;
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('YPAY redirect failed, continuing with order:', e);
+      }
     }
     
     // Generate invoice in background with real order ID

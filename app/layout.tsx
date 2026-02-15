@@ -4,6 +4,7 @@ import "./globals.css";
 import "../styles/voice-button.css";
 import { CartProvider } from "@/lib/context/CartContext";
 import { LanguageProvider } from "@/lib/context/LanguageContext";
+import { AuthProvider } from "@/lib/context/AuthContext";
 import ClientLayout from "@/components/ClientLayout";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import FaviconMeta from "@/components/FaviconMeta";
@@ -84,13 +85,15 @@ export default function RootLayout({
         className={`${fraunces.variable} ${inter.variable} ${rubik.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <LanguageProvider>
-          <CartProvider>
-            <ErrorBoundary>
-              <ClientLayout>
-                {children}
-              </ClientLayout>
-            </ErrorBoundary>
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <ErrorBoundary>
+                <ClientLayout>
+                  {children}
+                </ClientLayout>
+              </ErrorBoundary>
+            </CartProvider>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

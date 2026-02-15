@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, Store, Package, ShoppingCart, Users, Tag, Settings
+  LayoutDashboard, Store, Package, ShoppingCart, Users, Tag, Settings, Contact
 } from 'lucide-react';
 import { PortalLayout, ConfirmDialog } from '@/components/portal';
 import type { MenuItem } from '@/components/portal';
@@ -14,6 +14,7 @@ const adminMenuItems: MenuItem[] = [
   { id: 'vendors', path: '/admin/vendors', label: 'Vendors', labelHe: 'ספקים', icon: <Store className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'bundles', path: '/admin/bundles', label: 'Bundles', labelHe: 'חבילות', icon: <Package className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'orders', path: '/admin/orders', label: 'Orders', labelHe: 'הזמנות', icon: <ShoppingCart className="w-5 h-5 stroke-[1.5]" /> },
+  { id: 'crm', path: '/admin/crm', label: 'CRM', labelHe: 'CRM', icon: <Contact className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'accounts', path: '/admin/accounts', label: 'Accounts', labelHe: 'חשבונות', icon: <Users className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'promotions', path: '/admin/promotions', label: 'Promotions', labelHe: 'מבצעים', icon: <Tag className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'settings', path: '/admin/settings', label: 'Settings', labelHe: 'הגדרות', icon: <Settings className="w-5 h-5 stroke-[1.5]" /> },

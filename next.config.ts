@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   // Enable standalone for production deployments
   output: 'standalone',
   
+  // Server-only packages (never bundled for the browser)
+  serverExternalPackages: ['nodemailer'],
+
   // Bypass all build errors
   experimental: {
     turbo: {
