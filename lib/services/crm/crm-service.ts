@@ -279,12 +279,12 @@ export async function removeTag(
 
 export async function getSegments(): Promise<CRMSegment[]> {
   const { rows } = await query<CRMSegment>(
-    `SELECT cs.id, cs.name, cs.description, cs.segment_type, cs.rules,
+    `SELECT cs.id, cs.name, cs.description, cs.type as segment_type, cs.rules,
             cs.created_at, cs.updated_at,
             COUNT(csm.customer_id)::int as customer_count
      FROM customer_segments cs
      LEFT JOIN customer_segment_members csm ON csm.segment_id = cs.id
-     GROUP BY cs.id, cs.name, cs.description, cs.segment_type, cs.rules, cs.created_at, cs.updated_at
+     GROUP BY cs.id, cs.name, cs.description, cs.type, cs.rules, cs.created_at, cs.updated_at
      ORDER BY cs.created_at DESC`
   );
   return rows;
@@ -333,9 +333,9 @@ export async function createSegment(data: {
   rules?: any;
 }): Promise<CRMSegment> {
   const { rows } = await query<CRMSegment>(
-    `INSERT INTO customer_segments (name, description, segment_type, rules)
+    `INSERT INTO customer_segments (name, description, type, rules)
      VALUES ($1, $2, $3, $4)
-     RETURNING *, 0 as customer_count`,
+     RETURNING *, type as segment_type, 0 as customer_count`,
     [data.name, data.description || null, data.segment_type, data.rules ? JSON.stringify(data.rules) : null]
   );
   return rows[0];
