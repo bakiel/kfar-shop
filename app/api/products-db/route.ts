@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     // Build query dynamically
     let sqlQuery = `
-      SELECT p.*, v.name as vendor_name, v.slug as vendor_slug, v.logo as vendor_logo
+      SELECT p.*, v.name as vendor_name, v.slug as vendor_slug, v.logo_url as vendor_logo
       FROM products p
       LEFT JOIN vendors v ON p.vendor_id = v.id
       WHERE p.in_stock = true

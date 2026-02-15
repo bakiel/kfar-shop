@@ -83,17 +83,18 @@ async function getActiveVendors(): Promise<LandingVendor[]> {
             [v.id]
           );
 
+          const vendorLogo = v.logo_url || v.logo || '';
           return {
             id: v.id,
             name: v.name,
             slug: v.slug,
             description: v.description || '',
-            logo: v.logo || '/images/default_logo.svg',
-            banner: v.banner,
+            logo: vendorLogo,
+            banner: v.banner_url || v.banner,
             productCount: parseInt(allProducts[0]?.count || '0'),
-            categories: v.categories || [],
+            categories: v.categories || v.subcategories || [],
             rating: v.rating ? parseFloat(v.rating) : 4.5,
-            reviewCount: v.review_count || 0,
+            reviewCount: v.total_reviews || v.review_count || 0,
             established: v.established,
             location: v.location,
             specialty: v.specialty,
@@ -106,10 +107,10 @@ async function getActiveVendors(): Promise<LandingVendor[]> {
               price: parseFloat(p.price),
               originalPrice: p.original_price ? parseFloat(p.original_price) : undefined,
               category: p.category,
-              image: p.image || '/images/default_logo.svg',
+              image: p.image_url || p.image || '',
               vendorId: p.vendor_id,
               vendorName: v.name,
-              vendorLogo: v.logo,
+              vendorLogo: vendorLogo,
               inStock: p.in_stock !== false,
               isFeatured: p.is_featured || false,
               rating: p.rating ? parseFloat(p.rating) : undefined,
@@ -167,7 +168,7 @@ async function getActiveVendors(): Promise<LandingVendor[]> {
 async function getFeaturedProducts(limit: number = 12): Promise<LandingProduct[]> {
   try {
     const { rows } = await query(
-      `SELECT p.*, v.name as vendor_name, v.logo as vendor_logo
+      `SELECT p.*, v.name as vendor_name, v.logo_url as vendor_logo
        FROM products p
        JOIN vendors v ON p.vendor_id = v.id
        WHERE p.status = 'published'
@@ -185,13 +186,13 @@ async function getFeaturedProducts(limit: number = 12): Promise<LandingProduct[]
         price: parseFloat(p.price),
         originalPrice: p.original_price ? parseFloat(p.original_price) : undefined,
         category: p.category,
-        image: p.image || '/images/default_logo.svg',
+        image: p.image_url || p.image || '',
         vendorId: p.vendor_id,
         vendorName: p.vendor_name,
         vendorLogo: p.vendor_logo,
         badge: p.badge,
         rating: p.rating ? parseFloat(p.rating) : undefined,
-        reviewCount: p.review_count || 0,
+        reviewCount: p.review_count || p.total_reviews || 0,
         inStock: p.in_stock !== false,
         isFeatured: p.is_featured || false,
         tags: p.tags || [],
@@ -305,7 +306,7 @@ async function getActiveFlashDeals(): Promise<FlashDeal[]> {
   try {
     const { rows } = await query(
       `SELECT fd.*, p.name as product_name, p.name_he as product_name_he,
-              p.image as product_image, v.name as vendor_name
+              p.image_url as product_image, v.name as vendor_name
        FROM flash_deals fd
        JOIN products p ON fd.product_id = p.id
        JOIN vendors v ON p.vendor_id = v.id
@@ -318,7 +319,7 @@ async function getActiveFlashDeals(): Promise<FlashDeal[]> {
       productId: d.product_id,
       productName: d.product_name,
       productNameHe: d.product_name_he,
-      productImage: d.product_image || '/images/default_logo.svg',
+      productImage: d.product_image || '',
       vendorName: d.vendor_name,
       dealPrice: parseFloat(d.deal_price),
       originalPrice: parseFloat(d.original_price),
@@ -359,13 +360,13 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
             try {
               const placeholders = productIds.map((_: string, i: number) => `$${i + 1}`).join(',');
               const { rows: prodRows } = await query(
-                `SELECT id, name, image, price FROM products WHERE id IN (${placeholders})`,
+                `SELECT id, name, image_url, price FROM products WHERE id IN (${placeholders})`,
                 productIds
               );
               products = prodRows.map((p: any) => ({
                 id: p.id,
                 name: p.name,
-                image: p.image || '/images/default_logo.svg',
+                image: p.image_url || '',
                 price: parseFloat(p.price),
               }));
             } catch {
@@ -383,7 +384,7 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
             bundlePrice: parseFloat(b.bundle_price),
             originalPrice: parseFloat(b.original_price),
             savingsPercent: b.savings_percent ? parseFloat(b.savings_percent) : Math.round((1 - parseFloat(b.bundle_price) / parseFloat(b.original_price)) * 100),
-            image: b.image || '/images/default_logo.svg',
+            image: b.image || '',
             isFeatured: b.is_featured || false,
             loyaltyPointsBonus: b.loyalty_points_bonus || 0,
             vendorId: b.vendor_id,

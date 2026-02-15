@@ -26,7 +26,7 @@ async function searchProducts(searchQuery: string) {
         p.id,
         p.name,
         p.price,
-        p.images[1] as image,
+        p.image_url as image,
         p.vendor_id,
         v.name as vendor_name
       FROM products p
@@ -66,7 +66,7 @@ async function getSuggestedProducts(excludeVendorId?: string) {
         p.id,
         p.name,
         p.price,
-        p.images[1] as image,
+        p.image_url as image,
         p.vendor_id,
         v.name as vendor_name
       FROM products p

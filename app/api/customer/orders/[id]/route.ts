@@ -30,7 +30,7 @@ export async function GET(
     const { id: orderId } = await params;
 
     const { rows } = await query(
-      `SELECT o.*, v.name as vendor_name, v.logo as vendor_logo
+      `SELECT o.*, v.name as vendor_name, v.logo_url as vendor_logo
        FROM orders o
        LEFT JOIN vendors v ON o.vendor_id = v.id
        WHERE o.id = $1 AND o.customer_id = $2`,

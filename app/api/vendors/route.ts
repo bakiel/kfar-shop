@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
         nameHe: vendor.name_he,
         slug: vendor.slug,
         description: vendor.description,
-        logo: vendor.logo || '/images/placeholder-logo.jpg',
-        banner: vendor.banner || '/images/default-store-banner.svg',
+        logo: vendor.logo_url || vendor.logo || '',
+        banner: vendor.banner_url || vendor.banner || '',
         categories: vendor.metadata?.categories || [vendor.metadata?.specialty] || ['general'],
         featured: vendor.featured,
         metadata: {
