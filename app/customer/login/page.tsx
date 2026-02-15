@@ -3,10 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { toast } from '@/components/ui/use-toast';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 import {
   LogIn,
   UserPlus,
@@ -23,13 +22,8 @@ import {
   ShoppingBag,
   Loader2,
   ChevronRight,
-  Shield,
-  Store,
+  AlertCircle,
 } from 'lucide-react';
-
-/* -------------------------------------------------------------------------- */
-/*  Benefits data                                                              */
-/* -------------------------------------------------------------------------- */
 
 const benefits = [
   {
@@ -54,10 +48,6 @@ const benefits = [
   },
 ];
 
-/* -------------------------------------------------------------------------- */
-/*  Animation variants                                                        */
-/* -------------------------------------------------------------------------- */
-
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
@@ -67,18 +57,14 @@ const fadeUp = {
   }),
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Component                                                                 */
-/* -------------------------------------------------------------------------- */
-
 export default function CustomerLogin() {
-  const router = useRouter();
   const { t, language, isRTL } = useLanguage();
+  const { login, register } = useAuth();
   const shouldReduceMotion = useReducedMotion();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [roleHint, setRoleHint] = useState<string>('');
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -88,71 +74,57 @@ export default function CustomerLogin() {
   const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const role = params.get('role');
-    setRoleHint(role || '');
-  }, []);
-
-  // Focus email input on mode switch
-  useEffect(() => {
     emailRef.current?.focus();
+  }, [mode]);
+
+  // Clear error on mode switch
+  useEffect(() => {
+    setError('');
   }, [mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
 
     try {
       if (mode === 'login') {
-        if (formData.email === 'admin@kfar.com' && formData.password === 'admin123') {
-          localStorage.setItem('customerToken', 'admin-token-' + Date.now());
-          localStorage.setItem('customerName', 'Admin User');
-          localStorage.setItem('customerId', 'admin-001');
-          localStorage.setItem('userRole', 'admin');
-          window.dispatchEvent(new Event('storage'));
-          toast({ title: t('Admin access granted!'), description: t('Redirecting to admin dashboard...') });
-          setTimeout(() => { window.location.href = '/admin/dashboard'; }, 800);
-        } else if (formData.email === 'vendor@tevadeli.com' && formData.password === 'vendor123') {
-          localStorage.setItem('customerToken', 'vendor-token-' + Date.now());
-          localStorage.setItem('customerName', 'Teva Deli');
-          localStorage.setItem('customerId', 'vendor-tevadeli');
-          localStorage.setItem('userRole', 'vendor');
-          window.dispatchEvent(new Event('storage'));
-          toast({ title: t('Vendor access granted!'), description: t('Redirecting to vendor dashboard...') });
-          setTimeout(() => { window.location.href = '/vendor/dashboard'; }, 800);
-        } else {
-          localStorage.setItem('customerToken', 'demo-token-123');
-          localStorage.setItem('customerName', formData.email.split('@')[0]);
-          localStorage.setItem('customerId', 'customer-' + Date.now());
-          localStorage.setItem('userRole', 'customer');
-          window.dispatchEvent(new Event('storage'));
-          toast({ title: t('Welcome back!'), description: t('Redirecting to your dashboard...') });
-          setTimeout(() => { window.location.href = '/customer/dashboard'; }, 800);
+        const result = await login(formData.email, formData.password);
+
+        if (!result.success) {
+          setError(result.error || (isRTL ? 'אימייל או סיסמה שגויים' : 'Invalid email or password'));
+          setLoading(false);
+          return;
         }
+
+        window.location.href = '/customer/dashboard';
       } else {
-        localStorage.setItem('customerToken', 'demo-token-123');
-        localStorage.setItem('customerName', formData.name || formData.email.split('@')[0]);
-        localStorage.setItem('customerId', 'customer-' + Date.now());
-        localStorage.setItem('userRole', 'customer');
-        window.dispatchEvent(new Event('storage'));
-        toast({ title: t('Account created!'), description: t('Redirecting to onboarding...') });
-        setTimeout(() => { window.location.href = '/customer/onboarding'; }, 800);
+        // Registration
+        if (formData.password.length < 8) {
+          setError(isRTL ? 'הסיסמה חייבת להכיל לפחות 8 תווים' : 'Password must be at least 8 characters');
+          setLoading(false);
+          return;
+        }
+
+        const result = await register({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          phone: formData.phone || undefined,
+        });
+
+        if (!result.success) {
+          setError(result.error || (isRTL ? 'ההרשמה נכשלה' : 'Registration failed'));
+          setLoading(false);
+          return;
+        }
+
+        window.location.href = '/customer/dashboard';
       }
     } catch {
-      toast({ title: t('Error'), description: t('Please try again'), variant: 'destructive' });
-    } finally {
+      setError(isRTL ? 'שגיאת חיבור - נסו שוב' : 'Connection error - please try again');
       setLoading(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    localStorage.setItem('customerToken', 'demo-token-123');
-    localStorage.setItem('customerName', 'Sarah Cohen');
-    localStorage.setItem('customerId', 'customer-demo');
-    localStorage.setItem('userRole', 'customer');
-    window.dispatchEvent(new Event('storage'));
-    toast({ title: t('Demo Login'), description: t('Logged in as Sarah Cohen') });
-    router.push('/customer/dashboard');
   };
 
   const inputClasses =
@@ -160,9 +132,7 @@ export default function CustomerLogin() {
 
   return (
     <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen flex">
-      {/* ================================================================= */}
-      {/* LEFT: Community image panel (desktop only)                         */}
-      {/* ================================================================= */}
+      {/* LEFT: Community image panel (desktop only) */}
       <div className="hidden lg:flex lg:w-[45%] relative overflow-hidden">
         <Image
           src="/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_03.jpg"
@@ -171,10 +141,8 @@ export default function CustomerLogin() {
           className="object-cover"
           priority
         />
-        {/* Dark overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
 
-        {/* Content over image */}
         <div className="relative z-10 flex flex-col justify-end p-10 xl:p-14">
           <motion.div
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
@@ -204,7 +172,6 @@ export default function CustomerLogin() {
                 : 'Join 500+ families shopping from the community. Plant-based products, African heritage, and delivery to your door.'}
             </p>
 
-            {/* Benefits */}
             <div className="space-y-3">
               {benefits.map((b, i) => {
                 const Icon = b.icon;
@@ -231,9 +198,7 @@ export default function CustomerLogin() {
         </div>
       </div>
 
-      {/* ================================================================= */}
-      {/* RIGHT: Form panel                                                  */}
-      {/* ================================================================= */}
+      {/* RIGHT: Form panel */}
       <div className="flex-1 flex flex-col bg-kfar-warm-white">
         {/* Mobile header */}
         <div className="lg:hidden flex items-center justify-between px-5 pt-5">
@@ -273,7 +238,7 @@ export default function CustomerLogin() {
               <p className="text-gray-500 text-sm">
                 {mode === 'login'
                   ? (language === 'he' ? 'התחברו לחשבון שלכם כדי להמשיך לקנות' : 'Sign in to your account to continue shopping')
-                  : (language === 'he' ? 'צרו חשבון חינמי וקבלו הנחה על ההזמנה הראשונה' : 'Create a free account and get a discount on your first order')}
+                  : (language === 'he' ? 'צרו חשבון חינמי וקבלו 50 נקודות בונוס' : 'Create a free account and get 50 bonus points')}
               </p>
             </motion.div>
 
@@ -310,30 +275,18 @@ export default function CustomerLogin() {
               ))}
             </motion.div>
 
-            {/* Role hint banner */}
+            {/* Error message */}
             <AnimatePresence>
-              {roleHint && mode === 'login' && (
+              {error && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden mb-4"
                 >
-                  <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm ${
-                    roleHint === 'admin'
-                      ? 'bg-earth-flame/10 border border-earth-flame/20 text-earth-flame'
-                      : roleHint === 'vendor'
-                        ? 'bg-sun-gold/10 border border-sun-gold/20 text-kfar-gold-dark'
-                        : 'bg-leaf-green/10 border border-leaf-green/20 text-leaf-green'
-                  }`}>
-                    {roleHint === 'admin' && <Shield className="w-4 h-4 stroke-[1.5] flex-shrink-0" />}
-                    {roleHint === 'vendor' && <Store className="w-4 h-4 stroke-[1.5] flex-shrink-0" />}
-                    {roleHint === 'customer' && <User className="w-4 h-4 stroke-[1.5] flex-shrink-0" />}
-                    <span className="font-medium">
-                      {roleHint === 'admin' && (language === 'he' ? 'הרשאות מנהל: admin@kfar.com / admin123' : 'Admin credentials: admin@kfar.com / admin123')}
-                      {roleHint === 'vendor' && (language === 'he' ? 'הרשאות ספק: vendor@tevadeli.com / vendor123' : 'Vendor credentials: vendor@tevadeli.com / vendor123')}
-                      {roleHint === 'customer' && (language === 'he' ? 'השתמשו בכל אימייל וסיסמה' : 'Use any email and password')}
-                    </span>
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
+                    <AlertCircle className="w-4 h-4 stroke-[1.5] flex-shrink-0" />
+                    {error}
                   </div>
                 </motion.div>
               )}
@@ -388,11 +341,7 @@ export default function CustomerLogin() {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className={`${inputClasses} ps-10`}
-                    placeholder={
-                      roleHint === 'admin' ? 'admin@kfar.com'
-                        : roleHint === 'vendor' ? 'vendor@tevadeli.com'
-                          : 'you@email.com'
-                    }
+                    placeholder="you@email.com"
                   />
                 </div>
               </div>
@@ -403,14 +352,6 @@ export default function CustomerLogin() {
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     {t('Password')}
                   </label>
-                  {mode === 'login' && (
-                    <Link
-                      href="/forgot-password"
-                      className="text-xs font-medium text-leaf-green hover:text-leaf-green-dark transition-colors cursor-pointer"
-                    >
-                      {language === 'he' ? 'שכחתם סיסמה?' : 'Forgot password?'}
-                    </Link>
-                  )}
                 </div>
                 <div className="relative">
                   <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 stroke-[1.5]" />
@@ -420,7 +361,7 @@ export default function CustomerLogin() {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className={`${inputClasses} ps-10 pe-10`}
-                    placeholder="••••••••"
+                    placeholder={mode === 'register' ? (isRTL ? 'לפחות 8 תווים' : 'At least 8 characters') : '••••••••'}
                   />
                   <button
                     type="button"
@@ -492,18 +433,6 @@ export default function CustomerLogin() {
                   </>
                 )}
               </motion.button>
-
-              {/* Demo login */}
-              <motion.button
-                type="button"
-                onClick={handleDemoLogin}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm border-2 border-kfar-gold text-kfar-gold-dark bg-kfar-gold/5 hover:bg-kfar-gold/10 transition-colors cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 stroke-[1.5]" />
-                {t('Try Demo Account')}
-              </motion.button>
             </motion.form>
 
             {/* Divider */}
@@ -531,38 +460,6 @@ export default function CustomerLogin() {
                 <><LogIn className="w-4 h-4 stroke-[1.5]" />{language === 'he' ? 'התחברו לחשבון קיים' : 'Sign in to existing account'}</>
               )}
             </button>
-
-            {/* Demo credentials (login mode) */}
-            <AnimatePresence>
-              {mode === 'login' && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="mt-6 rounded-xl border border-gray-100 bg-white p-4"
-                >
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                    {language === 'he' ? 'הרשאות דמו' : 'Demo Credentials'}
-                  </p>
-                  <div className="space-y-2">
-                    {[
-                      { role: 'Admin', email: 'admin@kfar.com', pass: 'admin123', color: 'bg-earth-flame/8 text-earth-flame border-earth-flame/15' },
-                      { role: 'Vendor', email: 'vendor@tevadeli.com', pass: 'vendor123', color: 'bg-sun-gold/8 text-kfar-gold-dark border-sun-gold/15' },
-                      { role: 'Customer', email: 'Any email', pass: 'Any password', color: 'bg-leaf-green/8 text-leaf-green border-leaf-green/15' },
-                    ].map((c) => (
-                      <div
-                        key={c.role}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg border text-xs font-mono ${c.color}`}
-                      >
-                        <span className="font-sans font-semibold w-16">{c.role}</span>
-                        <span className="opacity-70">{c.email} / {c.pass}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
       </div>

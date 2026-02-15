@@ -9,6 +9,7 @@ import {
 import { PortalLayout, ConfirmDialog } from '@/components/portal';
 import type { MenuItem } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 // Routes that should NOT use the portal layout
 const PUBLIC_ROUTES = ['/vendor/login', '/vendor/onboarding'];
@@ -37,47 +38,31 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const router = useRouter();
   const { t, isRTL } = useLanguage();
-  const [vendorName, setVendorName] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
+  const { user, isLoading, isAuthenticated, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
-    // Skip auth check for public routes
-    if (isPublicRoute(pathname)) {
-      setIsChecking(false);
+    if (isPublicRoute(pathname)) return;
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
+      router.push('/vendor/login');
       return;
     }
 
-    try {
-      const authStr = localStorage.getItem('vendorAuth');
-      if (!authStr) {
-        router.push('/vendor/login');
-        return;
-      }
-
-      const auth = JSON.parse(authStr);
-      if (!auth.vendorId) {
-        router.push('/vendor/login');
-        return;
-      }
-
-      setVendorName(auth.vendorName || auth.name || 'Vendor');
-      setIsAuthenticated(true);
-    } catch {
+    // Verify vendor role
+    if (user?.role !== 'vendor') {
       router.push('/vendor/login');
-    } finally {
-      setIsChecking(false);
     }
-  }, [pathname, router]);
+  }, [pathname, router, isLoading, isAuthenticated, user]);
 
   // Public routes: render children directly
   if (isPublicRoute(pathname)) {
     return <>{children}</>;
   }
 
-  // Checking auth: show nothing to avoid flash
-  if (isChecking) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#478c0b] border-t-transparent rounded-full animate-spin" />
@@ -85,8 +70,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     );
   }
 
-  // Not authenticated and not redirecting (shouldn't reach here, but safety)
-  if (!isAuthenticated) {
+  if (!isAuthenticated || user?.role !== 'vendor') {
     return null;
   }
 
@@ -94,13 +78,8 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     setShowLogoutDialog(true);
   };
 
-  const confirmLogout = () => {
-    localStorage.removeItem('vendorAuth');
-    localStorage.removeItem('customerToken');
-    localStorage.removeItem('customerId');
-    localStorage.removeItem('customerName');
-    localStorage.removeItem('userRole');
-    window.dispatchEvent(new Event('storage'));
+  const confirmLogout = async () => {
+    await logout();
     router.push('/vendor/login');
   };
 
@@ -109,7 +88,7 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
       <PortalLayout
         role="vendor"
         menuItems={MENU_ITEMS}
-        user={{ name: vendorName, subtitle: isRTL ? 'ניהול חנות' : 'Store Management' }}
+        user={{ name: user?.displayName || 'Vendor', subtitle: isRTL ? 'ניהול חנות' : 'Store Management' }}
         onLogout={handleLogout}
       >
         {children}

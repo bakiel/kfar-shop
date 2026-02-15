@@ -8,6 +8,7 @@ import {
 import { PortalLayout, ConfirmDialog } from '@/components/portal';
 import type { MenuItem } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const adminMenuItems: MenuItem[] = [
   { id: 'dashboard', path: '/admin/dashboard', label: 'Dashboard', labelHe: 'לוח בקרה', icon: <LayoutDashboard className="w-5 h-5 stroke-[1.5]" /> },
@@ -28,43 +29,48 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { t, isRTL } = useLanguage();
+  const { user, isLoading, isAuthenticated, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     if (pathname === '/admin/login') return;
-    try {
-      const adminAuth = localStorage.getItem('adminAuth');
-      if (!adminAuth) {
-        router.push('/admin/login');
-        return;
-      }
-      try {
-        JSON.parse(adminAuth);
-      } catch {
-        localStorage.removeItem('adminAuth');
-        router.push('/admin/login');
-      }
-    } catch {
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
+      router.push('/admin/login');
+      return;
+    }
+
+    // Verify admin role
+    if (user?.role !== 'admin') {
       router.push('/admin/login');
     }
-  }, [pathname, router]);
+  }, [pathname, router, isLoading, isAuthenticated, user]);
 
   // Login page bypass - render children only
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#2D5A27] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return null;
+  }
+
   const handleLogout = () => {
     setShowLogoutDialog(true);
   };
 
-  const confirmLogout = () => {
-    localStorage.removeItem('adminAuth');
-    localStorage.removeItem('customerToken');
-    localStorage.removeItem('customerName');
-    localStorage.removeItem('customerId');
-    localStorage.removeItem('userRole');
-    document.cookie = 'adminAuth=; path=/; max-age=0';
+  const confirmLogout = async () => {
+    await logout();
     router.push('/admin/login');
   };
 
@@ -73,7 +79,7 @@ export default function AdminLayout({
       <PortalLayout
         role="admin"
         menuItems={adminMenuItems}
-        user={{ name: 'Admin Panel', subtitle: 'Marketplace Control' }}
+        user={{ name: user?.displayName || 'Admin Panel', subtitle: 'Marketplace Control' }}
         onLogout={handleLogout}
       >
         {children}

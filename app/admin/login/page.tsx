@@ -1,14 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Lock, Globe, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { Lock, Globe, Eye, EyeOff, Loader2, AlertCircle, Mail } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const { language, toggleLanguage, t, isRTL } = useLanguage();
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,28 +20,19 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
 
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'kfar-admin-2024';
+    try {
+      const result = await login(email, password);
 
-    if (password === adminPassword) {
-      const authData = {
-        role: 'admin',
-        loginTime: new Date().toISOString(),
-      };
+      if (!result.success) {
+        setError(result.error || (isRTL ? 'פרטי התחברות שגויים' : 'Invalid credentials'));
+        setLoading(false);
+        return;
+      }
 
-      localStorage.setItem('adminAuth', JSON.stringify(authData));
-      localStorage.setItem('customerToken', 'admin-token');
-      localStorage.setItem('customerName', 'Administrator');
-      localStorage.setItem('customerId', 'admin-1');
-      localStorage.setItem('userRole', 'admin');
-      document.cookie = `adminAuth=${JSON.stringify(authData)}; path=/; max-age=${60 * 60 * 24}`;
-
-      window.dispatchEvent(new Event('storage'));
-
-      setTimeout(() => {
-        window.location.href = '/admin/dashboard';
-      }, 500);
-    } else {
-      setError(isRTL ? 'סיסמה שגויה' : 'Invalid password');
+      // Redirect to admin dashboard
+      window.location.href = '/admin/dashboard';
+    } catch {
+      setError(isRTL ? 'שגיאת חיבור' : 'Connection error');
       setLoading(false);
     }
   };
@@ -91,17 +83,36 @@ export default function AdminLoginPage() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Email */}
             <div className="space-y-1.5">
               <label className={`block text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
-                {t('Admin Password')}
+                {t('Email')}
+              </label>
+              <div className="relative">
+                <Mail className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 stroke-[1.5] ${isRTL ? 'right-3' : 'left-3'}`} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={isRTL ? 'הזן אימייל' : 'Enter admin email'}
+                  className={`w-full py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] transition-all ${isRTL ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4'}`}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className={`block text-sm font-medium text-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {t('Password')}
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={isRTL ? 'הזן סיסמת מנהל' : 'Enter admin password'}
+                  placeholder={isRTL ? 'הזן סיסמה' : 'Enter password'}
                   className={`w-full py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] transition-all ${isRTL ? 'pr-4 pl-10 text-right' : 'pl-4 pr-10'}`}
                   required
                 />

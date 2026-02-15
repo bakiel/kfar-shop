@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "KFAR Marketplace - Village of Peace",
     description: "Authentic vegan products and services from the Village of Peace community in Dimona, Israel",
-    url: 'https://kfar-final.vercel.app',
+    url: 'https://kfarapp.com',
     siteName: 'KFAR Marketplace',
     images: [
       {

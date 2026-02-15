@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Store, Lock, ChevronDown, Eye, EyeOff, Globe, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const VENDOR_OPTIONS = [
-  { id: 'teva-deli', name: 'Teva Deli', nameHe: 'טבע דלי', logo: '/images/vendors/teva_deli_logo_vegan_factory.jpg' },
-  { id: 'queens-cuisine', name: "Queen's Cuisine", nameHe: 'המטבח של המלכה', logo: '/images/vendors/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg' },
-  { id: 'people-store', name: "People's Store", nameHe: 'חנות העם', logo: '/images/vendors/people_store_logo_community_retail.jpg' },
-  { id: 'garden-of-light', name: 'Garden of Light', nameHe: 'גן האור', logo: '/images/vendors/Garden of Light Logo.jpg' },
-  { id: 'vop-shop', name: 'VOP Shop', nameHe: 'חנות כפר השלום', logo: '/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg' },
-  { id: 'gahn-delight', name: 'Gahn Delight', nameHe: 'גן תענוג', logo: '/images/vendors/gahn_delight_official_logo_master_brand_ice_cream.jpg' },
+  { id: 'teva-deli', name: 'Teva Deli', nameHe: 'טבע דלי', logo: '/images/vendors/teva_deli_logo_vegan_factory.jpg', email: 'teva@kfarapp.com' },
+  { id: 'queens-cuisine', name: "Queen's Cuisine", nameHe: 'המטבח של המלכה', logo: '/images/vendors/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg', email: 'queens@kfarapp.com' },
+  { id: 'people-store', name: "People's Store", nameHe: 'חנות העם', logo: '/images/vendors/people_store_logo_community_retail.jpg', email: 'people@kfarapp.com' },
+  { id: 'garden-of-light', name: 'Garden of Light', nameHe: 'גן האור', logo: '/images/vendors/Garden of Light Logo.jpg', email: 'garden@kfarapp.com' },
+  { id: 'vop-shop', name: 'VOP Shop', nameHe: 'חנות כפר השלום', logo: '/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg', email: 'kfar@kfarapp.com' },
+  { id: 'gahn-delight', name: 'Gahn Delight', nameHe: 'גן תענוג', logo: '/images/vendors/gahn_delight_official_logo_master_brand_ice_cream.jpg', email: 'gahn@kfarapp.com' },
 ];
 
 const container = {
@@ -26,8 +26,8 @@ const item = {
 };
 
 export default function VendorLoginPage() {
-  const router = useRouter();
   const { language, toggleLanguage, t, isRTL } = useLanguage();
+  const { login } = useAuth();
 
   const [vendorId, setVendorId] = useState('');
   const [password, setPassword] = useState('');
@@ -54,39 +54,24 @@ export default function VendorLoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/vendor/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vendorId, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(isRTL ? 'פרטים שגויים' : data.error || 'Invalid credentials');
+      // Map vendorId to email
+      const vendor = VENDOR_OPTIONS.find(v => v.id === vendorId);
+      if (!vendor) {
+        setError(isRTL ? 'חנות לא נמצאה' : 'Store not found');
         setLoading(false);
         return;
       }
 
-      // Store auth
-      localStorage.setItem('vendorAuth', JSON.stringify({
-        vendorId: data.vendorId,
-        vendorName: data.name,
-        name: data.name,
-        token: data.token,
-        loginTime: Date.now(),
-      }));
-      // Legacy keys for backward compatibility
-      localStorage.setItem('customerToken', data.token);
-      localStorage.setItem('customerId', data.vendorId);
-      localStorage.setItem('customerName', data.name);
-      localStorage.setItem('userRole', 'vendor');
+      const result = await login(vendor.email, password);
 
-      window.dispatchEvent(new Event('storage'));
+      if (!result.success) {
+        setError(result.error || (isRTL ? 'פרטים שגויים' : 'Invalid credentials'));
+        setLoading(false);
+        return;
+      }
 
-      setTimeout(() => {
-        window.location.href = '/vendor/dashboard';
-      }, 300);
+      // Redirect to vendor dashboard
+      window.location.href = '/vendor/dashboard';
     } catch {
       setError(isRTL ? 'שגיאת חיבור - נסה שוב' : 'Connection error - please try again');
       setLoading(false);

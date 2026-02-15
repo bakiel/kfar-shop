@@ -8,6 +8,7 @@ import {
 import { PortalLayout, ConfirmDialog } from '@/components/portal';
 import type { MenuItem } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const customerMenuItems: MenuItem[] = [
   { id: 'dashboard', path: '/customer/dashboard', label: 'Dashboard', labelHe: 'לוח בקרה', icon: <LayoutDashboard className="w-5 h-5 stroke-[1.5]" /> },
@@ -27,41 +28,42 @@ export default function CustomerLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { t, isRTL } = useLanguage();
+  const { user, isLoading, isAuthenticated, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const [customerName, setCustomerName] = useState('');
 
   useEffect(() => {
-    // Bypass auth for public pages
     if (BYPASS_PATHS.some(p => pathname.startsWith(p))) return;
+    if (isLoading) return;
 
-    try {
-      const token = localStorage.getItem('customerToken');
-      if (!token) {
-        router.push('/customer/login');
-        return;
-      }
-      const name = localStorage.getItem('customerName') || '';
-      setCustomerName(name);
-    } catch {
+    if (!isAuthenticated) {
       router.push('/customer/login');
     }
-  }, [pathname, router]);
+  }, [pathname, router, isLoading, isAuthenticated]);
 
   // Bypass pages render children only (no portal layout)
   if (BYPASS_PATHS.some(p => pathname.startsWith(p))) {
     return <>{children}</>;
   }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#478c0b] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const handleLogout = () => {
     setShowLogoutDialog(true);
   };
 
-  const confirmLogout = () => {
-    localStorage.removeItem('customerToken');
-    localStorage.removeItem('customerName');
-    localStorage.removeItem('customerId');
-    localStorage.removeItem('customerEmail');
-    localStorage.removeItem('userRole');
+  const confirmLogout = async () => {
+    await logout();
     router.push('/customer/login');
   };
 
@@ -70,7 +72,7 @@ export default function CustomerLayout({
       <PortalLayout
         role="customer"
         menuItems={customerMenuItems}
-        user={{ name: customerName || 'Customer' }}
+        user={{ name: user?.displayName || 'Customer' }}
         onLogout={handleLogout}
       >
         {children}
