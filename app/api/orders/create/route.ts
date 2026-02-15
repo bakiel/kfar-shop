@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
+import { sendTransactional } from '@/lib/services/email/email-service';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -142,6 +143,90 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Order created:', orderNumber, 'ID:', order.id);
+
+    // --- Send email notifications (fire-and-forget, don't block response) ---
+    const emailPromises: Promise<any>[] = [];
+
+    // 1) Order confirmation to customer
+    const itemsHtml = body.items.map(item =>
+      `<tr>
+        <td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.name}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${item.price.toFixed(2)} ILS</td>
+      </tr>`
+    ).join('');
+
+    const itemsTable = `<table style="width:100%;border-collapse:collapse;">
+      <thead><tr>
+        <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Item</th>
+        <th style="text-align:center;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Qty</th>
+        <th style="text-align:right;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Price</th>
+      </tr></thead>
+      <tbody>${itemsHtml}</tbody>
+    </table>`;
+
+    emailPromises.push(
+      sendTransactional(body.customer.email, 'order_confirmation', {
+        customer_name: customerName,
+        order_number: orderNumber,
+        items_html: itemsTable,
+        total: body.total.toFixed(2),
+        currency: body.currency || 'ILS',
+        payment_method: body.paymentMethod || 'Cash on Delivery',
+        delivery_method: body.deliveryMethod || 'Pickup',
+      }).catch(err => console.error('Failed to send order confirmation email:', err))
+    );
+
+    // 2) New order alert to each vendor
+    const vendorEmails: Record<string, string> = {
+      'teva-deli': 'teva@kfarapp.com',
+      'queens-cuisine': 'queens@kfarapp.com',
+      'people-store': 'people@kfarapp.com',
+      'garden-of-light': 'garden@kfarapp.com',
+      'gahn-delight': 'gahn@kfarapp.com',
+      'vop-shop': 'kfar@kfarapp.com',
+    };
+
+    const vendorIds = [...new Set(body.items.map(i => i.vendorId).filter(Boolean))];
+    for (const vendorId of vendorIds) {
+      const vendorEmail = vendorEmails[vendorId as string];
+      if (vendorEmail) {
+        const vendorItems = body.items.filter(i => i.vendorId === vendorId);
+        const vendorItemsHtml = vendorItems.map(item =>
+          `<tr>
+            <td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.name}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
+            <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${item.price.toFixed(2)} ILS</td>
+          </tr>`
+        ).join('');
+
+        const vendorTable = `<table style="width:100%;border-collapse:collapse;">
+          <thead><tr>
+            <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Item</th>
+            <th style="text-align:center;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Qty</th>
+            <th style="text-align:right;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Price</th>
+          </tr></thead>
+          <tbody>${vendorItemsHtml}</tbody>
+        </table>`;
+
+        emailPromises.push(
+          sendTransactional(vendorEmail, 'vendor_new_order', {
+            vendor_name: vendorItems[0]?.vendorName || vendorId as string,
+            order_number: orderNumber,
+            customer_name: customerName,
+            items_html: vendorTable,
+            total: vendorItems.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2),
+            currency: body.currency || 'ILS',
+          }).catch(err => console.error('Failed to send vendor notification email:', err))
+        );
+      }
+    }
+
+    // Don't await emails - let them send in background
+    Promise.allSettled(emailPromises).then(results => {
+      const sent = results.filter(r => r.status === 'fulfilled').length;
+      console.log(`Order ${orderNumber}: ${sent}/${results.length} emails dispatched`);
+    });
 
     return NextResponse.json({
       success: true,

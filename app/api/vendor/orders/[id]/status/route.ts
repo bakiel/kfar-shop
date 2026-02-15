@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/services/auth-service';
 import { query } from '@/lib/db/postgres-client';
+import { sendTransactional } from '@/lib/services/email/email-service';
 
 function getUser(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -71,6 +72,21 @@ export async function PATCH(
     const order = rows[0];
     if (typeof order.items === 'string') {
       order.items = JSON.parse(order.items);
+    }
+
+    // Send order status update email to customer (fire-and-forget)
+    if (order.customer_email) {
+      const statusLabels: Record<string, string> = {
+        processing: 'Being Prepared',
+        ready: 'Ready for Pickup',
+        completed: 'Completed',
+        cancelled: 'Cancelled',
+      };
+      sendTransactional(order.customer_email, 'order_status_update', {
+        customer_name: order.customer_name || 'Customer',
+        order_number: order.order_number,
+        status: statusLabels[status] || status,
+      }).catch(err => console.error('Failed to send vendor status email:', err));
     }
 
     return NextResponse.json({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { registerCustomer } from '@/lib/services/auth-service';
+import { sendTransactional } from '@/lib/services/email/email-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,12 @@ export async function POST(request: NextRequest) {
     if (!result.success || !result.tokens || !result.user) {
       return NextResponse.json({ error: result.error || 'Registration failed' }, { status: 400 });
     }
+
+    // Send welcome email (fire-and-forget)
+    sendTransactional(email, 'welcome_customer', {
+      customer_name: name,
+      points_earned: '50',
+    }).catch(err => console.error('Failed to send welcome email:', err));
 
     const response = NextResponse.json({
       user: {

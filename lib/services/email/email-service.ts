@@ -218,7 +218,7 @@ function wrapInLayout(bodyHtml: string, language: 'en' | 'he' = 'en'): string {
     </div>
     <div class="footer">
       <p>${language === 'he' ? 'כפר השלום, דימונה, ישראל' : 'Village of Peace, Dimona, Israel'}</p>
-      <p><a href="https://kfar.village-of-peace.com">kfar.village-of-peace.com</a></p>
+      <p><a href="https://kfarapp.com">kfarapp.com</a></p>
     </div>
   </div>
 </body>

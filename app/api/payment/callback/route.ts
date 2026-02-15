@@ -6,6 +6,7 @@ import {
   updatePaymentTransaction,
   getPaymentTransactionByOrderId,
 } from '@/lib/services/payment/ypay-service';
+import { sendTransactional } from '@/lib/services/email/email-service';
 
 // ---------------------------------------------------------------------------
 // GET /api/payment/callback
@@ -85,6 +86,47 @@ export async function GET(request: NextRequest) {
       '-> payment:', paymentStatus,
       '-> order:', orderStatus
     );
+
+    // Send payment receipt email on success (fire-and-forget)
+    if (paymentStatus === 'completed') {
+      try {
+        const { rows: fullOrder } = await query(
+          `SELECT customer_name, customer_email, total_amount, items, delivery_method FROM orders WHERE id = $1`,
+          [orderId]
+        );
+        const o = fullOrder[0];
+        if (o?.customer_email) {
+          const items = typeof o.items === 'string' ? JSON.parse(o.items) : (o.items || []);
+          const itemsHtml = items.map((item: any) =>
+            `<tr>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.name}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
+              <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${Number(item.price).toFixed(2)} ILS</td>
+            </tr>`
+          ).join('');
+          const itemsTable = `<table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Item</th>
+              <th style="text-align:center;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Qty</th>
+              <th style="text-align:right;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Price</th>
+            </tr></thead>
+            <tbody>${itemsHtml}</tbody>
+          </table>`;
+
+          sendTransactional(o.customer_email, 'order_confirmation', {
+            customer_name: o.customer_name || 'Customer',
+            order_number: orderNumber,
+            items_html: itemsTable,
+            total: Number(o.total_amount).toFixed(2),
+            currency: 'ILS',
+            payment_method: `Credit Card${last4 ? ` ****${last4}` : ''} (YPAY)`,
+            delivery_method: o.delivery_method || 'Pickup',
+          }).catch(err => console.error('Failed to send payment receipt:', err));
+        }
+      } catch (emailError) {
+        console.error('Non-critical: email dispatch failed:', emailError);
+      }
+    }
 
     // Redirect to appropriate page
     if (paymentStatus === 'completed') {

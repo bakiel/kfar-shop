@@ -8,6 +8,7 @@ import {
   getPaymentTransactionByProviderTxId,
   YPayWebhookPayload,
 } from '@/lib/services/payment/ypay-service';
+import { sendTransactional } from '@/lib/services/email/email-service';
 
 // ---------------------------------------------------------------------------
 // POST /api/payment/webhook
@@ -120,14 +121,18 @@ export async function POST(request: NextRequest) {
         'order:', orderStatus
       );
 
-      // If payment completed, update customer stats
+      // If payment completed, update customer stats and send receipt
       if (paymentStatus === 'completed') {
         try {
           const { rows: orderRows } = await query(
-            'SELECT customer_email, total_amount FROM orders WHERE id = $1',
+            `SELECT order_number, customer_name, customer_email, total_amount, subtotal,
+                    delivery_fee, items, payment_method, delivery_method
+             FROM orders WHERE id = $1`,
             [orderId]
           );
-          if (orderRows[0]?.customer_email) {
+          const order = orderRows[0];
+          if (order?.customer_email) {
+            // Update customer stats
             await query(
               `UPDATE customers SET
                 total_orders = total_orders + 1,
@@ -135,12 +140,40 @@ export async function POST(request: NextRequest) {
                 last_order_at = NOW(),
                 updated_at = NOW()
               WHERE email = $2`,
-              [orderRows[0].total_amount, orderRows[0].customer_email]
+              [order.total_amount, order.customer_email]
             );
+
+            // Send payment receipt email (fire-and-forget)
+            const items = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []);
+            const itemsHtml = items.map((item: any) =>
+              `<tr>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.name}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${Number(item.price).toFixed(2)} ILS</td>
+              </tr>`
+            ).join('');
+            const itemsTable = `<table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="text-align:left;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Item</th>
+                <th style="text-align:center;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Qty</th>
+                <th style="text-align:right;padding:6px 8px;border-bottom:2px solid #2D5A27;color:#2D5A27;">Price</th>
+              </tr></thead>
+              <tbody>${itemsHtml}</tbody>
+            </table>`;
+
+            sendTransactional(order.customer_email, 'order_confirmation', {
+              customer_name: order.customer_name || 'Customer',
+              order_number: order.order_number,
+              items_html: itemsTable,
+              total: Number(order.total_amount).toFixed(2),
+              currency: 'ILS',
+              payment_method: 'Credit Card (YPAY)',
+              delivery_method: order.delivery_method || 'Pickup',
+            }).catch(err => console.error('Failed to send payment receipt email:', err));
           }
         } catch (statsError) {
           // Non-critical: log but don't fail the webhook
-          console.error('Failed to update customer stats:', statsError);
+          console.error('Failed to update customer stats/send receipt:', statsError);
         }
       }
     }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
+import { sendTransactional } from '@/lib/services/email/email-service';
 
 // ---------------------------------------------------------------------------
 // PATCH /api/orders/[id]/status
@@ -140,6 +141,24 @@ export async function PATCH(
       'status:', updatedOrder.status,
       'payment:', updatedOrder.payment_status
     );
+
+    // Send order status update email to customer (fire-and-forget)
+    if (status && updatedOrder.customer_email) {
+      const statusLabels: Record<string, string> = {
+        confirmed: 'Order Confirmed',
+        processing: 'Being Prepared',
+        ready: 'Ready for Pickup',
+        shipped: 'Shipped',
+        delivered: 'Delivered',
+        completed: 'Completed',
+        cancelled: 'Cancelled',
+      };
+      sendTransactional(updatedOrder.customer_email, 'order_status_update', {
+        customer_name: updatedOrder.customer_name || 'Customer',
+        order_number: updatedOrder.order_number,
+        status: statusLabels[status] || status,
+      }).catch(err => console.error('Failed to send status update email:', err));
+    }
 
     return NextResponse.json({
       success: true,

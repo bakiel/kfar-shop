@@ -54,8 +54,8 @@ const contactCards: ContactCard[] = [
     titleHe: 'שלחו אימייל',
     descriptionEn: 'We reply within 24 hours',
     descriptionHe: 'נשיב תוך 24 שעות',
-    valueEn: 'support@kfrmarketplace.com',
-    valueHe: 'support@kfrmarketplace.com',
+    valueEn: 'support@kfarapp.com',
+    valueHe: 'support@kfarapp.com',
     color: '#f6af0d',
     bgColor: '#f6af0d10'
   },
@@ -125,13 +125,29 @@ export default function ContactPage() {
     return { level: 'Standard', color: '#6b7280', time: '48 hours' };
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus('submitting');
-    setTimeout(() => {
-      setFormStatus('success');
-      setTimeout(() => setFormStatus('idle'), 4000);
-    }, 1500);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          tags: selectedTags,
+        }),
+      });
+      if (res.ok) {
+        setFormStatus('success');
+        setFormData({ firstName: '', lastName: '', email: '', phone: '', category: '', message: '' });
+        setSelectedTags([]);
+        setTimeout(() => setFormStatus('idle'), 5000);
+      } else {
+        setFormStatus('idle');
+      }
+    } catch {
+      setFormStatus('idle');
+    }
   };
 
   return (
@@ -567,7 +583,7 @@ export default function ContactPage() {
                       {[
                         { icon: MapPin, textEn: 'Village of Peace, Dimona, Israel', textHe: 'כפר השלום, דימונה, ישראל' },
                         { icon: Phone, textEn: '+972-8-655-7700', textHe: '08-655-7700' },
-                        { icon: Mail, textEn: 'support@kfrmarketplace.com', textHe: 'support@kfrmarketplace.com' }
+                        { icon: Mail, textEn: 'support@kfarapp.com', textHe: 'support@kfarapp.com' }
                       ].map((info, i) => {
                         const InfoIcon = info.icon;
                         return (
