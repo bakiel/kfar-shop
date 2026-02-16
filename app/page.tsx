@@ -8,7 +8,8 @@ import CommunityStory from '@/components/landing/CommunityStory';
 import Testimonials from '@/components/landing/Testimonials';
 import RewardsPromo from '@/components/landing/RewardsPromo';
 import FlashDeals from '@/components/landing/FlashDeals';
-export const dynamic = 'force-dynamic';
+// Revalidate every 5 minutes instead of force-dynamic (was causing 1.4s SSR on every request)
+export const revalidate = 300;
 
 export default async function Home() {
   const data = await getLandingPageData();

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getLandingPageData } from '@/lib/services/landing-data-service';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // Cache for 5 minutes
 
 export async function GET() {
   try {
