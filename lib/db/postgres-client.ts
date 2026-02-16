@@ -14,13 +14,16 @@ const pool = new Pool({
   connectionTimeoutMillis: 3000,
 });
 
-// Fast DB availability check -- caches result for 60s to avoid repeated timeouts
+// Fast DB availability check -- caches result to avoid repeated timeouts
+// Success cached 5min, failure cached only 5s (allows quick recovery after restart)
 let _dbAvailable: boolean | null = null;
 let _dbCheckTime = 0;
-const DB_CHECK_TTL = 60_000; // 60 seconds
+const DB_CHECK_TTL_OK = 300_000;  // 5 minutes when DB is up
+const DB_CHECK_TTL_FAIL = 5_000;  // 5 seconds when DB is down (retry quickly)
 
 export async function isDbAvailable(): Promise<boolean> {
-  if (_dbAvailable !== null && Date.now() - _dbCheckTime < DB_CHECK_TTL) {
+  const ttl = _dbAvailable === false ? DB_CHECK_TTL_FAIL : DB_CHECK_TTL_OK;
+  if (_dbAvailable !== null && Date.now() - _dbCheckTime < ttl) {
     return _dbAvailable;
   }
   try {
@@ -47,8 +50,8 @@ export async function query<T = any>(
   text: string,
   params?: any[]
 ): Promise<{ rows: T[]; rowCount: number }> {
-  // Skip DB if we already know it's unreachable (avoids repeated timeouts)
-  if (_dbAvailable === false && Date.now() - _dbCheckTime < DB_CHECK_TTL) {
+  // Skip DB if we recently confirmed it's unreachable (retry after 5s)
+  if (_dbAvailable === false && Date.now() - _dbCheckTime < DB_CHECK_TTL_FAIL) {
     throw new Error('Database unavailable (cached)');
   }
   const start = Date.now();
