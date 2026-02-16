@@ -55,6 +55,11 @@ const item = {
 //   { id: 'KF-1005', customer: 'Rivka Amar', customerHe: 'רבקה עמר', vendor: 'People Store', vendorHe: 'חנות העם', items: 1, total: 52, date: '2025-02-05', status: 'pending' },
 // ];
 
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token');
+}
+
 export default function AdminDashboard() {
   const { language, t, isRTL } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -62,7 +67,11 @@ export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    fetch('/api/admin/dashboard')
+    const token = getToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    fetch('/api/admin/dashboard', { headers })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();

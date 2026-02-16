@@ -92,7 +92,10 @@ export default function OrdersPage() {
     setError(null);
     const params = new URLSearchParams();
     if (status !== 'all') params.set('status', status);
-    fetch(`/api/admin/orders?${params.toString()}`)
+    const token = typeof window !== 'undefined' ? (sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token')) : null;
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    fetch(`/api/admin/orders?${params.toString()}`, { headers })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -122,9 +125,12 @@ export default function OrdersPage() {
 
   const handleStatusUpdate = useCallback((orderId: string, newStatus: OrderStatus) => {
     setUpdating(orderId);
+    const token = typeof window !== 'undefined' ? (sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token')) : null;
+    const patchHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) patchHeaders['Authorization'] = `Bearer ${token}`;
     fetch('/api/admin/orders', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: patchHeaders,
       body: JSON.stringify({ orderId, status: newStatus }),
     })
       .then((res) => {

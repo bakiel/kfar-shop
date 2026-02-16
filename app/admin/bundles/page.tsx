@@ -70,7 +70,10 @@ export default function BundlesPage() {
   const fetchBundles = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetch('/api/admin/bundles')
+    const token = typeof window !== 'undefined' ? (sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token')) : null;
+    const authHeaders: Record<string, string> = {};
+    if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+    fetch('/api/admin/bundles', { headers: authHeaders })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
