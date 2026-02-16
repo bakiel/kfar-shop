@@ -11,7 +11,7 @@ const pool = new Pool({
   password: process.env.POSTGRES_PASSWORD || 'kfar_secure_2025',
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 800,
+  connectionTimeoutMillis: 3000,
 });
 
 // Fast DB availability check -- caches result for 60s to avoid repeated timeouts
