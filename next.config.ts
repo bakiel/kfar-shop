@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable standalone for production deployments
-  output: 'standalone',
-  
   // Server-only packages (never bundled for the browser)
   serverExternalPackages: ['nodemailer'],
 
