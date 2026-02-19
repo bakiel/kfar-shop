@@ -331,7 +331,7 @@ export default function VendorBannerDisplay({ vendorId }: { vendorId: string }) 
         >
           <div>
             <p className="text-sm text-gray-600">Free Delivery</p>
-            <p className="font-semibold" style={{ color: '#478c0b' }}>Orders > ₪50</p>
+            <p className="font-semibold" style={{ color: '#478c0b' }}>Orders &gt; ₪50</p>
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div>

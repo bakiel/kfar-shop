@@ -17,7 +17,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
+  register: (data: { email: string; password: string; name: string; phone?: string }) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean; message?: string }>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<boolean>;
 }
@@ -144,9 +144,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: result.error || 'Registration failed' };
       }
 
-      setUser(result.user);
-      setAccessToken(result.accessToken);
-      scheduleRefresh();
+      // Registration requires email verification - don't auto-login
+      if (result.requiresVerification) {
+        return { success: true, requiresVerification: true, message: result.message };
+      }
+
+      // If server returns user/token (future: social auth), set them
+      if (result.user && result.accessToken) {
+        setUser(result.user);
+        setAccessToken(result.accessToken);
+        scheduleRefresh();
+      }
       return { success: true };
     } catch {
       return { success: false, error: 'Network error' };

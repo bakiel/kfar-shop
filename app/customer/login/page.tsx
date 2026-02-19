@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import {
@@ -23,6 +24,7 @@ import {
   Loader2,
   ChevronRight,
   AlertCircle,
+  Check,
 } from 'lucide-react';
 
 const benefits = [
@@ -61,10 +63,13 @@ export default function CustomerLogin() {
   const { t, language, isRTL } = useLanguage();
   const { login, register } = useAuth();
   const shouldReduceMotion = useReducedMotion();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const searchParams = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
+  const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -77,9 +82,10 @@ export default function CustomerLogin() {
     emailRef.current?.focus();
   }, [mode]);
 
-  // Clear error on mode switch
+  // Clear error/success on mode switch
   useEffect(() => {
     setError('');
+    setSuccessMessage('');
   }, [mode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,6 +121,19 @@ export default function CustomerLogin() {
 
         if (!result.success) {
           setError(result.error || (isRTL ? 'ההרשמה נכשלה' : 'Registration failed'));
+          setLoading(false);
+          return;
+        }
+
+        if (result.requiresVerification) {
+          // Show success message and switch to login mode
+          setSuccessMessage(
+            isRTL
+              ? 'ההרשמה הצליחה! בדקו את האימייל שלכם ולחצו על קישור האימות כדי להתחבר.'
+              : 'Registration successful! Check your email and click the verification link to log in.'
+          );
+          setMode('login');
+          setFormData({ ...formData, password: '' });
           setLoading(false);
           return;
         }
@@ -274,6 +293,23 @@ export default function CustomerLogin() {
                 </button>
               ))}
             </motion.div>
+
+            {/* Success message */}
+            <AnimatePresence>
+              {successMessage && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden mb-4"
+                >
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+                    <Check className="w-4 h-4 stroke-[1.5] flex-shrink-0" />
+                    {successMessage}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Error message */}
             <AnimatePresence>
