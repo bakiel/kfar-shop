@@ -35,7 +35,8 @@ export async function POST(request: NextRequest) {
       message: result.message || 'Registration successful. Please check your email to verify your account.',
       requiresVerification: true,
     });
-  } catch {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  } catch (error) {
+    console.error('Registration route error:', error);
+    return NextResponse.json({ error: 'Registration service unavailable. Please try again.' }, { status: 500 });
   }
 }
