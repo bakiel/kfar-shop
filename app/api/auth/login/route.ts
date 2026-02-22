@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Set refresh token as httpOnly cookie
     const response = NextResponse.json({
+      success: true,
       user: {
         id: result.user.id,
         email: result.user.email,
