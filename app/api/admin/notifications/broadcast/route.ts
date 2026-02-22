@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get target customers
-    let customerQuery = 'SELECT id, email, first_name, last_name FROM customers WHERE email IS NOT NULL';
+    let customerQuery = 'SELECT id, email, name FROM customers WHERE email IS NOT NULL';
     const params: any[] = [];
 
     if (segmentId) {
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         .filter((c: any) => c.email)
         .map((c: any) => ({
           email: c.email,
-          name: `${c.first_name || ''} ${c.last_name || ''}`.trim() || undefined,
+          name: c.name || undefined,
         }));
 
       if (recipients.length > 0) {

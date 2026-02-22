@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
         // Generic marketing QR with UTM parameters
         qrData = {
           vendorId,
-          url: `${baseUrl}/store/${vendorId}?utm_source=qr&utm_medium=${data.medium || 'print'}&utm_campaign=${data.campaign || 'general'}`,
-          campaign: data.campaign,
+          url: `${baseUrl}/store/${vendorId}?utm_source=qr&utm_medium=${data?.medium || 'print'}&utm_campaign=${data?.campaign || 'general'}`,
+          campaign: data?.campaign,
           type: 'marketing_campaign'
         };
         break;

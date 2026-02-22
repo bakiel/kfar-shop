@@ -29,7 +29,7 @@ export async function GET(
     // Get order from database
     const { rows: orderRows } = await query(
       `SELECT id, order_number, status, payment_status, payment_reference,
-              total_amount, subtotal, delivery_fee, customer_name, customer_email,
+              total, subtotal, delivery_fee, customer_name, customer_email,
               payment_method, delivery_method, created_at, updated_at,
               completed_at, cancelled_at
        FROM orders WHERE id = $1`,
@@ -40,7 +40,7 @@ export async function GET(
       // Try by order_number as fallback
       const { rows: orderByNumber } = await query(
         `SELECT id, order_number, status, payment_status, payment_reference,
-                total_amount, subtotal, delivery_fee, customer_name, customer_email,
+                total, subtotal, delivery_fee, customer_name, customer_email,
                 payment_method, delivery_method, created_at, updated_at,
                 completed_at, cancelled_at
          FROM orders WHERE order_number = $1`,
@@ -84,7 +84,7 @@ export async function GET(
         status: order.status,
         paymentStatus: order.payment_status,
         paymentReference: order.payment_reference,
-        totalAmount: order.total_amount,
+        totalAmount: order.total,
         subtotal: order.subtotal,
         deliveryFee: order.delivery_fee,
         customerName: order.customer_name,

@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       const { rows: orderRows } = await client.query(
         `INSERT INTO orders (
           order_number, customer_name, customer_email, customer_phone,
-          total_amount, subtotal, delivery_fee, payment_method,
+          total, subtotal, delivery_fee, payment_method,
           status, payment_status, delivery_method,
           shipping_address, delivery_address, items,
           created_at, updated_at
