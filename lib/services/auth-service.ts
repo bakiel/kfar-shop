@@ -387,17 +387,10 @@ export async function requestPasswordReset(email: string): Promise<{ success: bo
 
     // Send password reset email (fire-and-forget)
     const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com'}/reset-password?token=${resetToken}`;
-    sendTransactional(email.toLowerCase().trim(), 'status_update', {
+    sendTransactional(email.toLowerCase().trim(), 'password_reset', {
       customer_name: displayName,
-      subject: 'Password Reset Request',
-      status_message: 'Password Reset',
-      details_html: `
-        <p>We received a request to reset your password. Click the button below to set a new password:</p>
-        <p style="text-align:center;margin:24px 0;">
-          <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#2D5A27;color:#fff;text-decoration:none;border-radius:6px;font-weight:bold;">Reset Password</a>
-        </p>
-        <p style="color:#666;font-size:13px;">This link expires in 1 hour. If you did not request this, please ignore this email.</p>
-      `,
+      reset_url: resetUrl,
+      expiry_time: '1 hour',
     }).catch(err => console.error('Failed to send password reset email:', err));
 
     return { success: true };
