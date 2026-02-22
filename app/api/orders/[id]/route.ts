@@ -22,22 +22,43 @@ export async function GET(
       );
     }
 
-    // Try to find by ID first, then by order_number
-    let orderQuery = 'SELECT * FROM orders WHERE id = $1';
-    let orderParams: any[] = [id];
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isUUID = UUID_RE.test(id);
+    const isOrderNumber = id.startsWith('KFAR-');
 
-    // If it looks like an order number (starts with KFAR-), search by order_number
-    if (id.startsWith('KFAR-')) {
+    // Try to find by ID first, then by order_number
+    let orderQuery: string;
+    let orderParams: any[];
+
+    if (isUUID) {
+      orderQuery = 'SELECT * FROM orders WHERE id = $1';
+      orderParams = [id];
+    } else if (isOrderNumber) {
       orderQuery = 'SELECT * FROM orders WHERE order_number = $1';
+      orderParams = [id];
+    } else {
+      // Unknown format — try order_number only (safe, no UUID cast)
+      orderQuery = 'SELECT * FROM orders WHERE order_number = $1';
+      orderParams = [id];
     }
 
     const { rows: orderRows } = await query(orderQuery, orderParams);
 
     if (orderRows.length === 0) {
-      // Fallback: try the other field
-      const fallbackQuery = id.startsWith('KFAR-')
-        ? 'SELECT * FROM orders WHERE id = $1'
-        : 'SELECT * FROM orders WHERE order_number = $1';
+      // Fallback: if we searched by UUID try order_number, otherwise try UUID (only if valid)
+      const fallbackQuery = isUUID
+        ? 'SELECT * FROM orders WHERE order_number = $1'
+        : (isOrderNumber && UUID_RE.test(id) ? 'SELECT * FROM orders WHERE id = $1' : null);
+
+      if (!fallbackQuery) {
+        return NextResponse.json(
+          { success: false, error: 'Order not found' },
+          { status: 404 }
+        );
+      }
+
+      // eslint-disable-next-line no-warning-comments
+      // NOTE: second attempt with alternate key format
 
       const { rows: fallbackRows } = await query(fallbackQuery, [id]);
 

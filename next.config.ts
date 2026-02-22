@@ -4,12 +4,10 @@ const nextConfig: NextConfig = {
   // Server-only packages (never bundled for the browser)
   serverExternalPackages: ['nodemailer'],
 
-  // Bypass all build errors
-  experimental: {
-    turbo: {
-      // Turbopack configuration
-    }
-  },
+  // Turbopack configuration (moved from deprecated experimental.turbo)
+  turbopack: {},
+
+  experimental: {},
   
   images: {
     minimumCacheTTL: 2592000, // 30 days - prevents re-optimization

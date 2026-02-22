@@ -85,17 +85,17 @@ export async function POST(request: NextRequest) {
       qrData.analytics = {
         createdAt: new Date().toISOString(),
         source: 'vendor_dashboard',
-        campaign: data.campaign || 'default'
+        campaign: (data && data.campaign) || 'default'
       };
     }
-    
+
     // Generate QR code using the service
     const qrRecord = await qrService.generateQRCode(
       type === 'vendor' ? 'vendor' : 'discount', // Map to service types
       qrData,
       {
-        expiresIn: data.expiresIn, // in minutes
-        maxUsage: data.maxUsage,
+        expiresIn: data ? data.expiresIn : undefined, // in minutes
+        maxUsage: data ? data.maxUsage : undefined,
         template: design?.template || 'default'
       }
     );
@@ -187,43 +187,11 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    // In production, fetch from database
-    // For now, return mock data
-    const mockQRCodes = [
-      {
-        id: 'qr_vendor_1',
-        type: 'vendor',
-        shortCode: 'ABCD1234',
-        url: `https://kfar-marketplace.com/qr/ABCD1234`,
-        createdAt: new Date().toISOString(),
-        analytics: {
-          scans: 42,
-          uniqueScans: 28,
-          lastScanned: new Date(Date.now() - 3600000).toISOString()
-        }
-      },
-      {
-        id: 'qr_products_1',
-        type: 'products',
-        shortCode: 'EFGH5678',
-        url: `https://kfar-marketplace.com/qr/EFGH5678`,
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        analytics: {
-          scans: 15,
-          uniqueScans: 12,
-          lastScanned: new Date(Date.now() - 7200000).toISOString()
-        }
-      }
-    ];
-    
-    const filteredCodes = type 
-      ? mockQRCodes.filter(qr => qr.type === type)
-      : mockQRCodes;
-    
+    // No QR codes stored yet -- return empty array
     return NextResponse.json({
       success: true,
-      qrCodes: filteredCodes,
-      total: filteredCodes.length
+      qrCodes: [],
+      total: 0
     });
     
   } catch (error) {

@@ -93,6 +93,9 @@ export async function POST(request: NextRequest) {
       country: body.customer.country || 'Israel',
     });
 
+    // Derive primary vendor_id from items (first vendor found)
+    const primaryVendorId = body.items.find(i => i.vendorId)?.vendorId || null;
+
     // Create order (columns match actual DB schema)
     const { rows: orderRows } = await query(
       `INSERT INTO orders (
@@ -100,8 +103,9 @@ export async function POST(request: NextRequest) {
         total, subtotal, delivery_fee, payment_method,
         status, payment_status,
         delivery_address, items, delivery_notes,
+        vendor_id,
         created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
       RETURNING *`,
       [
         orderNumber,
@@ -117,6 +121,7 @@ export async function POST(request: NextRequest) {
         addressJson,
         JSON.stringify(body.items),
         body.notes || null,
+        primaryVendorId,
       ]
     );
 
@@ -172,7 +177,7 @@ export async function POST(request: NextRequest) {
       'people-store': 'people@kfarapp.com',
       'garden-of-light': 'garden@kfarapp.com',
       'gahn-delight': 'gahn@kfarapp.com',
-      'vop-shop': 'kfar@kfarapp.com',
+      'vop-shop': 'vop@kfarapp.com',
     };
 
     const vendorIds = [...new Set(body.items.map(i => i.vendorId).filter(Boolean))];

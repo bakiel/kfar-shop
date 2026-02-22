@@ -12,7 +12,7 @@ const VENDOR_OPTIONS = [
   { id: 'queens-cuisine', name: "Queen's Cuisine", nameHe: 'המטבח של המלכה', logo: '/images/vendors/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg', email: 'queens@kfarapp.com' },
   { id: 'people-store', name: "People's Store", nameHe: 'חנות העם', logo: '/images/vendors/people_store_logo_community_retail.jpg', email: 'people@kfarapp.com' },
   { id: 'garden-of-light', name: 'Garden of Light', nameHe: 'גן האור', logo: '/images/vendors/Garden of Light Logo.jpg', email: 'garden@kfarapp.com' },
-  { id: 'vop-shop', name: 'VOP Shop', nameHe: 'חנות כפר השלום', logo: '/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg', email: 'kfar@kfarapp.com' },
+  { id: 'vop-shop', name: 'VOP Shop', nameHe: 'חנות כפר השלום', logo: '/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg', email: 'vop@kfarapp.com' },
   { id: 'gahn-delight', name: 'Gahn Delight', nameHe: 'גן תענוג', logo: '/images/vendors/gahn_delight_official_logo_master_brand_ice_cream.jpg', email: 'gahn@kfarapp.com' },
 ];
 
