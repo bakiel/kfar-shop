@@ -9,9 +9,11 @@ const pool = new Pool({
   database: process.env.POSTGRES_DB || 'kfar_marketplace',
   user: process.env.POSTGRES_USER || 'kfar',
   password: process.env.POSTGRES_PASSWORD || 'kfar_secure_2025',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 3000,
+  max: 10,
+  idleTimeoutMillis: 60000,
+  connectionTimeoutMillis: 5000,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10000,
 });
 
 // Fast DB availability check -- caches result to avoid repeated timeouts
@@ -65,8 +67,10 @@ export async function query<T = any>(
     }
     return { rows: result.rows, rowCount: result.rowCount || 0 };
   } catch (error) {
-    // Mark DB unavailable on connection errors
-    if ((error as any)?.code === 'ECONNREFUSED' || (error as any)?.message?.includes('timeout')) {
+    // Mark DB unavailable on connection errors (do not crash the process)
+    const msg = (error as any)?.message || '';
+    const code = (error as any)?.code || '';
+    if (code === 'ECONNREFUSED' || msg.includes('timeout') || msg.includes('terminated') || msg.includes('Connection terminated')) {
       _dbAvailable = false;
       _dbCheckTime = Date.now();
     }
