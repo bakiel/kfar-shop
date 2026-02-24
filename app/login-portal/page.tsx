@@ -131,16 +131,6 @@ export default function LoginPortal() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="rounded-2xl p-4 border-2" style={{ backgroundColor: '#fef9ef', borderColor: '#f6af0d' }}>
-                    <div className="font-semibold mb-2" style={{ color: '#3a3a1d' }}>{t('Demo Credentials:')}</div>
-                    <div className="text-sm rounded-xl p-3 font-mono" style={{ backgroundColor: 'rgba(246, 175, 13, 0.1)', color: '#3a3a1d' }}>
-                      vendor@tevadeli.com<br/>
-                      vendor123
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="text-center">
                   <Link 
                     href="/vendor/onboarding"
                     className="inline-flex items-center gap-2 text-sm font-semibold hover:underline transition-colors"
@@ -182,16 +172,6 @@ export default function LoginPortal() {
                     <Crown className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
                     {t('Admin Access')}
                   </Link>
-                </div>
-                
-                <div className="text-center">
-                  <div className="rounded-2xl p-4 border-2" style={{ backgroundColor: '#fef9ef', borderColor: '#c23c09' }}>
-                    <div className="font-semibold mb-2" style={{ color: '#3a3a1d' }}>{t('Demo Credentials:')}</div>
-                    <div className="text-sm rounded-xl p-3 font-mono" style={{ backgroundColor: 'rgba(194, 60, 9, 0.1)', color: '#3a3a1d' }}>
-                      admin@kfar.com<br/>
-                      admin123
-                    </div>
-                  </div>
                 </div>
                 
                 <div className="text-center">

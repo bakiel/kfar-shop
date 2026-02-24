@@ -192,15 +192,7 @@ export default function UserAccountDropdown() {
                   </Link>
                 </div>
 
-                {/* Demo Credentials */}
-                <div className="p-4 bg-gray-50 border-t">
-                  <div className="text-xs text-gray-600 mb-2 font-medium">Demo Credentials:</div>
-                  <div className="text-xs space-y-1">
-                    <div><strong>Admin:</strong> admin@kfar.com / admin123</div>
-                    <div><strong>Vendor:</strong> vendor@tevadeli.com / vendor123</div>
-                    <div><strong>Customer:</strong> Any email/password</div>
-                  </div>
-                </div>
+
               </>
             )}
           </div>
