@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { db, isDbAvailable, query } from '@/lib/db/postgres-client';
 import { verifyAccessToken } from '@/lib/services/auth-service';
@@ -102,6 +104,32 @@ export async function GET(request: NextRequest) {
           { error: 'Database unavailable', customers: [], vendors: [] },
           { status: 503 }
         );
+      }
+    }
+
+    // --- Admins ---
+    if (!type || type === 'admins') {
+      try {
+        const { rows: admins } = await query(
+          `SELECT id, email, role, display_name, is_active, last_login_at, created_at
+           FROM users WHERE role = 'admin' ORDER BY created_at ASC`
+        );
+
+        const normalizedAdmins = admins.map((a: any) => ({
+          id: a.id,
+          name: a.display_name || a.email?.split('@')[0] || 'Admin',
+          email: a.email,
+          role: a.role === 'admin' ? 'Super Admin' : a.role,
+          lastLogin: a.last_login_at ? new Date(a.last_login_at).toISOString().split('T')[0] : '',
+          status: a.is_active ? 'active' : 'inactive',
+        }));
+
+        response.admins = normalizedAdmins;
+        response.adminCount = normalizedAdmins.length;
+      } catch (err) {
+        console.error('Admins DB query failed:', err);
+        response.admins = [];
+        response.adminCount = 0;
       }
     }
 
