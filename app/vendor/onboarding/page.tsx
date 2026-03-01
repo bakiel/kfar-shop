@@ -306,14 +306,30 @@ export default function VendorOnboarding() {
       const result = await response.json();
       
       if (result.success && result.vendorId) {
+        // Store JWT for immediate AuthContext hydration
+        if (result.accessToken) {
+          sessionStorage.setItem('kfar_access_token', result.accessToken);
+          sessionStorage.setItem('kfar_user', JSON.stringify({
+            id: `user-${result.vendorId}`,
+            email: storeData.email,
+            role: 'vendor',
+            vendorId: result.vendorId,
+            displayName: storeData.storeName,
+          }));
+        }
+        // Legacy localStorage for backward-compat with older dashboard pages
         localStorage.setItem('vendorId', result.vendorId);
         localStorage.setItem('userRole', 'vendor');
-        localStorage.setItem('customerName', storeData.storeName);
-        
+        localStorage.setItem('vendorAuth', JSON.stringify({
+          vendorId: result.vendorId,
+          vendorName: storeData.storeName,
+          name: storeData.storeName,
+        }));
+
         setAiMessage('✅ Success! Your store is live. Redirecting to your dashboard...');
-        
+
         setTimeout(() => {
-          router.push('/vendor/dashboard?vendorId=' + result.vendorId);
+          router.push('/vendor/dashboard');
         }, 2000);
       } else {
         const errorMessage = result.error || 'Could not connect to database';
