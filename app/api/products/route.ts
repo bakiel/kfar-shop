@@ -6,10 +6,12 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const rawSearch = searchParams.get('search') || '';
   const search = applyVoiceCorrections(rawSearch).toLowerCase();
-  
+  const vendorIdFilter = searchParams.get('vendorId') || searchParams.get('vendor_id') || '';
+  const limitParam = parseInt(searchParams.get('limit') || '0');
+
   // Get real products from your data system
   const allProducts = getAllProducts();
-  
+
   // Transform to match the expected format for voice chat
   const products = allProducts.map(product => ({
     id: product.id,
@@ -21,8 +23,11 @@ export async function GET(request: NextRequest) {
     image: product.images?.[0] || product.image || '',
     description: product.descriptionEn || product.description || ''
   }));
-  
-  let filteredProducts = products;
+
+  // Apply vendorId filter if provided
+  let filteredProducts = vendorIdFilter
+    ? products.filter(p => p.vendorId === vendorIdFilter)
+    : products;
   
   // Filter by search term with fuzzy matching
   if (search) {
@@ -132,9 +137,14 @@ export async function GET(request: NextRequest) {
     // Limit results for voice interface
     filteredProducts = filteredProducts.slice(0, 10);
   }
-  
-  return NextResponse.json({ 
+
+  // Apply explicit limit if provided (and no search was done, which already caps at 10)
+  if (limitParam > 0 && !search) {
+    filteredProducts = filteredProducts.slice(0, limitParam);
+  }
+
+  return NextResponse.json({
     products: filteredProducts,
-    total: filteredProducts.length 
+    total: filteredProducts.length
   });
 }

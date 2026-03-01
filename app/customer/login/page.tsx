@@ -388,6 +388,14 @@ export default function CustomerLogin() {
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     {t('Password')}
                   </label>
+                  {mode === 'login' && (
+                    <a
+                      href="/forgot-password"
+                      className="text-xs text-leaf-green hover:underline"
+                    >
+                      {isRTL ? 'שכחתי סיסמה' : 'Forgot password?'}
+                    </a>
+                  )}
                 </div>
                 <div className="relative">
                   <Lock className="absolute start-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 stroke-[1.5]" />

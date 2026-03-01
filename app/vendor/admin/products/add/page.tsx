@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Wand2, Bot, Plus, X, CloudUpload } from 'lucide-react';
+import { ArrowLeft, Wand2, Bot, Plus, X, CloudUpload, Loader2 } from 'lucide-react';
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -51,6 +51,8 @@ export default function AddProductPage() {
 
   const [currentIngredient, setCurrentIngredient] = useState('');
   const [currentTag, setCurrentTag] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const categories = [
     'Prepared Foods',
@@ -126,11 +128,77 @@ export default function AddProductPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, isDraft = false) => {
     e.preventDefault();
-    // In production, this would submit to the API
-    console.log('Submitting product:', product);
-    router.push('/vendor/admin?tab=products');
+    if (submitting) return;
+
+    if (!product.name.trim()) {
+      setSubmitError('Product name is required');
+      return;
+    }
+    if (!product.price || isNaN(parseFloat(product.price)) || parseFloat(product.price) < 0) {
+      setSubmitError('A valid price is required');
+      return;
+    }
+    if (!product.category) {
+      setSubmitError('Please select a category');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const token = typeof window !== 'undefined'
+      ? sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token') || ''
+      : '';
+
+    try {
+      const res = await fetch('/api/vendor/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          name: product.name.trim(),
+          name_he: product.nameHebrew.trim() || null,
+          description: product.description.trim() || null,
+          description_he: product.descriptionHebrew.trim() || null,
+          price: parseFloat(product.price),
+          original_price: product.originalPrice ? parseFloat(product.originalPrice) : null,
+          category: product.category,
+          stock_quantity: product.stock ? parseInt(product.stock) : 0,
+          unit: product.unit,
+          tags: product.tags,
+          image_url: product.images[0] || null,
+          image_gallery: product.images,
+          is_vegan: product.dietaryInfo.vegan,
+          is_gluten_free: product.dietaryInfo.glutenFree,
+          is_organic: product.dietaryInfo.organic,
+          nutritional_info: {
+            calories: product.nutritionInfo.calories,
+            protein: product.nutritionInfo.protein,
+            carbs: product.nutritionInfo.carbs,
+            fat: product.nutritionInfo.fat,
+            fiber: product.nutritionInfo.fiber,
+            sodium: product.nutritionInfo.sodium,
+          },
+          ingredients: product.ingredients,
+          status: isDraft ? 'draft' : 'published',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to create product');
+      }
+
+      router.push('/vendor/admin?tab=products&created=1');
+    } catch (err: any) {
+      setSubmitError(err.message || 'Failed to create product. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -147,17 +215,25 @@ export default function AddProductPage() {
             <h1 className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>Add New Product</h1>
           </div>
           <div className="flex items-center gap-3">
-            <button 
+            {submitError && (
+              <span className="text-red-600 text-sm">{submitError}</span>
+            )}
+            <button
               type="button"
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              disabled={submitting}
+              onClick={(e) => handleSubmit(e, true)}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
               Save as Draft
             </button>
-            <button 
-              onClick={handleSubmit}
-              className="px-6 py-2 bg-leaf-green text-white rounded-lg hover:bg-leaf-green/90 transition-colors"
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={(e) => handleSubmit(e, false)}
+              className="px-6 py-2 bg-leaf-green text-white rounded-lg hover:bg-leaf-green/90 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
-              Publish Product
+              {submitting && <Loader2 className="w-4 h-4 animate-spin stroke-[1.5]" />}
+              {submitting ? 'Publishing...' : 'Publish Product'}
             </button>
           </div>
         </div>

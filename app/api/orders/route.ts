@@ -41,28 +41,35 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
-    const orderId = `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const seq = Math.floor(Math.random() * 9000) + 1000;
+    const orderNumber = data.order_number || `KFAR-${dateStr}-${seq}`;
 
     const { rows } = await query(
       `INSERT INTO orders (
-        id, customer_id, vendor_id, items, subtotal, total,
-        delivery_fee, delivery_address, delivery_method,
-        payment_method, status, notes, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+        order_number, customer_id, vendor_id, items, subtotal, total,
+        delivery_fee, delivery_address,
+        payment_method, status, delivery_notes,
+        customer_name, customer_email, customer_phone,
+        created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
       RETURNING *`,
       [
-        orderId,
+        orderNumber,
         data.customer_id || null,
         data.vendor_id || null,
         JSON.stringify(data.items),
-        data.subtotal,
+        data.subtotal || data.total,
         data.total,
         data.delivery_fee || 0,
         data.delivery_address ? JSON.stringify(data.delivery_address) : null,
-        data.delivery_method || 'pickup',
         data.payment_method || 'cash',
         'pending',
-        data.notes || null
+        data.notes || data.delivery_notes || null,
+        data.customer_name || null,
+        data.customer_email || null,
+        data.customer_phone || null,
       ]
     );
 
