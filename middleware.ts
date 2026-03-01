@@ -94,7 +94,7 @@ export const config = {
     '/api/admin/:path*',
     '/api/vendor/:path*',
     '/api/customer/:path*',
-    '/api/test-:path*',
-    '/api/debug:path*',
+    '/api/test-(.*)',
+    '/api/debug(.*)',
   ],
 };
