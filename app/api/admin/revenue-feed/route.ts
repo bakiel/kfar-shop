@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/services/auth-service';
-import { query } from '@/lib/db/postgres-client';
+import { query, isDbAvailable } from '@/lib/db/postgres-client';
+
+export const dynamic = 'force-dynamic';
 
 function getUser(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -11,6 +13,11 @@ export async function GET(request: NextRequest) {
   const user = getUser(request);
   if (!user || user.role !== 'admin') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const dbOk = await isDbAvailable();
+  if (!dbOk) {
+    return NextResponse.json({ success: true, transactions: [], totalRevenue: 0, count: 0 });
   }
 
   try {
