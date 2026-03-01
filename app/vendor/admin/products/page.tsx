@@ -33,53 +33,106 @@ export default function VendorProductsPage() {
     setVendorName(name);
   }, [router]);
 
-  // Fetch products from backend API
+  // Helper: get auth token
+  const getToken = () =>
+    (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('kfar_access_token')) ||
+    (typeof localStorage !== 'undefined' && localStorage.getItem('kfar_access_token')) || '';
+
+  // Fetch products — try DB via /api/vendor/products first, fallback to static data
   useEffect(() => {
     if (!vendorId) return;
 
     const fetchProducts = async () => {
       try {
-        // Fetch products for this specific vendor
-        const response = await fetch(`/api/products-enhanced?vendor=${vendorId}`);
-        if (response.ok) {
-          const data = await response.json();
-          const vendorProducts = data.products || [];
-          
-          // Products are already in the correct format from our data layer
-          const transformedProducts = vendorProducts.map((p: any) => ({
-            id: p.id,
-            name: p.name,
-            nameHe: p.nameHe || '',
-            description: p.description || '',
-            longDescription: p.longDescription || p.description || '',
-            price: p.price,
-            originalPrice: p.originalPrice,
-            image: p.image || '/images/placeholder.jpg',
-            images: p.images || [p.image || '/images/placeholder.jpg'],
-            vendor: p.vendor,
-            vendorId: p.vendorId,
-            stock: p.stock || 0,
-            inStock: p.inStock !== false,
-            status: p.inStock ? 'active' : 'out-of-stock',
-            category: p.category || 'uncategorized',
-            rating: p.rating || 4.5,
-            reviewCount: p.reviewCount || 0,
-            kashrut: p.kosher ? 'Badatz Kosher' : null,
-            vegan: p.vegan || false,
-            organic: p.organic || false,
-            glutenFree: p.glutenFree || false,
-            unit: p.unit || 'piece',
-            minimumOrder: p.minimumOrder || 1,
-            shippingInfo: p.shippingInfo || {
-              localPickup: true,
-              delivery: true,
-              international: false
+        const token = getToken();
+        let vendorProducts: any[] = [];
+        let fromDb = false;
+
+        // Try authenticated DB route first
+        if (token) {
+          const res = await fetch('/api/vendor/products?limit=100', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.products && data.products.length > 0) {
+              vendorProducts = data.products;
+              fromDb = true;
             }
-          }));
-          
-          setProducts(transformedProducts);
-          setFilteredProducts(transformedProducts);
+          }
         }
+
+        // Fallback to static data layer
+        if (!fromDb) {
+          const fallback = await fetch(`/api/products-enhanced?vendor=${vendorId}`);
+          if (fallback.ok) {
+            const data = await fallback.json();
+            vendorProducts = data.products || [];
+          }
+        }
+
+        const transformedProducts = vendorProducts.map((p: any) => {
+          if (fromDb) {
+            // Map DB columns → frontend format
+            const st = p.status === 'active' ? 'active' : p.stock_quantity === 0 ? 'out-of-stock' : (p.status || 'inactive');
+            return {
+              id: p.id,
+              name: p.name || '',
+              nameHe: p.name_he || '',
+              description: p.description || '',
+              longDescription: p.description || '',
+              price: parseFloat(p.price) || 0,
+              originalPrice: p.original_price ? parseFloat(p.original_price) : undefined,
+              image: p.image || '/images/placeholder.jpg',
+              images: p.images || [p.image || '/images/placeholder.jpg'],
+              vendor: vendorName,
+              vendorId: vendorId,
+              stock: parseInt(p.stock_quantity) || 0,
+              inStock: p.status === 'active',
+              status: st,
+              category: p.category || 'uncategorized',
+              rating: 4.5,
+              reviewCount: 0,
+              kashrut: null,
+              vegan: false,
+              organic: false,
+              glutenFree: false,
+              unit: p.unit || 'piece',
+              minimumOrder: 1,
+              isDbProduct: true,
+            };
+          } else {
+            return {
+              id: p.id,
+              name: p.name,
+              nameHe: p.nameHe || '',
+              description: p.description || '',
+              longDescription: p.longDescription || p.description || '',
+              price: p.price,
+              originalPrice: p.originalPrice,
+              image: p.image || '/images/placeholder.jpg',
+              images: p.images || [p.image || '/images/placeholder.jpg'],
+              vendor: p.vendor,
+              vendorId: p.vendorId,
+              stock: p.stock || 0,
+              inStock: p.inStock !== false,
+              status: p.inStock ? 'active' : 'out-of-stock',
+              category: p.category || 'uncategorized',
+              rating: p.rating || 4.5,
+              reviewCount: p.reviewCount || 0,
+              kashrut: p.kosher ? 'Badatz Kosher' : null,
+              vegan: p.vegan || false,
+              organic: p.organic || false,
+              glutenFree: p.glutenFree || false,
+              unit: p.unit || 'piece',
+              minimumOrder: p.minimumOrder || 1,
+              isDbProduct: false,
+            };
+          }
+        });
+
+        setProducts(transformedProducts);
+        setFilteredProducts(transformedProducts);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -88,7 +141,7 @@ export default function VendorProductsPage() {
     };
 
     fetchProducts();
-  }, [vendorId]);
+  }, [vendorId, vendorName]);
 
   // Filter products
   useEffect(() => {
@@ -158,32 +211,50 @@ export default function VendorProductsPage() {
 
   // Save edited product
   const saveEdit = async () => {
+    const product = products.find(p => p.id === editingProduct);
+    if (!product) return;
     setSaving(true);
-    
+
     try {
-      // For now, we'll simulate the save since we're using static data
-      // In production, this would connect to a real database
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-      
-      // Update local state
+      if (product.isDbProduct) {
+        const token = getToken();
+        const body: Record<string, any> = {
+          name: editFormData.name,
+          name_he: editFormData.nameHe,
+          description: editFormData.description,
+          price: parseFloat(editFormData.price),
+          category: editFormData.category,
+          unit: editFormData.unit,
+          stock_quantity: parseInt(editFormData.stock) || 0,
+          status: parseInt(editFormData.stock) > 0 ? 'active' : 'inactive',
+        };
+        if (editFormData.image) body.image = editFormData.image;
+
+        const res = await fetch(`/api/vendor/products/${editingProduct}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update product');
+      }
+
+      // Update local state regardless (optimistic for static products)
       setProducts(prev => prev.map(p => {
         if (p.id === editingProduct) {
           return {
             ...p,
             ...editFormData,
-            status: editFormData.stock > 0 ? 'active' : 'out-of-stock',
-            inStock: editFormData.stock > 0
+            status: parseInt(editFormData.stock) > 0 ? 'active' : 'out-of-stock',
+            inStock: parseInt(editFormData.stock) > 0,
           };
         }
         return p;
       }));
       setEditingProduct(null);
-      
-      // Show success message
-      alert('Product updated successfully! Changes are visible in this session.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving product:', error);
-      alert('Failed to save changes. Please try again.');
+      alert(error.message || 'Failed to save changes. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -204,50 +275,51 @@ export default function VendorProductsPage() {
     const newStock = newStatus === 'active' ? (product.stock || 10) : 0;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/products/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          stock_quantity: newStock
-        })
-      });
-
-      if (response.ok) {
-        setProducts(prev => prev.map(p => {
-          if (p.id === productId) {
-            return {
-              ...p,
-              status: newStatus,
-              stock: newStock,
-              inStock: newStatus === 'active'
-            };
-          }
-          return p;
-        }));
+      if (product.isDbProduct) {
+        const token = getToken();
+        const res = await fetch(`/api/vendor/products/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ status: newStatus, stock_quantity: newStock }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Failed to update status');
       }
-    } catch (error) {
+
+      setProducts(prev => prev.map(p => {
+        if (p.id === productId) {
+          return { ...p, status: newStatus, stock: newStock, inStock: newStatus === 'active' };
+        }
+        return p;
+      }));
+    } catch (error: any) {
       console.error('Error toggling product status:', error);
-      alert('Failed to update product status.');
+      alert(error.message || 'Failed to update product status.');
     }
   };
 
-  // Delete product
+  // Delete product (soft-delete: archives in DB)
   const deleteProduct = async (productId: string) => {
-    if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-      try {
-        // Simulate delete operation
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Update local state
-        setProducts(prev => prev.filter(p => p.id !== productId));
-        setFilteredProducts(prev => prev.filter(p => p.id !== productId));
-        alert('Product removed from view. In production, this would delete from database.');
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        alert('Failed to delete product. Please try again.');
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
+
+    const product = products.find(p => p.id === productId);
+
+    try {
+      if (product?.isDbProduct) {
+        const token = getToken();
+        const res = await fetch(`/api/vendor/products/${productId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Failed to delete product');
       }
+
+      setProducts(prev => prev.filter(p => p.id !== productId));
+      setFilteredProducts(prev => prev.filter(p => p.id !== productId));
+    } catch (error: any) {
+      console.error('Error deleting product:', error);
+      alert(error.message || 'Failed to delete product. Please try again.');
     }
   };
 

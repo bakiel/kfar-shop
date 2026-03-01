@@ -15,8 +15,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const fullName = `${firstName} ${lastName || ''}`.trim();
-    const tagList = (tags || []).join(', ') || 'None';
+    // Escape HTML entities to prevent XSS in email templates
+    const esc = (s: string) =>
+      String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const fullName = esc(`${firstName} ${lastName || ''}`.trim());
+    const safeEmail = esc(email);
+    const safePhone = phone ? esc(phone) : '';
+    const safeCategory = esc(category || 'General');
+    const safeMessage = esc(message);
+    const tagList = (tags || []).map((t: string) => esc(t)).join(', ') || 'None';
     const priority = (tags || []).includes('urgent') ? 'URGENT' :
                      (tags || []).includes('payment') ? 'High' :
                      (tags || []).includes('technical') ? 'Medium' : 'Standard';
@@ -31,15 +44,15 @@ export async function POST(request: NextRequest) {
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;color:#2D5A27;">Email</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;"><a href="mailto:${email}">${email}</a></td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;"><a href="mailto:${safeEmail}">${safeEmail}</a></td>
         </tr>
-        ${phone ? `<tr>
+        ${safePhone ? `<tr>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;color:#2D5A27;">Phone</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${phone}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${safePhone}</td>
         </tr>` : ''}
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;color:#2D5A27;">Category</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${category || 'General'}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${safeCategory}</td>
         </tr>
         <tr>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:600;color:#2D5A27;">Tags</td>
@@ -52,7 +65,7 @@ export async function POST(request: NextRequest) {
       </table>
       <h3 style="color:#2D5A27;">Message</h3>
       <div style="background:#f5f0e8;padding:16px;border-radius:8px;border-left:4px solid #478c0b;margin:8px 0;">
-        <p style="white-space:pre-wrap;margin:0;">${message}</p>
+        <p style="white-space:pre-wrap;margin:0;">${safeMessage}</p>
       </div>
       <p style="margin-top:16px;font-size:12px;color:#777;">Reply directly to this email to respond to the customer.</p>
     `;
@@ -60,19 +73,19 @@ export async function POST(request: NextRequest) {
     // Send notification to admin
     const adminResult = await sendRaw(
       'admin@kfarapp.com',
-      `[KFAR Contact] ${priority !== 'Standard' ? `[${priority}] ` : ''}${category || 'General'} - ${fullName}`,
+      `[KFAR Contact] ${priority !== 'Standard' ? `[${priority}] ` : ''}${safeCategory} - ${fullName}`,
       adminHtml
     );
 
     // Send confirmation to the customer
     const confirmHtml = `
-      <h2>Thank you for contacting us, ${firstName}!</h2>
+      <h2>Thank you for contacting us, ${esc(firstName)}!</h2>
       <p>We have received your message and will get back to you within the estimated response time.</p>
       <div style="background:#f5f0e8;padding:16px;border-radius:8px;margin:16px 0;">
         <p style="margin:0 0 4px;font-weight:600;color:#2D5A27;">Your message:</p>
-        <p style="margin:0;color:#444;">${message.length > 200 ? message.substring(0, 200) + '...' : message}</p>
+        <p style="margin:0;color:#444;">${safeMessage.length > 200 ? safeMessage.substring(0, 200) + '...' : safeMessage}</p>
       </div>
-      <p><strong>Category:</strong> ${category || 'General'}</p>
+      <p><strong>Category:</strong> ${safeCategory}</p>
       <p><strong>Expected response:</strong> ${
         priority === 'URGENT' ? 'Within 1 hour' :
         priority === 'High' ? '2-4 hours' :

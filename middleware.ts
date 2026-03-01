@@ -32,6 +32,14 @@ function getRequiredRole(pathname: string): string | null {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Block test/debug API routes in production
+  if (
+    process.env.NODE_ENV !== 'development' &&
+    (pathname.startsWith('/api/test-') || pathname.startsWith('/api/debug'))
+  ) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   // Skip non-protected routes
   if (!isProtectedRoute(pathname)) {
     return NextResponse.next();
@@ -86,5 +94,7 @@ export const config = {
     '/api/admin/:path*',
     '/api/vendor/:path*',
     '/api/customer/:path*',
+    '/api/test-:path*',
+    '/api/debug:path*',
   ],
 };

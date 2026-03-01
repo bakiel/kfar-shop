@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAllProducts, vendorStores } from '@/lib/data/wordpress-style-data-layer';
 
+// This endpoint is disabled in production — dev-only data introspection
 export async function GET() {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
   try {
     const vendors = Object.keys(vendorStores);
     const vendorDetails = vendors.map(id => ({
@@ -9,9 +14,9 @@ export async function GET() {
       name: vendorStores[id].name,
       productCount: vendorStores[id].products?.length || 0
     }));
-    
+
     const allProducts = getAllProducts();
-    
+
     return NextResponse.json({
       success: true,
       vendorCount: vendors.length,
@@ -28,7 +33,6 @@ export async function GET() {
     return NextResponse.json({
       success: false,
       error: (error as Error).message,
-      stack: (error as Error).stack
     });
   }
 }

@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApplications, updateApplicationStatus } from '@/lib/services/driver-service';
 import { DriverStatus } from '@/lib/types/driver';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 const VALID_STATUSES: DriverStatus[] = ['pending', 'reviewing', 'approved', 'rejected'];
 
+function requireAdmin(request: NextRequest) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '') || '';
+  const user = token ? verifyAccessToken(token) : null;
+  return user?.role === 'admin' ? user : null;
+}
+
 export async function GET(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: 'Admin authentication required' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') as DriverStatus | null;
@@ -22,6 +33,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: 'Admin authentication required' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { applicationId, status, adminNotes } = body;

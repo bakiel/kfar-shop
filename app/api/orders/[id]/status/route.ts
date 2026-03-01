@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
 import { sendTransactional } from '@/lib/services/email/email-service';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 // ---------------------------------------------------------------------------
 // PATCH /api/orders/[id]/status
@@ -36,6 +37,16 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Require vendor or admin authentication
+  const token = request.headers.get('authorization')?.replace('Bearer ', '') || '';
+  const user = token ? verifyAccessToken(token) : null;
+  if (!user || (user.role !== 'admin' && user.role !== 'vendor')) {
+    return NextResponse.json(
+      { success: false, error: 'Authentication required' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { id } = await params;
 

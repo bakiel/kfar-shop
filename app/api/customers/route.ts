@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 export async function GET(request: NextRequest) {
+  // Require admin authentication — this endpoint exposes all customer PII
+  const token = request.headers.get('authorization')?.replace('Bearer ', '') || '';
+  const user = token ? verifyAccessToken(token) : null;
+  if (!user || user.role !== 'admin') {
+    return NextResponse.json({ error: 'Admin authentication required' }, { status: 401 });
+  }
+
   try {
     const customers = await db.customers.findAll();
     return NextResponse.json({ customers });
