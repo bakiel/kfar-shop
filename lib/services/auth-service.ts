@@ -477,3 +477,16 @@ export async function resendVerification(email: string): Promise<{ success: bool
 export async function cleanupExpiredSessions(): Promise<void> {
   await query('DELETE FROM user_sessions WHERE expires_at < NOW()');
 }
+
+// Generate tokens for a known user and store session in DB.
+// Used by onboarding routes that create the user record themselves.
+export async function generateTokensForUser(user: AuthUser): Promise<{ accessToken: string; refreshToken: string }> {
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+  await query(
+    `INSERT INTO user_sessions (user_id, refresh_token, expires_at)
+     VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
+    [user.id, refreshToken]
+  );
+  return { accessToken, refreshToken };
+}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { query } from '@/lib/db/postgres-client';
-import { generateTokens } from '@/lib/services/auth-service';
+import { generateTokensForUser } from '@/lib/services/auth-service';
 
 function generateSlug(storeName: string): string {
   return storeName
@@ -101,13 +101,15 @@ export async function POST(request: NextRequest) {
     );
 
     // ── 2. Create users entry so vendor can log in via JWT ──────────────────
-    await query(
+    const userResult = await query(
       `INSERT INTO users (
         email, password_hash, role, vendor_id, display_name,
         email_verified, is_active, created_at, updated_at
-      ) VALUES ($1, $2, 'vendor', $3, $4, true, true, NOW(), NOW())`,
+      ) VALUES ($1, $2, 'vendor', $3, $4, true, true, NOW(), NOW())
+      RETURNING id`,
       [data.email, passwordHash, vendorId, data.storeName]
     );
+    const userId = userResult.rows[0]?.id;
 
     // ── 3. Insert initial products ──────────────────────────────────────────
     if (data.products && data.products.length > 0) {
@@ -144,11 +146,13 @@ export async function POST(request: NextRequest) {
     }
 
     // ── 4. Issue JWT so vendor is immediately logged in ─────────────────────
-    const tokens = generateTokens({
-      userId: `user-${vendorId}`,
+    const tokens = await generateTokensForUser({
+      id: userId,
       email: data.email,
       role: 'vendor',
       vendorId,
+      displayName: data.storeName,
+      isActive: true,
     });
 
     console.log('✅ New vendor onboarded:', { vendorId, storeName: data.storeName, slug, products: data.products?.length || 0 });
@@ -158,6 +162,7 @@ export async function POST(request: NextRequest) {
       vendorId,
       slug,
       storeUrl: `/store/${slug}`,
+      userId,
       accessToken: tokens.accessToken,
       message: 'Vendor successfully onboarded',
     });
