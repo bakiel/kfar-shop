@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
             let totalOrders = 0;
             try {
               const { rows } = await query(
-                `SELECT COUNT(*) as order_count, COALESCE(SUM(total), 0) as revenue
+                `SELECT COUNT(*) as order_count, COALESCE(SUM(total_amount), 0) as revenue
                  FROM orders WHERE vendor_id = $1`,
                 [v.id]
               );

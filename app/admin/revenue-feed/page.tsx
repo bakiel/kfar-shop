@@ -1,509 +1,500 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { Play, Pause, ShoppingCart, Calculator, Users, Trophy } from 'lucide-react';
+import { motion } from 'framer-motion';
+import {
+  ShoppingCart, Calculator, Users, Trophy, RefreshCw, AlertTriangle, Store
+} from 'lucide-react';
+import { PageHeader, LoadingState, StatusBadge } from '@/components/portal';
+import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
-// Store data with logos
-const stores = [
-  {
-    id: 'teva-deli',
-    name: 'Teva Deli',
-    logo: '/images/vendors/teva_deli_logo_organic_vegan_products.jpg',
-    color: '#2E7D32',
-    avgOrderValue: 85
-  },
-  {
-    id: 'queens-cuisine',
-    name: 'Queens Cuisine',
-    logo: '/images/vendors/queens_cuisine_logo_vegan_food_art.jpg',
-    color: '#F57C00',
-    avgOrderValue: 95
-  },
-  {
-    id: 'people-store',
-    name: 'People Store',
-    logo: '/images/vendors/people_store_storefront_community_shop_local_goods.jpg',
-    color: '#1976D2',
-    avgOrderValue: 65
-  },
-  {
-    id: 'garden-of-light',
-    name: 'Garden of Light',
-    logo: '/images/vendors/garden_of_light_wellness_products_natural_health_store_logo.jpg',
-    color: '#388E3C',
-    avgOrderValue: 120
-  },
-  {
-    id: 'vop-shop',
-    name: 'VOP Shop',
-    logo: '/images/vendors/vop_shop_village_of_peace_branded_merchandise_apparel_gifts.jpg',
-    color: '#7B1FA2',
-    avgOrderValue: 75
-  },
-  {
-    id: 'gahn-delight',
-    name: 'Gahn Delight',
-    logo: '/images/vendors/gahn_delight_vegan_ice_cream_frozen_desserts_logo_sweet_treats.jpg',
-    color: '#E91E63',
-    avgOrderValue: 45
-  }
-];
+// --- Types ---
 
-// Product names for realistic orders
-const productsByStore = {
-  'teva-deli': ['Vegan Schnitzel', 'Plant-Based Burger', 'Seitan Strips', 'Vegan Sausages', 'Tofu Steaks'],
-  'queens-cuisine': ['Gourmet Wrap', 'Falafel Platter', 'Shawarma Bowl', 'Mediterranean Feast', 'Vegan Burger'],
-  'people-store': ['Organic Produce Box', 'Pantry Essentials', 'Fresh Bread', 'Local Honey', 'Dried Fruits'],
-  'garden-of-light': ['Wellness Kit', 'Herbal Tea Set', 'Natural Supplements', 'Essential Oils', 'Healing Crystals'],
-  'vop-shop': ['Community T-Shirt', 'Tote Bag', 'Prayer Shawl', 'Handmade Crafts', 'Book Set'],
-  'gahn-delight': ['Ice Cream Pint', 'Frozen Yogurt', 'Sorbet Selection', 'Ice Cream Cake', 'Dessert Sampler']
-};
-
-// Customer names for orders
-const customerNames = [
-  'Sarah Cohen', 'David Levi', 'Rachel Green', 'Michael Brown', 'Rebecca Miller',
-  'Daniel Goldstein', 'Miriam Shapiro', 'Jonathan Katz', 'Esther Friedman', 'Aaron Rosen',
-  'Leah Weiss', 'Joshua Silver', 'Hannah Gold', 'Benjamin Stone', 'Naomi Diamond'
-];
-
-interface RevenueItem {
+interface VendorInfo {
   id: string;
-  storeId: string;
-  storeName: string;
-  customerName: string;
-  products: string[];
-  amount: number;
-  timestamp: Date;
-  paymentMethod: string;
-  isVOPMember: boolean;
+  name: string;
+  logo: string;
+  color: string;
+  totalRevenue: number;
+  totalOrders: number;
 }
 
+interface FeedOrder {
+  id: string;
+  orderNumber: string;
+  customer: string;
+  vendorId: string;
+  vendorName: string;
+  items: number;
+  total: number;
+  date: string;
+  timestamp: Date;
+  status: string;
+  paymentMethod: string;
+}
+
+// --- Constants ---
+
+const defaultColors = ['#2E7D32', '#F57C00', '#1976D2', '#388E3C', '#7B1FA2', '#E91E63'];
+
+const container = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+};
+
+// --- Helpers ---
+
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+  return `${Math.floor(seconds / 86400)} days ago`;
+}
+
+function normalizeOrder(o: any): FeedOrder {
+  const customerName = typeof o.customer === 'object' ? o.customer?.name : (o.customer || 'Unknown');
+  const vendorName = o.vendorName || o.vendor_name || o.vendor || '';
+  const vendorId = o.vendorId || o.vendor_id || '';
+  const itemsCount = Array.isArray(o.items) ? o.items.length : (typeof o.items === 'number' ? o.items : 0);
+  const dateStr = o.date || (o.createdAt ? o.createdAt.split('T')[0] : (o.created_at ? o.created_at.split('T')[0] : ''));
+  const timestamp = o.createdAt ? new Date(o.createdAt) : (o.created_at ? new Date(o.created_at) : (o.date ? new Date(o.date) : new Date()));
+
+  return {
+    id: o.id || o.orderNumber || '',
+    orderNumber: o.orderNumber || o.order_number || o.id || '',
+    customer: customerName,
+    vendorId,
+    vendorName,
+    items: itemsCount,
+    total: typeof o.total_amount === 'number' ? o.total_amount : (typeof o.total === 'number' ? o.total : parseFloat(o.total_amount ?? o.total) || 0),
+    date: dateStr,
+    timestamp,
+    status: o.status || 'pending',
+    paymentMethod: o.paymentMethod || o.payment_method || 'Credit Card',
+  };
+}
+
+// --- Component ---
+
 export default function RevenueFeedPage() {
-  const [revenueItems, setRevenueItems] = useState<RevenueItem[]>([]);
+  const { language, t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
+
+  const [vendors, setVendors] = useState<VendorInfo[]>([]);
+  const [orders, setOrders] = useState<FeedOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   const [filter, setFilter] = useState('all');
-  const [timeRange, setTimeRange] = useState('live');
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [lastProductCheck, setLastProductCheck] = useState<Date>(new Date());
+  const [timeRange, setTimeRange] = useState('all');
 
-  // Check for product updates and generate orders based on real products
-  const checkProductUpdates = async () => {
+  // Build vendor lookup map
+  const vendorMap = useMemo(() => {
+    const map: Record<string, VendorInfo> = {};
+    vendors.forEach(v => { map[v.id] = v; });
+    return map;
+  }, [vendors]);
+
+  // --- Data fetching ---
+
+  const fetchData = useCallback(async (showRefresh = false) => {
+    if (!accessToken) return;
+
+    if (showRefresh) setRefreshing(true);
+    else setLoading(true);
+
+    setError(null);
+    const headers: Record<string, string> = { Authorization: `Bearer ${accessToken}` };
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/products`);
-      if (response.ok) {
-        const products = await response.json();
-        
-        // Group products by vendor
-        const productsByVendor: { [key: string]: any[] } = {};
-        products.forEach((product: any) => {
-          const vendorMap: { [key: string]: string } = {
-            'Teva Deli': 'teva-deli',
-            'Queens Cuisine': 'queens-cuisine',
-            'People Store': 'people-store',
-            'Garden of Light': 'garden-of-light',
-            'VOP Shop': 'vop-shop',
-            'Gahn Delight': 'gahn-delight'
-          };
-          
-          const vendorId = vendorMap[product.vendor_name];
-          if (vendorId) {
-            if (!productsByVendor[vendorId]) {
-              productsByVendor[vendorId] = [];
-            }
-            productsByVendor[vendorId].push(product);
-          }
-        });
+      const [vendorsRes, ordersRes] = await Promise.all([
+        fetch('/api/admin/accounts?type=vendors', { headers }),
+        fetch('/api/admin/orders?limit=200', { headers }),
+      ]);
 
-        // Update productsByStore with real product names
-        Object.keys(productsByVendor).forEach(vendorId => {
-          const vendorProducts = productsByVendor[vendorId];
-          productsByStore[vendorId] = vendorProducts
-            .filter(p => p.stock_quantity > 0)
-            .slice(0, 10)
-            .map(p => p.name || p.name_en);
-        });
+      // --- Vendors ---
+      if (vendorsRes.ok) {
+        const vendorsJson = await vendorsRes.json();
+        const vendorList: VendorInfo[] = (vendorsJson.vendors || []).map((v: any, i: number) => ({
+          id: v.id,
+          name: v.name || v.store_name || '',
+          logo: v.logo_url || v.logo || `/images/vendors/default-vendor.png`,
+          color: v.primary_color || defaultColors[i % defaultColors.length],
+          totalRevenue: v.totalRevenue || 0,
+          totalOrders: v.totalOrders || 0,
+        }));
+        setVendors(vendorList);
+      } else {
+        console.error('Vendors fetch failed:', vendorsRes.status);
       }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
 
-  // Generate random order with real products
-  const generateOrder = (): RevenueItem => {
-    const store = stores[Math.floor(Math.random() * stores.length)];
-    const customer = customerNames[Math.floor(Math.random() * customerNames.length)];
-    const storeProducts = productsByStore[store.id as keyof typeof productsByStore];
-    
-    // If no products available for store, use defaults
-    if (!storeProducts || storeProducts.length === 0) {
-      productsByStore[store.id] = ['Product 1', 'Product 2', 'Product 3'];
-    }
-    
-    const numProducts = Math.floor(Math.random() * 3) + 1;
-    const selectedProducts = [];
-    
-    for (let i = 0; i < numProducts; i++) {
-      const availableProducts = productsByStore[store.id];
-      if (availableProducts && availableProducts.length > 0) {
-        selectedProducts.push(availableProducts[Math.floor(Math.random() * availableProducts.length)]);
+      // --- Orders ---
+      if (ordersRes.ok) {
+        const ordersJson = await ordersRes.json();
+        const normalizedOrders = (ordersJson.orders || []).map(normalizeOrder);
+        // Sort newest first
+        normalizedOrders.sort((a: FeedOrder, b: FeedOrder) => b.timestamp.getTime() - a.timestamp.getTime());
+        setOrders(normalizedOrders);
+      } else {
+        console.error('Orders fetch failed:', ordersRes.status);
+        if (ordersRes.status === 401) {
+          setError('Unauthorized. Please log in again.');
+        }
       }
+    } catch (err: any) {
+      console.error('Revenue feed fetch error:', err);
+      setError(err.message || 'Failed to load data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (accessToken) fetchData();
+  }, [fetchData, accessToken]);
+
+  // --- Filtering ---
+
+  const filteredOrders = useMemo(() => {
+    let items = orders;
+
+    // Store filter
+    if (filter !== 'all') {
+      items = items.filter(o => o.vendorId === filter || o.vendorName === filter);
     }
 
-    const baseAmount = store.avgOrderValue * (0.8 + Math.random() * 0.4);
-    const isVOPMember = Math.random() > 0.7;
-    const amount = isVOPMember ? baseAmount * 0.9 : baseAmount; // 10% member discount
-
-    const paymentMethods = ['Credit Card', 'Braysheet Token', 'QR Payment', 'Bank Transfer'];
-
-    return {
-      id: `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      storeId: store.id,
-      storeName: store.name,
-      customerName: customer,
-      products: selectedProducts,
-      amount: Math.round(amount * 100) / 100,
-      timestamp: new Date(),
-      paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
-      isVOPMember
-    };
-  };
-
-  // Initial load - fetch real products
-  useEffect(() => {
-    checkProductUpdates();
-  }, []);
-
-  // Generate initial historical data
-  useEffect(() => {
-    const historicalOrders: RevenueItem[] = [];
-    const now = new Date();
-    
-    // Generate 50 orders from the past 24 hours
-    for (let i = 0; i < 50; i++) {
-      const order = generateOrder();
-      const hoursAgo = Math.random() * 24;
-      order.timestamp = new Date(now.getTime() - hoursAgo * 60 * 60 * 1000);
-      historicalOrders.push(order);
-    }
-    
-    // Sort by timestamp (newest first)
-    historicalOrders.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    setRevenueItems(historicalOrders);
-  }, []);
-
-  // Generate new orders in real-time and check for product updates
-  useEffect(() => {
-    if (isPaused || timeRange !== 'live') return;
-
-    // Check for product updates every 30 seconds
-    const productCheckInterval = setInterval(() => {
-      checkProductUpdates();
-    }, 30000);
-
-    // Generate new orders
-    const orderInterval = setInterval(() => {
-      const newOrder = generateOrder();
-      setRevenueItems(prev => [newOrder, ...prev].slice(0, 100)); // Keep last 100 orders
-    }, Math.random() * 8000 + 4000); // Random interval between 4-12 seconds
-
-    return () => {
-      clearInterval(productCheckInterval);
-      clearInterval(orderInterval);
-    };
-  }, [isPaused, timeRange]);
-
-  // Calculate total revenue
-  useEffect(() => {
-    const filteredItems = filter === 'all' 
-      ? revenueItems 
-      : revenueItems.filter(item => item.storeId === filter);
-    
-    const total = filteredItems.reduce((sum, item) => sum + item.amount, 0);
-    setTotalRevenue(total);
-  }, [revenueItems, filter]);
-
-  // Filter items based on time range
-  const getFilteredItems = () => {
-    let items = filter === 'all' 
-      ? revenueItems 
-      : revenueItems.filter(item => item.storeId === filter);
-
-    if (timeRange !== 'live') {
+    // Time range filter
+    if (timeRange !== 'all') {
       const now = new Date();
-      const hoursAgo = parseInt(timeRange);
-      items = items.filter(item => 
-        item.timestamp.getTime() > now.getTime() - hoursAgo * 60 * 60 * 1000
-      );
+      const hoursAgo = parseInt(timeRange, 10);
+      if (!isNaN(hoursAgo)) {
+        items = items.filter(o => o.timestamp.getTime() > now.getTime() - hoursAgo * 60 * 60 * 1000);
+      }
     }
 
     return items;
-  };
+  }, [orders, filter, timeRange]);
 
-  const filteredItems = getFilteredItems();
+  // --- Computed stats ---
 
-  // Format time ago
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (seconds < 60) return 'just now';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
-    return `${Math.floor(seconds / 86400)} days ago`;
-  };
+  const totalRevenue = useMemo(() => {
+    return filteredOrders.reduce((sum, o) => sum + o.total, 0);
+  }, [filteredOrders]);
 
-  // Get store stats
-  const getStoreStats = () => {
-    return stores.map(store => {
-      const storeOrders = revenueItems.filter(item => item.storeId === store.id);
-      const revenue = storeOrders.reduce((sum, item) => sum + item.amount, 0);
+  const storeStats = useMemo(() => {
+    return vendors.map(vendor => {
+      const vendorOrders = orders.filter(o => o.vendorId === vendor.id || o.vendorName === vendor.name);
+      const revenue = vendorOrders.reduce((sum, o) => sum + o.total, 0);
       return {
-        ...store,
-        orderCount: storeOrders.length,
-        revenue: revenue
+        ...vendor,
+        orderCount: vendorOrders.length,
+        feedRevenue: revenue,
       };
     });
-  };
+  }, [vendors, orders]);
 
-  const storeStats = getStoreStats();
+  const topStore = useMemo(() => {
+    if (storeStats.length === 0) return null;
+    return [...storeStats].sort((a, b) => b.feedRevenue - a.feedRevenue)[0];
+  }, [storeStats]);
+
+  const avgOrder = useMemo(() => {
+    if (filteredOrders.length === 0) return 0;
+    return totalRevenue / filteredOrders.length;
+  }, [totalRevenue, filteredOrders]);
+
+  // --- Render ---
+
+  if (loading) {
+    return (
+      <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+        <LoadingState type="page" />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <motion.div
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="p-6 lg:p-8 max-w-7xl mx-auto"
+    >
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">KiFar Marketplace Revenue Feed</h1>
-              <p className="text-sm text-gray-600 mt-1">Real-time revenue tracking across all stores</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsPaused(!isPaused)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isPaused 
-                    ? 'bg-green-600 text-white hover:bg-green-700' 
-                    : 'bg-red-600 text-white hover:bg-red-700'
-                }`}
+      <motion.div variants={item}>
+        <PageHeader
+          title={language === 'he' ? 'פיד הכנסות' : 'Revenue Feed'}
+          subtitle={language === 'he' ? 'הזמנות ונתוני הכנסות בזמן אמת' : 'Latest orders and revenue data across all stores'}
+          isRTL={isRTL}
+          actions={
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => fetchData(true)}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
               >
-                {isPaused ? <Play className="w-4 h-4 stroke-[1.5] inline mr-2" /> : <Pause className="w-4 h-4 stroke-[1.5] inline mr-2" />}
-                {isPaused ? 'Resume' : 'Pause'} Feed
-              </button>
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Total Revenue (24h)</p>
-                <p className="text-2xl font-bold text-green-600">₪{totalRevenue.toLocaleString()}</p>
+                <RefreshCw className={`w-4 h-4 stroke-[1.5] ${refreshing ? 'animate-spin' : ''}`} />
+                {language === 'he' ? 'רענן' : 'Refresh'}
+              </motion.button>
+              <div className={`${isRTL ? 'text-left' : 'text-right'}`}>
+                <p className="text-sm text-gray-500">{language === 'he' ? 'סה"כ הכנסות' : 'Total Revenue'}</p>
+                <p className="text-xl font-bold text-emerald-600">{'\u20AA'}{totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
               </div>
             </div>
-          </div>
-        </div>
-      </header>
+          }
+        />
+      </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Store Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          {storeStats.map(store => (
-            <div
+      {/* Error banner */}
+      {error && (
+        <motion.div variants={item} className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 stroke-[1.5] text-red-500 flex-shrink-0" />
+          <p className="text-sm text-red-700">{error}</p>
+        </motion.div>
+      )}
+
+      {/* Store Stats Cards */}
+      {vendors.length > 0 && (
+        <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+          {storeStats.map((store) => (
+            <motion.div
               key={store.id}
-              className={`bg-white rounded-lg shadow p-4 cursor-pointer transition-all hover:shadow-lg ${
-                filter === store.id ? 'ring-2 ring-offset-2' : ''
+              whileHover={{ y: -4, boxShadow: '0 12px 24px -6px rgba(0,0,0,0.1)' }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className={`bg-white rounded-xl border p-4 cursor-pointer transition-all ${
+                filter === store.id
+                  ? 'ring-2 ring-offset-2 border-transparent'
+                  : 'border-gray-100 hover:border-gray-200'
               }`}
-              style={{ 
-                borderColor: filter === store.id ? store.color : 'transparent',
-                borderWidth: '2px',
-                '--tw-ring-color': store.color
-              } as any}
+              style={{
+                '--tw-ring-color': store.color,
+              } as React.CSSProperties}
               onClick={() => setFilter(filter === store.id ? 'all' : store.id)}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <Image
-                  src={store.logo}
-                  alt={store.name || "Image"}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-                <h3 className="font-semibold text-sm">{store.name}</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                  <Image
+                    src={store.logo}
+                    alt={store.name || 'Vendor'}
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="font-semibold text-xs text-gray-700 line-clamp-1">{store.name}</h3>
               </div>
-              <p className="text-2xl font-bold" style={{ color: store.color }}>
-                ₪{store.revenue.toFixed(0)}
+              <p className="text-xl font-bold" style={{ color: store.color }}>
+                {'\u20AA'}{store.feedRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-gray-600">{store.orderCount} orders</p>
-            </div>
+              <p className="text-xs text-gray-500 mt-0.5">{store.orderCount} {language === 'he' ? 'הזמנות' : 'orders'}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+      )}
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">Time Range:</label>
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-                className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-green-500"
-              >
-                <option value="live">Live Feed</option>
-                <option value="1">Last Hour</option>
-                <option value="6">Last 6 Hours</option>
-                <option value="24">Last 24 Hours</option>
-              </select>
-            </div>
-            
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                filter === 'all' 
-                  ? 'bg-gray-800 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+      {/* Filters */}
+      <motion.div variants={item} className="bg-white rounded-xl border border-gray-100 p-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-600">
+              {language === 'he' ? 'טווח זמן:' : 'Time Range:'}
+            </label>
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
             >
-              All Stores
-            </button>
+              <option value="all">{language === 'he' ? 'הכל' : 'All Time'}</option>
+              <option value="1">{language === 'he' ? 'שעה אחרונה' : 'Last Hour'}</option>
+              <option value="6">{language === 'he' ? '6 שעות' : 'Last 6 Hours'}</option>
+              <option value="24">{language === 'he' ? '24 שעות' : 'Last 24 Hours'}</option>
+              <option value="168">{language === 'he' ? 'שבוע' : 'Last 7 Days'}</option>
+            </select>
+          </div>
 
-            {/* Live indicator */}
-            {timeRange === 'live' && !isPaused && (
-              <div className="flex items-center gap-4 ml-auto">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-green-600 font-medium">Live</span>
-                </div>
-                <div className="text-xs text-gray-500">
-                  Product data synced every 30s
-                </div>
-              </div>
-            )}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+              filter === 'all'
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {language === 'he' ? 'כל החנויות' : 'All Stores'}
+          </motion.button>
+
+          <div className="flex items-center gap-2 ml-auto text-sm text-gray-500">
+            <ShoppingCart className="w-4 h-4 stroke-[1.5]" />
+            <span>{filteredOrders.length} {language === 'he' ? 'הזמנות' : 'orders'}</span>
           </div>
         </div>
+      </motion.div>
 
-        {/* Revenue Feed */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="max-h-[600px] overflow-y-auto">
-            {filteredItems.map((item, index) => (
-              <div
-                key={item.id}
-                className={`border-b hover:bg-gray-50 transition-all ${
-                  index === 0 && timeRange === 'live' ? 'animate-slide-in' : ''
-                }`}
-              >
-                <div className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <Image src={stores.find(s => s.id === item.storeId)?.logo || ''}
-                        alt={item.storeName || "Image"}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">{item.customerName}</h4>
-                          {item.isVOPMember && (
-                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
-                              VOP Member
-                            </span>
+      {/* Order Feed */}
+      <motion.div variants={item} className="bg-white rounded-xl border border-gray-100 overflow-hidden mb-8">
+        {filteredOrders.length === 0 ? (
+          <div className="p-12 text-center">
+            <Store className="w-12 h-12 stroke-[1.5] text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">
+              {language === 'he' ? 'אין הזמנות להצגה' : 'No orders to display'}
+            </p>
+            <p className="text-sm text-gray-400 mt-1">
+              {language === 'he' ? 'נסה לשנות את הסינון או טווח הזמן' : 'Try adjusting your filters or time range'}
+            </p>
+          </div>
+        ) : (
+          <div className="max-h-[600px] overflow-y-auto divide-y divide-gray-50">
+            {filteredOrders.map((order) => {
+              const vendor = vendorMap[order.vendorId];
+              const vendorColor = vendor?.color || '#6B7280';
+              const vendorLogo = vendor?.logo;
+
+              return (
+                <motion.div
+                  key={order.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="hover:bg-gray-50/50 transition-colors"
+                >
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0">
+                        {/* Vendor logo */}
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                          {vendorLogo ? (
+                            <Image
+                              src={vendorLogo}
+                              alt={order.vendorName || 'Vendor'}
+                              width={40}
+                              height={40}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div
+                              className="w-full h-full flex items-center justify-center text-white text-sm font-bold"
+                              style={{ backgroundColor: vendorColor }}
+                            >
+                              {(order.vendorName || '?').charAt(0).toUpperCase()}
+                            </div>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600">
-                          {item.products.join(', ')}
-                        </p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                          <span>{item.storeName}</span>
-                          <span>•</span>
-                          <span>{item.paymentMethod}</span>
-                          <span>•</span>
-                          <span>{formatTimeAgo(item.timestamp)}</span>
+
+                        {/* Order details */}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold text-sm text-gray-900 truncate">{order.customer}</h4>
+                            <StatusBadge
+                              status={order.status as any}
+                              language={language as 'en' | 'he'}
+                              size="sm"
+                            />
+                          </div>
+                          <p className="text-sm text-gray-500 mt-0.5 truncate">
+                            {order.orderNumber && <span className="text-gray-400 mr-1">#{order.orderNumber}</span>}
+                            {order.items > 0 && (
+                              <span>{order.items} {language === 'he' ? 'פריטים' : order.items === 1 ? 'item' : 'items'}</span>
+                            )}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                            <span style={{ color: vendorColor }} className="font-medium">{order.vendorName}</span>
+                            <span>-</span>
+                            <span>{order.paymentMethod}</span>
+                            <span>-</span>
+                            <span>{formatTimeAgo(order.timestamp)}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold" style={{ 
-                        color: stores.find(s => s.id === item.storeId)?.color 
-                      }}>
-                        ₪{item.amount.toFixed(2)}
-                      </p>
-                      {item.isVOPMember && (
-                        <p className="text-xs text-green-600">10% discount applied</p>
-                      )}
+
+                      {/* Amount */}
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-base font-bold" style={{ color: vendorColor }}>
+                          {'\u20AA'}{order.total.toFixed(2)}
+                        </p>
+                        {order.date && (
+                          <p className="text-xs text-gray-400 mt-0.5">{order.date}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
+        )}
+      </motion.div>
+
+      {/* Summary Stats */}
+      <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-500">
+              {language === 'he' ? 'סה"כ הזמנות' : 'Total Orders'}
+            </h3>
+            <ShoppingCart className="w-5 h-5 stroke-[1.5] text-gray-300" />
+          </div>
+          <p className="text-2xl font-bold text-gray-900">
+            {filteredOrders.length}
+          </p>
         </div>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-600">Orders Today</h3>
-              <ShoppingCart className="w-5 h-5 stroke-[1.5] text-gray-400" />
-            </div>
-            <p className="text-3xl font-bold text-gray-900">
-              {revenueItems.filter(item => 
-                item.timestamp.getTime() > new Date().setHours(0,0,0,0)
-              ).length}
-            </p>
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-500">
+              {language === 'he' ? 'ממוצע הזמנה' : 'Average Order'}
+            </h3>
+            <Calculator className="w-5 h-5 stroke-[1.5] text-gray-300" />
           </div>
-          
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-600">Average Order</h3>
-              <Calculator className="w-5 h-5 stroke-[1.5] text-gray-400" />
-            </div>
-            <p className="text-3xl font-bold text-gray-900">
-              ₪{filteredItems.length > 0 
-                ? (totalRevenue / filteredItems.length).toFixed(0) 
-                : '0'}
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-600">VOP Members</h3>
-              <Users className="w-5 h-5 stroke-[1.5] text-gray-400" />
-            </div>
-            <p className="text-3xl font-bold text-purple-600">
-              {Math.round(
-                (filteredItems.filter(item => item.isVOPMember).length / 
-                (filteredItems.length || 1)) * 100
-              )}%
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-600">Top Store</h3>
-              <Trophy className="w-5 h-5 stroke-[1.5] text-gray-400" />
-            </div>
-            <p className="text-lg font-bold text-gray-900">
-              {storeStats.sort((a, b) => b.revenue - a.revenue)[0]?.name || '-'}
-            </p>
-            <p className="text-sm text-gray-600">
-              ₪{storeStats.sort((a, b) => b.revenue - a.revenue)[0]?.revenue.toFixed(0) || '0'}
-            </p>
-          </div>
+          <p className="text-2xl font-bold text-gray-900">
+            {'\u20AA'}{avgOrder.toFixed(0)}
+          </p>
         </div>
-      </div>
 
-      <style jsx>{`
-        @keyframes slide-in {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
-        }
-      `}</style>
-    </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-500">
+              {language === 'he' ? 'חנויות פעילות' : 'Active Stores'}
+            </h3>
+            <Users className="w-5 h-5 stroke-[1.5] text-gray-300" />
+          </div>
+          <p className="text-2xl font-bold text-gray-900">
+            {storeStats.filter(s => s.orderCount > 0).length} / {vendors.length}
+          </p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-500">
+              {language === 'he' ? 'חנות מובילה' : 'Top Store'}
+            </h3>
+            <Trophy className="w-5 h-5 stroke-[1.5] text-gray-300" />
+          </div>
+          {topStore ? (
+            <>
+              <p className="text-base font-bold text-gray-900 truncate">{topStore.name}</p>
+              <p className="text-sm text-gray-500">
+                {'\u20AA'}{topStore.feedRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
+            </>
+          ) : (
+            <p className="text-base text-gray-400">-</p>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }

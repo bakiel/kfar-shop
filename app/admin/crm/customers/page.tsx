@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { PageHeader, StatusBadge, LoadingState } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface Customer {
   id: string;
@@ -19,7 +20,8 @@ interface Customer {
   points: number;
   total_orders: number;
   total_spent: number;
-  last_order_date: string | null;
+  last_order_at: string | null;
+  last_order_date?: string | null; // alias kept for compat
   tags: string[];
   created_at: string;
 }
@@ -47,14 +49,10 @@ const tierBadgeColors: Record<string, string> = {
   platinum: 'bg-indigo-100 text-indigo-800 border-indigo-200',
 };
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token');
-}
-
 export default function CustomersPage() {
   const router = useRouter();
   const { t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 0 });
   const [loading, setLoading] = useState(true);
@@ -66,12 +64,12 @@ export default function CustomersPage() {
 
   const fetchCustomers = useCallback(
     (page: number = 1) => {
+      if (!accessToken) return;
       setLoading(true);
       setError(null);
 
-      const token = getToken();
       const headers: Record<string, string> = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Bearer ${accessToken}`;
 
       const params = new URLSearchParams();
       params.set('page', String(page));
@@ -95,7 +93,7 @@ export default function CustomersPage() {
           setLoading(false);
         });
     },
-    [search, tierFilter]
+    [accessToken, search, tierFilter]
   );
 
   useEffect(() => {
@@ -317,8 +315,8 @@ export default function CustomersPage() {
                           )}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500 hidden lg:table-cell">
-                          {customer.last_order_date
-                            ? new Date(customer.last_order_date).toLocaleDateString()
+                          {(customer.last_order_at || customer.last_order_date)
+                            ? new Date((customer.last_order_at || customer.last_order_date)!).toLocaleDateString()
                             : '-'}
                         </td>
                       </motion.tr>

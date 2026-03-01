@@ -8,6 +8,7 @@ import {
 import { PageHeader, DataTable, StatusBadge, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
@@ -18,9 +19,11 @@ interface Order {
   vendorName?: string;
   vendor?: string;
   items: number | any[];
-  total: number;
+  total?: number;
+  total_amount?: number | string;
   date?: string;
   createdAt?: string;
+  created_at?: string;
   status: OrderStatus;
   [key: string]: unknown;
 }
@@ -54,23 +57,18 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-// --- Mock fallback data (kept for reference) ---
-// const mockOrders: Order[] = [
-//   { id: 'KF-1001', customer: 'Sarah Cohen', customerHe: 'שרה כהן', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 3, total: 145, date: '2025-02-07', status: 'pending' },
-//   ... (15 entries)
-// ];
-
 function normalizeOrder(o: Order): NormalizedOrder {
   const customerName = typeof o.customer === 'object' ? o.customer.name : (o.customer || '');
   const vendorName = o.vendorName || o.vendor || '';
   const itemsCount = Array.isArray(o.items) ? o.items.length : (o.items || 0);
-  const date = o.date || (o.createdAt ? o.createdAt.split('T')[0] : '');
+  const rawDate = o.date || o.createdAt || o.created_at || '';
+  const date = rawDate ? String(rawDate).split('T')[0] : '';
   return {
     id: o.orderNumber || o.id,
     customer: customerName,
     vendor: vendorName,
     items: itemsCount,
-    total: o.total,
+    total: parseFloat(String(o.total_amount ?? o.total ?? 0)) || 0,
     date,
     status: o.status,
   };
@@ -80,6 +78,7 @@ type FilterStatus = 'all' | OrderStatus;
 
 export default function OrdersPage() {
   const { language, t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
   const [orders, setOrders] = useState<NormalizedOrder[]>([]);
   const [summary, setSummary] = useState<OrdersSummary>({ total: 0, pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 });
@@ -92,9 +91,8 @@ export default function OrdersPage() {
     setError(null);
     const params = new URLSearchParams();
     if (status !== 'all') params.set('status', status);
-    const token = typeof window !== 'undefined' ? (sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token')) : null;
     const headers: Record<string, string> = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
     fetch(`/api/admin/orders?${params.toString()}`, { headers })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -111,12 +109,13 @@ export default function OrdersPage() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [accessToken]);
 
   useEffect(() => {
+    if (!accessToken) return;
     // Always fetch 'all' initially so we get full summary counts
     fetchOrders('all');
-  }, [fetchOrders]);
+  }, [fetchOrders, accessToken]);
 
   const handleFilterChange = (newFilter: FilterStatus) => {
     setStatusFilter(newFilter);
@@ -125,9 +124,8 @@ export default function OrdersPage() {
 
   const handleStatusUpdate = useCallback((orderId: string, newStatus: OrderStatus) => {
     setUpdating(orderId);
-    const token = typeof window !== 'undefined' ? (sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token')) : null;
     const patchHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) patchHeaders['Authorization'] = `Bearer ${token}`;
+    if (accessToken) patchHeaders['Authorization'] = `Bearer ${accessToken}`;
     fetch('/api/admin/orders', {
       method: 'PATCH',
       headers: patchHeaders,
@@ -143,7 +141,7 @@ export default function OrdersPage() {
       })
       .catch((err) => console.error('Status update error:', err))
       .finally(() => setUpdating(null));
-  }, [statusFilter, fetchOrders]);
+  }, [statusFilter, fetchOrders, accessToken]);
 
   const filteredOrders = orders;
 

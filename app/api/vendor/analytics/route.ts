@@ -35,11 +35,11 @@ export async function GET(request: NextRequest) {
       topProductsResult,
       statusBreakdownResult,
     ] = await Promise.all([
-      // Total revenue (from completed orders)
+      // Total revenue (all non-cancelled orders)
       query(
-        `SELECT COALESCE(SUM(total), 0) as total_revenue
+        `SELECT COALESCE(SUM(total_amount), 0) as total_revenue
          FROM orders
-         WHERE vendor_id = $1 AND status IN ('completed', 'ready', 'processing')`,
+         WHERE vendor_id = $1 AND status NOT IN ('cancelled', 'refunded')`,
         [vendorId]
       ),
 
@@ -59,12 +59,12 @@ export async function GET(request: NextRequest) {
       query(
         `SELECT
            DATE(created_at) as date,
-           COALESCE(SUM(total), 0) as revenue,
+           COALESCE(SUM(total_amount), 0) as revenue,
            COUNT(*) as orders
          FROM orders
          WHERE vendor_id = $1
            AND created_at >= NOW() - INTERVAL '30 days'
-           AND status IN ('completed', 'ready', 'processing')
+           AND status NOT IN ('cancelled', 'refunded')
          GROUP BY DATE(created_at)
          ORDER BY date DESC`,
         [vendorId]
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
          FROM products p
          LEFT JOIN orders o ON o.vendor_id = p.vendor_id
            AND o.items::text LIKE CONCAT('%', p.id, '%')
-           AND o.status IN ('completed', 'ready', 'processing')
+           AND o.status NOT IN ('cancelled', 'refunded')
          WHERE p.vendor_id = $1 AND p.status != 'archived'
          GROUP BY p.id, p.name, p.price, p.image_url, p.view_count
          ORDER BY order_appearances DESC, views DESC

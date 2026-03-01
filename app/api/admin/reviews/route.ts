@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const { rows: reviews } = await query(
       `SELECT id, vendor_id, customer_id, rating, comment, created_at, status
-       FROM reviews
+       FROM product_reviews
        ORDER BY created_at DESC
        LIMIT 100`,
       []
@@ -49,7 +49,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Review ID and status required' }, { status: 400 });
     }
 
-    await query('UPDATE reviews SET status = $1 WHERE id = $2', [status, id]).catch(() => {});
+    await query('UPDATE product_reviews SET status = $1 WHERE id = $2', [status, id]).catch(() => {});
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: true });

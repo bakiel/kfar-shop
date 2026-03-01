@@ -10,6 +10,7 @@ import {
 import { PageHeader, DataTable, StatusBadge, EmptyState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 import { whatsAppService } from '@/lib/services/whatsapp-service';
 
 // --- Types ---
@@ -60,84 +61,10 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
 };
 
-// --- Mock orders fallback ---
-function getMockOrders(): Order[] {
-  return [
-    {
-      id: '1',
-      orderNumber: 'ORD-2025-001',
-      customerName: 'Sarah Cohen',
-      customerPhone: '+972-54-1234567',
-      items: [
-        { id: '1', productName: 'Organic Honey', quantity: 2, price: 45 },
-        { id: '2', productName: 'Fresh Dates', quantity: 1, price: 35 },
-      ],
-      total: 125,
-      status: 'pending',
-      orderDate: new Date().toISOString(),
-      pickupDate: '2025-02-09',
-      pickupTime: '14:00',
-      collectionPoint: 'Community Center',
-      paymentMethod: 'Credit Card',
-      notes: 'Please pack honey in bubble wrap',
-      invoiceNumber: 'INV-1735776000000-ABC123DEF',
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-2025-002',
-      customerName: 'David Levi',
-      customerPhone: '+972-52-9876543',
-      items: [
-        { id: '3', productName: 'Tahini', quantity: 3, price: 28 },
-      ],
-      total: 84,
-      status: 'preparing',
-      orderDate: new Date(Date.now() - 3600000).toISOString(),
-      pickupDate: '2025-02-08',
-      pickupTime: '16:30',
-      collectionPoint: 'Main Gate',
-      paymentMethod: 'Braysheet',
-      invoiceNumber: 'INV-1735689600000-XYZ789GHI',
-    },
-    {
-      id: '3',
-      orderNumber: 'ORD-2025-003',
-      customerName: 'Rachel Ben-Ari',
-      customerPhone: '+972-58-4567890',
-      items: [
-        { id: '4', productName: 'Vegan Schnitzel', quantity: 2, price: 42 },
-        { id: '5', productName: 'Hummus', quantity: 4, price: 18 },
-      ],
-      total: 156,
-      status: 'ready',
-      orderDate: new Date(Date.now() - 7200000).toISOString(),
-      pickupDate: '2025-02-08',
-      pickupTime: '12:00',
-      collectionPoint: 'Community Center',
-      paymentMethod: 'Credit Card',
-    },
-    {
-      id: '4',
-      orderNumber: 'ORD-2025-004',
-      customerName: 'Yossi Amir',
-      customerPhone: '+972-50-1112233',
-      items: [
-        { id: '6', productName: 'Tofu Block', quantity: 5, price: 22 },
-      ],
-      total: 110,
-      status: 'completed',
-      orderDate: new Date(Date.now() - 86400000).toISOString(),
-      pickupDate: '2025-02-07',
-      pickupTime: '10:00',
-      collectionPoint: 'Main Gate',
-      paymentMethod: 'Bank Transfer',
-    },
-  ];
-}
-
 export default function VendorOrders() {
   const router = useRouter();
   const { language, t, isRTL } = useLanguage();
+  const { user, accessToken } = useAuth();
 
   const [vendorId, setVendorId] = useState('');
   const [vendorName, setVendorName] = useState('');
@@ -146,65 +73,83 @@ export default function VendorOrders() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  // --- Fetch orders from DB with mock fallback (preserved from original) ---
-  const fetchOrders = useCallback(async (vid: string) => {
+  // --- Fetch orders from authenticated vendor API ---
+  const fetchOrders = useCallback(async (token: string) => {
     try {
-      const response = await fetch(`/api/orders?vendor_id=${vid}`);
+      const res = await fetch('/api/vendor/orders?limit=100', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (res.ok) {
+        const data = await res.json();
 
-        if (data.orders && data.orders.length > 0) {
-          const formattedOrders: Order[] = data.orders.map((order: Record<string, unknown>) => ({
-            id: order.id,
-            orderNumber: order.order_number || order.id,
-            customerName: order.customer_name,
-            customerPhone: order.customer_phone,
-            items: ((order.order_items as Record<string, unknown>[]) || []).map((itm: Record<string, unknown>) => ({
-              id: itm.product_id,
-              productName: (itm.products as Record<string, unknown>)?.name || `Product ${itm.product_id}`,
-              quantity: itm.quantity,
-              price: itm.price,
-            })),
-            total: order.total,
-            status: order.status || 'pending',
-            orderDate: order.created_at as string,
-            pickupDate: (order.delivery_date as string) || new Date(Date.now() + 86400000).toISOString().split('T')[0],
-            pickupTime: (order.delivery_time as string) || '14:00',
-            collectionPoint: (order.collection_point as string) || 'Community Center',
-            paymentMethod: (order.payment_method as string) || 'Credit Card',
-            notes: order.notes,
-            invoiceNumber: ((order.invoices as Record<string, unknown>[]) || [])[0]?.invoice_number,
-          }));
+        if (data.success && data.orders && data.orders.length > 0) {
+          const formattedOrders: Order[] = data.orders.map((order: any) => {
+            const items = Array.isArray(order.items) ? order.items : [];
+            return {
+              id: order.id,
+              orderNumber: order.order_number || order.id,
+              customerName: order.customer_name || '',
+              customerPhone: order.customer_phone || '',
+              items: items.map((itm: any) => ({
+                id: itm.product_id || itm.id || '',
+                productName: itm.product_name || itm.productName || `Product`,
+                quantity: itm.quantity || 1,
+                price: parseFloat(itm.price || '0'),
+              })),
+              total: parseFloat(order.total_amount ?? order.total ?? '0'),
+              status: order.status || 'pending',
+              orderDate: order.created_at || new Date().toISOString(),
+              pickupDate: order.delivery_date || '',
+              pickupTime: order.delivery_time || '',
+              collectionPoint: order.collection_point || '',
+              paymentMethod: order.payment_method || '',
+              notes: order.notes || '',
+              invoiceNumber: order.invoice_number || '',
+            };
+          });
 
           setOrders(formattedOrders);
           return;
         }
       }
     } catch (error) {
-      console.error('Error fetching orders from database:', error);
+      console.error('Error fetching orders:', error);
     }
 
-    // Fallback to mock orders
-    setOrders(getMockOrders());
+    // No orders found or error -- set empty
+    setOrders([]);
   }, []);
 
   useEffect(() => {
-    try {
-      const authStr = localStorage.getItem('vendorAuth');
-      if (!authStr) return;
-      const auth = JSON.parse(authStr);
-      const id = auth.vendorId || '';
-      const name = auth.vendorName || auth.name || '';
-      setVendorId(id);
-      setVendorName(name);
-      fetchOrders(id).finally(() => setLoading(false));
-    } catch {
+    // Get vendor info from auth context or legacy localStorage
+    let id = user?.vendorId || '';
+    let name = user?.displayName || '';
+
+    if (!id) {
+      try {
+        const authStr = localStorage.getItem('vendorAuth');
+        if (authStr) {
+          const auth = JSON.parse(authStr);
+          id = auth.vendorId || '';
+          name = auth.vendorName || auth.name || '';
+        }
+      } catch { /* ignore */ }
+    }
+
+    setVendorId(id);
+    setVendorName(name);
+
+    if (accessToken) {
+      fetchOrders(accessToken).finally(() => setLoading(false));
+    } else {
+      // No token, show empty state
+      setOrders([]);
       setLoading(false);
     }
-  }, [fetchOrders]);
+  }, [user, accessToken, fetchOrders]);
 
-  // --- Update order status (preserved DB logic + WhatsApp notification) ---
+  // --- Update order status (DB update + WhatsApp notification) ---
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
@@ -215,9 +160,14 @@ export default function VendorOrders() {
     );
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+
       const response = await fetch(`/api/orders?id=${orderId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ status: newStatus }),
       });
       if (!response.ok) {
@@ -352,7 +302,7 @@ export default function VendorOrders() {
           { label: isRTL ? 'ממתין' : 'Pending', count: counts.pending, color: '#d97706', bg: 'bg-amber-50' },
           { label: isRTL ? 'בתהליך' : 'In Progress', count: counts.active, color: '#2563eb', bg: 'bg-blue-50' },
           { label: isRTL ? 'מוכן' : 'Ready', count: orders.filter(o => o.status === 'ready').length, color: '#059669', bg: 'bg-emerald-50' },
-          { label: isRTL ? 'הכנסות היום' : "Today's Revenue", count: null, color: '#3a3a1d', bg: 'bg-gray-50', revenue: orders.reduce((sum, o) => sum + o.total, 0) },
+          { label: isRTL ? 'הכנסות' : 'Revenue', count: null, color: '#3a3a1d', bg: 'bg-gray-50', revenue: orders.reduce((sum, o) => sum + o.total, 0) },
         ].map((stat, i) => (
           <div key={i} className={`${stat.bg} rounded-xl px-5 py-4 border border-gray-100`}>
             <p className="text-xs font-medium text-gray-500 mb-1">{stat.label}</p>
@@ -448,33 +398,35 @@ export default function VendorOrders() {
                           {isRTL ? 'פרטי לקוח' : 'Customer Details'}
                         </h4>
                         <div className="space-y-2 text-sm">
-                          <p className="text-gray-700">{order.customerName}</p>
-                          <p className="text-gray-500">{order.customerPhone}</p>
+                          <p className="text-gray-700">{order.customerName || (isRTL ? 'לא צוין' : 'Not specified')}</p>
+                          <p className="text-gray-500">{order.customerPhone || (isRTL ? 'לא צוין' : 'Not specified')}</p>
                         </div>
-                        <div className="flex gap-2 mt-3">
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => window.open(`tel:${order.customerPhone}`)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-gray-300 transition-colors cursor-pointer"
-                          >
-                            <Phone className="w-3.5 h-3.5 stroke-[1.5]" />
-                            {isRTL ? 'התקשר' : 'Call'}
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => {
-                              const cleanPhone = order.customerPhone.replace(/\D/g, '');
-                              const msg = `Hi ${order.customerName}, this is ${vendorName} regarding your order ${order.orderNumber}.`;
-                              window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`);
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-gray-300 transition-colors cursor-pointer"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5 stroke-[1.5]" />
-                            WhatsApp
-                          </motion.button>
-                        </div>
+                        {order.customerPhone && (
+                          <div className="flex gap-2 mt-3">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => window.open(`tel:${order.customerPhone}`)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-gray-300 transition-colors cursor-pointer"
+                            >
+                              <Phone className="w-3.5 h-3.5 stroke-[1.5]" />
+                              {isRTL ? 'התקשר' : 'Call'}
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                const cleanPhone = order.customerPhone.replace(/\D/g, '');
+                                const msg = `Hi ${order.customerName}, this is ${vendorName} regarding your order ${order.orderNumber}.`;
+                                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`);
+                              }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-gray-300 transition-colors cursor-pointer"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 stroke-[1.5]" />
+                              WhatsApp
+                            </motion.button>
+                          </div>
+                        )}
                       </div>
 
                       <div className="bg-gray-50 rounded-lg p-4">
@@ -482,40 +434,51 @@ export default function VendorOrders() {
                           {isRTL ? 'פרטי איסוף' : 'Pickup Details'}
                         </h4>
                         <div className="space-y-2 text-sm">
-                          <p className="text-gray-700">
-                            <span className="text-gray-400">{isRTL ? 'תאריך:' : 'Date:'} </span>
-                            {order.pickupDate} {isRTL ? 'בשעה' : 'at'} {order.pickupTime}
-                          </p>
-                          <p className="text-gray-700">
-                            <span className="text-gray-400">{isRTL ? 'נקודת איסוף:' : 'Point:'} </span>
-                            {order.collectionPoint}
-                          </p>
-                          <p className="text-gray-700">
-                            <span className="text-gray-400">{isRTL ? 'תשלום:' : 'Payment:'} </span>
-                            {order.paymentMethod}
-                          </p>
+                          {order.pickupDate && (
+                            <p className="text-gray-700">
+                              <span className="text-gray-400">{isRTL ? 'תאריך:' : 'Date:'} </span>
+                              {order.pickupDate} {order.pickupTime ? `${isRTL ? 'בשעה' : 'at'} ${order.pickupTime}` : ''}
+                            </p>
+                          )}
+                          {order.collectionPoint && (
+                            <p className="text-gray-700">
+                              <span className="text-gray-400">{isRTL ? 'נקודת איסוף:' : 'Point:'} </span>
+                              {order.collectionPoint}
+                            </p>
+                          )}
+                          {order.paymentMethod && (
+                            <p className="text-gray-700">
+                              <span className="text-gray-400">{isRTL ? 'תשלום:' : 'Payment:'} </span>
+                              {order.paymentMethod}
+                            </p>
+                          )}
+                          {!order.pickupDate && !order.collectionPoint && !order.paymentMethod && (
+                            <p className="text-gray-400 italic">{isRTL ? 'אין פרטים נוספים' : 'No additional details'}</p>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Order Items */}
-                    <div>
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                        {isRTL ? 'פריטים' : 'Order Items'}
-                      </h4>
-                      <div className="space-y-2">
-                        {order.items.map((itm) => (
-                          <div key={itm.id} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50 last:border-0">
-                            <span className="text-gray-700">
-                              {itm.quantity}x {itm.productName}
-                            </span>
-                            <span className="font-medium text-gray-900">
-                              {'\u20AA'}{itm.price * itm.quantity}
-                            </span>
-                          </div>
-                        ))}
+                    {order.items.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                          {isRTL ? 'פריטים' : 'Order Items'}
+                        </h4>
+                        <div className="space-y-2">
+                          {order.items.map((itm, idx) => (
+                            <div key={itm.id || idx} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50 last:border-0">
+                              <span className="text-gray-700">
+                                {itm.quantity}x {itm.productName}
+                              </span>
+                              <span className="font-medium text-gray-900">
+                                {'\u20AA'}{itm.price * itm.quantity}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Notes */}
                     {order.notes && (

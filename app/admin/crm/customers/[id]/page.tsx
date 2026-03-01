@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { PageHeader, LoadingState } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface Customer {
   id: string;
@@ -20,7 +21,8 @@ interface Customer {
   points: number;
   total_orders: number;
   total_spent: number;
-  last_order_date: string | null;
+  last_order_at: string | null;
+  last_order_date?: string | null; // alias kept for compat
   tags: string[];
   notes: string | null;
   addresses: any;
@@ -62,16 +64,12 @@ const activityIcons: Record<string, React.ReactNode> = {
   tier_change: <Crown className="w-4 h-4 text-yellow-500 stroke-[1.5]" />,
 };
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token');
-}
-
 export default function CustomerDetailPage() {
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
   const { t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -88,13 +86,13 @@ export default function CustomerDetailPage() {
   const [submittingTag, setSubmittingTag] = useState(false);
 
   const headers = useCallback(() => {
-    const token = getToken();
     const h: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) h['Authorization'] = `Bearer ${token}`;
+    if (accessToken) h['Authorization'] = `Bearer ${accessToken}`;
     return h;
-  }, []);
+  }, [accessToken]);
 
   const fetchCustomer = useCallback(() => {
+    if (!accessToken) return;
     setLoading(true);
     fetch(`/api/admin/crm/customers/${customerId}`, { headers: headers() })
       .then((res) => {
@@ -109,21 +107,23 @@ export default function CustomerDetailPage() {
         setError(err.message);
         setLoading(false);
       });
-  }, [customerId, headers]);
+  }, [accessToken, customerId, headers]);
 
   const fetchActivity = useCallback(() => {
+    if (!accessToken) return;
     fetch(`/api/admin/crm/customers/${customerId}/activity`, { headers: headers() })
       .then((res) => res.json())
       .then((json) => {
         setActivities(json.activities || []);
       })
       .catch((err) => console.error('Activity fetch error:', err));
-  }, [customerId, headers]);
+  }, [accessToken, customerId, headers]);
 
   useEffect(() => {
+    if (!accessToken) return;
     fetchCustomer();
     fetchActivity();
-  }, [fetchCustomer, fetchActivity]);
+  }, [accessToken, fetchCustomer, fetchActivity]);
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -314,8 +314,8 @@ export default function CustomerDetailPage() {
               <div>
                 <p className="text-xs text-gray-500">{isRTL ? 'הזמנה אחרונה' : 'Last Order'}</p>
                 <p className="text-lg font-bold text-gray-900">
-                  {customer.last_order_date
-                    ? new Date(customer.last_order_date).toLocaleDateString()
+                  {(customer.last_order_at || customer.last_order_date)
+                    ? new Date((customer.last_order_at || customer.last_order_date)!).toLocaleDateString()
                     : '-'}
                 </p>
               </div>
