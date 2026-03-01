@@ -10,6 +10,7 @@ import {
 import { PageHeader, StatCard, DataTable, StatusBadge, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface DashboardOrder {
   id: string;
@@ -46,30 +47,17 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-// --- Mock fallback data (kept for reference) ---
-// const mockOrders = [
-//   { id: 'KF-1001', customer: 'Sarah Cohen', customerHe: 'שרה כהן', vendor: 'Teva Deli', vendorHe: 'טבע דלי', items: 3, total: 145, date: '2025-02-07', status: 'pending' },
-//   { id: 'KF-1002', customer: 'David Levi', customerHe: 'דוד לוי', vendor: 'Garden of Light', vendorHe: 'גן האור', items: 5, total: 230, date: '2025-02-07', status: 'processing' },
-//   { id: 'KF-1003', customer: 'Miriam Yosef', customerHe: 'מרים יוסף', vendor: "Queen's Cuisine", vendorHe: 'המטבח של המלכה', items: 2, total: 89, date: '2025-02-06', status: 'shipped' },
-//   { id: 'KF-1004', customer: 'Avi Ben-Israel', customerHe: 'אבי בן-ישראל', vendor: 'Gahn Delight', vendorHe: 'גן תענוג', items: 4, total: 178, date: '2025-02-06', status: 'delivered' },
-//   { id: 'KF-1005', customer: 'Rivka Amar', customerHe: 'רבקה עמר', vendor: 'People Store', vendorHe: 'חנות העם', items: 1, total: 52, date: '2025-02-05', status: 'pending' },
-// ];
-
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token');
-}
-
 export default function AdminDashboard() {
   const { language, t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    const token = getToken();
+    if (!accessToken) return;
     const headers: Record<string, string> = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    headers['Authorization'] = `Bearer ${accessToken}`;
 
     fetch('/api/admin/dashboard', { headers })
       .then((res) => {
@@ -85,7 +73,7 @@ export default function AdminDashboard() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [accessToken]);
 
   if (loading) {
     return <LoadingState type="page" />;
@@ -193,9 +181,14 @@ export default function AdminDashboard() {
       {/* Header */}
       <motion.div variants={item}>
         <PageHeader
-          title={t('Dashboard')}
+          title={isRTL ? 'לוח ניהול מנהל' : 'Admin Dashboard'}
           subtitle={dateString}
           isRTL={isRTL}
+          actions={
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2D5A27] text-white text-xs font-semibold uppercase tracking-wide">
+              Admin Panel
+            </span>
+          }
         />
       </motion.div>
 

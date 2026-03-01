@@ -1,15 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   ShoppingCart, Gift, DollarSign, Heart, Store, ArrowRight,
-  ShoppingBag, Star, Package
+  ShoppingBag, Star, Package, Loader2
 } from 'lucide-react';
 import { StatCard, DataTable, PageHeader, StatusBadge } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const container = {
   hidden: { opacity: 0 },
@@ -34,22 +35,71 @@ interface RecentOrder {
   [key: string]: unknown;
 }
 
-const mockRecentOrders: RecentOrder[] = [
-  { id: 'ORD-2025-042', date: '2025-02-06', items: 4, total: '189.50', status: 'delivered', vendor: 'Teva Deli' },
-  { id: 'ORD-2025-039', date: '2025-02-03', items: 2, total: '67.00', status: 'shipped', vendor: 'Gahn Delight' },
-  { id: 'ORD-2025-035', date: '2025-01-29', items: 6, total: '312.75', status: 'delivered', vendor: "Queen's Cuisine" },
-  { id: 'ORD-2025-031', date: '2025-01-24', items: 1, total: '45.00', status: 'delivered', vendor: 'Garden of Light' },
-  { id: 'ORD-2025-028', date: '2025-01-19', items: 3, total: '134.25', status: 'delivered', vendor: 'People Store' },
-];
-
 export default function CustomerDashboard() {
   const { language, t, isRTL } = useLanguage();
+  const { accessToken, user } = useAuth();
   const [customerName, setCustomerName] = useState('');
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [rewardsPoints, setRewardsPoints] = useState(0);
+  const [totalSavings, setTotalSavings] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const name = localStorage.getItem('customerName') || 'Customer';
+    const name = user?.displayName || localStorage.getItem('customerName') || 'Customer';
     setCustomerName(name);
-  }, []);
+  }, [user]);
+
+  const fetchDashboardData = useCallback(async () => {
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const headers = { Authorization: `Bearer ${accessToken}` };
+
+    try {
+      // Fetch orders and rewards in parallel
+      const [ordersRes, rewardsRes] = await Promise.allSettled([
+        fetch('/api/customer/orders?limit=5', { headers }),
+        fetch('/api/customer/rewards', { headers }),
+      ]);
+
+      // Process orders
+      if (ordersRes.status === 'fulfilled' && ordersRes.value.ok) {
+        const ordersData = await ordersRes.value.json();
+        if (ordersData.success && ordersData.orders) {
+          setTotalOrders(ordersData.pagination?.total || ordersData.orders.length);
+          const mapped: RecentOrder[] = ordersData.orders.map((o: any) => ({
+            id: o.id || o.order_number || '-',
+            date: o.created_at || o.date || '',
+            items: Array.isArray(o.items) ? o.items.length : (o.item_count || 0),
+            total: String(parseFloat(o.total_amount || o.total || '0').toFixed(2)),
+            status: o.status || 'pending',
+            vendor: o.vendor_name || o.vendor || '-',
+          }));
+          setRecentOrders(mapped);
+        }
+      }
+
+      // Process rewards
+      if (rewardsRes.status === 'fulfilled' && rewardsRes.value.ok) {
+        const rewardsData = await rewardsRes.value.json();
+        if (rewardsData.success && rewardsData.rewards) {
+          setRewardsPoints(rewardsData.rewards.balance || 0);
+          setTotalSavings(rewardsData.rewards.lifetimeRedeemed || 0);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const columns: Column<RecentOrder>[] = [
     {
@@ -142,6 +192,11 @@ export default function CustomerDashboard() {
           title={isRTL ? `${customerName} ,שלום` : `Welcome back, ${customerName}`}
           subtitle={isRTL ? 'הנה סקירה של החשבון שלך' : 'Here is an overview of your account'}
           isRTL={isRTL}
+          actions={
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0369a1] text-white text-xs font-semibold uppercase tracking-wide">
+              My Account
+            </span>
+          }
         />
       </motion.div>
 
@@ -149,29 +204,26 @@ export default function CustomerDashboard() {
       <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <StatCard
           title={isRTL ? 'סה"כ הזמנות' : 'Total Orders'}
-          value={12}
+          value={totalOrders}
           icon={<ShoppingCart className="w-5 h-5 stroke-[1.5]" />}
           color="green"
-          trend={{ value: 8, label: isRTL ? 'החודש' : 'this month' }}
         />
         <StatCard
           title={isRTL ? 'נקודות פרסים' : 'Rewards Points'}
-          value={2450}
+          value={rewardsPoints}
           icon={<Gift className="w-5 h-5 stroke-[1.5]" />}
           color="amber"
-          trend={{ value: 120, label: isRTL ? 'נוספו' : 'earned' }}
         />
         <StatCard
           title={isRTL ? 'סה"כ חיסכון' : 'Total Savings'}
-          value={380}
+          value={totalSavings}
           prefix="₪"
           icon={<DollarSign className="w-5 h-5 stroke-[1.5]" />}
           color="emerald"
-          trend={{ value: 12, label: isRTL ? 'החודש' : 'this month' }}
         />
         <StatCard
           title={isRTL ? 'מועדפים' : 'Favorites'}
-          value={7}
+          value={0}
           icon={<Heart className="w-5 h-5 stroke-[1.5]" />}
           color="purple"
         />
@@ -224,16 +276,23 @@ export default function CustomerDashboard() {
             <ArrowRight className={`w-3.5 h-3.5 stroke-[1.5] ${isRTL ? 'rotate-180' : ''}`} />
           </Link>
         </div>
-        <DataTable
-          columns={columns}
-          data={mockRecentOrders}
-          searchable={false}
-          pageSize={5}
-          emptyTitle={isRTL ? 'אין הזמנות עדיין' : 'No orders yet'}
-          emptyDescription={isRTL ? 'התחל לקנות כדי לראות את ההזמנות שלך כאן' : 'Start shopping to see your orders here'}
-          emptyIcon="cart"
-          isRTL={isRTL}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 text-[#2D5A27] animate-spin stroke-[1.5]" />
+            <span className="ml-2 text-sm text-gray-500">{isRTL ? 'טוען...' : 'Loading...'}</span>
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={recentOrders}
+            searchable={false}
+            pageSize={5}
+            emptyTitle={isRTL ? 'אין הזמנות עדיין' : 'No orders yet'}
+            emptyDescription={isRTL ? 'התחל לקנות כדי לראות את ההזמנות שלך כאן' : 'Start shopping to see your orders here'}
+            emptyIcon="cart"
+            isRTL={isRTL}
+          />
+        )}
       </motion.div>
     </motion.div>
   );

@@ -52,9 +52,9 @@ export default function PortalLayout({ role, menuItems, user, onLogout, children
   const activeId = getActiveId();
 
   const roleConfig = {
-    admin: { title: 'KFAR Admin', titleHe: 'מנהל כפר', subtitle: 'Marketplace Control', subtitleHe: 'ניהול שוק', gradient: 'from-[#2D5A27] to-[#1a3517]' },
-    vendor: { title: user?.name || 'Vendor Portal', titleHe: user?.name || 'פורטל ספקים', subtitle: 'Store Management', subtitleHe: 'ניהול חנות', gradient: 'from-[#3a3a1d] to-[#252512]' },
-    customer: { title: 'My Account', titleHe: 'החשבון שלי', subtitle: user?.name || '', subtitleHe: user?.name || '', gradient: 'from-[#478c0b] to-[#2D5A27]' },
+    admin: { title: 'KFAR Admin', titleHe: 'מנהל כפר', subtitle: 'Marketplace Control', subtitleHe: 'ניהול שוק', gradient: 'from-[#1a3517] to-[#0d1f0a]' },
+    vendor: { title: user?.name || 'Vendor Portal', titleHe: user?.name || 'פורטל ספקים', subtitle: 'Store Management', subtitleHe: 'ניהול חנות', gradient: 'from-[#7c3d12] to-[#431f06]' },
+    customer: { title: 'My Account', titleHe: 'החשבון שלי', subtitle: user?.name || '', subtitleHe: user?.name || '', gradient: 'from-[#0369a1] to-[#075985]' },
   };
 
   const config = roleConfig[role];
@@ -248,6 +248,13 @@ export default function PortalLayout({ role, menuItems, user, onLogout, children
       <main className="flex-1 min-w-0 bg-gray-50/50">
         {/* Spacer for mobile header */}
         <div className="h-14 lg:hidden" />
+        {/* Role accent bar */}
+        <div className={cn(
+          'h-1 w-full',
+          role === 'admin' ? 'bg-gradient-to-r from-[#2D5A27] to-[#478c0b]' :
+          role === 'vendor' ? 'bg-gradient-to-r from-[#92400e] to-[#C4A265]' :
+          'bg-gradient-to-r from-[#0369a1] to-[#38bdf8]'
+        )} />
         {/* Page Content */}
         <div className="p-6 lg:p-8">
           {children}
