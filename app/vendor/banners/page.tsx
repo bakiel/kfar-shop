@@ -5,10 +5,11 @@ import { motion } from 'framer-motion';
 import VendorBannerManager from '@/components/vendor/VendorBannerManager';
 import Link from 'next/link';
 import { ArrowLeft, HelpCircle, Info } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function VendorBannersPage() {
-  // In production, get vendorId from auth
-  const vendorId = 'teva-deli';
+  const { user } = useAuth();
+  const vendorId = user?.vendorId || '';
   
   return (
     <div className="min-h-screen bg-gray-50 py-12">

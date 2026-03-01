@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,45 +27,11 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ banners });
       }
     } catch (dbError) {
-      console.log('Database operation failed, returning mock response');
+      console.log('Database operation failed, returning empty banners');
     }
 
-    // Fallback to mock banners if database is not available
-    const mockBanners = [
-      {
-        id: 'banner_001',
-        vendor_id: vendorId,
-        title: '🎉 Weekend Special!',
-        subtitle: '20% off all prepared foods',
-        template: 'sale',
-        content: {
-          discount: '20%',
-          endDate: new Date(Date.now() + 172800000).toISOString(),
-          categories: ['prepared-foods']
-        },
-        is_active: true,
-        order_position: 1,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 'banner_002',
-        vendor_id: vendorId,
-        title: '🌟 New Arrivals',
-        subtitle: 'Fresh products just in!',
-        template: 'announcement',
-        content: {
-          message: 'Check out our latest selection of organic vegetables',
-          icon: 'sparkles'
-        },
-        is_active: true,
-        order_position: 2,
-        created_at: new Date().toISOString()
-      }
-    ];
-
-    return NextResponse.json({
-      banners: mockBanners.filter(b => b.vendor_id === vendorId)
-    });
+    // DB unavailable -- return empty array
+    return NextResponse.json({ banners: [] });
   } catch (error) {
     console.error('Error fetching vendor banners:', error);
     return NextResponse.json(
@@ -76,8 +43,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'vendor') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { vendor_id, title, subtitle, template, content, start_date, end_date, order_position } = body;
+
+    // Prevent cross-vendor banner creation
+    if (vendor_id !== user.vendorId) {
+      return NextResponse.json({ error: 'Forbidden: cannot create banners for another vendor' }, { status: 403 });
+    }
 
     // Validate required fields
     if (!vendor_id || !title || !template) {
@@ -122,26 +100,11 @@ export async function POST(request: NextRequest) {
         banner: rows[0]
       });
     } catch (dbError) {
-      console.log('Database operation failed, returning mock response');
-
-      // Fallback to mock response
-      return NextResponse.json({
-        success: true,
-        banner: {
-          id: `banner_${Date.now()}`,
-          vendor_id,
-          title,
-          subtitle,
-          template,
-          content: content || {},
-          start_date,
-          end_date,
-          is_active: true,
-          order_position: order_position || 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      });
+      console.error('Database operation failed:', dbError);
+      return NextResponse.json(
+        { error: 'Database unavailable, cannot create banner' },
+        { status: 503 }
+      );
     }
   } catch (error) {
     console.error('Error creating vendor banner:', error);
@@ -154,6 +117,12 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'vendor') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const bannerId = searchParams.get('id');
 
@@ -183,16 +152,11 @@ export async function PUT(request: NextRequest) {
         banner: rows[0]
       });
     } catch (dbError) {
-      console.log('Database operation failed, returning mock response');
-
-      return NextResponse.json({
-        success: true,
-        banner: {
-          id: bannerId,
-          ...body,
-          updated_at: new Date().toISOString()
-        }
-      });
+      console.error('Database operation failed:', dbError);
+      return NextResponse.json(
+        { error: 'Database unavailable, cannot update banner' },
+        { status: 503 }
+      );
     }
   } catch (error) {
     console.error('Error updating vendor banner:', error);
@@ -205,6 +169,12 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'vendor') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const bannerId = searchParams.get('id');
 
@@ -224,12 +194,11 @@ export async function DELETE(request: NextRequest) {
         message: 'Banner deleted successfully'
       });
     } catch (dbError) {
-      console.log('Database operation failed, returning mock response');
-
-      return NextResponse.json({
-        success: true,
-        message: 'Banner deleted successfully'
-      });
+      console.error('Database operation failed:', dbError);
+      return NextResponse.json(
+        { error: 'Database unavailable, cannot delete banner' },
+        { status: 503 }
+      );
     }
   } catch (error) {
     console.error('Error deleting vendor banner:', error);

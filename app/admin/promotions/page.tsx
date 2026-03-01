@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, Clock, CheckCircle, DollarSign, Store, Check, X } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
+import { Loader2, Clock, CheckCircle, DollarSign, Store, Check, X, Zap, Star, Sparkles, TrendingUp, Gift, Megaphone, Package } from 'lucide-react';
 
 interface Promotion {
   id: string;
@@ -28,18 +29,23 @@ interface Promotion {
 }
 
 export default function AdminPromotionsPage() {
+  const { accessToken } = useAuth();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending_approval' | 'approved' | 'active'>('pending_approval');
   const [loading, setLoading] = useState(true);
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
 
   useEffect(() => {
+    if (!accessToken) return;
     fetchPromotions();
-  }, [filter]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, accessToken]);
 
   const fetchPromotions = async () => {
     try {
-      const response = await fetch(`/api/admin/promotions?status=${filter}`);
+      const headers: Record<string, string> = {};
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+      const response = await fetch(`/api/admin/promotions?status=${filter}`, { headers });
       const data = await response.json();
       setPromotions(data.promotions || []);
     } catch (error) {
@@ -55,9 +61,11 @@ export default function AdminPromotionsPage() {
 
   const handleApproval = async (promotionId: string, action: 'approve' | 'reject', priority?: number) => {
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
       const response = await fetch('/api/admin/promotions/moderate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ promotionId, action, priority })
       });
 
@@ -79,16 +87,16 @@ export default function AdminPromotionsPage() {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    const icons = {
-      flash_sale: '⚡',
-      vendor_special: '🌟',
-      new_arrival: '🆕',
-      limited_stock: '🔥',
-      bundle_deal: '🎁',
-      kfar_announcement: '📢'
+  const getTypeIcon = (type: string): React.ReactNode => {
+    const icons: Record<string, React.ReactNode> = {
+      flash_sale: <Zap className="w-4 h-4 stroke-[1.5]" />,
+      vendor_special: <Star className="w-4 h-4 stroke-[1.5]" />,
+      new_arrival: <Sparkles className="w-4 h-4 stroke-[1.5]" />,
+      limited_stock: <TrendingUp className="w-4 h-4 stroke-[1.5]" />,
+      bundle_deal: <Gift className="w-4 h-4 stroke-[1.5]" />,
+      kfar_announcement: <Megaphone className="w-4 h-4 stroke-[1.5]" />,
     };
-    return icons[type as keyof typeof icons] || '📦';
+    return icons[type] ?? <Package className="w-4 h-4 stroke-[1.5]" />;
   };
 
   const getStatusColor = (status: string) => {
@@ -233,7 +241,9 @@ export default function AdminPromotionsPage() {
                   className="object-cover"
                 />
                 <div className="absolute top-2 left-2">
-                  <span className="text-2xl">{getTypeIcon(promotion.promotionType)}</span>
+                  <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm text-gray-800">
+                    {getTypeIcon(promotion.promotionType)}
+                  </span>
                 </div>
                 <div className="absolute top-2 right-2">
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(promotion.status)}`}>

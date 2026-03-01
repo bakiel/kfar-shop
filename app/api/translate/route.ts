@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Authorization': `Bearer ${openRouterConfig.apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://kfar-marketplace.com',
+        'HTTP-Referer': 'https://kfarapp.com',
         'X-Title': 'KFAR Marketplace Translation'
       },
       body: JSON.stringify({

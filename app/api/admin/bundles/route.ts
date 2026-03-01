@@ -3,49 +3,6 @@ import { getProductById } from '@/lib/data/wordpress-style-data-layer';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
 import { verifyAccessToken } from '@/lib/services/auth-service';
 
-// In-memory mock bundles -- used as primary source and as fallback
-const mockBundles: any[] = [
-  {
-    id: 'bundle-1',
-    name: 'Shabbat Essentials',
-    nameHe: '\u05D7\u05D1\u05D9\u05DC\u05EA \u05E9\u05D1\u05EA',
-    description: 'Everything you need for a perfect Shabbat dinner',
-    products: ['teva-deli-1', 'queens-cuisine-1', 'gahn-delight-1'],
-    price: 89,
-    originalPrice: 120,
-    status: 'active',
-    image: '/images/vendors/teva_deli_logo_vegan_factory.jpg',
-    createdAt: '2025-01-15T10:00:00Z',
-    updatedAt: '2025-01-15T10:00:00Z',
-  },
-  {
-    id: 'bundle-2',
-    name: 'Healthy Breakfast Pack',
-    nameHe: '\u05D7\u05D1\u05D9\u05DC\u05EA \u05D0\u05E8\u05D5\u05D7\u05EA \u05D1\u05D5\u05E7\u05E8 \u05D1\u05E8\u05D9\u05D0\u05D4',
-    description: 'Start your day with plant-based goodness',
-    products: ['teva-deli-5', 'garden-of-light-1'],
-    price: 55,
-    originalPrice: 72,
-    status: 'active',
-    image: '/images/vendors/Garden of Light Logo.jpg',
-    createdAt: '2025-01-20T14:30:00Z',
-    updatedAt: '2025-01-20T14:30:00Z',
-  },
-  {
-    id: 'bundle-3',
-    name: 'Party Platter',
-    nameHe: '\u05DE\u05D2\u05E9 \u05DE\u05E1\u05D9\u05D1\u05D4',
-    description: 'Catering-ready selections for your next event',
-    products: ['queens-cuisine-2', 'queens-cuisine-3', 'gahn-delight-2'],
-    price: 145,
-    originalPrice: 195,
-    status: 'draft',
-    image: '/images/vendors/queens_cuisine_logo_vegan_food_art.jpg',
-    createdAt: '2025-02-01T09:00:00Z',
-    updatedAt: '2025-02-01T09:00:00Z',
-  },
-];
-
 // Enrich bundle with resolved product details
 function enrichBundle(bundle: any) {
   const resolvedProducts = (bundle.products || []).map((pid: string) => {
@@ -113,18 +70,7 @@ export async function GET(request: NextRequest) {
           bundles = result.rows;
         }
       } catch {
-        // Table may not exist -- fall through to mock data
-      }
-    }
-
-    // Fallback to mock data
-    if (bundles.length === 0) {
-      bundles = [...mockBundles];
-
-      if (bundleId) {
-        bundles = bundles.filter((b) => b.id === bundleId);
-      } else if (status && status !== 'all') {
-        bundles = bundles.filter((b) => b.status === status);
+        // Table may not exist -- return empty result
       }
     }
 
@@ -221,16 +167,14 @@ export async function POST(request: NextRequest) {
           );
         }
       } catch {
-        // Table may not exist -- store in mock array
+        // Table may not exist
       }
     }
 
-    // Fallback: add to in-memory mock data
-    mockBundles.push(newBundle);
-
+    // DB unavailable -- return error
     return NextResponse.json(
-      { success: true, bundle: enrichBundle(newBundle) },
-      { status: 201 }
+      { error: 'Database unavailable, cannot create bundle' },
+      { status: 503 }
     );
   } catch (error) {
     console.error('Bundle POST error:', error);
@@ -244,6 +188,9 @@ export async function POST(request: NextRequest) {
 // PATCH -- update an existing bundle
 export async function PATCH(request: NextRequest) {
   try {
+    if (!requireAdmin(request)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
     const { id, ...updates } = body;
 
@@ -313,25 +260,15 @@ export async function PATCH(request: NextRequest) {
           }
         }
       } catch {
-        // Fall through to mock update
+        // Table may not exist
       }
     }
 
-    // Fallback: update in-memory mock data
-    const bundleIndex = mockBundles.findIndex((b) => b.id === id);
-    if (bundleIndex === -1) {
-      return NextResponse.json(
-        { error: `Bundle ${id} not found` },
-        { status: 404 }
-      );
-    }
-
-    mockBundles[bundleIndex] = { ...mockBundles[bundleIndex], ...updates };
-
-    return NextResponse.json({
-      success: true,
-      bundle: enrichBundle(mockBundles[bundleIndex]),
-    });
+    // DB unavailable or bundle not found
+    return NextResponse.json(
+      { error: `Bundle ${id} not found or database unavailable` },
+      { status: 404 }
+    );
   } catch (error) {
     console.error('Bundle PATCH error:', error);
     return NextResponse.json(
@@ -372,25 +309,15 @@ export async function DELETE(request: NextRequest) {
           });
         }
       } catch {
-        // Fall through to mock delete
+        // Table may not exist
       }
     }
 
-    // Fallback: remove from in-memory mock data
-    const bundleIndex = mockBundles.findIndex((b) => b.id === id);
-    if (bundleIndex === -1) {
-      return NextResponse.json(
-        { error: `Bundle ${id} not found` },
-        { status: 404 }
-      );
-    }
-
-    mockBundles.splice(bundleIndex, 1);
-
-    return NextResponse.json({
-      success: true,
-      message: `Bundle ${id} deleted`,
-    });
+    // DB unavailable or bundle not found
+    return NextResponse.json(
+      { error: `Bundle ${id} not found or database unavailable` },
+      { status: 404 }
+    );
   } catch (error) {
     console.error('Bundle DELETE error:', error);
     return NextResponse.json(

@@ -5,10 +5,11 @@ import { motion } from 'framer-motion';
 import PromotionSubmissionForm from '@/components/vendor/PromotionSubmissionForm';
 import Link from 'next/link';
 import { ArrowLeft, Megaphone, Clock, Eye, TrendingUp, Flag, ArrowRight, Lightbulb, CheckCircle, BarChart3, Info } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function VendorPromotionsPage() {
-  // In production, get vendorId from auth
-  const vendorId = 'teva-deli';
+  const { user } = useAuth();
+  const vendorId = user?.vendorId || '';
   
   return (
     <div className="min-h-screen bg-gray-50 py-12">

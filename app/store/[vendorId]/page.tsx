@@ -185,7 +185,7 @@ export default async function StorePage({ params }: PageProps) {
       } else {
         // For server-side rendering, we'll need to fetch from API
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 
-          (process.env.NODE_ENV === 'production' ? 'https://kfar-marketplace.com' : 'http://localhost:3001');
+          (process.env.NODE_ENV === 'production' ? 'https://kfarapp.com' : 'http://localhost:3001');
         const response = await fetch(`${apiUrl}/api/vendor/${vendorId}`, {
           cache: 'no-store'
         });

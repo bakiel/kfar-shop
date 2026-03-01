@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     
     // Generate QR code data
     let qrData: any = { vendorId };
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kfar-marketplace.com';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kfarapp.com';
     
     switch (type) {
       case 'vendor':
