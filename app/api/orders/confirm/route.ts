@@ -45,8 +45,9 @@ export async function POST(request: NextRequest) {
         order_number, customer_name, customer_email, customer_phone,
         total, subtotal, delivery_fee, payment_method,
         status, payment_status, shipping_address, delivery_address,
+        items,
         created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
       RETURNING *`,
       [
         orderRecord.order_number,
@@ -61,8 +62,7 @@ export async function POST(request: NextRequest) {
         orderRecord.payment_status,
         orderRecord.shipping_address,
         orderRecord.delivery_address,
-        orderRecord.created_at,
-        orderRecord.updated_at
+        JSON.stringify(items || []),
       ]
     );
 
