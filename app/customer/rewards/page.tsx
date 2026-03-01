@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, animate } from 'framer-motion';
-import { Gift, Star, Trophy, ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
+import { Gift, Star, Trophy, ArrowUpRight, ArrowDownRight, TrendingUp, Loader2 } from 'lucide-react';
 import { PageHeader, DataTable, StatusBadge } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 import { cn } from '@/lib/utils';
 
 const containerVariants = {
@@ -32,19 +33,6 @@ interface PointTransaction {
   [key: string]: unknown;
 }
 
-const mockTransactions: PointTransaction[] = [
-  { id: 'PT-001', date: '2025-02-06', description: 'Purchase - Teva Deli', descriptionHe: 'רכישה - טבע דלי', points: '+45', balance: '2,450', type: 'earned' },
-  { id: 'PT-002', date: '2025-02-03', description: 'Review bonus', descriptionHe: 'בונוס ביקורת', points: '+50', balance: '2,405', type: 'earned' },
-  { id: 'PT-003', date: '2025-01-29', description: 'Coupon redeemed', descriptionHe: 'קופון מומש', points: '-200', balance: '2,355', type: 'redeemed' },
-  { id: 'PT-004', date: '2025-01-24', description: "Purchase - Queen's Cuisine", descriptionHe: 'רכישה - המטבח של המלכה', points: '+95', balance: '2,555', type: 'earned' },
-  { id: 'PT-005', date: '2025-01-19', description: 'Referral bonus', descriptionHe: 'בונוס הפניה', points: '+500', balance: '2,460', type: 'earned' },
-  { id: 'PT-006', date: '2025-01-12', description: 'Purchase - Garden of Light', descriptionHe: 'רכישה - גן האור', points: '+30', balance: '1,960', type: 'earned' },
-  { id: 'PT-007', date: '2025-01-07', description: 'Free shipping redeemed', descriptionHe: 'משלוח חינם מומש', points: '-150', balance: '1,930', type: 'redeemed' },
-  { id: 'PT-008', date: '2025-01-02', description: 'Purchase - People Store', descriptionHe: 'רכישה - חנות העם', points: '+80', balance: '2,080', type: 'earned' },
-  { id: 'PT-009', date: '2024-12-28', description: 'Birthday bonus', descriptionHe: 'בונוס יום הולדת', points: '+200', balance: '2,000', type: 'earned' },
-  { id: 'PT-010', date: '2024-12-20', description: 'Purchase - Gahn Delight', descriptionHe: 'רכישה - גן תענוג', points: '+55', balance: '1,800', type: 'earned' },
-];
-
 const tiers = [
   { name: 'Bronze', nameHe: 'ברונזה', min: 0, max: 499, color: '#CD7F32', bgColor: '#CD7F32' },
   { name: 'Silver', nameHe: 'כסף', min: 500, max: 1499, color: '#A0A0A0', bgColor: '#A0A0A0' },
@@ -52,27 +40,91 @@ const tiers = [
   { name: 'Platinum', nameHe: 'פלטינה', min: 5000, max: Infinity, color: '#478c0b', bgColor: '#478c0b' },
 ];
 
-const CURRENT_POINTS = 2450;
-const CURRENT_TIER_INDEX = 2; // Gold
+function getTierIndex(tierName: string): number {
+  const map: Record<string, number> = { bronze: 0, silver: 1, gold: 2, platinum: 3 };
+  return map[tierName.toLowerCase()] ?? 0;
+}
 
 export default function CustomerRewards() {
   const { language, t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [displayPoints, setDisplayPoints] = useState(0);
+  const [currentPoints, setCurrentPoints] = useState(0);
+  const [currentTierIndex, setCurrentTierIndex] = useState(0);
+  const [pointsToNextTier, setPointsToNextTier] = useState(0);
+  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Animate points counter on mount
+  const fetchRewardsData = useCallback(async () => {
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const headers = { Authorization: `Bearer ${accessToken}` };
+
+    try {
+      const [rewardsRes, txnRes] = await Promise.allSettled([
+        fetch('/api/customer/rewards', { headers }),
+        fetch('/api/customer/rewards/transactions?limit=50', { headers }),
+      ]);
+
+      // Process rewards summary
+      if (rewardsRes.status === 'fulfilled' && rewardsRes.value.ok) {
+        const data = await rewardsRes.value.json();
+        if (data.success && data.rewards) {
+          const balance = data.rewards.balance || 0;
+          setCurrentPoints(balance);
+          setCurrentTierIndex(getTierIndex(data.rewards.tier || 'bronze'));
+          setPointsToNextTier(data.rewards.pointsToNextTier || 0);
+        }
+      }
+
+      // Process transactions
+      if (txnRes.status === 'fulfilled' && txnRes.value.ok) {
+        const data = await txnRes.value.json();
+        if (data.success && data.transactions) {
+          const mapped: PointTransaction[] = data.transactions.map((tx: any) => ({
+            id: tx.id || '-',
+            date: tx.createdAt || tx.created_at || '',
+            description: tx.description || '-',
+            descriptionHe: tx.description || '-',
+            points: tx.type === 'earned' ? `+${Math.abs(tx.amount)}` : `-${Math.abs(tx.amount)}`,
+            balance: String(tx.balanceAfter ?? tx.balance_after ?? 0),
+            type: tx.type || 'earned',
+          }));
+          setTransactions(mapped);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching rewards data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken]);
+
   useEffect(() => {
-    const controls = animate(0, CURRENT_POINTS, {
+    fetchRewardsData();
+  }, [fetchRewardsData]);
+
+  // Animate points counter when currentPoints changes
+  useEffect(() => {
+    if (currentPoints === 0) {
+      setDisplayPoints(0);
+      return;
+    }
+    const controls = animate(0, currentPoints, {
       duration: 1.5,
       ease: 'easeOut',
       onUpdate: (v) => setDisplayPoints(Math.round(v)),
     });
     return () => controls.stop();
-  }, []);
+  }, [currentPoints]);
 
-  const currentTier = tiers[CURRENT_TIER_INDEX];
-  const nextTier = tiers[CURRENT_TIER_INDEX + 1];
+  const currentTier = tiers[currentTierIndex];
+  const nextTier = tiers[currentTierIndex + 1] || null;
   const progressPercent = nextTier
-    ? ((CURRENT_POINTS - currentTier.min) / (nextTier.min - currentTier.min)) * 100
+    ? ((currentPoints - currentTier.min) / (nextTier.min - currentTier.min)) * 100
     : 100;
 
   const columns: Column<PointTransaction>[] = [
@@ -159,12 +211,14 @@ export default function CustomerRewards() {
                 </motion.p>
               </div>
             </div>
-            <div className="flex items-center gap-2 mt-2 justify-center md:justify-start">
-              <TrendingUp className="w-4 h-4 text-emerald-500 stroke-[1.5]" />
-              <span className="text-sm text-emerald-600 font-medium">
-                {isRTL ? '+345 נקודות החודש' : '+345 points this month'}
-              </span>
-            </div>
+            {currentPoints > 0 && (
+              <div className="flex items-center gap-2 mt-2 justify-center md:justify-start">
+                <TrendingUp className="w-4 h-4 text-emerald-500 stroke-[1.5]" />
+                <span className="text-sm text-emerald-600 font-medium">
+                  {isRTL ? `${currentPoints.toLocaleString()} נקודות זמינות` : `${currentPoints.toLocaleString()} points available`}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Current Tier Badge */}
@@ -200,11 +254,11 @@ export default function CustomerRewards() {
                   transition={{ delay: 0.3 + index * 0.1, type: 'spring', stiffness: 200 }}
                   className={cn(
                     'w-10 h-10 rounded-full flex items-center justify-center mb-2 border-2',
-                    index <= CURRENT_TIER_INDEX ? 'border-transparent' : 'border-gray-200 bg-gray-50'
+                    index <= currentTierIndex ? 'border-transparent' : 'border-gray-200 bg-gray-50'
                   )}
-                  style={index <= CURRENT_TIER_INDEX ? { backgroundColor: tier.color } : {}}
+                  style={index <= currentTierIndex ? { backgroundColor: tier.color } : {}}
                 >
-                  {index <= CURRENT_TIER_INDEX ? (
+                  {index <= currentTierIndex ? (
                     <Star className="w-5 h-5 text-white stroke-[1.5]" />
                   ) : (
                     <Star className="w-5 h-5 text-gray-300 stroke-[1.5]" />
@@ -212,7 +266,7 @@ export default function CustomerRewards() {
                 </motion.div>
                 <p className={cn(
                   'text-xs font-semibold',
-                  index === CURRENT_TIER_INDEX ? 'text-gray-900' : 'text-gray-400'
+                  index === currentTierIndex ? 'text-gray-900' : 'text-gray-400'
                 )}>
                   {isRTL ? tier.nameHe : tier.name}
                 </p>
@@ -237,12 +291,12 @@ export default function CustomerRewards() {
           {nextTier && (
             <div className={cn('flex items-center justify-between mt-3 px-4', isRTL && 'flex-row-reverse')}>
               <p className="text-xs text-gray-500">
-                {isRTL ? `${CURRENT_POINTS.toLocaleString()} נקודות` : `${CURRENT_POINTS.toLocaleString()} points`}
+                {isRTL ? `${currentPoints.toLocaleString()} נקודות` : `${currentPoints.toLocaleString()} points`}
               </p>
               <p className="text-xs font-medium" style={{ color: nextTier.color }}>
                 {isRTL
-                  ? `${(nextTier.min - CURRENT_POINTS).toLocaleString()} נקודות לרמת ${nextTier.nameHe}`
-                  : `${(nextTier.min - CURRENT_POINTS).toLocaleString()} points to ${nextTier.name}`
+                  ? `${(nextTier.min - currentPoints).toLocaleString()} נקודות לרמת ${nextTier.nameHe}`
+                  : `${(nextTier.min - currentPoints).toLocaleString()} points to ${nextTier.name}`
                 }
               </p>
             </div>
@@ -257,17 +311,24 @@ export default function CustomerRewards() {
             {isRTL ? 'היסטוריית נקודות' : 'Points History'}
           </h3>
         </div>
-        <DataTable
-          columns={columns}
-          data={mockTransactions}
-          searchable={true}
-          searchPlaceholder={isRTL ? 'חפש בהיסטוריה...' : 'Search history...'}
-          pageSize={8}
-          emptyTitle={isRTL ? 'אין היסטוריית נקודות' : 'No points history'}
-          emptyDescription={isRTL ? 'צבור נקודות על ידי רכישות וביקורות' : 'Earn points through purchases and reviews'}
-          emptyIcon="package"
-          isRTL={isRTL}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 text-[#2D5A27] animate-spin stroke-[1.5]" />
+            <span className="ml-2 text-sm text-gray-500">{isRTL ? 'טוען...' : 'Loading...'}</span>
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={transactions}
+            searchable={true}
+            searchPlaceholder={isRTL ? 'חפש בהיסטוריה...' : 'Search history...'}
+            pageSize={8}
+            emptyTitle={isRTL ? 'אין היסטוריית נקודות' : 'No points history yet'}
+            emptyDescription={isRTL ? 'צבור נקודות על ידי רכישות וביקורות' : 'Earn points through purchases and reviews'}
+            emptyIcon="package"
+            isRTL={isRTL}
+          />
+        )}
       </motion.div>
     </motion.div>
   );

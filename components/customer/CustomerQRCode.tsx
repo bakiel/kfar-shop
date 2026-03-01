@@ -394,16 +394,26 @@ export default function CustomerQRCode({
     </motion.div>
   );
 
-  // Share Modal
-  const ShareModal = () => (
+  return (
+    <>
+      {variant === 'compact' && renderCompact()}
+      {variant === 'full' && renderFull()}
+      {variant === 'card' && renderCard()}
+      <ShareModal show={showShareModal} onClose={() => setShowShareModal(false)} profileId={profile.id} toast={toast} />
+    </>
+  );
+}
+
+function ShareModal({ show, onClose, profileId, toast }: { show: boolean; onClose: () => void; profileId: string; toast: any }) {
+  return (
     <AnimatePresence>
-      {showShareModal && (
+      {show && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowShareModal(false)}
+          onClick={onClose}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -415,7 +425,7 @@ export default function CustomerQRCode({
             <h3 className="text-xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
               Share Your Member QR
             </h3>
-            
+
             <div className="space-y-3 mb-6">
               <button
                 className="w-full py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
@@ -427,7 +437,7 @@ export default function CustomerQRCode({
                 <Share2 className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Share via WhatsApp
               </button>
-              
+
               <button
                 className="w-full py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
                 onClick={() => {
@@ -438,26 +448,26 @@ export default function CustomerQRCode({
                 <Mail className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Share via Email
               </button>
-              
+
               <button
                 className="w-full py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
                 onClick={() => {
                   // Copy profile link
-                  navigator.clipboard.writeText(`https://kfar.com/member/${profile.id}`);
+                  navigator.clipboard.writeText(`https://kfar.com/member/${profileId}`);
                   toast({
                     title: "Link Copied",
                     description: "Member profile link copied to clipboard",
                   });
-                  setShowShareModal(false);
+                  onClose();
                 }}
               >
                 <Link2 className="w-4 h-4 stroke-[1.5] mr-2 inline" />
                 Copy Link
               </button>
             </div>
-            
+
             <button
-              onClick={() => setShowShareModal(false)}
+              onClick={onClose}
               className="w-full py-2 text-gray-600 font-medium"
             >
               Cancel
@@ -466,14 +476,5 @@ export default function CustomerQRCode({
         </motion.div>
       )}
     </AnimatePresence>
-  );
-
-  return (
-    <>
-      {variant === 'compact' && renderCompact()}
-      {variant === 'full' && renderFull()}
-      {variant === 'card' && renderCard()}
-      <ShareModal />
-    </>
   );
 }

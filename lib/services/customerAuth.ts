@@ -78,45 +78,35 @@ class CustomerAuthService {
     try {
       // Normalize phone number
       const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
-      
-      // In production, this would be an API call
-      // For now, simulate login
-      const mockCustomer: CustomerProfile = {
-        id: `CUST-${Date.now()}`,
-        name: 'Sarah Cohen',
-        phone: normalizedPhone,
-        email: 'sarah@example.com',
-        qrCode: `KFAR-${normalizedPhone}-${Date.now()}`,
-        points: 1250,
-        tier: 'Gold',
-        preferences: {
-          language: 'he',
-          currency: 'ILS',
-          dietary: ['kosher', 'vegetarian'],
-          notifications: true
-        },
-        addresses: [
-          {
-            id: 'addr-1',
-            label: 'Home',
-            street: '123 Peace Street',
-            city: 'Kfar Shalom',
-            postalCode: '12345',
-            isDefault: true
-          }
-        ],
-        joinedAt: new Date('2024-01-15'),
-        lastVisit: new Date()
-      };
 
-      const token = `token-${Date.now()}`;
-      
-      this.setAuth(mockCustomer, token);
-      
+      // Call the auth API to look up customer by phone
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: normalizedPhone }),
+      });
+
+      if (!response.ok) {
+        return {
+          success: false,
+          message: 'Login failed. Please check your phone number and try again.'
+        };
+      }
+
+      const data = await response.json();
+
+      if (data.customer && data.token) {
+        this.setAuth(data.customer, data.token);
+        return {
+          success: true,
+          customer: data.customer,
+          token: data.token
+        };
+      }
+
       return {
-        success: true,
-        customer: mockCustomer,
-        token
+        success: false,
+        message: data.message || 'Customer not found. Please register first.'
       };
     } catch (error) {
       return {
@@ -129,30 +119,41 @@ class CustomerAuthService {
   // QR code login
   async loginWithQR(qrData: string): Promise<LoginResponse> {
     try {
-      // Parse QR data
-      const customerData = this.parseQRCode(qrData);
-      
-      if (!customerData) {
+      if (!qrData || !qrData.startsWith('KFAR-')) {
         return {
           success: false,
           message: 'Invalid QR code'
         };
       }
 
-      // In production, validate QR with backend
-      const mockCustomer: CustomerProfile = {
-        ...customerData,
-        lastVisit: new Date()
-      };
+      // Validate QR with backend
+      const response = await fetch('/api/auth/qr-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrCode: qrData }),
+      });
 
-      const token = `token-${Date.now()}`;
-      
-      this.setAuth(mockCustomer, token);
-      
+      if (!response.ok) {
+        return {
+          success: false,
+          message: 'QR code validation failed'
+        };
+      }
+
+      const data = await response.json();
+
+      if (data.customer && data.token) {
+        this.setAuth(data.customer, data.token);
+        return {
+          success: true,
+          customer: data.customer,
+          token: data.token
+        };
+      }
+
       return {
-        success: true,
-        customer: mockCustomer,
-        token
+        success: false,
+        message: data.message || 'Invalid QR code'
       };
     } catch (error) {
       return {
@@ -166,34 +167,40 @@ class CustomerAuthService {
   async quickRegister(phoneNumber: string, name?: string): Promise<LoginResponse> {
     try {
       const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
-      
-      const newCustomer: CustomerProfile = {
-        id: `CUST-${Date.now()}`,
-        name: name || 'Guest User',
-        phone: normalizedPhone,
-        qrCode: `KFAR-${normalizedPhone}-${Date.now()}`,
-        points: 500, // Welcome bonus
-        tier: 'Bronze',
-        preferences: {
-          language: 'he',
-          currency: 'ILS',
-          dietary: [],
-          notifications: true
-        },
-        addresses: [],
-        joinedAt: new Date(),
-        lastVisit: new Date()
-      };
 
-      const token = `token-${Date.now()}`;
-      
-      this.setAuth(newCustomer, token);
-      
+      // Call the registration API
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: normalizedPhone,
+          name: name || 'Guest User',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          message: errorData.message || 'Registration failed'
+        };
+      }
+
+      const data = await response.json();
+
+      if (data.customer && data.token) {
+        this.setAuth(data.customer, data.token);
+        return {
+          success: true,
+          customer: data.customer,
+          token: data.token,
+          message: data.message || 'Welcome to KFAR!'
+        };
+      }
+
       return {
-        success: true,
-        customer: newCustomer,
-        token,
-        message: 'Welcome to KFAR! You earned 500 bonus points!'
+        success: false,
+        message: data.message || 'Registration failed'
       };
     } catch (error) {
       return {
@@ -289,33 +296,14 @@ class CustomerAuthService {
     return normalized;
   }
 
-  // Parse QR code
-  private parseQRCode(qrData: string): CustomerProfile | null {
+  // Parse QR code -- validates format only, actual lookup done by backend
+  private parseQRCode(qrData: string): string | null {
     try {
       // QR format: KFAR-PHONE-TIMESTAMP-DATA
       if (!qrData.startsWith('KFAR-')) {
         return null;
       }
-
-      // In production, decode encrypted QR data
-      // For now, return mock data
-      return {
-        id: 'CUST-123456',
-        name: 'David Levi',
-        phone: '0541234567',
-        qrCode: qrData,
-        points: 850,
-        tier: 'Silver',
-        preferences: {
-          language: 'he',
-          currency: 'ILS',
-          dietary: ['kosher'],
-          notifications: true
-        },
-        addresses: [],
-        joinedAt: new Date('2024-03-01'),
-        lastVisit: new Date()
-      };
+      return qrData;
     } catch (error) {
       return null;
     }

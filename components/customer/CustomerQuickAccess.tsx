@@ -34,21 +34,26 @@ export default function CustomerQuickAccess({ isCompact = false }: CustomerQuick
   });
   const router = useRouter();
 
-  // Simulated login function
   const handleQuickLogin = async (method: 'phone' | 'qr', data: string) => {
-    // In production, this would validate with backend
-    console.log(`Logging in with ${method}:`, data);
-    
-    // Simulate successful login
-    setIsLoggedIn(true);
-    setCustomerData({
-      name: 'Sarah Cohen',
-      points: 1250,
-      tier: 'Gold',
-      qrCode: `KFAR-CUST-${Date.now()}`
-    });
-    
-    // Close dropdown after login
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(method === 'phone' ? { phone: data } : { qrCode: data }),
+      });
+      if (res.ok) {
+        const body = await res.json();
+        setIsLoggedIn(true);
+        setCustomerData({
+          name: body.user?.displayName || body.user?.email?.split('@')[0] || 'Customer',
+          points: body.user?.loyaltyPoints || 0,
+          tier: body.user?.tier || 'Bronze',
+          qrCode: `KFAR-CUST-${body.user?.id || Date.now()}`
+        });
+      }
+    } catch {
+      console.error('Login failed');
+    }
     setIsOpen(false);
   };
 

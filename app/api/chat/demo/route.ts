@@ -1,35 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAllProducts } from '@/lib/data/wordpress-style-data-layer';
 
-// Simple mock data for demo - no external dependencies
-const mockProducts = [
-  {
-    id: 'teva-001',
-    name: 'Classic Vegan Schnitzel',
-    vendorId: 'teva-deli',
-    vendorName: 'Teva Deli',
-    price: 25,
-    image: '/images/teva-deli/schnitzel-classic.jpg',
-    description: 'Our signature plant-based schnitzel, crispy and delicious'
-  },
-  {
-    id: 'garden-001', 
-    name: 'Cashew Spread Deluxe',
-    vendorId: 'garden-of-light',
-    vendorName: 'Garden of Light',
-    price: 18,
-    image: '/images/garden-of-light/cashew-spread.jpg',
-    description: 'Artisanal cashew spread with herbs and spices'
-  },
-  {
-    id: 'queens-001',
-    name: 'Gourmet Protein Bowl',
-    vendorId: 'queens-cuisine',
-    vendorName: "Queen's Cuisine", 
-    price: 32,
-    image: '/images/queens-cuisine/protein-bowl.jpg',
-    description: 'Complete meal with plant-based proteins and vegetables'
-  }
-];
+// Load real products from the static data layer
+function getRealProducts() {
+  const all = getAllProducts();
+  return all.map(p => ({
+    id: p.id,
+    name: p.name,
+    vendorId: p.vendorId,
+    vendorName: p.vendorName,
+    price: p.price,
+    image: p.image,
+    description: p.description,
+    category: p.category,
+    tags: p.tags || [],
+    vegan: p.vegan ?? p.isVegan ?? true
+  }));
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,8 +30,9 @@ export async function POST(request: NextRequest) {
 
     console.log('🤖 Processing message:', message);
 
-    // Simple message processing for demo
-    const response = processMessage(message);
+    // Load real products and process message
+    const products = getRealProducts();
+    const response = processMessage(message, products);
     
     // Return response without audio for now (to avoid loading errors)
     return NextResponse.json({
@@ -61,14 +49,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Demo Chat API Error:', error);
-    
+
+    const fallbackProducts = getRealProducts();
     // Return helpful fallback response
     return NextResponse.json({
       success: true,
       response: {
         text: "Welcome to KFAR Marketplace! I'm your AI assistant. I can help you discover our amazing vegan products from the Village of Peace community. What would you like to know about?",
         audio_url: null,
-        products: mockProducts.slice(0, 2),
+        products: fallbackProducts.slice(0, 2),
         suggestions: ['Show me products', 'Tell me about vendors', 'Community story'],
         conversation_id: `kfar_demo_${Date.now()}`,
         timestamp: new Date().toISOString()
@@ -77,36 +66,46 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function processMessage(message: string) {
+function processMessage(message: string, products: ReturnType<typeof getRealProducts>) {
   const lowercaseMessage = message.toLowerCase();
-  
+
+  // Helper: find products by vendor
+  const byVendor = (vid: string) => products.filter(p => p.vendorId === vid);
+  // Helper: find products matching a keyword in name, category, or tags
+  const matching = (keyword: string) => products.filter(p =>
+    p.name.toLowerCase().includes(keyword) ||
+    p.category?.toLowerCase().includes(keyword) ||
+    p.tags.some(t => t.toLowerCase().includes(keyword))
+  );
+
   // Greetings
   if (lowercaseMessage.includes('hello') || lowercaseMessage.includes('hi') || lowercaseMessage.includes('hey')) {
     return {
       text: "Shalom! Welcome to KFAR Marketplace! I'm your AI assistant from the Village of Peace community in Dimona, Israel. We've been creating amazing vegan products for over 50 years. How can I help you today?",
       suggestions: ['Show me popular products', 'Tell me about vendors', 'Community story', 'What makes you special?'],
-      products: mockProducts.slice(0, 2)
+      products: products.slice(0, 2)
     };
   }
-  
+
   // Product search
   if (lowercaseMessage.includes('product') || lowercaseMessage.includes('food') || lowercaseMessage.includes('show') || lowercaseMessage.includes('popular')) {
     return {
-      text: "Here are some of our most popular products! Our Teva Deli schnitzel is a community favorite - crispy, protein-rich, and made with our secret spice blend. Garden of Light creates artisanal spreads that even non-vegans love. All our products are 100% vegan and made with love in our community.",
-      products: mockProducts,
+      text: `We have ${products.length} products across our marketplace! Here are a few highlights. All our products are 100% vegan and made with love in our Village of Peace community.`,
+      products: products.slice(0, 6),
       suggestions: ['Tell me about Teva Deli', 'What about nutrition?', 'How do you make these?', 'Add to cart']
     };
   }
-  
+
   // Vendor information
   if (lowercaseMessage.includes('vendor') || lowercaseMessage.includes('teva') || lowercaseMessage.includes('deli')) {
+    const tevaProducts = byVendor('teva-deli');
     return {
       text: "Teva Deli is our premium plant-based meat alternative specialist! They've been perfecting vegan schnitzels, burgers, and protein products for over 15 years. Using traditional Israeli spices and modern plant-based techniques, they create products that even meat-eaters love. Their secret? Generations of community recipes and sustainable ingredients.",
-      products: [mockProducts[0]],
+      products: tevaProducts.slice(0, 3),
       suggestions: ['Show me Teva products', 'What about other vendors?', 'How is it made?', 'Order now']
     };
   }
-  
+
   // Community story
   if (lowercaseMessage.includes('community') || lowercaseMessage.includes('story') || lowercaseMessage.includes('special') || lowercaseMessage.includes('village')) {
     return {
@@ -114,30 +113,33 @@ function processMessage(message: string) {
       suggestions: ['Tell me about the food', 'How did this start?', 'Show me products', 'What makes it healthy?']
     };
   }
-  
+
   // Nutrition and health
   if (lowercaseMessage.includes('nutrition') || lowercaseMessage.includes('healthy') || lowercaseMessage.includes('protein')) {
+    const proteinProducts = matching('protein');
+    const healthProducts = proteinProducts.length >= 2 ? proteinProducts : products.slice(0, 3);
     return {
-      text: "Our community has thrived on plant-based nutrition for 50+ years! Our products are rich in protein, vitamins, and minerals. The schnitzel has complete amino acids, our spreads provide healthy fats, and everything is made from whole food ingredients. We've proven that vegan food isn't just healthy - it's delicious, satisfying, and energizing!",
-      products: [mockProducts[0], mockProducts[2]],
+      text: "Our community has thrived on plant-based nutrition for 50+ years! Our products are rich in protein, vitamins, and minerals. Everything is made from whole food ingredients. We've proven that vegan food isn't just healthy - it's delicious, satisfying, and energizing!",
+      products: healthProducts.slice(0, 3),
       suggestions: ['Show protein products', 'What about ingredients?', 'Recipe ideas', 'Health benefits']
     };
   }
-  
+
   // Default response
   return {
-    text: "I'm here to help you discover our amazing vegan marketplace! We have over 100 products from 6 local vendors, all created in our Village of Peace community. I can tell you about our products, share our community story, or help you find exactly what you're looking for. What interests you most?",
+    text: `I'm here to help you discover our amazing vegan marketplace! We have ${products.length} products from 6 local vendors, all created in our Village of Peace community. I can tell you about our products, share our community story, or help you find exactly what you're looking for. What interests you most?`,
     suggestions: ['Show me products', 'Tell me about vendors', 'Community story', 'What makes you special?'],
-    products: mockProducts.slice(0, 2)
+    products: products.slice(0, 2)
   };
 }
 
 // Simple GET endpoint for testing
 export async function GET() {
+  const products = getRealProducts();
   return NextResponse.json({
     status: 'KFAR Demo Chat API is working!',
     timestamp: new Date().toISOString(),
     features: ['Text chat', 'Product recommendations', 'Community stories'],
-    mockProducts: mockProducts.length
+    productCount: products.length
   });
 }

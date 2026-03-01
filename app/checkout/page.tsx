@@ -19,13 +19,6 @@ import { SmartQRCompactFixed } from '@/components/qr/SmartQRCompactFixed';
 import { listContainer, listItem } from '@/lib/animations/motion-variants';
 import '@/styles/checkout-mobile.css';
 
-interface CheckoutStep {
-  id: number;
-  title: string;
-  icon: string;
-  component: JSX.Element;
-}
-
 export default function EnhancedCheckoutPage() {
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCart();
@@ -146,34 +139,14 @@ export default function EnhancedCheckoutPage() {
     return { subtotal, shipping, discount, tax, total };
   };
 
-  const steps: CheckoutStep[] = [
-    {
-      id: 1,
-      title: 'Information',
-      icon: 'fa-user',
-      component: <ContactInfoStep />
-    },
-    {
-      id: 2,
-      title: 'Delivery',
-      icon: 'fa-truck',
-      component: <DeliveryStep />
-    },
-    {
-      id: 3,
-      title: 'Payment',
-      icon: 'fa-credit-card',
-      component: <PaymentStep />
-    },
-    {
-      id: 4,
-      title: 'Confirmation',
-      icon: 'fa-check-circle',
-      component: <ConfirmationStep />
-    }
+  const steps = [
+    { id: 1, title: 'Information', icon: 'fa-user' },
+    { id: 2, title: 'Delivery', icon: 'fa-truck' },
+    { id: 3, title: 'Payment', icon: 'fa-credit-card' },
+    { id: 4, title: 'Confirmation', icon: 'fa-check-circle' }
   ];
 
-  function ContactInfoStep() {
+  function renderContactInfo() {
     return (
       <motion.div
         className="space-y-6"
@@ -326,7 +299,7 @@ export default function EnhancedCheckoutPage() {
     );
   }
 
-  function DeliveryStep() {
+  function renderDelivery() {
     return (
       <motion.div
         className="space-y-6"
@@ -466,7 +439,7 @@ export default function EnhancedCheckoutPage() {
     );
   }
 
-  function PaymentStep() {
+  function renderPayment() {
     // Map payment method icons to Lucide components
     const getPaymentIcon = (iconKey: string) => {
       switch (iconKey) {
@@ -683,7 +656,7 @@ export default function EnhancedCheckoutPage() {
     );
   }
 
-  function ConfirmationStep() {
+  function renderConfirmation() {
     return (
       <motion.div
         className="text-center confirmation-container"
@@ -1457,7 +1430,10 @@ Contact: 052-KFAR-MKT`;
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25, ease: 'easeOut' }}
                   >
-                    {steps[currentStep - 1].component}
+                    {currentStep === 1 && renderContactInfo()}
+                    {currentStep === 2 && renderDelivery()}
+                    {currentStep === 3 && renderPayment()}
+                    {currentStep === 4 && renderConfirmation()}
                   </motion.div>
                 </AnimatePresence>
 

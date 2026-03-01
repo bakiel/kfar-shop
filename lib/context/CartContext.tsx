@@ -156,3 +156,21 @@ export const useCart = () => {
   }
   return context;
 };
+
+const defaultCartContext: CartContextType = {
+  items: [],
+  addToCart: () => {},
+  removeFromCart: () => {},
+  updateQuantity: () => {},
+  clearCart: () => {},
+  getCartTotal: () => 0,
+  getCartCount: () => 0,
+  getItemsByVendor: () => ({}),
+  isInCart: () => false,
+  getQuantity: () => 0,
+};
+
+export const useCartSafe = (): CartContextType => {
+  const context = useContext(CartContext);
+  return context ?? defaultCartContext;
+};

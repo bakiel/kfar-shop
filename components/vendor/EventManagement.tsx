@@ -28,6 +28,292 @@ interface Event {
   };
 }
 
+interface EventFormProps {
+  vendorId: number;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function EventForm({ vendorId, onClose, onSuccess }: EventFormProps) {
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    description: '',
+    long_description: '',
+    category: 'workshop',
+    event_type: 'one-time',
+    start_date: '',
+    end_date: '',
+    start_time: '',
+    end_time: '',
+    venue_name: '',
+    venue_address: '',
+    capacity: '',
+    is_free: true,
+    price: '',
+    registration_required: false,
+    contact_name: '',
+    contact_email: '',
+    contact_phone: '',
+    tags: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch('/api/events/vendor/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          tags: formData.tags.split(',').map(tag => tag.trim()),
+          capacity: formData.capacity ? parseInt(formData.capacity) : null,
+          price: !formData.is_free && formData.price ? parseFloat(formData.price) : null
+        })
+      });
+
+      if (response.ok) {
+        onClose();
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Error creating event:', error);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-6">
+      <h3 className="text-xl font-bold mb-4" style={{ color: '#3a3a1d' }}>Create New Event</h3>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Event Title</label>
+            <input
+              type="text"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">URL Slug</label>
+            <input
+              type="text"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.slug}
+              onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Short Description</label>
+          <input
+            type="text"
+            required
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Detailed Description</label>
+          <textarea
+            rows={4}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+            value={formData.long_description}
+            onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
+          />
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Category</label>
+            <select
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            >
+              <option value="workshop">Workshop</option>
+              <option value="dining">Food & Dining</option>
+              <option value="cultural">Cultural Event</option>
+              <option value="wellness">Wellness</option>
+              <option value="market">Market</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Event Type</label>
+            <select
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.event_type}
+              onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
+            >
+              <option value="one-time">One-time</option>
+              <option value="recurring">Recurring</option>
+              <option value="series">Series</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Capacity</label>
+            <input
+              type="number"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.capacity}
+              onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+              placeholder="Leave empty for unlimited"
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Start Date</label>
+            <input
+              type="date"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.start_date}
+              onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">End Date (if multi-day)</label>
+            <input
+              type="date"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.end_date}
+              onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Start Time</label>
+            <input
+              type="time"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.start_time}
+              onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">End Time</label>
+            <input
+              type="time"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.end_time}
+              onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Venue Name</label>
+            <input
+              type="text"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.venue_name}
+              onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Venue Address</label>
+            <input
+              type="text"
+              required
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+              value={formData.venue_address}
+              onChange={(e) => setFormData({ ...formData, venue_address: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.is_free}
+              onChange={(e) => setFormData({ ...formData, is_free: e.target.checked })}
+              className="w-5 h-5"
+            />
+            <span className="font-medium">Free Event</span>
+          </label>
+
+          {!formData.is_free && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Price (&#8362;)</label>
+              <input
+                type="number"
+                required
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              />
+            </div>
+          )}
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.registration_required}
+              onChange={(e) => setFormData({ ...formData, registration_required: e.target.checked })}
+              className="w-5 h-5"
+            />
+            <span className="font-medium">Registration Required</span>
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
+          <input
+            type="text"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
+            value={formData.tags}
+            onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+            placeholder="workshop, vegan, cooking"
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="px-6 py-3 text-white rounded-lg font-medium hover:shadow-lg transition-all"
+            style={{ backgroundColor: '#478c0b' }}
+          >
+            Create Event
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function EventManagement({ vendorId }: { vendorId: number }) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,286 +361,6 @@ export default function EventManagement({ vendorId }: { vendorId: number }) {
     }
   };
 
-  const EventForm = () => {
-    const [formData, setFormData] = useState({
-      title: '',
-      slug: '',
-      description: '',
-      long_description: '',
-      category: 'workshop',
-      event_type: 'one-time',
-      start_date: '',
-      end_date: '',
-      start_time: '',
-      end_time: '',
-      venue_name: '',
-      venue_address: '',
-      capacity: '',
-      is_free: true,
-      price: '',
-      registration_required: false,
-      contact_name: '',
-      contact_email: '',
-      contact_phone: '',
-      tags: ''
-    });
-
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      
-      try {
-        const response = await fetch('/api/events/vendor/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            ...formData,
-            tags: formData.tags.split(',').map(tag => tag.trim()),
-            capacity: formData.capacity ? parseInt(formData.capacity) : null,
-            price: !formData.is_free && formData.price ? parseFloat(formData.price) : null
-          })
-        });
-
-        if (response.ok) {
-          setShowCreateForm(false);
-          fetchVendorEvents();
-        }
-      } catch (error) {
-        console.error('Error creating event:', error);
-      }
-    };
-
-    return (
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-xl font-bold mb-4" style={{ color: '#3a3a1d' }}>Create New Event</h3>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Event Title</label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium mb-1">URL Slug</label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Short Description</label>
-            <input
-              type="text"
-              required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Detailed Description</label>
-            <textarea
-              rows={4}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-              value={formData.long_description}
-              onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
-            />
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <select
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              >
-                <option value="workshop">Workshop</option>
-                <option value="dining">Food & Dining</option>
-                <option value="cultural">Cultural Event</option>
-                <option value="wellness">Wellness</option>
-                <option value="market">Market</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Event Type</label>
-              <select
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.event_type}
-                onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-              >
-                <option value="one-time">One-time</option>
-                <option value="recurring">Recurring</option>
-                <option value="series">Series</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Capacity</label>
-              <input
-                type="number"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.capacity}
-                onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                placeholder="Leave empty for unlimited"
-              />
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Start Date</label>
-              <input
-                type="date"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">End Date (if multi-day)</label>
-              <input
-                type="date"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Start Time</label>
-              <input
-                type="time"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.start_time}
-                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">End Time</label>
-              <input
-                type="time"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.end_time}
-                onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Venue Name</label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.venue_name}
-                onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">Venue Address</label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                value={formData.venue_address}
-                onChange={(e) => setFormData({ ...formData, venue_address: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.is_free}
-                onChange={(e) => setFormData({ ...formData, is_free: e.target.checked })}
-                className="w-5 h-5"
-              />
-              <span className="font-medium">Free Event</span>
-            </label>
-
-            {!formData.is_free && (
-              <div>
-                <label className="block text-sm font-medium mb-1">Price (₪)</label>
-                <input
-                  type="number"
-                  required
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                />
-              </div>
-            )}
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.registration_required}
-                onChange={(e) => setFormData({ ...formData, registration_required: e.target.checked })}
-                className="w-5 h-5"
-              />
-              <span className="font-medium">Registration Required</span>
-            </label>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
-            <input
-              type="text"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-green-500"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              placeholder="workshop, vegan, cooking"
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="px-6 py-3 text-white rounded-lg font-medium hover:shadow-lg transition-all"
-              style={{ backgroundColor: '#478c0b' }}
-            >
-              Create Event
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowCreateForm(false)}
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-all"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  };
-
   if (loading) {
     return <div className="text-center py-8">Loading events...</div>;
   }
@@ -377,7 +383,13 @@ export default function EventManagement({ vendorId }: { vendorId: number }) {
       </div>
 
       {/* Create Form */}
-      {showCreateForm && <EventForm />}
+      {showCreateForm && (
+        <EventForm
+          vendorId={vendorId}
+          onClose={() => setShowCreateForm(false)}
+          onSuccess={fetchVendorEvents}
+        />
+      )}
 
       {/* Events List */}
       {!showCreateForm && (

@@ -1,31 +1,96 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, Brain, QrCode, ShoppingBasket, Percent, CheckCircle, Star, Shield, AlertTriangle, Check, Coins, History, RotateCw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Brain, QrCode, ShoppingBasket, Percent, CheckCircle, Star, Shield, AlertTriangle, Check, Coins, History, RotateCw, Loader } from 'lucide-react';
 import CustomerQRCode from '@/components/customer/CustomerQRCode';
 import CustomerQRScanner from '@/components/vendor/CustomerQRScanner';
-import { ANALYZED_CUSTOMER_PROFILES } from '@/lib/services/customer-avatar-analyzer';
+import { useAuth } from '@/lib/context/AuthContext';
+
+interface CustomerProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  description: string;
+  loyaltyTier: string;
+  points: number;
+  preferences: {
+    dietary: string[];
+    allergies: string[];
+    favoriteCategories: string[];
+  };
+  avatar: string;
+  memberSince: string;
+  stats: {
+    totalOrders: number;
+    totalSpent: number;
+    savedByDiscounts: number;
+  };
+}
 
 export default function CustomerJourneyDemo() {
+  const { accessToken } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedCustomer, setSelectedCustomer] = useState(0);
   const [showScanResult, setShowScanResult] = useState(false);
+  const [customers, setCustomers] = useState<CustomerProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Convert analyzed profile to full customer profile
-  const customerProfile = {
-    ...ANALYZED_CUSTOMER_PROFILES[selectedCustomer],
-    email: `${ANALYZED_CUSTOMER_PROFILES[selectedCustomer].name.toLowerCase().replace(' ', '.')}@example.com`,
-    phone: '+972-50-' + Math.floor(Math.random() * 9000000 + 1000000),
-    avatar: `/images/customer-onboarding/${ANALYZED_CUSTOMER_PROFILES[selectedCustomer].imageId}.jpg`,
-    memberSince: 'Jan 2023',
-    stats: {
-      totalOrders: 47,
-      totalSpent: 2840,
-      savedByDiscounts: 426
+  useEffect(() => {
+    async function fetchCustomers() {
+      try {
+        const headers: Record<string, string> = {};
+        if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+        const res = await fetch('/api/admin/crm/customers?limit=6', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = (data.customers || []).map((c: any) => ({
+            id: c.id,
+            name: c.name || 'Customer',
+            email: c.email || '',
+            phone: c.phone || '',
+            description: `A valued KFAR marketplace ${c.loyalty_tier || 'bronze'} member`,
+            loyaltyTier: c.loyalty_tier || 'bronze',
+            points: c.points || 0,
+            preferences: {
+              dietary: c.preferences?.dietary || [],
+              allergies: c.preferences?.allergies || [],
+              favoriteCategories: c.preferences?.favoriteCategories || [],
+            },
+            avatar: '',
+            memberSince: c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A',
+            stats: {
+              totalOrders: c.total_orders || 0,
+              totalSpent: c.total_spent || 0,
+              savedByDiscounts: 0,
+            },
+          }));
+          setCustomers(mapped);
+        }
+      } catch {
+        // Silently fail - demo page
+      } finally {
+        setIsLoading(false);
+      }
     }
+    fetchCustomers();
+  }, [accessToken]);
+
+  const customerProfile = customers[selectedCustomer] || {
+    id: 'none',
+    name: 'No Customer Data',
+    email: '',
+    phone: '',
+    description: 'No customers in database yet',
+    loyaltyTier: 'bronze',
+    points: 0,
+    preferences: { dietary: [], allergies: [], favoriteCategories: [] },
+    avatar: '',
+    memberSince: 'N/A',
+    stats: { totalOrders: 0, totalSpent: 0, savedByDiscounts: 0 },
   };
 
   const journeySteps = [
@@ -141,8 +206,18 @@ export default function CustomerJourneyDemo() {
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
                     <h3 className="text-lg font-semibold mb-4">Select a Customer Avatar</h3>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader className="w-6 h-6 stroke-[1.5] animate-spin text-gray-400" />
+                        <span className="ml-2 text-gray-500">Loading customers...</span>
+                      </div>
+                    ) : customers.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>No customers in database yet.</p>
+                      </div>
+                    ) : (
                     <div className="grid grid-cols-3 gap-4 mb-6">
-                      {ANALYZED_CUSTOMER_PROFILES.map((profile, index) => (
+                      {customers.map((profile, index) => (
                         <motion.div
                           key={profile.id}
                           whileHover={{ scale: 1.05 }}
@@ -154,33 +229,28 @@ export default function CustomerJourneyDemo() {
                           }`}
                           onClick={() => setSelectedCustomer(index)}
                         >
-                          <Image
-                            src={`/images/customer-onboarding/${profile.imageId}.jpg`}
-                            alt={profile.name}
-                            width={150}
-                            height={150}
-                            className="w-full h-32 object-cover"
-                          />
+                          <div className="w-full h-32 flex items-center justify-center text-4xl font-bold text-white"
+                            style={{ backgroundColor: profile.loyaltyTier === 'platinum' ? '#7c3aed' : profile.loyaltyTier === 'gold' ? '#d4a017' : profile.loyaltyTier === 'silver' ? '#8e8e8e' : '#CD7F32' }}>
+                            {profile.name.charAt(0).toUpperCase()}
+                          </div>
                           <div className="p-2 text-center">
                             <p className="text-sm font-semibold">{profile.name}</p>
-                            <p className="text-xs text-gray-600">{profile.loyaltyTier}</p>
+                            <p className="text-xs text-gray-600 capitalize">{profile.loyaltyTier}</p>
                           </div>
                         </motion.div>
                       ))}
                     </div>
+                    )}
                   </div>
                   
                   <div>
                     <h3 className="text-lg font-semibold mb-4">AI Analysis Results</h3>
                     <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
                       <div className="flex items-start gap-4 mb-4">
-                        <Image
-                          src={customerProfile.avatar}
-                          alt={customerProfile.name}
-                          width={80}
-                          height={80}
-                          className="rounded-full"
-                        />
+                        <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white flex-shrink-0"
+                          style={{ backgroundColor: customerProfile.loyaltyTier === 'platinum' ? '#7c3aed' : customerProfile.loyaltyTier === 'gold' ? '#d4a017' : customerProfile.loyaltyTier === 'silver' ? '#8e8e8e' : '#CD7F32' }}>
+                          {customerProfile.name.charAt(0).toUpperCase()}
+                        </div>
                         <div>
                           <h4 className="font-bold text-lg">{customerProfile.name}</h4>
                           <p className="text-sm text-gray-600">{customerProfile.description}</p>

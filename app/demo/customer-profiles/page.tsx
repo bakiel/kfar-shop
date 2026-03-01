@@ -26,64 +26,41 @@ export default function CustomerProfilesDemo() {
   const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'integration'>('overview');
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [showQRModal, setShowQRModal] = useState(false);
-  
-  // Sample customer profiles
-  const sampleCustomers = [
-    {
-      id: '550e8400-e29b-41d4-a716-446655440001',
-      name: 'Sarah Cohen',
-      email: 'sarah.cohen@example.com',
-      avatar: '/images/avatars/sarah.jpg',
-      avatarDescription: 'Woman with curly hair wearing glasses and a bright smile',
-      loyaltyTier: 'gold',
-      points: 5250,
-      lifetimePoints: 5250,
-      preferences: {
-        favoriteCategories: ['dairy-alternatives', 'prepared-foods'],
-        shoppingFrequency: 'weekly',
-        dietaryRestrictions: ['vegan', 'gluten-free']
-      },
-      location: 'Dimona',
-      joinedDate: '2023-06-15',
-      lastPurchase: '2024-01-20'
-    },
-    {
-      id: '550e8400-e29b-41d4-a716-446655440002',
-      name: 'David Levi',
-      email: 'david.levi@example.com',
-      avatar: '/images/avatars/david.jpg',
-      avatarDescription: 'Man with short beard wearing a casual shirt',
-      loyaltyTier: 'silver',
-      points: 2100,
-      lifetimePoints: 2100,
-      preferences: {
-        favoriteCategories: ['beverages', 'snacks'],
-        shoppingFrequency: 'bi-weekly',
-        dietaryRestrictions: ['vegan']
-      },
-      location: 'Eilat',
-      joinedDate: '2023-09-22',
-      lastPurchase: '2024-01-18'
-    },
-    {
-      id: '550e8400-e29b-41d4-a716-446655440003',
-      name: 'Rachel Green',
-      email: 'rachel.green@example.com',
-      avatar: '/images/avatars/rachel.jpg',
-      avatarDescription: 'Young woman with long hair and friendly expression',
-      loyaltyTier: 'bronze',
-      points: 750,
-      lifetimePoints: 750,
-      preferences: {
-        favoriteCategories: ['personal-care', 'home-essentials'],
-        shoppingFrequency: 'monthly',
-        dietaryRestrictions: ['vegan', 'organic']
-      },
-      location: 'Beer Sheva',
-      joinedDate: '2023-12-01',
-      lastPurchase: '2024-01-15'
+  const [sampleCustomers, setSampleCustomers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCustomers() {
+      try {
+        const res = await fetch('/api/admin/crm/customers?limit=6');
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = (data.customers || []).map((c: any) => ({
+            id: c.id,
+            name: c.name || 'Customer',
+            email: c.email || '',
+            loyaltyTier: c.loyalty_tier || 'bronze',
+            points: c.points || 0,
+            lifetimePoints: c.points || 0,
+            preferences: {
+              favoriteCategories: c.preferences?.favoriteCategories || [],
+              shoppingFrequency: 'weekly',
+              dietaryRestrictions: c.preferences?.dietary || [],
+            },
+            location: 'Dimona',
+            joinedDate: c.created_at || '',
+            lastPurchase: c.last_order_at || '',
+          }));
+          setSampleCustomers(mapped);
+        }
+      } catch {
+        // Silently fail for demo page
+      } finally {
+        setIsLoading(false);
+      }
     }
-  ];
+    fetchCustomers();
+  }, []);
 
   const features = [
     {
@@ -625,7 +602,7 @@ export default function CustomerProfilesDemo() {
                       <li>• Name: {selectedCustomer.name}</li>
                       <li>• Tier: {selectedCustomer.loyaltyTier}</li>
                       <li>• Points: {selectedCustomer.points}</li>
-                      <li>• Preferences: {selectedCustomer.preferences.dietaryRestrictions.join(', ')}</li>
+                      <li>• Preferences: {(selectedCustomer.preferences.dietaryRestrictions || []).join(', ') || 'None'}</li>
                     </ul>
                   </div>
                   

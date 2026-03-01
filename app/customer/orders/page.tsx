@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Store, Eye, RotateCcw } from 'lucide-react';
+import { ShoppingCart, Store, Eye, RotateCcw, Loader2 } from 'lucide-react';
 import { PageHeader, DataTable, StatusBadge } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const container = {
   hidden: { opacity: 0 },
@@ -31,21 +32,59 @@ interface Order {
   [key: string]: unknown;
 }
 
-const mockOrders: Order[] = [
-  { id: 'ORD-2025-042', date: '2025-02-06', items: '4 items', total: '189.50', status: 'delivered', vendor: 'Teva Deli' },
-  { id: 'ORD-2025-039', date: '2025-02-03', items: '2 items', total: '67.00', status: 'shipped', vendor: 'Gahn Delight' },
-  { id: 'ORD-2025-035', date: '2025-01-29', items: '6 items', total: '312.75', status: 'delivered', vendor: "Queen's Cuisine" },
-  { id: 'ORD-2025-031', date: '2025-01-24', items: '1 item', total: '45.00', status: 'processing', vendor: 'Garden of Light' },
-  { id: 'ORD-2025-028', date: '2025-01-19', items: '3 items', total: '134.25', status: 'delivered', vendor: 'People Store' },
-  { id: 'ORD-2025-022', date: '2025-01-12', items: '5 items', total: '256.80', status: 'delivered', vendor: 'Teva Deli' },
-  { id: 'ORD-2025-018', date: '2025-01-07', items: '2 items', total: '78.50', status: 'cancelled', vendor: 'VOP Shop' },
-  { id: 'ORD-2025-014', date: '2025-01-02', items: '4 items', total: '198.00', status: 'delivered', vendor: "Queen's Cuisine" },
-  { id: 'ORD-2024-098', date: '2024-12-28', items: '3 items', total: '145.75', status: 'delivered', vendor: 'Gahn Delight' },
-  { id: 'ORD-2024-091', date: '2024-12-20', items: '1 item', total: '32.00', status: 'refunded', vendor: 'Garden of Light' },
-];
-
 export default function CustomerOrders() {
   const { language, t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrders = useCallback(async () => {
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch('/api/customer/orders?limit=100', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.orders) {
+          const mapped: Order[] = data.orders.map((o: any) => {
+            const itemCount = Array.isArray(o.items) ? o.items.length : (o.item_count || 0);
+            return {
+              id: o.id || o.order_number || '-',
+              date: o.created_at || o.date || '',
+              items: itemCount === 1
+                ? (isRTL ? 'פריט 1' : '1 item')
+                : (isRTL ? `${itemCount} פריטים` : `${itemCount} items`),
+              total: String(parseFloat(o.total_amount || o.total || '0').toFixed(2)),
+              status: o.status || 'pending',
+              vendor: o.vendor_name || o.vendor || '-',
+            };
+          });
+          setOrders(mapped);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken, isRTL]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const summaryStats = useMemo(() => {
+    const total = orders.length;
+    const delivered = orders.filter(o => o.status === 'delivered').length;
+    const active = orders.filter(o => ['shipped', 'processing', 'pending'].includes(o.status)).length;
+    const cancelledRefunded = orders.filter(o => ['cancelled', 'refunded'].includes(o.status)).length;
+    return { total, delivered, active, cancelledRefunded };
+  }, [orders]);
 
   const columns: Column<Order>[] = [
     {
@@ -122,10 +161,10 @@ export default function CustomerOrders() {
       {/* Summary Stats */}
       <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: isRTL ? 'סה"כ הזמנות' : 'Total Orders', value: '10', color: '#2D5A27' },
-          { label: isRTL ? 'נמסרו' : 'Delivered', value: '6', color: '#10b981' },
-          { label: isRTL ? 'פעילות' : 'Active', value: '2', color: '#C4A265' },
-          { label: isRTL ? 'בוטלו/הוחזרו' : 'Cancelled/Refunded', value: '2', color: '#ef4444' },
+          { label: isRTL ? 'סה"כ הזמנות' : 'Total Orders', value: String(summaryStats.total), color: '#2D5A27' },
+          { label: isRTL ? 'נמסרו' : 'Delivered', value: String(summaryStats.delivered), color: '#10b981' },
+          { label: isRTL ? 'פעילות' : 'Active', value: String(summaryStats.active), color: '#C4A265' },
+          { label: isRTL ? 'בוטלו/הוחזרו' : 'Cancelled/Refunded', value: String(summaryStats.cancelledRefunded), color: '#ef4444' },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -142,27 +181,34 @@ export default function CustomerOrders() {
 
       {/* Orders Table */}
       <motion.div variants={item}>
-        <DataTable
-          columns={columns}
-          data={mockOrders}
-          searchable={true}
-          searchPlaceholder={isRTL ? 'חפש הזמנות...' : 'Search orders...'}
-          pageSize={8}
-          emptyTitle={isRTL ? 'אין הזמנות עדיין' : 'No orders yet'}
-          emptyDescription={isRTL ? 'התחל לקנות כדי לראות את ההזמנות שלך כאן' : 'Start shopping to see your orders here'}
-          emptyIcon="cart"
-          isRTL={isRTL}
-          rowActions={(row) => [
-            {
-              label: isRTL ? 'צפה בפרטים' : 'View Details',
-              onClick: () => {},
-            },
-            ...(row.status === 'delivered' ? [{
-              label: isRTL ? 'הזמן שוב' : 'Reorder',
-              onClick: () => {},
-            }] : []),
-          ]}
-        />
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 text-[#2D5A27] animate-spin stroke-[1.5]" />
+            <span className="ml-2 text-sm text-gray-500">{isRTL ? 'טוען הזמנות...' : 'Loading orders...'}</span>
+          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            data={orders}
+            searchable={true}
+            searchPlaceholder={isRTL ? 'חפש הזמנות...' : 'Search orders...'}
+            pageSize={8}
+            emptyTitle={isRTL ? 'אין הזמנות עדיין' : 'No orders yet'}
+            emptyDescription={isRTL ? 'התחל לקנות כדי לראות את ההזמנות שלך כאן' : 'Start shopping to see your orders here'}
+            emptyIcon="cart"
+            isRTL={isRTL}
+            rowActions={(row) => [
+              {
+                label: isRTL ? 'צפה בפרטים' : 'View Details',
+                onClick: () => {},
+              },
+              ...(row.status === 'delivered' ? [{
+                label: isRTL ? 'הזמן שוב' : 'Reorder',
+                onClick: () => {},
+              }] : []),
+            ]}
+          />
+        )}
       </motion.div>
     </motion.div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, ComponentType } from 'react';
+import React, { useState, ComponentType } from 'react';
 import { LucideProps, X, SlidersHorizontal, ArrowUpDown, Check, Leaf, CheckCircle, Sprout, Wheat, Candy, Carrot, Flame, ArrowUp, ArrowDown, Star, Clock, TrendingUp, type LucideIcon } from 'lucide-react';
 
 const faToLucide: Record<string, LucideIcon> = {
@@ -59,10 +59,13 @@ export default function MobileFilterSheet({
 }: MobileFilterSheetProps) {
   const [localFilters, setLocalFilters] = useState(filters);
   const [activeTab, setActiveTab] = useState<'filters' | 'sort'>('filters');
+  const [prevFilters, setPrevFilters] = useState(filters);
 
-  useEffect(() => {
+  // Sync local filters when parent filters change (no useEffect needed)
+  if (filters !== prevFilters) {
+    setPrevFilters(filters);
     setLocalFilters(filters);
-  }, [filters]);
+  }
 
   const dietaryOptions = [
     { id: 'vegan', name: 'Vegan', icon: 'fa-leaf' },

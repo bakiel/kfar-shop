@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,13 +9,18 @@ import CustomerQRCode from '@/components/customer/CustomerQRCode';
 import PersonalizedShopping from '@/components/customer/PersonalizedShopping';
 import { toast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 import { ShoppingCart, QrCode, Heart, Settings, ShoppingBag, Star, Trophy, Percent, Gift, Zap, Leaf, MapPin, Recycle, Store, Package, Coins } from 'lucide-react';
 
 export default function EnhancedCustomerDashboard() {
   const router = useRouter();
+  const { user, accessToken, isAuthenticated, isLoading: authLoading } = useAuth();
+
   const [customer, setCustomer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'rewards' | 'preferences' | 'insights'>('overview');
+  const [orders, setOrders] = useState<any[]>([]);
+  const [rewards, setRewards] = useState<any>(null);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalSpent: 0,
@@ -24,92 +29,158 @@ export default function EnhancedCustomerDashboard() {
     lastOrderDate: null as Date | null
   });
 
-  useEffect(() => {
-    loadCustomerData();
-  }, []);
-
-  const loadCustomerData = async () => {
+  const loadCustomerData = useCallback(async (token: string) => {
     try {
-      // Check if customer is logged in
-      const token = localStorage.getItem('customerToken');
-      if (!token) {
-        router.push('/customer/login');
-        return;
+      // Load profile, stats, rewards, and orders in parallel
+      const [profileRes, statsRes, rewardsRes, ordersRes] = await Promise.all([
+        fetch('/api/customer/profile', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/customer/stats', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/customer/rewards', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/customer/orders?limit=5', { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+
+      // Profile
+      if (profileRes.ok) {
+        const profileData = await profileRes.json();
+        if (profileData.success && profileData.customer) {
+          const c = profileData.customer;
+          setCustomer({
+            id: c.id,
+            name: c.name || user?.displayName || '',
+            email: c.email || user?.email || '',
+            avatar: c.avatar || '',
+            joinedDate: c.createdAt || new Date().toISOString(),
+            loyaltyTier: c.loyaltyTier || 'bronze',
+            points: c.points || 0,
+            lifetimePoints: c.points || 0, // Will be overridden by rewards data
+            preferences: {
+              dietaryRestrictions: c.preferences?.dietary || c.preferences?.dietaryRestrictions || [],
+              favoriteCategories: c.preferences?.favoriteCategories || [],
+              shoppingFrequency: c.preferences?.shoppingFrequency || 'weekly',
+              preferredVendors: c.preferences?.preferredVendors || [],
+            },
+            address: c.addresses?.[0] || {},
+          });
+        }
       }
 
-      // Load customer profile
-      const response = await fetch('/api/customer/profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load profile');
+      // If profile failed, set customer from auth context
+      if (!profileRes.ok && user) {
+        setCustomer({
+          id: user.customerId || user.id,
+          name: user.displayName || '',
+          email: user.email || '',
+          avatar: '',
+          joinedDate: new Date().toISOString(),
+          loyaltyTier: 'bronze',
+          points: 0,
+          lifetimePoints: 0,
+          preferences: {
+            dietaryRestrictions: [],
+            favoriteCategories: [],
+            shoppingFrequency: 'weekly',
+            preferredVendors: [],
+          },
+          address: {},
+        });
       }
 
-      const data = await response.json();
-      setCustomer(data.customer);
+      // Stats
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats({
+          totalOrders: statsData.totalOrders || 0,
+          totalSpent: statsData.totalSpent || 0,
+          savedWithDiscounts: statsData.savedWithDiscounts || 0,
+          favoriteVendor: statsData.favoriteVendor || '',
+          lastOrderDate: statsData.lastOrderDate ? new Date(statsData.lastOrderDate) : null,
+        });
+      }
 
-      // Load stats
-      const statsResponse = await fetch('/api/customer/stats', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Rewards
+      if (rewardsRes.ok) {
+        const rewardsData = await rewardsRes.json();
+        if (rewardsData.success && rewardsData.rewards) {
+          setRewards(rewardsData.rewards);
+          // Update customer points from rewards
+          setCustomer((prev: any) => prev ? {
+            ...prev,
+            loyaltyTier: rewardsData.rewards.tier || prev.loyaltyTier,
+            points: rewardsData.rewards.balance || prev.points,
+            lifetimePoints: rewardsData.rewards.lifetimeEarned || prev.lifetimePoints,
+          } : prev);
+        }
+      }
 
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData);
+      // Orders
+      if (ordersRes.ok) {
+        const ordersData = await ordersRes.json();
+        if (ordersData.success && ordersData.orders) {
+          setOrders(ordersData.orders);
+        }
       }
     } catch (error) {
       console.error('Error loading customer data:', error);
-      // Use mock data for demo
-      setCustomer({
-        id: 'demo-customer',
-        name: 'Sarah Cohen',
-        email: 'sarah@example.com',
-        avatar: '/images/customers/sarah-avatar.jpg',
-        joinedDate: new Date('2024-01-15'),
-        loyaltyTier: 'gold',
-        points: 5250,
-        lifetimePoints: 8500,
-        preferences: {
-          dietaryRestrictions: ['vegan', 'gluten-free'],
-          favoriteCategories: ['dairy-alternatives', 'prepared-foods'],
-          shoppingFrequency: 'weekly',
-          preferredVendors: ['teva-deli', 'gahn-delight']
-        },
-        address: {
-          city: 'Dimona',
-          region: 'Negev'
-        }
-      });
-      
-      setStats({
-        totalOrders: 42,
-        totalSpent: 3580,
-        savedWithDiscounts: 425,
-        favoriteVendor: 'Teva Deli',
-        lastOrderDate: new Date('2024-12-20')
-      });
+      // Minimal customer from auth context
+      if (user) {
+        setCustomer({
+          id: user.customerId || user.id,
+          name: user.displayName || '',
+          email: user.email || '',
+          avatar: '',
+          joinedDate: new Date().toISOString(),
+          loyaltyTier: 'bronze',
+          points: 0,
+          lifetimePoints: 0,
+          preferences: {
+            dietaryRestrictions: [],
+            favoriteCategories: [],
+            shoppingFrequency: 'weekly',
+            preferredVendors: [],
+          },
+          address: {},
+        });
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!isAuthenticated) {
+      // Try legacy token
+      const legacyToken = localStorage.getItem('customerToken');
+      if (legacyToken) {
+        loadCustomerData(legacyToken);
+        return;
+      }
+      router.push('/customer/login');
+      return;
+    }
+
+    if (accessToken) {
+      loadCustomerData(accessToken);
+    }
+  }, [authLoading, isAuthenticated, accessToken, loadCustomerData, router]);
 
   const getLoyaltyProgress = () => {
-    const tiers = {
-      bronze: { min: 0, max: 999, next: 'Silver' },
-      silver: { min: 1000, max: 4999, next: 'Gold' },
-      gold: { min: 5000, max: 9999, next: 'Platinum' },
-      platinum: { min: 10000, max: Infinity, next: null }
+    const tiers: Record<string, { min: number; max: number; next: string | null }> = {
+      bronze: { min: 0, max: 499, next: 'Silver' },
+      silver: { min: 500, max: 1999, next: 'Gold' },
+      gold: { min: 2000, max: 4999, next: 'Platinum' },
+      platinum: { min: 5000, max: Infinity, next: null }
     };
 
     const currentTier = tiers[customer?.loyaltyTier || 'bronze'];
-    const progress = customer?.points ? 
-      ((customer.points - currentTier.min) / (currentTier.max - currentTier.min)) * 100 : 0;
+    const progress = customer?.points ?
+      ((customer.points - currentTier.min) / (currentTier.max - currentTier.min + 1)) * 100 : 0;
 
-    return { 
-      progress: Math.min(progress, 100), 
-      pointsToNext: currentTier.max - (customer?.points || 0) + 1,
-      nextTier: currentTier.next 
+    return {
+      progress: Math.min(progress, 100),
+      pointsToNext: currentTier.next ? Math.max(0, currentTier.max + 1 - (customer?.points || 0)) : 0,
+      nextTier: currentTier.next
     };
   };
 
@@ -127,7 +198,7 @@ export default function EnhancedCustomerDashboard() {
     { icon: 'settings', label: 'Settings', href: '/customer/settings', color: 'gray' }
   ];
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <Layout>
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -147,13 +218,34 @@ export default function EnhancedCustomerDashboard() {
           <div className="text-center">
             <p className="text-gray-600 mb-4">Please log in to view your dashboard</p>
             <Link href="/customer/login" className="text-green-600 hover:text-green-700 font-semibold">
-              Log In →
+              Log In
             </Link>
           </div>
         </div>
       </Layout>
     );
   }
+
+  // Build QR profile shape for CustomerQRCode component
+  const qrProfile = {
+    id: customer.id,
+    name: customer.name,
+    email: customer.email,
+    phone: '',
+    memberSince: customer.joinedDate ? new Date(customer.joinedDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '',
+    loyaltyTier: customer.loyaltyTier || 'bronze',
+    points: customer.points || 0,
+    preferences: {
+      dietary: customer.preferences?.dietaryRestrictions || [],
+      allergies: [],
+      favoriteCategories: customer.preferences?.favoriteCategories || [],
+    },
+    stats: {
+      totalOrders: stats.totalOrders,
+      totalSpent: stats.totalSpent,
+      savedByDiscounts: stats.savedWithDiscounts,
+    },
+  };
 
   return (
     <Layout>
@@ -167,7 +259,7 @@ export default function EnhancedCustomerDashboard() {
                 <div className="w-24 h-24 rounded-full bg-white p-1">
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-green-400 to-blue-400 flex items-center justify-center">
                     <span className="text-3xl text-white font-bold">
-                      {customer.name.charAt(0)}
+                      {customer.name ? customer.name.charAt(0) : '?'}
                     </span>
                   </div>
                 </div>
@@ -176,7 +268,7 @@ export default function EnhancedCustomerDashboard() {
                   customer.loyaltyTier === 'gold' ? 'bg-yellow-500' :
                   customer.loyaltyTier === 'silver' ? 'bg-gray-400' :
                   'bg-orange-500'
-                } text-white`}>
+                } text-white capitalize`}>
                   {customer.loyaltyTier}
                 </div>
               </div>
@@ -184,22 +276,25 @@ export default function EnhancedCustomerDashboard() {
               {/* Welcome Message */}
               <div className="flex-1 text-center md:text-left">
                 <h1 className="text-3xl font-bold mb-2">
-                  Welcome back, {customer.name}!
+                  Welcome back, {customer.name || 'Member'}!
                 </h1>
                 <p className="opacity-90">
-                  Member since {new Date(customer.joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  {customer.joinedDate
+                    ? `Member since ${new Date(customer.joinedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+                    : 'Welcome to KFAR Marketplace'
+                  }
                 </p>
-                
+
                 {/* Loyalty Progress */}
                 <div className="mt-4 max-w-md">
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span>{customer.points} points</span>
+                    <span>{customer.points || 0} points</span>
                     {getLoyaltyProgress().nextTier && (
                       <span>{getLoyaltyProgress().pointsToNext} to {getLoyaltyProgress().nextTier}</span>
                     )}
                   </div>
                   <div className="w-full bg-white/20 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-white h-full rounded-full transition-all duration-500"
                       style={{ width: `${getLoyaltyProgress().progress}%` }}
                     />
@@ -214,7 +309,9 @@ export default function EnhancedCustomerDashboard() {
                   <div className="text-sm opacity-75">Orders</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">₪{stats.savedWithDiscounts}</div>
+                  <div className="text-2xl font-bold">
+                    {stats.savedWithDiscounts > 0 ? `\u20AA${stats.savedWithDiscounts}` : '\u20AA0'}
+                  </div>
                   <div className="text-sm opacity-75">Saved</div>
                 </div>
               </div>
@@ -247,7 +344,7 @@ export default function EnhancedCustomerDashboard() {
                           setActiveTab('overview');
                         }
                       }}
-                      className={`flex flex-col items-center gap-3 p-4 rounded-lg bg-${action.color}-50 hover:bg-${action.color}-100 transition-colors cursor-pointer`}
+                      className={`flex flex-col items-center gap-3 p-4 rounded-lg bg-${action.color}-50 hover:bg-${action.color}-100 transition-colors cursor-pointer w-full`}
                     >
                       <span className={`text-${action.color}-600`}>{quickActionIcons[action.icon]}</span>
                       <span className="text-sm font-medium text-gray-700">{action.label}</span>
@@ -294,7 +391,7 @@ export default function EnhancedCustomerDashboard() {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Your QR Code</h3>
                   <div className="flex justify-center">
-                    <CustomerQRCode profile={customer} variant="full" />
+                    <CustomerQRCode profile={qrProfile} variant="full" />
                   </div>
                   <p className="text-sm text-gray-600 text-center mt-4">
                     Show this to vendors for quick checkout and to earn points
@@ -305,33 +402,32 @@ export default function EnhancedCustomerDashboard() {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <ShoppingBag className="w-5 h-5 stroke-[1.5] text-green-600" />
-                      <div className="flex-1">
-                        <p className="font-medium">Order from {stats.favoriteVendor}</p>
-                        <p className="text-sm text-gray-600">
-                          {stats.lastOrderDate?.toLocaleDateString()} - ₪125
-                        </p>
+                    {orders.length > 0 ? (
+                      orders.slice(0, 3).map((order: any, idx: number) => (
+                        <div key={order.id || idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <ShoppingBag className="w-5 h-5 stroke-[1.5] text-green-600" />
+                          <div className="flex-1">
+                            <p className="font-medium">
+                              Order {order.order_number || order.id}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {order.created_at ? new Date(order.created_at).toLocaleDateString() : ''} - {'\u20AA'}{parseFloat(order.total || '0')}
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 capitalize">
+                            {order.status}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-400">
+                        <ShoppingBag className="w-8 h-8 stroke-[1.5] mx-auto mb-2" />
+                        <p>No recent orders</p>
+                        <Link href="/shop" className="text-sm text-green-600 hover:text-green-700 font-medium mt-2 inline-block">
+                          Start Shopping
+                        </Link>
                       </div>
-                      <span className="text-sm text-green-600">+50 pts</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Star className="w-5 h-5 stroke-[1.5] text-yellow-500" />
-                      <div className="flex-1">
-                        <p className="font-medium">Left a review</p>
-                        <p className="text-sm text-gray-600">Organic Hummus - 5 stars</p>
-                      </div>
-                      <span className="text-sm text-green-600">+100 pts</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Trophy className="w-5 h-5 stroke-[1.5] text-purple-600" />
-                      <div className="flex-1">
-                        <p className="font-medium">Reached Gold Tier!</p>
-                        <p className="text-sm text-gray-600">Unlocked 15% discounts</p>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
@@ -356,57 +452,51 @@ export default function EnhancedCustomerDashboard() {
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-semibold">Order History</h3>
-                    <select className="px-4 py-2 border rounded-lg text-sm">
-                      <option>All Orders</option>
-                      <option>Last 30 Days</option>
-                      <option>Last 3 Months</option>
-                      <option>This Year</option>
-                    </select>
                   </div>
 
                   {/* Order List */}
                   <div className="space-y-4">
-                    {[1, 2, 3].map((order) => (
-                      <div key={order} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <p className="font-semibold">Order #{String(order).padStart(6, '0')}</p>
-                            <p className="text-sm text-gray-600">
-                              {new Date(Date.now() - order * 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                            </p>
+                    {orders.length > 0 ? (
+                      orders.map((order: any, idx: number) => (
+                        <div key={order.id || idx} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <p className="font-semibold">Order {order.order_number || `#${String(idx + 1).padStart(6, '0')}`}</p>
+                              <p className="text-sm text-gray-600">
+                                {order.created_at ? new Date(order.created_at).toLocaleDateString() : ''}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">{'\u20AA'}{parseFloat(order.total || '0')}</p>
+                              <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                                order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                order.status === 'pending' ? 'bg-amber-100 text-amber-800' :
+                                'bg-blue-100 text-blue-800'
+                              }`}>
+                                {order.status || 'pending'}
+                              </span>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-semibold">₪{125 + order * 35}</p>
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                              Delivered
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <span className="inline-flex items-center gap-1"><Store className="w-3.5 h-3.5 stroke-[1.5]" />Teva Deli</span>
-                          <span className="inline-flex items-center gap-1"><Package className="w-3.5 h-3.5 stroke-[1.5]" />{3 + order} items</span>
-                          <span className="inline-flex items-center gap-1"><Coins className="w-3.5 h-3.5 stroke-[1.5]" />+{50 + order * 10} points</span>
-                        </div>
-                        
-                        <div className="mt-3 flex gap-2">
-                          <button className="text-sm text-green-600 hover:text-green-700 font-medium">
-                            View Details
-                          </button>
-                          <span className="text-gray-300">|</span>
-                          <button className="text-sm text-green-600 hover:text-green-700 font-medium">
-                            Reorder
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
 
-                  {/* View More */}
-                  <div className="mt-6 text-center">
-                    <button className="text-green-600 hover:text-green-700 font-medium">
-                      View All Orders →
-                    </button>
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            {order.vendor_name && (
+                              <span className="inline-flex items-center gap-1"><Store className="w-3.5 h-3.5 stroke-[1.5]" />{order.vendor_name}</span>
+                            )}
+                            {Array.isArray(order.items) && (
+                              <span className="inline-flex items-center gap-1"><Package className="w-3.5 h-3.5 stroke-[1.5]" />{order.items.length} items</span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-12 text-gray-400">
+                        <ShoppingBag className="w-10 h-10 stroke-[1.5] mx-auto mb-3" />
+                        <p>No orders yet</p>
+                        <Link href="/shop" className="text-green-600 hover:text-green-700 font-medium mt-2 inline-block">
+                          Start Shopping
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -424,30 +514,32 @@ export default function EnhancedCustomerDashboard() {
                 {/* Points Summary */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Points Summary</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="text-center py-6">
                       <div className="text-4xl font-bold text-green-600 mb-2">
-                        {customer.points}
+                        {customer.points || 0}
                       </div>
                       <p className="text-gray-600">Available Points</p>
                     </div>
-                    
+
                     <div className="border-t pt-4 space-y-3">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Lifetime Points</span>
-                        <span className="font-medium">{customer.lifetimePoints}</span>
+                        <span className="font-medium">{customer.lifetimePoints || 0}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Points Redeemed</span>
                         <span className="font-medium">
-                          {customer.lifetimePoints - customer.points}
+                          {rewards ? rewards.lifetimeRedeemed || 0 : (customer.lifetimePoints || 0) - (customer.points || 0)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Current Tier</span>
                         <span className={`font-medium capitalize ${
-                          customer.loyaltyTier === 'gold' ? 'text-yellow-600' : ''
+                          customer.loyaltyTier === 'gold' ? 'text-yellow-600' :
+                          customer.loyaltyTier === 'platinum' ? 'text-purple-600' :
+                          customer.loyaltyTier === 'silver' ? 'text-gray-500' : ''
                         }`}>
                           {customer.loyaltyTier}
                         </span>
@@ -459,49 +551,68 @@ export default function EnhancedCustomerDashboard() {
                 {/* Available Rewards */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Available Rewards</h3>
-                  
+
                   <div className="space-y-3">
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <div className={`p-4 border rounded-lg transition-colors ${(customer.points || 0) >= 500 ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50'}`}>
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">₪10 Off Next Order</h4>
+                        <h4 className="font-medium">{'\u20AA'}10 Off Next Order</h4>
                         <span className="text-green-600 font-semibold">500 pts</span>
                       </div>
-                      <p className="text-sm text-gray-600">Valid on orders over ₪50</p>
-                      <button className="mt-2 text-sm text-green-600 hover:text-green-700 font-medium">
-                        Redeem →
-                      </button>
+                      <p className="text-sm text-gray-600">
+                        {(customer.points || 0) >= 500 ? 'Valid on orders over \u20AA50' : 'Not enough points'}
+                      </p>
+                      {(customer.points || 0) >= 500 && (
+                        <button className="mt-2 text-sm text-green-600 hover:text-green-700 font-medium">
+                          Redeem
+                        </button>
+                      )}
                     </div>
-                    
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+
+                    <div className={`p-4 border rounded-lg transition-colors ${(customer.points || 0) >= 300 ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50'}`}>
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium">Free Delivery</h4>
                         <span className="text-green-600 font-semibold">300 pts</span>
                       </div>
-                      <p className="text-sm text-gray-600">One-time free delivery</p>
-                      <button className="mt-2 text-sm text-green-600 hover:text-green-700 font-medium">
-                        Redeem →
-                      </button>
+                      <p className="text-sm text-gray-600">
+                        {(customer.points || 0) >= 300 ? 'One-time free delivery' : 'Not enough points'}
+                      </p>
+                      {(customer.points || 0) >= 300 && (
+                        <button className="mt-2 text-sm text-green-600 hover:text-green-700 font-medium">
+                          Redeem
+                        </button>
+                      )}
                     </div>
-                    
-                    <div className="p-4 border rounded-lg opacity-50">
+
+                    <div className={`p-4 border rounded-lg ${(customer.points || 0) >= 1000 ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-50'}`}>
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium">20% Off Entire Order</h4>
-                        <span className="text-gray-600 font-semibold">1000 pts</span>
+                        <span className={`font-semibold ${(customer.points || 0) >= 1000 ? 'text-green-600' : 'text-gray-600'}`}>1000 pts</span>
                       </div>
-                      <p className="text-sm text-gray-600">Not enough points</p>
+                      <p className="text-sm text-gray-600">
+                        {(customer.points || 0) >= 1000 ? 'Maximum \u20AA50 discount' : 'Not enough points'}
+                      </p>
+                      {(customer.points || 0) >= 1000 && (
+                        <button className="mt-2 text-sm text-green-600 hover:text-green-700 font-medium">
+                          Redeem
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* Tier Benefits */}
                 <div className="md:col-span-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold mb-4">Your Gold Tier Benefits</h3>
-                  
+                  <h3 className="text-lg font-semibold mb-4">Your {customer.loyaltyTier ? customer.loyaltyTier.charAt(0).toUpperCase() + customer.loyaltyTier.slice(1) : 'Bronze'} Tier Benefits</h3>
+
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="flex items-start gap-3">
                       <Percent className="w-5 h-5 stroke-[1.5] text-yellow-600 flex-shrink-0" />
                       <div>
-                        <h4 className="font-medium">15% Discount</h4>
+                        <h4 className="font-medium">
+                          {customer.loyaltyTier === 'platinum' ? '20%' :
+                           customer.loyaltyTier === 'gold' ? '15%' :
+                           customer.loyaltyTier === 'silver' ? '10%' : '5%'} Discount
+                        </h4>
                         <p className="text-sm text-gray-600">On all orders</p>
                       </div>
                     </div>
@@ -509,16 +620,20 @@ export default function EnhancedCustomerDashboard() {
                     <div className="flex items-start gap-3">
                       <Gift className="w-5 h-5 stroke-[1.5] text-yellow-600 flex-shrink-0" />
                       <div>
-                        <h4 className="font-medium">Birthday Bonus</h4>
-                        <p className="text-sm text-gray-600">500 bonus points</p>
+                        <h4 className="font-medium">Earn Points</h4>
+                        <p className="text-sm text-gray-600">1 point per shekel</p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3">
                       <Zap className="w-5 h-5 stroke-[1.5] text-yellow-600 flex-shrink-0" />
                       <div>
-                        <h4 className="font-medium">Early Access</h4>
-                        <p className="text-sm text-gray-600">New products & sales</p>
+                        <h4 className="font-medium">
+                          {customer.loyaltyTier === 'gold' || customer.loyaltyTier === 'platinum' ? 'Early Access' : 'Member Perks'}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {customer.loyaltyTier === 'gold' || customer.loyaltyTier === 'platinum' ? 'New products & sales' : 'Exclusive deals'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -536,46 +651,54 @@ export default function EnhancedCustomerDashboard() {
               >
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-6">Your Preferences</h3>
-                  
+
                   <div className="space-y-6">
                     {/* Dietary Restrictions */}
                     <div>
                       <h4 className="font-medium mb-3">Dietary Restrictions</h4>
                       <div className="flex flex-wrap gap-2">
-                        {customer.preferences.dietaryRestrictions.map((diet: string) => (
-                          <span key={diet} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                            {diet}
-                          </span>
-                        ))}
+                        {customer.preferences?.dietaryRestrictions?.length > 0 ? (
+                          customer.preferences.dietaryRestrictions.map((diet: string) => (
+                            <span key={diet} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                              {diet}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-400">No dietary restrictions set</span>
+                        )}
                         <button className="px-3 py-1 border border-dashed border-gray-300 rounded-full text-sm text-gray-600 hover:border-gray-400">
                           + Add
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* Favorite Categories */}
                     <div>
                       <h4 className="font-medium mb-3">Favorite Categories</h4>
                       <div className="flex flex-wrap gap-2">
-                        {customer.preferences.favoriteCategories.map((cat: string) => (
-                          <span key={cat} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                            {cat.replace('-', ' ')}
-                          </span>
-                        ))}
+                        {customer.preferences?.favoriteCategories?.length > 0 ? (
+                          customer.preferences.favoriteCategories.map((cat: string) => (
+                            <span key={cat} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                              {cat.replace(/-/g, ' ')}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-gray-400">No favorite categories set</span>
+                        )}
                       </div>
                     </div>
-                    
+
                     {/* Shopping Frequency */}
                     <div>
                       <h4 className="font-medium mb-3">Shopping Frequency</h4>
-                      <select className="px-4 py-2 border rounded-lg" defaultValue={customer.preferences.shoppingFrequency}>
+                      <select className="px-4 py-2 border rounded-lg" defaultValue={customer.preferences?.shoppingFrequency || 'weekly'}>
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="biweekly">Bi-weekly</option>
                         <option value="monthly">Monthly</option>
                       </select>
                     </div>
-                    
+
                     {/* Communication Preferences */}
                     <div>
                       <h4 className="font-medium mb-3">Communication</h4>
@@ -594,7 +717,7 @@ export default function EnhancedCustomerDashboard() {
                         </label>
                       </div>
                     </div>
-                    
+
                     <div className="pt-4">
                       <button className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors">
                         Save Preferences
@@ -617,53 +740,55 @@ export default function EnhancedCustomerDashboard() {
                 {/* Shopping Patterns */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Your Shopping Patterns</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Average Order Value</span>
-                      <span className="font-semibold">₪{Math.round(stats.totalSpent / stats.totalOrders)}</span>
+                      <span className="font-semibold">
+                        {stats.totalOrders > 0 ? `\u20AA${Math.round(stats.totalSpent / stats.totalOrders)}` : '\u20AA0'}
+                      </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Most Active Day</span>
-                      <span className="font-semibold">Sunday</span>
+                      <span className="text-gray-600">Total Spent</span>
+                      <span className="font-semibold">{'\u20AA'}{stats.totalSpent}</span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">Favorite Vendor</span>
-                      <span className="font-semibold">{stats.favoriteVendor}</span>
+                      <span className="font-semibold">{stats.favoriteVendor || 'N/A'}</span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Shopping Frequency</span>
-                      <span className="font-semibold">Every 8 days</span>
+                      <span className="text-gray-600">Total Orders</span>
+                      <span className="font-semibold">{stats.totalOrders}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Environmental Impact */}
+                {/* Impact */}
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h3 className="text-lg font-semibold mb-4">Your Impact</h3>
-                  
+
                   <div className="text-center py-4">
                     <div className="text-3xl font-bold text-green-600 mb-2">
-                      127 kg CO₂
+                      {stats.totalOrders} Orders
                     </div>
-                    <p className="text-gray-600">Saved this year</p>
+                    <p className="text-gray-600">Supporting local vendors</p>
                   </div>
-                  
+
                   <div className="space-y-3 mt-4">
                     <div className="flex items-center gap-3">
                       <Leaf className="w-5 h-5 stroke-[1.5] text-green-600" />
-                      <span className="text-sm">100% plant-based purchases</span>
+                      <span className="text-sm">100% plant-based marketplace</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5 stroke-[1.5] text-green-600" />
-                      <span className="text-sm">Supporting 6 local vendors</span>
+                      <span className="text-sm">Supporting local community vendors</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Recycle className="w-5 h-5 stroke-[1.5] text-green-600" />
-                      <span className="text-sm">42 plastic-free orders</span>
+                      <span className="text-sm">Eco-friendly shopping</span>
                     </div>
                   </div>
                 </div>
@@ -671,18 +796,24 @@ export default function EnhancedCustomerDashboard() {
                 {/* Savings Summary */}
                 <div className="md:col-span-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6">
                   <h3 className="text-lg font-semibold mb-4">Total Savings</h3>
-                  
+
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-green-600">₪{stats.savedWithDiscounts}</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {'\u20AA'}{stats.savedWithDiscounts}
+                      </div>
                       <p className="text-sm text-gray-600">From Discounts</p>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-blue-600">₪120</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {'\u20AA'}{rewards ? rewards.lifetimeRedeemed || 0 : 0}
+                      </div>
                       <p className="text-sm text-gray-600">Points Redeemed</p>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-purple-600">₪{stats.savedWithDiscounts + 120}</div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        {'\u20AA'}{stats.savedWithDiscounts + (rewards ? rewards.lifetimeRedeemed || 0 : 0)}
+                      </div>
                       <p className="text-sm text-gray-600">Total Saved</p>
                     </div>
                   </div>

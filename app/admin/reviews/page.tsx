@@ -13,6 +13,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface Review {
   id: string;
@@ -32,6 +33,7 @@ interface Review {
 }
 
 export default function AdminReviewsPage() {
+  const { accessToken } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
@@ -39,12 +41,16 @@ export default function AdminReviewsPage() {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
   useEffect(() => {
+    if (!accessToken) return;
     fetchReviews();
-  }, [filter]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, accessToken]);
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`/api/admin/reviews?status=${filter}`);
+      const headers: Record<string, string> = {};
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+      const response = await fetch(`/api/admin/reviews?status=${filter}`, { headers });
       const data = await response.json();
       setReviews(data.reviews || []);
     } catch (error) {
@@ -60,9 +66,11 @@ export default function AdminReviewsPage() {
 
   const handleModerateReview = async (reviewId: string, action: 'approve' | 'reject') => {
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
       const response = await fetch('/api/admin/reviews/moderate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ reviewId, action })
       });
 

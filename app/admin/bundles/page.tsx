@@ -8,6 +8,7 @@ import {
 import { PageHeader, DataTable, StatusBadge, FormField, ConfirmDialog, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface Bundle {
   id: string;
@@ -51,6 +52,7 @@ function normalizeBundle(b: any): Bundle {
 
 export default function BundlesPage() {
   const { language, t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,9 +72,8 @@ export default function BundlesPage() {
   const fetchBundles = useCallback(() => {
     setLoading(true);
     setError(null);
-    const token = typeof window !== 'undefined' ? (sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token')) : null;
     const authHeaders: Record<string, string> = {};
-    if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+    if (accessToken) authHeaders['Authorization'] = `Bearer ${accessToken}`;
     fetch('/api/admin/bundles', { headers: authHeaders })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -88,11 +89,12 @@ export default function BundlesPage() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [accessToken]);
 
   useEffect(() => {
+    if (!accessToken) return;
     fetchBundles();
-  }, [fetchBundles]);
+  }, [fetchBundles, accessToken]);
 
   const openCreateForm = () => {
     setEditingBundle(null);
@@ -124,9 +126,11 @@ export default function BundlesPage() {
 
     if (editingBundle) {
       // PATCH update
+      const patchHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) patchHeaders['Authorization'] = `Bearer ${accessToken}`;
       fetch('/api/admin/bundles', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: patchHeaders,
         body: JSON.stringify({
           id: editingBundle.id,
           name: formName,
@@ -149,9 +153,11 @@ export default function BundlesPage() {
         .finally(() => setSaving(false));
     } else {
       // POST create
+      const postHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (accessToken) postHeaders['Authorization'] = `Bearer ${accessToken}`;
       fetch('/api/admin/bundles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: postHeaders,
         body: JSON.stringify({
           name: formName,
           nameHe: formNameHe,
@@ -176,9 +182,11 @@ export default function BundlesPage() {
 
   const handleToggleStatus = (bundle: Bundle) => {
     const newStatus = bundle.status === 'active' ? 'draft' : 'active';
+    const toggleHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (accessToken) toggleHeaders['Authorization'] = `Bearer ${accessToken}`;
     fetch('/api/admin/bundles', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: toggleHeaders,
       body: JSON.stringify({ id: bundle.id, status: newStatus }),
     })
       .then((res) => {
@@ -191,7 +199,9 @@ export default function BundlesPage() {
 
   const handleDelete = () => {
     if (!deleteTarget) return;
-    fetch(`/api/admin/bundles?id=${deleteTarget.id}`, { method: 'DELETE' })
+    const deleteHeaders: Record<string, string> = {};
+    if (accessToken) deleteHeaders['Authorization'] = `Bearer ${accessToken}`;
+    fetch(`/api/admin/bundles?id=${deleteTarget.id}`, { method: 'DELETE', headers: deleteHeaders })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();

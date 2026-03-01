@@ -1,36 +1,191 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowLeft, Brain, Leaf, Star, Sprout, Wheat, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Brain, Leaf, Star, Sprout, Wheat, AlertTriangle, Loader, Users } from 'lucide-react';
 import CustomerProfileShowcase from '@/components/customer/CustomerProfileShowcase';
-import { ANALYZED_CUSTOMER_PROFILES } from '@/lib/services/customer-avatar-analyzer';
+import { useAuth } from '@/lib/context/AuthContext';
+
+interface CRMCustomer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  loyalty_tier: string;
+  points: number;
+  total_orders: number;
+  total_spent: number;
+  last_order_at: string | null;
+  tags: string[];
+  notes: string | null;
+  addresses: any;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Stats {
+  totalCustomers: number;
+  tierDistribution: {
+    platinum: number;
+    gold: number;
+    silver: number;
+    bronze: number;
+  };
+  totalOrders: number;
+  totalRevenue: number;
+}
+
+function computeStats(customers: CRMCustomer[]): Stats {
+  const tierDistribution = { platinum: 0, gold: 0, silver: 0, bronze: 0 };
+  let totalOrders = 0;
+  let totalRevenue = 0;
+
+  for (const c of customers) {
+    const tier = (c.loyalty_tier || 'bronze').toLowerCase() as keyof typeof tierDistribution;
+    if (tier in tierDistribution) {
+      tierDistribution[tier]++;
+    } else {
+      tierDistribution.bronze++;
+    }
+    totalOrders += c.total_orders || 0;
+    totalRevenue += Number(c.total_spent) || 0;
+  }
+
+  return {
+    totalCustomers: customers.length,
+    tierDistribution,
+    totalOrders,
+    totalRevenue,
+  };
+}
 
 export default function AdminCustomerProfilesPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'profiles' | 'analytics'>('overview');
+  const [customers, setCustomers] = useState<CRMCustomer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { accessToken } = useAuth();
 
-  // Calculate statistics
-  const stats = {
-    totalCustomers: ANALYZED_CUSTOMER_PROFILES.length,
-    tierDistribution: {
-      platinum: ANALYZED_CUSTOMER_PROFILES.filter(p => p.loyaltyTier === 'platinum').length,
-      gold: ANALYZED_CUSTOMER_PROFILES.filter(p => p.loyaltyTier === 'gold').length,
-      silver: ANALYZED_CUSTOMER_PROFILES.filter(p => p.loyaltyTier === 'silver').length,
-      bronze: ANALYZED_CUSTOMER_PROFILES.filter(p => p.loyaltyTier === 'bronze').length
-    },
-    dietaryPreferences: {
-      vegan: ANALYZED_CUSTOMER_PROFILES.filter(p => p.preferences.dietary.includes('vegan')).length,
-      kosher: ANALYZED_CUSTOMER_PROFILES.filter(p => p.preferences.dietary.includes('kosher')).length,
-      organic: ANALYZED_CUSTOMER_PROFILES.filter(p => p.preferences.dietary.includes('organic')).length,
-      glutenFree: ANALYZED_CUSTOMER_PROFILES.filter(p => p.preferences.dietary.includes('gluten-free')).length
-    },
-    commonAllergies: {
-      nuts: ANALYZED_CUSTOMER_PROFILES.filter(p => p.preferences.allergies.includes('nuts')).length,
-      dairy: ANALYZED_CUSTOMER_PROFILES.filter(p => p.preferences.allergies.includes('dairy')).length,
-      gluten: ANALYZED_CUSTOMER_PROFILES.filter(p => p.preferences.allergies.includes('gluten')).length
+  const fetchCustomers = useCallback(async () => {
+    if (!accessToken) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const headers: Record<string, string> = {};
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
+      const res = await fetch('/api/admin/crm/customers?limit=100', { headers });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch customers (${res.status})`);
+      }
+      const data = await res.json();
+      setCustomers(data.customers || []);
+    } catch (err: any) {
+      console.error('Failed to fetch customers:', err);
+      setError(err.message || 'Failed to load customer data');
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [accessToken]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
+
+  const stats = computeStats(customers);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <Link
+              href="/admin/dashboard"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
+            >
+              <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
+              Back to Admin Dashboard
+            </Link>
+            <h1 className="text-3xl font-bold" style={{ color: '#3a3a1d' }}>
+              Customer Profile Management
+            </h1>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-12 flex flex-col items-center justify-center gap-4">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+            >
+              <Loader className="w-8 h-8 stroke-[1.5] text-green-600" />
+            </motion.div>
+            <p className="text-gray-600">Loading customer data from database...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <Link
+              href="/admin/dashboard"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
+            >
+              <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
+              Back to Admin Dashboard
+            </Link>
+            <h1 className="text-3xl font-bold" style={{ color: '#3a3a1d' }}>
+              Customer Profile Management
+            </h1>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-12 flex flex-col items-center justify-center gap-4">
+            <AlertTriangle className="w-8 h-8 stroke-[1.5] text-red-500" />
+            <p className="text-gray-800 font-medium">{error}</p>
+            <button
+              onClick={fetchCustomers}
+              className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (customers.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <Link
+              href="/admin/dashboard"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4"
+            >
+              <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
+              Back to Admin Dashboard
+            </Link>
+            <h1 className="text-3xl font-bold" style={{ color: '#3a3a1d' }}>
+              Customer Profile Management
+            </h1>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-12 flex flex-col items-center justify-center gap-4">
+            <Users className="w-12 h-12 stroke-[1.5] text-gray-400" />
+            <p className="text-gray-800 font-medium text-lg">No customers found</p>
+            <p className="text-gray-500 text-sm">
+              Customer profiles will appear here once customers register on the platform.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -48,12 +203,12 @@ export default function AdminCustomerProfilesPage() {
             <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
             Back to Admin Dashboard
           </Link>
-          
+
           <h1 className="text-3xl font-bold" style={{ color: '#3a3a1d' }}>
             Customer Profile Management
           </h1>
           <p className="text-gray-600 mt-2">
-            AI-analyzed customer profiles with visual recognition and behavior patterns
+            Real customer data from the database ({stats.totalCustomers} customers)
           </p>
         </motion.div>
 
@@ -64,7 +219,7 @@ export default function AdminCustomerProfilesPage() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
-                className={`py-4 px-2 border-b-2 font-medium transition-all capitalize ${
+                className={`py-4 px-2 border-b-2 font-medium transition-all capitalize cursor-pointer ${
                   activeTab === tab
                     ? 'border-green-600 text-green-600'
                     : 'border-transparent text-gray-600 hover:text-gray-800'
@@ -95,10 +250,10 @@ export default function AdminCustomerProfilesPage() {
                     <h3 className="text-3xl font-bold" style={{ color: '#478c0b' }}>
                       {stats.totalCustomers}
                     </h3>
-                    <p className="text-gray-600 mt-1">Total Profiles</p>
-                    <p className="text-sm text-gray-500 mt-2">AI-analyzed & categorized</p>
+                    <p className="text-gray-600 mt-1">Total Customers</p>
+                    <p className="text-sm text-gray-500 mt-2">Registered in database</p>
                   </div>
-                  
+
                   <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6">
                     <h3 className="text-3xl font-bold" style={{ color: '#7c3aed' }}>
                       {stats.tierDistribution.platinum + stats.tierDistribution.gold}
@@ -106,21 +261,21 @@ export default function AdminCustomerProfilesPage() {
                     <p className="text-gray-600 mt-1">Premium Members</p>
                     <p className="text-sm text-gray-500 mt-2">Gold & Platinum tiers</p>
                   </div>
-                  
+
                   <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-6">
                     <h3 className="text-3xl font-bold" style={{ color: '#f6af0d' }}>
-                      {stats.dietaryPreferences.vegan + stats.dietaryPreferences.organic}
+                      {stats.totalOrders}
                     </h3>
-                    <p className="text-gray-600 mt-1">Health Conscious</p>
-                    <p className="text-sm text-gray-500 mt-2">Special dietary needs</p>
+                    <p className="text-gray-600 mt-1">Total Orders</p>
+                    <p className="text-sm text-gray-500 mt-2">Across all customers</p>
                   </div>
-                  
-                  <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6">
-                    <h3 className="text-3xl font-bold" style={{ color: '#c23c09' }}>
-                      {Object.values(stats.commonAllergies).reduce((a, b) => a + b, 0)}
+
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
+                    <h3 className="text-3xl font-bold" style={{ color: '#3b82f6' }}>
+                      {stats.totalRevenue.toLocaleString()} ILS
                     </h3>
-                    <p className="text-gray-600 mt-1">With Allergies</p>
-                    <p className="text-sm text-gray-500 mt-2">Requiring special care</p>
+                    <p className="text-gray-600 mt-1">Total Revenue</p>
+                    <p className="text-sm text-gray-500 mt-2">Lifetime customer spend</p>
                   </div>
                 </div>
               </div>
@@ -137,7 +292,7 @@ export default function AdminCustomerProfilesPage() {
                       <div className="flex-1 bg-gray-200 rounded-full h-8 relative overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${(count / stats.totalCustomers) * 100}%` }}
+                          animate={{ width: stats.totalCustomers > 0 ? `${(count / stats.totalCustomers) * 100}%` : '0%' }}
                           transition={{ duration: 0.5, delay: 0.2 }}
                           className={`h-full flex items-center justify-end px-3 text-white text-sm font-medium ${
                             tier === 'platinum' ? 'bg-purple-500' :
@@ -154,29 +309,29 @@ export default function AdminCustomerProfilesPage() {
                 </div>
               </div>
 
-              {/* AI Analysis Insights */}
+              {/* Customer Data Summary */}
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
                 <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
                   <Brain className="w-5 h-5 stroke-[1.5] inline mr-2" style={{ color: '#3b82f6' }} />
-                  AI Vision Analysis Insights
+                  Customer Data Summary
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-semibold mb-2">Visual Characteristics Detected</h4>
+                    <h4 className="font-semibold mb-2">Database Overview</h4>
                     <ul className="space-y-1 text-sm text-gray-700">
-                      <li>• Age demographics: 25-65 years</li>
-                      <li>• Professional & family-oriented individuals</li>
-                      <li>• Health-conscious appearance indicators</li>
-                      <li>• Diverse cultural backgrounds</li>
+                      <li>- {stats.totalCustomers} registered customers in the system</li>
+                      <li>- {stats.tierDistribution.platinum + stats.tierDistribution.gold} premium tier members (Gold + Platinum)</li>
+                      <li>- {stats.tierDistribution.silver} Silver tier members</li>
+                      <li>- {stats.tierDistribution.bronze} Bronze tier members</li>
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Behavioral Predictions</h4>
+                    <h4 className="font-semibold mb-2">Activity Summary</h4>
                     <ul className="space-y-1 text-sm text-gray-700">
-                      <li>• Weekly shopping patterns likely</li>
-                      <li>• Quality over quantity preference</li>
-                      <li>• Brand loyalty indicators high</li>
-                      <li>• Social shopping tendencies</li>
+                      <li>- {stats.totalOrders} total orders placed</li>
+                      <li>- {stats.totalRevenue.toLocaleString()} ILS total lifetime spend</li>
+                      <li>- {stats.totalCustomers > 0 ? Math.round(stats.totalOrders / stats.totalCustomers) : 0} average orders per customer</li>
+                      <li>- {stats.totalCustomers > 0 ? Math.round(stats.totalRevenue / stats.totalCustomers).toLocaleString() : 0} ILS average spend per customer</li>
                     </ul>
                   </div>
                 </div>
@@ -201,98 +356,114 @@ export default function AdminCustomerProfilesPage() {
               animate={{ opacity: 1 }}
               className="space-y-8"
             >
-              {/* Dietary Preferences */}
+              {/* Tier Breakdown */}
               <div>
                 <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                  Dietary Preferences Analysis
+                  Loyalty Tier Breakdown
                 </h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {Object.entries(stats.dietaryPreferences).map(([pref, count]) => {
-                    const DietaryIcon = pref === 'vegan' ? Leaf :
-                      pref === 'kosher' ? Star :
-                      pref === 'organic' ? Sprout :
-                      Wheat;
+                  {Object.entries(stats.tierDistribution).map(([tier, count]) => {
+                    const TierIcon = tier === 'platinum' ? Star :
+                      tier === 'gold' ? Star :
+                      tier === 'silver' ? Star :
+                      Leaf;
+                    const percentage = stats.totalCustomers > 0 ? Math.round((count / stats.totalCustomers) * 100) : 0;
                     return (
-                    <div key={pref} className="bg-green-50 rounded-lg p-4 text-center">
-                      <DietaryIcon className="w-6 h-6 stroke-[1.5] mb-2 mx-auto" style={{ color: '#478c0b' }} />
-                      <p className="font-semibold capitalize">
-                        {pref.replace(/([A-Z])/g, ' $1').trim()}
-                      </p>
-                      <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>{count}</p>
-                    </div>
-                  );})}
-                </div>
-              </div>
-
-              {/* Allergy Distribution */}
-              <div>
-                <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                  Allergy Awareness
-                </h3>
-                <div className="bg-yellow-50 rounded-xl p-6">
-                  <div className="grid md:grid-cols-3 gap-4">
-                    {Object.entries(stats.commonAllergies).map(([allergy, count]) => (
-                      <div key={allergy} className="flex items-center justify-between p-3 bg-white rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <AlertTriangle className="w-5 h-5 stroke-[1.5] text-yellow-500" />
-                          <span className="font-medium capitalize">{allergy}</span>
-                        </div>
-                        <span className="text-xl font-bold">{count}</span>
+                      <div key={tier} className="bg-green-50 rounded-lg p-4 text-center">
+                        <TierIcon className="w-6 h-6 stroke-[1.5] mb-2 mx-auto" style={{ color: '#478c0b' }} />
+                        <p className="font-semibold capitalize">{tier}</p>
+                        <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>{count}</p>
+                        <p className="text-sm text-gray-500">{percentage}% of total</p>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Shopping Patterns */}
+              {/* Top Customers by Spend */}
               <div>
                 <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                  Predicted Shopping Patterns
+                  Top Customers by Spend
+                </h3>
+                <div className="bg-white border rounded-xl overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600">Customer</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600">Tier</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-600">Orders</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-600">Total Spent</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-600">Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...customers]
+                        .sort((a, b) => (Number(b.total_spent) || 0) - (Number(a.total_spent) || 0))
+                        .slice(0, 10)
+                        .map((customer) => (
+                          <tr key={customer.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-3">
+                              <div>
+                                <p className="font-medium text-gray-800">{customer.name}</p>
+                                <p className="text-xs text-gray-500">{customer.email}</p>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                                customer.loyalty_tier === 'platinum' ? 'bg-purple-100 text-purple-700' :
+                                customer.loyalty_tier === 'gold' ? 'bg-yellow-100 text-yellow-700' :
+                                customer.loyalty_tier === 'silver' ? 'bg-gray-100 text-gray-700' :
+                                'bg-orange-100 text-orange-700'
+                              }`}>
+                                {customer.loyalty_tier || 'bronze'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right text-gray-700">{customer.total_orders || 0}</td>
+                            <td className="px-4 py-3 text-right font-medium text-gray-800">
+                              {(Number(customer.total_spent) || 0).toLocaleString()} ILS
+                            </td>
+                            <td className="px-4 py-3 text-right text-gray-700">{(customer.points || 0).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                  {customers.length === 0 && (
+                    <div className="p-8 text-center text-gray-500">
+                      No customer data available
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Shopping Patterns Placeholder */}
+              <div>
+                <h3 className="text-lg font-bold mb-4" style={{ color: '#3a3a1d' }}>
+                  Shopping Patterns & Category Preferences
                 </h3>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="bg-white border rounded-xl p-6">
                     <h4 className="font-semibold mb-3">Peak Shopping Times</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Morning (7-10 AM)</span>
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div className="bg-green-500 h-2 rounded-full" style={{ width: '30%' }} />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Afternoon (2-5 PM)</span>
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div className="bg-green-500 h-2 rounded-full" style={{ width: '70%' }} />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Evening (6-9 PM)</span>
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
-                          <div className="bg-green-500 h-2 rounded-full" style={{ width: '90%' }} />
-                        </div>
-                      </div>
+                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                      <AlertTriangle className="w-8 h-8 stroke-[1.5] mb-3 text-gray-300" />
+                      <p className="text-sm text-gray-500 text-center">
+                        No analytics data available yet.
+                      </p>
+                      <p className="text-xs text-gray-400 text-center mt-1">
+                        Shopping time patterns will appear once order history builds up.
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="bg-white border rounded-xl p-6">
                     <h4 className="font-semibold mb-3">Category Preferences</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Fresh Produce</span>
-                        <span className="font-bold text-green-600">85%</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Bakery</span>
-                        <span className="font-bold text-green-600">72%</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Prepared Meals</span>
-                        <span className="font-bold text-green-600">58%</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Specialty Foods</span>
-                        <span className="font-bold text-green-600">45%</span>
-                      </div>
+                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                      <AlertTriangle className="w-8 h-8 stroke-[1.5] mb-3 text-gray-300" />
+                      <p className="text-sm text-gray-500 text-center">
+                        No analytics data available yet.
+                      </p>
+                      <p className="text-xs text-gray-400 text-center mt-1">
+                        Category preferences will appear once purchase data is analyzed.
+                      </p>
                     </div>
                   </div>
                 </div>

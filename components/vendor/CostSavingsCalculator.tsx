@@ -38,6 +38,44 @@ interface SavingsResults {
 
 const KFAR_MONTHLY_COST = 149; // Example monthly subscription cost
 
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'ILS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount).replace('ILS', '₪');
+}
+
+function AnimatedNumber({ value, format = 'number', suffix = '', animate }: { value: number; format?: 'number' | 'currency'; suffix?: string; animate: boolean }) {
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    if (animate) {
+      const duration = 1500;
+      const steps = 60;
+      const increment = value / steps;
+      let current = 0;
+
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= value) {
+          current = value;
+          clearInterval(timer);
+        }
+        setDisplayValue(current);
+      }, duration / steps);
+
+      return () => clearInterval(timer);
+    }
+  }, [value, animate]);
+
+  if (format === 'currency') {
+    return <>{formatCurrency(displayValue)}{suffix}</>;
+  }
+  return <>{Math.round(displayValue).toLocaleString()}{suffix}</>;
+}
+
 export default function CostSavingsCalculator() {
   const [inputs, setInputs] = useState<SavingsInputs>({
     productsPerWeek: 20,
@@ -105,44 +143,6 @@ export default function CostSavingsCalculator() {
       setAnimateNumbers(true);
     }
   }, [showResults]);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'ILS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount).replace('ILS', '₪');
-  };
-
-  const AnimatedNumber = ({ value, format = 'number', suffix = '' }: { value: number; format?: 'number' | 'currency'; suffix?: string }) => {
-    const [displayValue, setDisplayValue] = useState(0);
-
-    useEffect(() => {
-      if (animateNumbers) {
-        const duration = 1500;
-        const steps = 60;
-        const increment = value / steps;
-        let current = 0;
-
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= value) {
-            current = value;
-            clearInterval(timer);
-          }
-          setDisplayValue(current);
-        }, duration / steps);
-
-        return () => clearInterval(timer);
-      }
-    }, [value, animateNumbers]);
-
-    if (format === 'currency') {
-      return <>{formatCurrency(displayValue)}{suffix}</>;
-    }
-    return <>{Math.round(displayValue).toLocaleString()}{suffix}</>;
-  };
 
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -280,10 +280,10 @@ export default function CostSavingsCalculator() {
             {/* ROI Highlight */}
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 text-center">
               <h4 className="text-2xl font-bold text-green-800 mb-2">
-                <AnimatedNumber value={results.roi.percentage} suffix="%" /> ROI
+                <AnimatedNumber value={results.roi.percentage} suffix="%" animate={animateNumbers} /> ROI
               </h4>
               <p className="text-green-700">
-                Pay back your investment in just <AnimatedNumber value={results.roi.months} /> months!
+                Pay back your investment in just <AnimatedNumber value={results.roi.months} animate={animateNumbers} /> months!
               </p>
             </div>
 
@@ -300,13 +300,13 @@ export default function CostSavingsCalculator() {
                 <div className="space-y-2">
                   <div>
                     <p className="text-2xl font-bold text-blue-600">
-                      <AnimatedNumber value={results.timeSaved.hoursPerWeek} /> hrs/week
+                      <AnimatedNumber value={results.timeSaved.hoursPerWeek} animate={animateNumbers} /> hrs/week
                     </p>
                     <p className="text-sm text-blue-600">Hours saved weekly</p>
                   </div>
                   <div className="pt-2 border-t border-blue-200">
                     <p className="text-lg font-semibold text-blue-700">
-                      <AnimatedNumber value={results.timeSaved.daysPerYear} /> days/year
+                      <AnimatedNumber value={results.timeSaved.daysPerYear} animate={animateNumbers} /> days/year
                     </p>
                     <p className="text-sm text-blue-600">Work days saved annually</p>
                   </div>
@@ -324,13 +324,13 @@ export default function CostSavingsCalculator() {
                 <div className="space-y-2">
                   <div>
                     <p className="text-2xl font-bold text-green-600">
-                      <AnimatedNumber value={results.moneySaved.totalMonthly} format="currency" />
+                      <AnimatedNumber value={results.moneySaved.totalMonthly} format="currency" animate={animateNumbers} />
                     </p>
                     <p className="text-sm text-green-600">Saved monthly</p>
                   </div>
                   <div className="pt-2 border-t border-green-200">
                     <p className="text-lg font-semibold text-green-700">
-                      <AnimatedNumber value={results.moneySaved.totalAnnual} format="currency" />
+                      <AnimatedNumber value={results.moneySaved.totalAnnual} format="currency" animate={animateNumbers} />
                     </p>
                     <p className="text-sm text-green-600">Saved annually</p>
                   </div>
@@ -348,13 +348,13 @@ export default function CostSavingsCalculator() {
                 <div className="space-y-2">
                   <div>
                     <p className="text-2xl font-bold text-purple-600">
-                      +<AnimatedNumber value={results.revenueIncrease.percentage} />%
+                      +<AnimatedNumber value={results.revenueIncrease.percentage} animate={animateNumbers} />%
                     </p>
                     <p className="text-sm text-purple-600">Revenue increase</p>
                   </div>
                   <div className="pt-2 border-t border-purple-200">
                     <p className="text-lg font-semibold text-purple-700">
-                      <AnimatedNumber value={results.revenueIncrease.annualAmount} format="currency" />
+                      <AnimatedNumber value={results.revenueIncrease.annualAmount} format="currency" animate={animateNumbers} />
                     </p>
                     <p className="text-sm text-purple-600">Extra revenue/year</p>
                   </div>

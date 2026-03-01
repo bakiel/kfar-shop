@@ -45,19 +45,21 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://kfarapp.com'),
   title: "KFAR Marketplace - Village of Peace",
   description: "Authentic vegan products and services from the Village of Peace community in Dimona, Israel",
   openGraph: {
     title: "KFAR Marketplace - Village of Peace",
-    description: "Authentic vegan products and services from the Village of Peace community in Dimona, Israel",
+    description: "Authentic vegan products & services from the Village of Peace community in Dimona, Israel",
     url: 'https://kfarapp.com',
     siteName: 'KFAR Marketplace',
     images: [
       {
-        url: '/images/logos/kfar_logo_africa_heritage.png',
+        url: 'https://kfarapp.com/og-share.jpg',
         width: 1200,
         height: 630,
-        alt: 'KFAR Marketplace - Village of Peace',
+        alt: 'KFAR Marketplace - 6 Vendors, 113 Products, 100% Plant-Based',
+        type: 'image/jpeg',
       }
     ],
     locale: 'en_US',
@@ -66,8 +68,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "KFAR Marketplace - Village of Peace",
-    description: "Authentic vegan products and services from the Village of Peace community",
-    images: ['/images/logos/kfar_logo_africa_heritage.png'],
+    description: "Authentic vegan products & services from the Village of Peace community in Dimona, Israel",
+    images: ['https://kfarapp.com/og-share.jpg'],
   },
 };
 

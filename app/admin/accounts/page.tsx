@@ -8,6 +8,7 @@ import {
 import { PageHeader, DataTable, StatusBadge, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface CustomerAccount {
   id: string;
@@ -52,24 +53,15 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-// --- Mock fallback data (kept for reference) ---
-// const mockCustomers: CustomerAccount[] = [
-//   { id: 'cust-001', name: 'Sarah Cohen', nameHe: 'שרה כהן', email: 'sarah@example.com', orders: 12, points: 480, status: 'active' },
-//   ... (6 entries)
-// ];
-
-const mockAdmins: AdminAccount[] = [
-  { id: 'adm-001', name: 'System Admin', nameHe: 'מנהל מערכת', email: 'admin@kfar.com', role: 'Super Admin', roleHe: 'מנהל ראשי', lastLogin: '2025-02-07', status: 'active' },
-  { id: 'adm-002', name: 'Content Manager', nameHe: 'מנהל תוכן', email: 'content@kfar.com', role: 'Content Admin', roleHe: 'מנהל תוכן', lastLogin: '2025-02-06', status: 'active' },
-];
-
 type TabId = 'customers' | 'vendors' | 'admins';
 
 export default function AccountsPage() {
   const { language, t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [activeTab, setActiveTab] = useState<TabId>('customers');
   const [customers, setCustomers] = useState<CustomerAccount[]>([]);
   const [vendorAccounts, setVendorAccounts] = useState<VendorAccount[]>([]);
+  const [admins, setAdmins] = useState<AdminAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,24 +69,32 @@ export default function AccountsPage() {
     setLoading(true);
     setError(null);
 
+    const headers: Record<string, string> = {};
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
     const customerParams = new URLSearchParams({ type: 'customers' });
     const vendorParams = new URLSearchParams({ type: 'vendors' });
+    const adminParams = new URLSearchParams({ type: 'admins' });
     if (search) {
       customerParams.set('search', search);
       vendorParams.set('search', search);
     }
 
     Promise.all([
-      fetch(`/api/admin/accounts?${customerParams.toString()}`).then((r) => {
+      fetch(`/api/admin/accounts?${customerParams.toString()}`, { headers }).then((r) => {
         if (!r.ok) throw new Error(`Customers: HTTP ${r.status}`);
         return r.json();
       }),
-      fetch(`/api/admin/accounts?${vendorParams.toString()}`).then((r) => {
+      fetch(`/api/admin/accounts?${vendorParams.toString()}`, { headers }).then((r) => {
         if (!r.ok) throw new Error(`Vendors: HTTP ${r.status}`);
         return r.json();
       }),
+      fetch(`/api/admin/accounts?${adminParams.toString()}`, { headers }).then((r) => {
+        if (!r.ok) throw new Error(`Admins: HTTP ${r.status}`);
+        return r.json();
+      }),
     ])
-      .then(([custData, vendData]) => {
+      .then(([custData, vendData, adminData]) => {
         // Normalize customer data from API shape to our interface
         const normalizedCustomers: CustomerAccount[] = (custData.customers || []).map((c: any) => ({
           id: c.id,
@@ -111,13 +111,26 @@ export default function AccountsPage() {
         const normalizedVendors: VendorAccount[] = (vendData.vendors || []).map((v: any) => ({
           id: v.id,
           storeName: v.name || '',
-          storeNameHe: v.name || '',
-          products: v.productCount ?? v.products ?? 0,
-          revenue: v.totalRevenue ?? v.revenue ?? 0,
-          rating: v.averageRating ?? v.rating ?? 4.5,
+          storeNameHe: v.name_he || v.name || '',
+          products: Number(v.productCount ?? v.products ?? 0),
+          revenue: Number(v.totalRevenue ?? v.revenue ?? 0),
+          rating: Number(v.averageRating ?? v.rating ?? 0) || 0,
           status: v.status || 'active',
         }));
         setVendorAccounts(normalizedVendors);
+
+        // Normalize admin data
+        const normalizedAdmins: AdminAccount[] = (adminData.admins || []).map((a: any) => ({
+          id: a.id,
+          name: a.name || '',
+          nameHe: a.name || '',
+          email: a.email || '',
+          role: a.role || 'Admin',
+          roleHe: a.role === 'Super Admin' ? 'מנהל ראשי' : 'מנהל',
+          lastLogin: a.lastLogin || '',
+          status: a.status || 'active',
+        }));
+        setAdmins(normalizedAdmins);
 
         setLoading(false);
       })
@@ -126,16 +139,17 @@ export default function AccountsPage() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [accessToken]);
 
   useEffect(() => {
+    if (!accessToken) return;
     fetchAccounts();
-  }, [fetchAccounts]);
+  }, [fetchAccounts, accessToken]);
 
   const tabs: { id: TabId; label: string; labelHe: string; icon: React.ReactNode; count: number }[] = [
     { id: 'customers', label: 'Customers', labelHe: 'לקוחות', icon: <Users className="w-4 h-4 stroke-[1.5]" />, count: customers.length },
     { id: 'vendors', label: 'Vendors', labelHe: 'ספקים', icon: <Store className="w-4 h-4 stroke-[1.5]" />, count: vendorAccounts.length },
-    { id: 'admins', label: 'Admins', labelHe: 'מנהלים', icon: <Shield className="w-4 h-4 stroke-[1.5]" />, count: mockAdmins.length },
+    { id: 'admins', label: 'Admins', labelHe: 'מנהלים', icon: <Shield className="w-4 h-4 stroke-[1.5]" />, count: admins.length },
   ];
 
   const customerColumns: Column<CustomerAccount>[] = [
@@ -270,8 +284,8 @@ export default function AccountsPage() {
         <PageHeader
           title={t('Accounts')}
           subtitle={isRTL
-            ? `${customers.length} לקוחות, ${vendorAccounts.length} ספקים, ${mockAdmins.length} מנהלים`
-            : `${customers.length} customers, ${vendorAccounts.length} vendors, ${mockAdmins.length} admins`
+            ? `${customers.length} לקוחות, ${vendorAccounts.length} ספקים, ${admins.length} מנהלים`
+            : `${customers.length} customers, ${vendorAccounts.length} vendors, ${admins.length} admins`
           }
           isRTL={isRTL}
         />
@@ -347,7 +361,7 @@ export default function AccountsPage() {
         {activeTab === 'admins' && (
           <DataTable<AdminAccount>
             columns={adminColumns}
-            data={mockAdmins}
+            data={admins}
             searchable={false}
             pageSize={10}
             emptyTitle={isRTL ? 'אין מנהלים' : 'No admins'}

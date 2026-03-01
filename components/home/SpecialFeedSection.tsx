@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/context/CartContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { toast } from '@/components/ui/use-toast';
-import { Heart, Share, Bookmark, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Heart, Share, Bookmark, ChevronLeft, ChevronRight, ArrowRight, Tag, Package } from 'lucide-react';
 
 // Feed item types
 type FeedItemType = 'flash_sale' | 'new_arrival' | 'vendor_special' | 'kfar_announcement' | 'limited_stock' | 'bundle_deal';
@@ -45,126 +45,147 @@ interface FeedItem {
   priority: number;
 }
 
-// Create stable dates for SSR/hydration
-const getStableEndTime = (hoursFromNow: number) => {
-  // Return a stable date for SSR - will be updated on client
-  if (typeof window === 'undefined') {
-    // Server-side: return a fixed future date
-    return new Date('2025-12-31T23:59:59Z');
-  }
-  // Client-side: return actual dynamic date
-  return new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
-};
+/**
+ * Transform landing API data (flash deals, promotions, featured products) into feed items.
+ */
+function transformLandingData(data: any): FeedItem[] {
+  const items: FeedItem[] = [];
 
-// Mock data - In production, this would come from Supabase
-const mockFeedItems: FeedItem[] = [
-  {
-    id: '1',
-    type: 'flash_sale',
-    vendor: {
-      id: 'teva-deli',
-      name: 'Teva Deli',
-      logo: '/images/teva-deli/teva_deli_official_logo_master_brand_israeli_vegan_food_company.jpg'
-    },
-    product: {
-      id: 'schnitzel-special',
-      name: 'Vegan Schnitzel Platter',
-      image: '/images/teva-deli/teva_deli_vegan_seitan_schnitzel_breaded_cutlet_plant_based_meat_alternative_israeli_comfort_food.jpg',
-      originalPrice: 45,
-      salePrice: 32,
-      discount: 29,
-      stock: 8
-    },
-    promotion: {
-      title: '⚡ FLASH SALE - 29% OFF',
-      description: 'Fresh made today! Limited quantity',
-      endTime: getStableEndTime(2), // 2 hours
-      urgency: 'Only 8 left!',
-      badge: 'HOT DEAL'
-    },
-    interaction: {
-      likes: 124,
-      shares: 23,
-      hasLiked: false
-    },
-    adminApproved: true,
-    priority: 1
-  },
-  {
-    id: '2',
-    type: 'kfar_announcement',
-    vendor: {
-      id: 'garden-of-light',
-      name: 'Garden of Light',
-      logo: '/images/garden-of-light/garden_of_light_official_logo_master_brand_organic_vegan_deli.jpg'
-    },
-    product: {
-      id: 'weekly-harvest',
-      name: 'Weekly Harvest Box',
-      image: '/images/garden-of-light/1.jpg',
-      originalPrice: 120,
-      salePrice: 89
-    },
-    promotion: {
-      title: '🌟 NEW: Community Harvest Box',
-      description: 'Support local farmers - 7 fresh items from Village of Peace gardens',
-      badge: 'COMMUNITY SPECIAL'
-    },
-    interaction: {
-      likes: 256,
-      shares: 45,
-      hasLiked: true
-    },
-    adminApproved: true,
-    priority: 2
-  },
-  {
-    id: '3',
-    type: 'vendor_special',
-    vendor: {
-      id: 'vop-shop',
-      name: 'VOP Shop',
-      logo: '/images/vop-shop/vop_shop_official_logo_master_brand_village_of_peace.jpg'
-    },
-    product: {
-      id: 'wellness-book',
-      name: 'Holistic Health Guide',
-      image: '/images/vop-shop/vop_shop_wellness_education_product_11_healing_books_holistic_health_community_wisdom.jpg',
-      originalPrice: 75,
-      salePrice: 65
-    },
-    promotion: {
-      title: '📚 Wellness Weekend Special',
-      description: 'Transform your health journey - Community wisdom for holistic living',
-      endTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      badge: 'WELLNESS DEAL'
-    },
-    interaction: {
-      likes: 89,
-      shares: 12,
-      hasLiked: false
-    },
-    adminApproved: true,
-    priority: 3
+  // Transform flash deals into feed items
+  if (data.flashDeals && Array.isArray(data.flashDeals)) {
+    data.flashDeals.forEach((deal: any, idx: number) => {
+      items.push({
+        id: `flash-${deal.id}`,
+        type: 'flash_sale',
+        vendor: {
+          id: deal.vendorId || '',
+          name: deal.vendorName || 'KFAR Vendor',
+          logo: '/images/default_logo.svg',
+        },
+        product: {
+          id: deal.productId,
+          name: deal.productName,
+          image: deal.productImage || '/images/default_logo.svg',
+          originalPrice: deal.originalPrice,
+          salePrice: deal.dealPrice,
+          discount: deal.savingsPercent,
+          stock: deal.stockRemaining,
+        },
+        promotion: {
+          title: `${deal.savingsPercent}% OFF`,
+          description: `Save on ${deal.productName}`,
+          endTime: deal.endsAt ? new Date(deal.endsAt) : undefined,
+          urgency: deal.stockRemaining <= 5 ? `Only ${deal.stockRemaining} left!` : undefined,
+          badge: 'FLASH SALE',
+        },
+        interaction: { likes: 0, shares: 0, hasLiked: false },
+        adminApproved: true,
+        priority: idx,
+      });
+    });
   }
-];
+
+  // Transform featured products with original prices (deals) into feed items
+  if (data.featuredProducts && Array.isArray(data.featuredProducts)) {
+    data.featuredProducts
+      .filter((p: any) => p.originalPrice && p.originalPrice > p.price)
+      .slice(0, 4)
+      .forEach((product: any, idx: number) => {
+        const discount = Math.round((1 - product.price / product.originalPrice) * 100);
+        items.push({
+          id: `product-${product.id}`,
+          type: 'vendor_special',
+          vendor: {
+            id: product.vendorId,
+            name: product.vendorName,
+            logo: product.vendorLogo || '/images/default_logo.svg',
+          },
+          product: {
+            id: product.id,
+            name: product.name,
+            image: product.image || '/images/default_logo.svg',
+            originalPrice: product.originalPrice,
+            salePrice: product.price,
+            discount,
+          },
+          promotion: {
+            title: `${discount}% OFF`,
+            description: product.description || `Special from ${product.vendorName}`,
+            badge: 'DEAL',
+          },
+          interaction: { likes: 0, shares: 0, hasLiked: false },
+          adminApproved: true,
+          priority: items.length + idx,
+        });
+      });
+  }
+
+  // Transform promotions into feed items
+  if (data.promotions && Array.isArray(data.promotions)) {
+    data.promotions.slice(0, 2).forEach((promo: any, idx: number) => {
+      items.push({
+        id: `promo-${promo.id}`,
+        type: 'kfar_announcement',
+        vendor: {
+          id: 'kfar',
+          name: 'KFAR Marketplace',
+          logo: '/images/logos/kfar_logo_primary_horizontal.png',
+        },
+        product: {
+          id: promo.id,
+          name: promo.title,
+          image: promo.image || '/images/default_logo.svg',
+          originalPrice: 0,
+        },
+        promotion: {
+          title: promo.title,
+          description: promo.description || '',
+          endTime: promo.endDate ? new Date(promo.endDate) : undefined,
+          badge: promo.badgeText || 'PROMO',
+        },
+        interaction: { likes: 0, shares: 0, hasLiked: false },
+        adminApproved: true,
+        priority: items.length + idx,
+      });
+    });
+  }
+
+  return items;
+}
 
 export default function SpecialFeedSection() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const { addToCart } = useCart();
   const { t } = useLanguage();
   const autoScrollRef = useRef<NodeJS.Timeout>();
-  
-  // Initialize feed items on client to avoid hydration mismatch
+
+  // Fetch real data from landing API
   useEffect(() => {
-    setFeedItems(mockFeedItems);
+    const fetchFeedData = async () => {
+      try {
+        const res = await fetch('/api/landing');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        const items = transformLandingData(data);
+        setFeedItems(items);
+      } catch (err) {
+        console.error('Error fetching feed data:', err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeedData();
   }, []);
 
   // Auto-rotate through items
   useEffect(() => {
-    if (!isPaused) {
+    if (!isPaused && feedItems.length > 1) {
       autoScrollRef.current = setInterval(() => {
         setActiveIndex((prev) => (prev + 1) % feedItems.length);
       }, 5000);
@@ -173,6 +194,8 @@ export default function SpecialFeedSection() {
   }, [isPaused, feedItems.length]);
 
   const handleQuickAdd = (item: FeedItem) => {
+    if (item.product.originalPrice === 0) return; // Skip non-product items (promotions)
+
     addToCart({
       id: item.product.id,
       name: item.product.name,
@@ -189,15 +212,15 @@ export default function SpecialFeedSection() {
   };
 
   const handleLike = (itemId: string) => {
-    setFeedItems(prev => prev.map(item => 
-      item.id === itemId 
-        ? { 
-            ...item, 
-            interaction: { 
-              ...item.interaction, 
+    setFeedItems(prev => prev.map(item =>
+      item.id === itemId
+        ? {
+            ...item,
+            interaction: {
+              ...item.interaction,
               hasLiked: !item.interaction.hasLiked,
-              likes: item.interaction.hasLiked 
-                ? item.interaction.likes - 1 
+              likes: item.interaction.hasLiked
+                ? item.interaction.likes - 1
                 : item.interaction.likes + 1
             }
           }
@@ -231,26 +254,49 @@ export default function SpecialFeedSection() {
   }, []);
 
   const formatTimeLeft = (endTime: Date) => {
-    // Return placeholder during SSR to avoid hydration mismatch
     if (!isClient) {
       return 'Loading...';
     }
-    
+
     const now = new Date();
     const diff = endTime.getTime() - now.getTime();
+    if (diff <= 0) return 'Ended';
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;
   };
 
-  // Don't render until client-side initialization to avoid hydration issues
-  if (feedItems.length === 0) {
+  // Loading state
+  if (loading) {
     return (
       <section className="relative py-8 overflow-hidden bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-4 text-center">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-4"></div>
             <div className="h-4 bg-gray-200 rounded w-64 mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Empty state -- no deals/promotions available, hide the section
+  if (error || feedItems.length === 0) {
+    return (
+      <section className="relative py-8 overflow-hidden bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex flex-col items-center gap-3 py-8">
+            <Tag className="w-10 h-10 stroke-[1.5] text-gray-300" />
+            <h3 className="text-lg font-semibold text-gray-500">{t('No special deals right now')}</h3>
+            <p className="text-sm text-gray-400">{t('Check back soon for new promotions!')}</p>
+            <Link
+              href="/marketplace"
+              className="mt-2 inline-flex items-center gap-2 px-6 py-2 text-sm font-medium rounded-full transition-all hover:shadow-md"
+              style={{ backgroundColor: '#478c0b', color: 'white' }}
+            >
+              <span>{t('Browse Marketplace')}</span>
+              <ArrowRight className="w-4 h-4 stroke-[1.5]" />
+            </Link>
           </div>
         </div>
       </section>
@@ -273,18 +319,17 @@ export default function SpecialFeedSection() {
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-2 bg-red-100 text-red-800 px-4 py-2 rounded-full mb-4"
           >
-            <span className="animate-pulse">🔥</span>
+            <Tag className="w-4 h-4 stroke-[1.5]" />
             <span className="font-semibold">{t('Live Marketplace Feed')}</span>
-            <span className="animate-pulse">🔥</span>
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: '#3a3a1d' }}>
             {t("Today's Special Deals")}
           </h2>
-          <p className="text-gray-600">{t('Fresh promotions from our vendors • Updated every hour')}</p>
+          <p className="text-gray-600">{t('Fresh promotions from our vendors')}</p>
         </div>
 
         {/* Main Feed Display */}
-        <div 
+        <div
           className="relative"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -307,7 +352,7 @@ export default function SpecialFeedSection() {
                     fill
                     className="object-cover"
                   />
-                  
+
                   {/* Badges */}
                   <div className="absolute top-4 left-4 space-y-2">
                     {feedItems[activeIndex].promotion.badge && (
@@ -372,34 +417,38 @@ export default function SpecialFeedSection() {
                   </p>
 
                   {/* Price */}
-                  <div className="mb-6">
-                    {feedItems[activeIndex].product.salePrice ? (
-                      <div className="flex items-baseline gap-3">
-                        <span className="text-3xl font-bold" style={{ color: '#c23c09' }}>
-                          ₪{feedItems[activeIndex].product.salePrice}
+                  {feedItems[activeIndex].product.originalPrice > 0 && (
+                    <div className="mb-6">
+                      {feedItems[activeIndex].product.salePrice ? (
+                        <div className="flex items-baseline gap-3">
+                          <span className="text-3xl font-bold" style={{ color: '#c23c09' }}>
+                            &#8362;{feedItems[activeIndex].product.salePrice}
+                          </span>
+                          <span className="text-xl text-gray-400 line-through">
+                            &#8362;{feedItems[activeIndex].product.originalPrice}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-3xl font-bold" style={{ color: '#478c0b' }}>
+                          &#8362;{feedItems[activeIndex].product.originalPrice}
                         </span>
-                        <span className="text-xl text-gray-400 line-through">
-                          ₪{feedItems[activeIndex].product.originalPrice}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-3xl font-bold" style={{ color: '#478c0b' }}>
-                        ₪{feedItems[activeIndex].product.originalPrice}
-                      </span>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Actions */}
                   <div className="flex gap-3 mb-4">
-                    <button
-                      onClick={() => handleQuickAdd(feedItems[activeIndex])}
-                      className="flex-1 px-6 py-3 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
-                      style={{ backgroundColor: '#478c0b' }}
-                    >
-                      {t('Quick Add to Cart')}
-                    </button>
+                    {feedItems[activeIndex].product.originalPrice > 0 && (
+                      <button
+                        onClick={() => handleQuickAdd(feedItems[activeIndex])}
+                        className="flex-1 px-6 py-3 text-white font-semibold rounded-lg hover:shadow-lg transition-all cursor-pointer"
+                        style={{ backgroundColor: '#478c0b' }}
+                      >
+                        {t('Quick Add to Cart')}
+                      </button>
+                    )}
                     <Link
-                      href={`/product/${feedItems[activeIndex].product.id}`}
+                      href={feedItems[activeIndex].type === 'kfar_announcement' ? '/marketplace' : `/product/${feedItems[activeIndex].product.id}`}
                       className="px-6 py-3 border-2 font-semibold rounded-lg hover:bg-gray-50 transition-all"
                       style={{ borderColor: '#478c0b', color: '#478c0b' }}
                     >
@@ -411,16 +460,16 @@ export default function SpecialFeedSection() {
                   <div className="flex items-center gap-6 text-sm">
                     <button
                       onClick={() => handleLike(feedItems[activeIndex].id)}
-                      className="flex items-center gap-2 hover:scale-105 transition-transform"
+                      className="flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer"
                     >
                       <Heart className={`w-5 h-5 stroke-[1.5] text-red-500 ${feedItems[activeIndex].interaction.hasLiked ? 'fill-red-500' : ''}`} />
                       <span>{feedItems[activeIndex].interaction.likes}</span>
                     </button>
-                    <button className="flex items-center gap-2 hover:scale-105 transition-transform">
+                    <button className="flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer">
                       <Share className="w-5 h-5 stroke-[1.5] text-blue-500" />
                       <span>{feedItems[activeIndex].interaction.shares}</span>
                     </button>
-                    <button className="flex items-center gap-2 hover:scale-105 transition-transform">
+                    <button className="flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer">
                       <Bookmark className="w-5 h-5 stroke-[1.5] text-gray-500" />
                       <span>{t('Save')}</span>
                     </button>
@@ -436,9 +485,9 @@ export default function SpecialFeedSection() {
               <button
                 key={index}
                 onClick={() => setActiveIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === activeIndex 
-                    ? 'w-8 bg-leaf-green' 
+                className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
+                  index === activeIndex
+                    ? 'w-8 bg-leaf-green'
                     : 'bg-gray-300 hover:bg-gray-400'
                 }`}
                 style={index === activeIndex ? { backgroundColor: '#478c0b' } : {}}
@@ -447,54 +496,62 @@ export default function SpecialFeedSection() {
           </div>
 
           {/* Side Navigation */}
-          <button
-            onClick={() => setActiveIndex((prev) => (prev - 1 + feedItems.length) % feedItems.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all"
-          >
-            <ChevronLeft className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
-          </button>
-          <button
-            onClick={() => setActiveIndex((prev) => (prev + 1) % feedItems.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all"
-          >
-            <ChevronRight className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
-          </button>
+          {feedItems.length > 1 && (
+            <>
+              <button
+                onClick={() => setActiveIndex((prev) => (prev - 1 + feedItems.length) % feedItems.length)}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all cursor-pointer"
+              >
+                <ChevronLeft className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
+              </button>
+              <button
+                onClick={() => setActiveIndex((prev) => (prev + 1) % feedItems.length)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white transition-all cursor-pointer"
+              >
+                <ChevronRight className="w-5 h-5 stroke-[1.5]" style={{ color: '#478c0b' }} />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Quick Feed Thumbnails */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {feedItems.slice(0, 4).map((item) => (
-            <motion.div
-              key={item.id}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
-              onClick={() => setActiveIndex(feedItems.indexOf(item))}
-            >
-              <div className="relative h-32">
-                <Image
-                  src={item.product.image}
-                  alt={item.product.name}
-                  fill
-                  className="object-cover"
-                />
-                {item.product.discount && (
-                  <span className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
-                    -{item.product.discount}%
-                  </span>
-                )}
-              </div>
-              <div className="p-3">
-                <p className="text-sm font-semibold truncate" style={{ color: '#3a3a1d' }}>
-                  {item.product.name}
-                </p>
-                <p className="text-xs text-gray-600">{item.vendor.name}</p>
-                <p className="text-sm font-bold mt-1" style={{ color: '#c23c09' }}>
-                  ₪{item.product.salePrice || item.product.originalPrice}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {feedItems.length > 1 && (
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {feedItems.slice(0, 4).map((item) => (
+              <motion.div
+                key={item.id}
+                whileHover={{ scale: 1.05 }}
+                className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                onClick={() => setActiveIndex(feedItems.indexOf(item))}
+              >
+                <div className="relative h-32">
+                  <Image
+                    src={item.product.image}
+                    alt={item.product.name}
+                    fill
+                    className="object-cover"
+                  />
+                  {item.product.discount && (
+                    <span className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">
+                      -{item.product.discount}%
+                    </span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <p className="text-sm font-semibold truncate" style={{ color: '#3a3a1d' }}>
+                    {item.product.name}
+                  </p>
+                  <p className="text-xs text-gray-600">{item.vendor.name}</p>
+                  {item.product.originalPrice > 0 && (
+                    <p className="text-sm font-bold mt-1" style={{ color: '#c23c09' }}>
+                      &#8362;{item.product.salePrice || item.product.originalPrice}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* See All Deals Button */}
         <div className="text-center mt-8">

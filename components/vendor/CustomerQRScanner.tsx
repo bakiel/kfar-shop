@@ -352,24 +352,8 @@ export default function CustomerQRScanner({
               <h3 className="font-bold mb-4" style={{ color: '#3a3a1d' }}>
                 Recent Customers
               </h3>
-              <div className="space-y-3">
-                {['Sarah Cohen', 'David Levi', 'Rachel Green'].map((name, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">
-                        {name[0]}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{name}</p>
-                        <p className="text-xs text-gray-600">Last visit: 2 days ago</p>
-                      </div>
-                    </div>
-                    <span className="text-sm font-medium text-yellow-600">Gold</span>
-                  </div>
-                ))}
+              <div className="text-center py-6 text-gray-500 text-sm">
+                <p>Scan a customer QR code to see recent activity</p>
               </div>
             </div>
           </motion.div>

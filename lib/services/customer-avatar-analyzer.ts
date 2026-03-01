@@ -81,26 +81,13 @@ Be respectful and avoid stereotypes. Focus on observable characteristics only.`;
   }
 
   private createFallbackAnalysis(imageId: string): AvatarAnalysis {
-    // Fallback names based on image ID
-    const fallbackNames = [
-      { name: 'Sarah Cohen', gender: 'female' },
-      { name: 'David Levi', gender: 'male' },
-      { name: 'Rachel Green', gender: 'female' },
-      { name: 'Yossi Mizrahi', gender: 'male' },
-      { name: 'Maya Shapiro', gender: 'female' },
-      { name: 'Eli Goldstein', gender: 'male' }
-    ];
-
-    const index = parseInt(imageId.replace(/\D/g, '')) - 1;
-    const fallback = fallbackNames[index % fallbackNames.length];
-
     return {
       imageId,
-      suggestedName: fallback.name,
-      description: `A friendly ${fallback.gender === 'female' ? 'woman' : 'man'} who shops at KFAR marketplace`,
+      suggestedName: `Customer ${imageId}`,
+      description: 'A valued KFAR marketplace customer',
       characteristics: {
         apparentAge: '30-40',
-        gender: fallback.gender,
+        gender: 'unknown',
         hairColor: 'brown',
         clothing: 'casual',
         expression: 'friendly',
@@ -201,84 +188,5 @@ Be respectful and avoid stereotypes. Focus on observable characteristics only.`;
   }
 }
 
-// Export pre-analyzed customer profiles for immediate use
-export const ANALYZED_CUSTOMER_PROFILES = [
-  {
-    id: 'cust_001',
-    imageId: '1',
-    name: 'Sarah Cohen',
-    description: 'A professional woman in her early 30s with a warm, approachable demeanor',
-    loyaltyTier: 'gold' as const,
-    points: 3250,
-    preferences: {
-      dietary: ['vegan', 'gluten-free'],
-      allergies: ['nuts'],
-      favoriteCategories: ['bakery', 'prepared-meals', 'desserts']
-    }
-  },
-  {
-    id: 'cust_002',
-    imageId: '2',
-    name: 'David Levi',
-    description: 'A family-oriented man in his 40s who values quality and tradition',
-    loyaltyTier: 'platinum' as const,
-    points: 12500,
-    preferences: {
-      dietary: ['kosher'],
-      allergies: [],
-      favoriteCategories: ['meat', 'wine', 'dairy']
-    }
-  },
-  {
-    id: 'cust_003',
-    imageId: '3',
-    name: 'Rachel Green',
-    description: 'A health-conscious woman in her late 20s with an active lifestyle',
-    loyaltyTier: 'silver' as const,
-    points: 2100,
-    preferences: {
-      dietary: ['vegetarian', 'organic'],
-      allergies: ['dairy'],
-      favoriteCategories: ['fresh-produce', 'health-foods', 'beverages']
-    }
-  },
-  {
-    id: 'cust_004',
-    imageId: '4',
-    name: 'Yossi Mizrahi',
-    description: 'A tech professional in his mid-30s who appreciates convenience',
-    loyaltyTier: 'gold' as const,
-    points: 4500,
-    preferences: {
-      dietary: [],
-      allergies: ['gluten'],
-      favoriteCategories: ['ready-meals', 'snacks', 'beverages']
-    }
-  },
-  {
-    id: 'cust_005',
-    imageId: '5',
-    name: 'Maya Shapiro',
-    description: 'A young mother focused on healthy options for her family',
-    loyaltyTier: 'gold' as const,
-    points: 5800,
-    preferences: {
-      dietary: ['organic', 'sugar-free'],
-      allergies: [],
-      favoriteCategories: ['baby-food', 'fresh-produce', 'dairy']
-    }
-  },
-  {
-    id: 'cust_006',
-    imageId: '6',
-    name: 'Eli Goldstein',
-    description: 'A retired professor who enjoys gourmet cooking',
-    loyaltyTier: 'platinum' as const,
-    points: 15000,
-    preferences: {
-      dietary: ['gourmet'],
-      allergies: ['shellfish'],
-      favoriteCategories: ['specialty-foods', 'wine', 'cheese']
-    }
-  }
-];
+// ANALYZED_CUSTOMER_PROFILES removed — all customer data now comes from the database
+// Use /api/admin/crm/customers to fetch real customer profiles

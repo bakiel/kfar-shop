@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { MicrophoneIcon, ShoppingBagIcon } from '@heroicons/react/24/solid';
-import { useCart } from '@/lib/context/CartContext';
+import { useCartSafe } from '@/lib/context/CartContext';
 import { useVoiceCommerce } from '@/hooks/useVoiceCommerce';
 import { VOICE_CONFIG } from '@/config/voice';
 
@@ -14,23 +14,16 @@ interface VoiceQuickBuyProps {
   onSuccess?: () => void;
 }
 
-export default function VoiceQuickBuy({ 
-  productId, 
-  productName, 
+export default function VoiceQuickBuy({
+  productId,
+  productName,
   price,
-  onSuccess 
+  onSuccess
 }: VoiceQuickBuyProps) {
   const [isListening, setIsListening] = useState(false);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'success'>('idle');
-  
-  // Handle missing cart context
-  let cartContext;
-  try {
-    cartContext = useCart();
-  } catch (e) {
-    cartContext = { addToCart: () => {} };
-  }
-  const { addToCart } = cartContext;
+
+  const { addToCart } = useCartSafe();
   
   const { speak } = useVoiceCommerce();
   const recognitionRef = useRef<any>(null);
@@ -175,15 +168,8 @@ export function VoiceQuickBuyMini({
   price 
 }: VoiceQuickBuyProps) {
   const [isActive, setIsActive] = useState(false);
-  
-  // Handle missing cart context
-  let cartContext;
-  try {
-    cartContext = useCart();
-  } catch (e) {
-    cartContext = { addToCart: () => {} };
-  }
-  const { addToCart } = cartContext;
+
+  const { addToCart } = useCartSafe();
   
   const { speak } = useVoiceCommerce();
 

@@ -15,9 +15,11 @@ import {
   Database,
   RefreshCw
 } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function AdminDataManagement() {
   const router = useRouter();
+  const { accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     vendors: 0,
@@ -32,10 +34,12 @@ export default function AdminDataManagement() {
 
   useEffect(() => {
     checkAuth();
+    if (!accessToken) return;
     fetchStats();
     fetchVendors();
     fetchCustomers();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]);
 
   const checkAuth = () => {
     const adminAuth = localStorage.getItem('adminAuth');
@@ -46,8 +50,10 @@ export default function AdminDataManagement() {
 
   const fetchStats = async () => {
     try {
+      const headers: Record<string, string> = {};
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
       // Fetch stats from API
-      const response = await fetch('/api/admin/stats');
+      const response = await fetch('/api/admin/stats', { headers });
       if (response.ok) {
         const data = await response.json();
         setStats({
@@ -65,7 +71,9 @@ export default function AdminDataManagement() {
 
   const fetchVendors = async () => {
     try {
-      const response = await fetch('/api/admin/vendors');
+      const headers: Record<string, string> = {};
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+      const response = await fetch('/api/admin/vendors', { headers });
       if (response.ok) {
         const data = await response.json();
         setVendors(data.vendors || []);
@@ -77,7 +85,9 @@ export default function AdminDataManagement() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/admin/customers');
+      const headers: Record<string, string> = {};
+      if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+      const response = await fetch('/api/admin/customers', { headers });
       if (response.ok) {
         const data = await response.json();
         setCustomers(data.customers || []);

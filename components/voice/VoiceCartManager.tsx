@@ -9,26 +9,11 @@ import {
   PlusIcon,
   MinusIcon 
 } from '@heroicons/react/24/outline';
-import { useCart } from '@/lib/context/CartContext';
+import { useCartSafe } from '@/lib/context/CartContext';
 import { useVoiceCommerce } from '@/hooks/useVoiceCommerce';
-import { parseVoiceCommand, CommandIntent } from '@/lib/voice/voiceCommandParser';
 
 export default function VoiceCartManager() {
-  // Handle missing cart context gracefully
-  let cartContext;
-  try {
-    cartContext = useCart();
-  } catch (e) {
-    // Cart context not available, provide defaults
-    cartContext = {
-      cart: [],
-      updateQuantity: () => {},
-      removeFromCart: () => {},
-      getCartTotal: () => 0
-    };
-  }
-  
-  const { cart = [], updateQuantity, removeFromCart, getCartTotal } = cartContext;
+  const { items: cart, updateQuantity, removeFromCart, getCartTotal } = useCartSafe();
   const { speak } = useVoiceCommerce();
   const [isListening, setIsListening] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);

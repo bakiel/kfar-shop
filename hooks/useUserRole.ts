@@ -102,10 +102,12 @@ export function useVendorOrderCount(): number {
 
   useEffect(() => {
     if (isVendor) {
-      // This would normally fetch from API
-      // For now, using mock data
-      const mockOrderCount = 3;
-      setOrderCount(mockOrderCount);
+      fetch('/api/vendor/orders?limit=1', {
+        headers: { 'Authorization': `Bearer ${typeof window !== 'undefined' ? sessionStorage.getItem('kfar_access_token') || '' : ''}` }
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.summary?.total) setOrderCount(data.summary.total); })
+        .catch(() => {});
     }
   }, [isVendor]);
 

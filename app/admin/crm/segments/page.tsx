@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { PageHeader, LoadingState } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface Segment {
   id: string;
@@ -28,13 +29,9 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token');
-}
-
 export default function SegmentsPage() {
   const { t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,13 +46,13 @@ export default function SegmentsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const headers = useCallback(() => {
-    const token = getToken();
     const h: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) h['Authorization'] = `Bearer ${token}`;
+    if (accessToken) h['Authorization'] = `Bearer ${accessToken}`;
     return h;
-  }, []);
+  }, [accessToken]);
 
   const fetchSegments = useCallback(() => {
+    if (!accessToken) return;
     setLoading(true);
     fetch('/api/admin/crm/segments', { headers: headers() })
       .then((res) => {
@@ -70,7 +67,7 @@ export default function SegmentsPage() {
         setError(err.message);
         setLoading(false);
       });
-  }, [headers]);
+  }, [accessToken, headers]);
 
   useEffect(() => {
     fetchSegments();

@@ -198,34 +198,103 @@ export class AgentActionHandler {
   }
 
   static async processOrderTracking(orderId: string) {
-    // Mock order tracking - in production, fetch from Supabase
-    const mockStatus = {
-      orderId,
-      status: 'confirmed',
-      vendor: 'Green Garden Store',
-      estimatedDelivery: new Date(Date.now() + 86400000).toLocaleDateString(),
-      items: 3,
-      total: 150.50
-    };
-    
-    return {
-      action: 'display_status',
-      data: mockStatus,
-      message: AGENT_RESPONSES['order-tracker'].statuses.confirmed
-    };
+    try {
+      const res = await fetch(`/api/orders/${orderId}`);
+      if (!res.ok) {
+        return {
+          action: 'display_status',
+          data: { orderId, status: 'not_found' },
+          message: `Order ${orderId} could not be found. Please check the order number and try again.`
+        };
+      }
+      const order = await res.json();
+      const status = order.status || 'pending';
+      const statusKey = status as keyof typeof AGENT_RESPONSES['order-tracker']['statuses'];
+      const statusMessage = AGENT_RESPONSES['order-tracker'].statuses[statusKey]
+        || `Order status: ${status}`;
+
+      return {
+        action: 'display_status',
+        data: {
+          orderId: order.id || orderId,
+          status,
+          vendor: order.vendor_name || order.vendorName || 'Unknown vendor',
+          estimatedDelivery: order.estimated_delivery || order.estimatedDelivery || null,
+          items: order.items?.length ?? order.item_count ?? 0,
+          total: order.total ?? order.total_amount ?? 0
+        },
+        message: statusMessage
+      };
+    } catch {
+      return {
+        action: 'display_status',
+        data: { orderId, status: 'error' },
+        message: `Unable to retrieve order ${orderId}. Please try again later.`
+      };
+    }
   }
 
   static async getProductRecommendations(preferences: any) {
-    // Mock recommendations - in production, use AI or algorithm
-    return {
-      action: 'show_products',
-      products: [
-        { id: '1', name: 'Organic Dates', price: 25, vopCertified: true },
-        { id: '2', name: 'Fresh Bread', price: 18, vopCertified: true },
-        { id: '3', name: 'Local Honey', price: 35, vopCertified: true }
-      ],
-      message: AGENT_RESPONSES['product-advisor'].recommendations.vegan
-    };
+    try {
+      const res = await fetch('/api/products');
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const data = await res.json();
+      const allProducts: Array<{ id: string; name: string; price: number; category?: string; tags?: string[]; vegan?: boolean; isVegan?: boolean; vendorId?: string; vendorName?: string; image?: string }> = data.products || data || [];
+
+      let filtered = allProducts;
+      if (preferences) {
+        const { category, vendorId, maxPrice, query } = preferences;
+        if (category) {
+          filtered = filtered.filter(p => p.category?.toLowerCase() === category.toLowerCase());
+        }
+        if (vendorId) {
+          filtered = filtered.filter(p => p.vendorId === vendorId);
+        }
+        if (maxPrice) {
+          filtered = filtered.filter(p => p.price <= maxPrice);
+        }
+        if (query) {
+          const q = query.toLowerCase();
+          filtered = filtered.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            (p.tags && p.tags.some((t: string) => t.toLowerCase().includes(q)))
+          );
+        }
+      }
+
+      const recommended = (filtered.length > 0 ? filtered : allProducts).slice(0, 3);
+
+      return {
+        action: 'show_products',
+        products: recommended.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          vopCertified: p.vegan ?? p.isVegan ?? true,
+          vendorName: p.vendorName,
+          image: p.image
+        })),
+        message: AGENT_RESPONSES['product-advisor'].recommendations.vegan
+      };
+    } catch {
+      // Fallback: import directly from the static data layer
+      const { getAllProducts } = await import('@/lib/data/wordpress-style-data-layer');
+      const allProducts = getAllProducts();
+      const recommended = allProducts.slice(0, 3);
+
+      return {
+        action: 'show_products',
+        products: recommended.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          vopCertified: p.vegan ?? p.isVegan ?? true,
+          vendorName: p.vendorName,
+          image: p.image
+        })),
+        message: AGENT_RESPONSES['product-advisor'].recommendations.vegan
+      };
+    }
   }
 }
 

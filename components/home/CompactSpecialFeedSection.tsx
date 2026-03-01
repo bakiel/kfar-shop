@@ -7,9 +7,9 @@ import Link from 'next/link';
 import { useCart } from '@/lib/context/CartContext';
 import { toast } from '@/components/ui/use-toast';
 import { useMobileDetect } from '@/hooks/useMobileDetect';
-import { ChevronLeft, ChevronRight, Clock, ShoppingCart, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, ShoppingCart, X, Tag } from 'lucide-react';
 
-// Same types as before
+// Same types as SpecialFeedSection
 type FeedItemType = 'flash_sale' | 'new_arrival' | 'vendor_special' | 'kfar_announcement' | 'limited_stock' | 'bundle_deal';
 
 interface FeedItem {
@@ -45,111 +45,116 @@ interface FeedItem {
   priority: number;
 }
 
-// Same mock data
-const mockFeedItems: FeedItem[] = [
-  {
-    id: '1',
-    type: 'flash_sale',
-    vendor: {
-      id: 'teva-deli',
-      name: 'Teva Deli',
-      logo: '/images/teva-deli/teva_deli_official_logo_master_brand_israeli_vegan_food_company.jpg'
-    },
-    product: {
-      id: 'schnitzel-special',
-      name: 'Vegan Schnitzel Platter',
-      image: '/images/teva-deli/teva_deli_vegan_seitan_schnitzel_breaded_cutlet_plant_based_meat_alternative_israeli_comfort_food.jpg',
-      originalPrice: 45,
-      salePrice: 32,
-      discount: 29,
-      stock: 8
-    },
-    promotion: {
-      title: '⚡ Flash Sale',
-      description: 'Fresh made today!',
-      endTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      urgency: 'Only 8 left!',
-      badge: 'HOT'
-    },
-    interaction: {
-      likes: 124,
-      shares: 23,
-      hasLiked: false
-    },
-    adminApproved: true,
-    priority: 1
-  },
-  {
-    id: '2',
-    type: 'kfar_announcement',
-    vendor: {
-      id: 'garden-of-light',
-      name: 'Garden of Light',
-      logo: '/images/garden-of-light/garden_of_light_official_logo_master_brand_organic_vegan_deli.jpg'
-    },
-    product: {
-      id: 'weekly-harvest',
-      name: 'Weekly Harvest Box',
-      image: '/images/garden-of-light/1.jpg',
-      originalPrice: 120,
-      salePrice: 89
-    },
-    promotion: {
-      title: '🌟 Community Special',
-      description: 'Support local farmers',
-      badge: 'NEW'
-    },
-    interaction: {
-      likes: 256,
-      shares: 45,
-      hasLiked: true
-    },
-    adminApproved: true,
-    priority: 2
-  },
-  {
-    id: '3',
-    type: 'vendor_special',
-    vendor: {
-      id: 'vop-shop',
-      name: 'VOP Shop',
-      logo: '/images/vop-shop/vop_shop_official_logo_master_brand_village_of_peace.jpg'
-    },
-    product: {
-      id: 'wellness-book',
-      name: 'Holistic Health Guide',
-      image: '/images/vop-shop/vop_shop_wellness_education_product_11_healing_books_holistic_health_community_wisdom.jpg',
-      originalPrice: 75,
-      salePrice: 65
-    },
-    promotion: {
-      title: '📚 Weekend Deal',
-      description: 'Transform your health',
-      endTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      badge: 'SAVE'
-    },
-    interaction: {
-      likes: 89,
-      shares: 12,
-      hasLiked: false
-    },
-    adminApproved: true,
-    priority: 3
+/**
+ * Transform landing API data into feed items.
+ */
+function transformLandingData(data: any): FeedItem[] {
+  const items: FeedItem[] = [];
+
+  // Transform flash deals
+  if (data.flashDeals && Array.isArray(data.flashDeals)) {
+    data.flashDeals.forEach((deal: any, idx: number) => {
+      items.push({
+        id: `flash-${deal.id}`,
+        type: 'flash_sale',
+        vendor: {
+          id: deal.vendorId || '',
+          name: deal.vendorName || 'KFAR Vendor',
+          logo: '/images/default_logo.svg',
+        },
+        product: {
+          id: deal.productId,
+          name: deal.productName,
+          image: deal.productImage || '/images/default_logo.svg',
+          originalPrice: deal.originalPrice,
+          salePrice: deal.dealPrice,
+          discount: deal.savingsPercent,
+          stock: deal.stockRemaining,
+        },
+        promotion: {
+          title: `${deal.savingsPercent}% OFF`,
+          description: `Save on ${deal.productName}`,
+          endTime: deal.endsAt ? new Date(deal.endsAt) : undefined,
+          urgency: deal.stockRemaining <= 5 ? `Only ${deal.stockRemaining} left!` : undefined,
+          badge: 'FLASH',
+        },
+        interaction: { likes: 0, shares: 0, hasLiked: false },
+        adminApproved: true,
+        priority: idx,
+      });
+    });
   }
-];
+
+  // Transform featured products with sale prices
+  if (data.featuredProducts && Array.isArray(data.featuredProducts)) {
+    data.featuredProducts
+      .filter((p: any) => p.originalPrice && p.originalPrice > p.price)
+      .slice(0, 4)
+      .forEach((product: any, idx: number) => {
+        const discount = Math.round((1 - product.price / product.originalPrice) * 100);
+        items.push({
+          id: `product-${product.id}`,
+          type: 'vendor_special',
+          vendor: {
+            id: product.vendorId,
+            name: product.vendorName,
+            logo: product.vendorLogo || '/images/default_logo.svg',
+          },
+          product: {
+            id: product.id,
+            name: product.name,
+            image: product.image || '/images/default_logo.svg',
+            originalPrice: product.originalPrice,
+            salePrice: product.price,
+            discount,
+          },
+          promotion: {
+            title: `${discount}% OFF`,
+            description: product.description || `Special from ${product.vendorName}`,
+            badge: 'DEAL',
+          },
+          interaction: { likes: 0, shares: 0, hasLiked: false },
+          adminApproved: true,
+          priority: items.length + idx,
+        });
+      });
+  }
+
+  return items;
+}
 
 export default function CompactSpecialFeedSection() {
-  const [feedItems] = useState<FeedItem[]>(mockFeedItems);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [showFullBanner, setShowFullBanner] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
   const { isMobile, isTablet } = useMobileDetect();
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Fetch real data from landing API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('/api/landing');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        const items = transformLandingData(data);
+        setFeedItems(items);
+      } catch (err) {
+        console.error('Error fetching compact feed data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   // Auto-scroll for desktop only
   useEffect(() => {
-    if (!isMobile && !isTablet && !showFullBanner) {
+    if (!isMobile && !isTablet && !showFullBanner && feedItems.length > 1) {
       const timer = setInterval(() => {
         setActiveIndex((prev) => (prev + 1) % feedItems.length);
       }, 8000);
@@ -158,6 +163,8 @@ export default function CompactSpecialFeedSection() {
   }, [isMobile, isTablet, showFullBanner, feedItems.length]);
 
   const handleQuickAdd = (item: FeedItem) => {
+    if (item.product.originalPrice === 0) return;
+
     addToCart({
       id: item.product.id,
       name: item.product.name,
@@ -176,12 +183,33 @@ export default function CompactSpecialFeedSection() {
   const formatTimeLeft = (endTime: Date) => {
     const now = new Date();
     const diff = endTime.getTime() - now.getTime();
+    if (diff <= 0) return 'Ended';
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;
   };
 
   if (isDismissed) return null;
+
+  // Loading state
+  if (loading) {
+    return (
+      <section className="py-4 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="animate-pulse flex gap-3">
+            <div className="h-40 bg-gray-200 rounded-lg flex-1"></div>
+            <div className="h-40 bg-gray-200 rounded-lg flex-1 hidden md:block"></div>
+            <div className="h-40 bg-gray-200 rounded-lg flex-1 hidden md:block"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Empty state -- no deals available, hide the section
+  if (feedItems.length === 0) {
+    return null;
+  }
 
   // Mobile View - Horizontal Scroll
   if (isMobile) {
@@ -191,19 +219,19 @@ export default function CompactSpecialFeedSection() {
           {/* Compact Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-red-500 animate-pulse">🔥</span>
-              <h3 className="font-semibold text-gray-800">Today's Deals</h3>
+              <Tag className="w-4 h-4 stroke-[1.5] text-red-500" />
+              <h3 className="font-semibold text-gray-800">Today&apos;s Deals</h3>
             </div>
             <button
               onClick={() => setIsDismissed(true)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Horizontal Scroll Container */}
-          <div 
+          <div
             ref={scrollRef}
             className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4"
           >
@@ -233,7 +261,7 @@ export default function CompactSpecialFeedSection() {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="p-3">
                     <div className="flex items-center gap-2 mb-2">
                       <Image
@@ -245,20 +273,20 @@ export default function CompactSpecialFeedSection() {
                       />
                       <span className="text-xs text-gray-600">{item.vendor.name}</span>
                     </div>
-                    
+
                     <h4 className="font-semibold text-sm mb-1 line-clamp-1">{item.product.name}</h4>
                     <p className="text-xs text-gray-600 mb-2 line-clamp-1">{item.promotion.description}</p>
-                    
+
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         {item.product.salePrice ? (
                           <div className="flex items-baseline gap-1">
-                            <span className="text-lg font-bold text-red-600">₪{item.product.salePrice}</span>
-                            <span className="text-xs text-gray-400 line-through">₪{item.product.originalPrice}</span>
+                            <span className="text-lg font-bold text-red-600">&#8362;{item.product.salePrice}</span>
+                            <span className="text-xs text-gray-400 line-through">&#8362;{item.product.originalPrice}</span>
                           </div>
-                        ) : (
-                          <span className="text-lg font-bold text-green-600">₪{item.product.originalPrice}</span>
-                        )}
+                        ) : item.product.originalPrice > 0 ? (
+                          <span className="text-lg font-bold text-green-600">&#8362;{item.product.originalPrice}</span>
+                        ) : null}
                       </div>
                       {item.promotion.endTime && (
                         <span className="text-xs text-gray-500 flex items-center gap-1">
@@ -267,14 +295,16 @@ export default function CompactSpecialFeedSection() {
                         </span>
                       )}
                     </div>
-                    
-                    <button
-                      onClick={() => handleQuickAdd(item)}
-                      className="w-full bg-[#478c0b] text-white py-2 rounded-md text-sm font-medium flex items-center justify-center gap-1"
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      Add to Cart
-                    </button>
+
+                    {item.product.originalPrice > 0 && (
+                      <button
+                        onClick={() => handleQuickAdd(item)}
+                        className="w-full bg-[#478c0b] text-white py-2 rounded-md text-sm font-medium flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        Add to Cart
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -284,7 +314,7 @@ export default function CompactSpecialFeedSection() {
           {/* View All Link */}
           <div className="text-center mt-3">
             <Link href="/marketplace/deals" className="text-sm text-[#478c0b] font-medium">
-              View all deals →
+              View all deals
             </Link>
           </div>
         </div>
@@ -342,32 +372,36 @@ export default function CompactSpecialFeedSection() {
                         )}
                       </div>
                       <h3 className="font-bold text-lg mb-1">{feedItems[activeIndex].promotion.title}</h3>
-                      <p className="text-sm text-gray-600">{feedItems[activeIndex].product.name} • {feedItems[activeIndex].promotion.description}</p>
+                      <p className="text-sm text-gray-600">{feedItems[activeIndex].product.name} - {feedItems[activeIndex].promotion.description}</p>
                     </div>
 
                     {/* Price and Actions */}
                     <div className="flex items-center gap-4 ml-4">
-                      <div className="text-right">
-                        {feedItems[activeIndex].product.salePrice ? (
-                          <>
-                            <span className="text-2xl font-bold text-red-600">₪{feedItems[activeIndex].product.salePrice}</span>
-                            <span className="text-sm text-gray-400 line-through block">₪{feedItems[activeIndex].product.originalPrice}</span>
-                          </>
-                        ) : (
-                          <span className="text-2xl font-bold text-green-600">₪{feedItems[activeIndex].product.originalPrice}</span>
-                        )}
-                      </div>
-                      
+                      {feedItems[activeIndex].product.originalPrice > 0 && (
+                        <div className="text-right">
+                          {feedItems[activeIndex].product.salePrice ? (
+                            <>
+                              <span className="text-2xl font-bold text-red-600">&#8362;{feedItems[activeIndex].product.salePrice}</span>
+                              <span className="text-sm text-gray-400 line-through block">&#8362;{feedItems[activeIndex].product.originalPrice}</span>
+                            </>
+                          ) : (
+                            <span className="text-2xl font-bold text-green-600">&#8362;{feedItems[activeIndex].product.originalPrice}</span>
+                          )}
+                        </div>
+                      )}
+
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleQuickAdd(feedItems[activeIndex])}
-                          className="bg-[#478c0b] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#3a7009] transition-colors"
-                        >
-                          Quick Add
-                        </button>
+                        {feedItems[activeIndex].product.originalPrice > 0 && (
+                          <button
+                            onClick={() => handleQuickAdd(feedItems[activeIndex])}
+                            className="bg-[#478c0b] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#3a7009] transition-colors cursor-pointer"
+                          >
+                            Quick Add
+                          </button>
+                        )}
                         <button
                           onClick={() => setShowFullBanner(true)}
-                          className="border border-[#478c0b] text-[#478c0b] px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                          className="border border-[#478c0b] text-[#478c0b] px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           View Details
                         </button>
@@ -377,42 +411,46 @@ export default function CompactSpecialFeedSection() {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex items-center gap-2 px-4">
-                  <button
-                    onClick={() => setActiveIndex((prev) => (prev - 1 + feedItems.length) % feedItems.length)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5 text-gray-600" />
-                  </button>
-                  <button
-                    onClick={() => setActiveIndex((prev) => (prev + 1) % feedItems.length)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  >
-                    <ChevronRight className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
+                {feedItems.length > 1 && (
+                  <div className="flex items-center gap-2 px-4">
+                    <button
+                      onClick={() => setActiveIndex((prev) => (prev - 1 + feedItems.length) % feedItems.length)}
+                      className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => setActiveIndex((prev) => (prev + 1) % feedItems.length)}
+                      className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+                )}
 
                 {/* Dismiss */}
                 <button
                   onClick={() => setIsDismissed(true)}
-                  className="p-2 mr-2 text-gray-400 hover:text-gray-600"
+                  className="p-2 mr-2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Progress Dots */}
-              <div className="flex justify-center gap-1 pb-2">
-                {feedItems.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setActiveIndex(index)}
-                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                      index === activeIndex ? 'w-4 bg-[#478c0b]' : 'bg-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
+              {feedItems.length > 1 && (
+                <div className="flex justify-center gap-1 pb-2">
+                  {feedItems.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveIndex(index)}
+                      className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${
+                        index === activeIndex ? 'w-4 bg-[#478c0b]' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </motion.div>
           ) : (
             // Full Banner View (on demand)
@@ -425,7 +463,7 @@ export default function CompactSpecialFeedSection() {
               <div className="relative">
                 <button
                   onClick={() => setShowFullBanner(false)}
-                  className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-all"
+                  className="absolute top-4 right-4 z-10 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-all cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -439,7 +477,7 @@ export default function CompactSpecialFeedSection() {
                       className="object-cover"
                     />
                   </div>
-                  
+
                   <div className="p-8">
                     <div className="flex items-center gap-3 mb-4">
                       <Image
@@ -469,35 +507,41 @@ export default function CompactSpecialFeedSection() {
                       {feedItems[activeIndex].promotion.description}
                     </p>
 
-                    <div className="mb-6">
-                      {feedItems[activeIndex].product.salePrice ? (
-                        <div className="flex items-baseline gap-3">
-                          <span className="text-3xl font-bold text-red-600">
-                            ₪{feedItems[activeIndex].product.salePrice}
+                    {feedItems[activeIndex].product.originalPrice > 0 && (
+                      <div className="mb-6">
+                        {feedItems[activeIndex].product.salePrice ? (
+                          <div className="flex items-baseline gap-3">
+                            <span className="text-3xl font-bold text-red-600">
+                              &#8362;{feedItems[activeIndex].product.salePrice}
+                            </span>
+                            <span className="text-xl text-gray-400 line-through">
+                              &#8362;{feedItems[activeIndex].product.originalPrice}
+                            </span>
+                            {feedItems[activeIndex].product.discount && (
+                              <span className="text-sm text-green-600 font-medium">
+                                Save {feedItems[activeIndex].product.discount}%
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-3xl font-bold text-green-600">
+                            &#8362;{feedItems[activeIndex].product.originalPrice}
                           </span>
-                          <span className="text-xl text-gray-400 line-through">
-                            ₪{feedItems[activeIndex].product.originalPrice}
-                          </span>
-                          <span className="text-sm text-green-600 font-medium">
-                            Save {feedItems[activeIndex].product.discount}%
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-3xl font-bold text-green-600">
-                          ₪{feedItems[activeIndex].product.originalPrice}
-                        </span>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )}
 
                     <div className="flex gap-3">
-                      <button
-                        onClick={() => handleQuickAdd(feedItems[activeIndex])}
-                        className="flex-1 bg-[#478c0b] text-white py-3 rounded-lg font-semibold hover:bg-[#3a7009] transition-colors"
-                      >
-                        Add to Cart
-                      </button>
+                      {feedItems[activeIndex].product.originalPrice > 0 && (
+                        <button
+                          onClick={() => handleQuickAdd(feedItems[activeIndex])}
+                          className="flex-1 bg-[#478c0b] text-white py-3 rounded-lg font-semibold hover:bg-[#3a7009] transition-colors cursor-pointer"
+                        >
+                          Add to Cart
+                        </button>
+                      )}
                       <Link
-                        href={`/product/${feedItems[activeIndex].product.id}`}
+                        href={feedItems[activeIndex].type === 'kfar_announcement' ? '/marketplace' : `/product/${feedItems[activeIndex].product.id}`}
                         className="flex-1 text-center border-2 border-[#478c0b] text-[#478c0b] py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
                       >
                         View Product
@@ -511,14 +555,14 @@ export default function CompactSpecialFeedSection() {
         </AnimatePresence>
 
         {/* Thumbnail Strip - Desktop Only */}
-        {!isMobile && !showFullBanner && (
+        {!isMobile && !showFullBanner && feedItems.length > 1 && (
           <div className="mt-4 grid grid-cols-4 gap-3">
-            {feedItems.map((item, index) => (
+            {feedItems.slice(0, 4).map((item, index) => (
               <motion.button
                 key={item.id}
                 onClick={() => setActiveIndex(index)}
                 whileHover={{ scale: 1.05 }}
-                className={`bg-white rounded-lg p-2 shadow-sm border-2 transition-all ${
+                className={`bg-white rounded-lg p-2 shadow-sm border-2 transition-all cursor-pointer ${
                   index === activeIndex ? 'border-[#478c0b]' : 'border-transparent'
                 }`}
               >
@@ -532,9 +576,11 @@ export default function CompactSpecialFeedSection() {
                   />
                   <div className="text-left flex-1">
                     <p className="text-xs font-semibold line-clamp-1">{item.product.name}</p>
-                    <p className="text-xs text-red-600 font-bold">
-                      ₪{item.product.salePrice || item.product.originalPrice}
-                    </p>
+                    {item.product.originalPrice > 0 && (
+                      <p className="text-xs text-red-600 font-bold">
+                        &#8362;{item.product.salePrice || item.product.originalPrice}
+                      </p>
+                    )}
                   </div>
                 </div>
               </motion.button>

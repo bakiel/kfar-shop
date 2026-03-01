@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, QrCode, Database, Brain, Wand2, UserPlus, Play } from 'lucide-react';
@@ -12,21 +12,49 @@ import { toast } from '@/components/ui/use-toast';
 export default function AIPersonalizationDemo() {
   const [activeDemo, setActiveDemo] = useState<'overview' | 'live-demo' | 'technical'>('overview');
   const [simulatedScan, setSimulatedScan] = useState(false);
-  
-  // Demo customer profile
-  const demoCustomer = {
-    id: '550e8400-e29b-41d4-a716-446655440001',
-    name: 'Sarah Cohen',
-    email: 'sarah.cohen@example.com',
-    loyaltyTier: 'gold',
-    points: 5250,
-    lifetimePoints: 5250,
+  const [demoCustomer, setDemoCustomer] = useState<any>({
+    id: '',
+    name: 'Loading...',
+    email: '',
+    loyaltyTier: 'bronze',
+    points: 0,
+    lifetimePoints: 0,
     preferences: {
-      favoriteCategories: ['dairy-alternatives', 'prepared-foods'],
+      favoriteCategories: [],
       shoppingFrequency: 'weekly',
-      dietaryRestrictions: ['vegan', 'gluten-free']
+      dietaryRestrictions: []
     }
-  };
+  });
+
+  useEffect(() => {
+    async function fetchCustomer() {
+      try {
+        const res = await fetch('/api/admin/crm/customers?limit=1');
+        if (res.ok) {
+          const data = await res.json();
+          const c = data.customers?.[0];
+          if (c) {
+            setDemoCustomer({
+              id: c.id,
+              name: c.name || 'Customer',
+              email: c.email || '',
+              loyaltyTier: c.loyalty_tier || 'bronze',
+              points: c.points || 0,
+              lifetimePoints: c.points || 0,
+              preferences: {
+                favoriteCategories: c.preferences?.favoriteCategories || [],
+                shoppingFrequency: 'weekly',
+                dietaryRestrictions: c.preferences?.dietary || [],
+              },
+            });
+          }
+        }
+      } catch {
+        // Silently fail for demo page
+      }
+    }
+    fetchCustomer();
+  }, []);
 
   const simulateQRScan = async () => {
     setSimulatedScan(true);

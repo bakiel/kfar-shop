@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { PageHeader, StatCard, LoadingState } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface CRMStats {
   totalCustomers: number;
@@ -50,22 +51,19 @@ const tierColors: Record<string, string> = {
   platinum: 'bg-indigo-100 text-indigo-800',
 };
 
-function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token');
-}
-
 export default function CRMDashboard() {
   const { t, isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [stats, setStats] = useState<CRMStats | null>(null);
   const [segments, setSegments] = useState<Segment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
+    if (!accessToken) return;
+
     const headers: Record<string, string> = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    headers['Authorization'] = `Bearer ${accessToken}`;
 
     Promise.all([
       fetch('/api/admin/crm/stats', { headers }).then((r) => r.json()),
@@ -81,7 +79,7 @@ export default function CRMDashboard() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [accessToken]);
 
   if (loading) {
     return <LoadingState message="Loading CRM data..." />;
