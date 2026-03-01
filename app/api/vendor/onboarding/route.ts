@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { query } from '@/lib/db/postgres-client';
+import { generateTokens } from '@/lib/services/auth-service';
 
-// Helper to generate vendor slug
 function generateSlug(storeName: string): string {
   return storeName
     .toLowerCase()
@@ -25,122 +25,158 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if email already exists
-    const existingVendor = await query(
-      'SELECT id FROM vendors WHERE email = $1',
-      [data.email]
-    );
-
-    if (existingVendor.rows.length > 0) {
+    if (data.password.length < 8) {
       return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 409 }
+        { error: 'Password must be at least 8 characters' },
+        { status: 400 }
       );
     }
 
-    // Hash password
+    // Check email not already taken (in either vendors or users table)
+    const [existingVendor, existingUser] = await Promise.all([
+      query('SELECT id FROM vendors WHERE email = $1', [data.email]),
+      query('SELECT id FROM users WHERE email = $1', [data.email]),
+    ]);
+    if (existingVendor.rows.length > 0 || existingUser.rows.length > 0) {
+      return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
+    }
+
     const passwordHash = await bcrypt.hash(data.password, 10);
-
-    // Generate unique vendor ID and slug
     const vendorId = `vendor-${Date.now()}`;
-    const slug = generateSlug(data.storeName);
 
-    // Save to database
-    const result = await query(
+    // Make slug unique
+    let slug = generateSlug(data.storeName);
+    const slugCheck = await query('SELECT id FROM vendors WHERE slug = $1', [slug]);
+    if (slugCheck.rows.length > 0) {
+      slug = `${slug}-${Date.now()}`;
+    }
+
+    // ── 1. Insert into vendors table (using real column names) ──────────────
+    await query(
       `INSERT INTO vendors (
         id, name, name_he, slug, email, password_hash, phone,
-        category, description, description_he, logo, banner,
+        category, description, description_he,
+        logo_url, banner_url,
         address, delivery_options, business_hours, about_owner,
-        status, featured, created_at, updated_at, metadata, is_active
+        status, featured, is_featured,
+        created_at, updated_at, metadata, is_active
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7,
-        $8, $9, $10, $11, $12,
+        $8, $9, $10,
+        $11, $12,
         $13, $14, $15, $16,
-        $17, $18, $19, $20, $21, $22
-      ) RETURNING id`,
+        $17, $18, $19,
+        NOW(), NOW(), $20, true
+      )`,
       [
         vendorId,
         data.storeName,
-        data.storeNameHe || '',
+        data.storeNameHe || data.storeName,
         slug,
         data.email,
         passwordHash,
         data.phone,
         data.category,
         data.description,
-        data.descriptionHe || '',
+        data.descriptionHe || data.description,
         data.logo || null,
         data.banner || null,
         data.address || '',
-        JSON.stringify(data.deliveryOptions || []),
+        // delivery_options is text[] — pass as postgres array literal
+        data.deliveryOptions && data.deliveryOptions.length > 0
+          ? data.deliveryOptions
+          : ['pickup', 'delivery'],
         JSON.stringify(data.businessHours || {}),
         data.aboutOwner || '',
         'active',
-        true, // New vendors are featured for 30 days
-        new Date(),
-        new Date(),
+        true,
+        true,
         JSON.stringify({
           established: new Date().getFullYear().toString(),
           location: 'Dimona, Israel',
           specialty: data.category,
-          certifications: ['VOP Approved', 'Vegan', 'Kosher']
+          certifications: ['VOP Approved', 'Vegan', 'Kosher'],
         }),
-        true
       ]
     );
 
-    // Add products if provided
+    // ── 2. Create users entry so vendor can log in via JWT ──────────────────
+    await query(
+      `INSERT INTO users (
+        email, password_hash, role, vendor_id, display_name,
+        email_verified, is_active, created_at, updated_at
+      ) VALUES ($1, $2, 'vendor', $3, $4, true, true, NOW(), NOW())`,
+      [data.email, passwordHash, vendorId, data.storeName]
+    );
+
+    // ── 3. Insert initial products ──────────────────────────────────────────
     if (data.products && data.products.length > 0) {
       for (const product of data.products) {
+        const productId = `${vendorId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         await query(
           `INSERT INTO products (
             id, vendor_id, name, name_he, description, price,
-            category, image, is_vegan, is_kosher, in_stock,
+            category, image_url,
+            is_vegan, is_kosher, in_stock, stock_quantity,
             created_at, updated_at, status
           ) VALUES (
             $1, $2, $3, $4, $5, $6,
-            $7, $8, $9, $10, $11,
-            $12, $13, $14
+            $7, $8,
+            $9, $10, $11, $12,
+            NOW(), NOW(), 'published'
           )`,
           [
-            `${vendorId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            productId,
             vendorId,
             product.name,
             product.nameHe || '',
-            product.description,
+            product.description || '',
             product.price,
-            product.category,
-            product.image,
-            product.isVegan !== false, // Default true for VOP
-            product.isKosher !== false, // Default true for VOP
+            product.category || data.category,
+            product.image || null,
+            product.isVegan !== false,
+            product.isKosher !== false,
             product.inStock !== false,
-            new Date(),
-            new Date(),
-            'published'
+            product.inStock !== false ? 100 : 0,
           ]
         );
       }
     }
 
-    console.log('✅ New vendor successfully onboarded:', {
+    // ── 4. Issue JWT so vendor is immediately logged in ─────────────────────
+    const tokens = generateTokens({
+      userId: `user-${vendorId}`,
+      email: data.email,
+      role: 'vendor',
       vendorId,
-      storeName: data.storeName,
-      slug: slug,
-      productCount: data.products?.length || 0
     });
 
-    return NextResponse.json({
+    console.log('✅ New vendor onboarded:', { vendorId, storeName: data.storeName, slug, products: data.products?.length || 0 });
+
+    const response = NextResponse.json({
       success: true,
       vendorId,
-      slug: slug,
+      slug,
+      storeUrl: `/store/${slug}`,
+      accessToken: tokens.accessToken,
       message: 'Vendor successfully onboarded',
-      storeUrl: `/store/${slug}`
     });
 
-  } catch (error) {
+    // Set refresh token cookie
+    response.cookies.set('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    });
+
+    return response;
+
+  } catch (error: any) {
     console.error('Onboarding error:', error);
     return NextResponse.json(
-      { error: 'Failed to process onboarding' },
+      { error: error.message || 'Failed to process onboarding' },
       { status: 500 }
     );
   }
