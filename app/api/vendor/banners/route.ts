@@ -136,10 +136,27 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
 
     try {
-      // Update banner in PostgreSQL
-      const updates = { ...body, updated_at: new Date().toISOString() };
-      const keys = Object.keys(updates);
-      const values = Object.values(updates);
+      // Verify the banner belongs to the authenticated vendor (prevent cross-vendor modification)
+      const { rows: existing } = await query(
+        'SELECT vendor_id FROM vendor_banners WHERE id = $1',
+        [bannerId]
+      );
+      if (!existing.length || existing[0].vendor_id !== user.vendorId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+
+      // Whitelist allowed columns to prevent SQL injection via column name injection
+      const ALLOWED_COLUMNS = new Set([
+        'title', 'subtitle', 'template', 'content',
+        'start_date', 'end_date', 'order_position', 'is_active'
+      ]);
+      const safeUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      for (const [k, v] of Object.entries(body)) {
+        if (ALLOWED_COLUMNS.has(k)) safeUpdates[k] = v;
+      }
+
+      const keys = Object.keys(safeUpdates);
+      const values = Object.values(safeUpdates);
       const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(', ');
 
       const { rows } = await query(
@@ -186,8 +203,17 @@ export async function DELETE(request: NextRequest) {
     }
 
     try {
+      // Verify the banner belongs to the authenticated vendor (prevent cross-vendor deletion)
+      const { rows: existing } = await query(
+        'SELECT vendor_id FROM vendor_banners WHERE id = $1',
+        [bannerId]
+      );
+      if (!existing.length || existing[0].vendor_id !== user.vendorId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+
       // Delete banner from PostgreSQL
-      await query('DELETE FROM vendor_banners WHERE id = $1', [bannerId]);
+      await query('DELETE FROM vendor_banners WHERE id = $1 AND vendor_id = $2', [bannerId, user.vendorId]);
 
       return NextResponse.json({
         success: true,

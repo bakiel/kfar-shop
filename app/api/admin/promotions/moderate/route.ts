@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { promotionId, action, priority } = await request.json();
 
     // Validate input
