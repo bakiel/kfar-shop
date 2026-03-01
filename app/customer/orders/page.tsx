@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Store, Eye, RotateCcw, Loader2 } from 'lucide-react';
 import { PageHeader, DataTable, StatusBadge } from '@/components/portal';
@@ -35,6 +36,7 @@ interface Order {
 export default function CustomerOrders() {
   const { language, t, isRTL } = useLanguage();
   const { accessToken } = useAuth();
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -200,11 +202,11 @@ export default function CustomerOrders() {
             rowActions={(row) => [
               {
                 label: isRTL ? 'צפה בפרטים' : 'View Details',
-                onClick: () => {},
+                onClick: () => router.push(`/customer/orders/${row.id}`),
               },
               ...(row.status === 'delivered' ? [{
                 label: isRTL ? 'הזמן שוב' : 'Reorder',
-                onClick: () => {},
+                onClick: () => router.push('/'),
               }] : []),
             ]}
           />

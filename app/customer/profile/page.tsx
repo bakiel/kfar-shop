@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { User, Mail, Phone, MapPin, Save, Calendar } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Save, Calendar, Award } from 'lucide-react';
 import { PageHeader, FormField } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 import { cn } from '@/lib/utils';
 
 const containerVariants = {
@@ -20,10 +21,22 @@ const itemVariant = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 };
 
+const TIER_COLORS: Record<string, string> = {
+  bronze:   '#92400E',
+  silver:   '#6B7280',
+  gold:     '#B45309',
+  platinum: '#1D4ED8',
+};
+
 export default function CustomerProfile() {
-  const { language, t, isRTL } = useLanguage();
+  const { isRTL } = useLanguage();
+  const { accessToken } = useAuth();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [memberSince, setMemberSince] = useState('');
+  const [points, setPoints] = useState(0);
+  const [loyaltyTier, setLoyaltyTier] = useState('bronze');
 
   const [profile, setProfile] = useState({
     fullName: '',
@@ -32,27 +45,91 @@ export default function CustomerProfile() {
     address: '',
   });
 
-  useEffect(() => {
-    // Load from localStorage
-    const name = localStorage.getItem('customerName') || 'John Doe';
-    const email = localStorage.getItem('customerEmail') || 'john@example.com';
-    setProfile({
-      fullName: name,
-      email: email,
-      phone: '+972-50-123-4567',
-      address: '123 Peace Street, Dimona',
-    });
-  }, []);
+  const fetchProfile = useCallback(async () => {
+    setLoading(true);
+    try {
+      if (accessToken) {
+        const res = await fetch('/api/customer/profile', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.customer) {
+            const c = data.customer;
+            const addr = Array.isArray(c.addresses) && c.addresses.length > 0
+              ? [c.addresses[0].address, c.addresses[0].city].filter(Boolean).join(', ')
+              : '';
+            setProfile({
+              fullName: c.name || '',
+              email: c.email || '',
+              phone: c.phone || '',
+              address: addr,
+            });
+            setPoints(c.points || 0);
+            setLoyaltyTier(c.loyaltyTier || 'bronze');
+            if (c.createdAt) {
+              setMemberSince(
+                new Date(c.createdAt).toLocaleDateString('en-IL', { month: 'long', year: 'numeric' })
+              );
+            }
+            return;
+          }
+        }
+      }
+      // Fallback to localStorage
+      setProfile({
+        fullName: localStorage.getItem('customerName') || '',
+        email: localStorage.getItem('customerEmail') || '',
+        phone: '',
+        address: '',
+      });
+    } catch {
+      setProfile({
+        fullName: localStorage.getItem('customerName') || '',
+        email: localStorage.getItem('customerEmail') || '',
+        phone: '',
+        address: '',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken]);
+
+  useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate save
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    localStorage.setItem('customerName', profile.fullName);
-    localStorage.setItem('customerEmail', profile.email);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      if (accessToken) {
+        const addresses = profile.address
+          ? [{ address: profile.address, city: 'Dimona', country: 'Israel', isDefault: true }]
+          : [];
+        const res = await fetch('/api/customer/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            name: profile.fullName,
+            phone: profile.phone,
+            addresses,
+          }),
+        });
+        if (res.ok) {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 2000);
+          return;
+        }
+      }
+      // Fallback localStorage save
+      localStorage.setItem('customerName', profile.fullName);
+      localStorage.setItem('customerEmail', profile.email);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const inputClasses = cn(
@@ -79,26 +156,45 @@ export default function CustomerProfile() {
       {/* Profile Card */}
       <motion.div
         variants={itemVariant}
-        className="bg-white rounded-2xl border border-gray-100 p-6 mb-8"
+        className="bg-white rounded-2xl border border-gray-100 p-6 mb-6"
       >
-        <div className={cn('flex items-center gap-5', isRTL && 'flex-row-reverse')}>
-          {/* Avatar */}
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#2D5A27] to-[#478c0b] flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl font-bold text-white">
-              {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : 'C'}
-            </span>
-          </div>
-          <div className={cn(isRTL && 'text-right')}>
-            <h2 className="text-xl font-bold text-gray-900">{profile.fullName}</h2>
-            <p className="text-sm text-gray-500">{profile.email}</p>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <Calendar className="w-3.5 h-3.5 text-gray-400 stroke-[1.5]" />
-              <span className="text-xs text-gray-400">
-                {isRTL ? 'חבר מאז דצמבר 2023' : 'Member since December 2023'}
-              </span>
+        {loading ? (
+          <div className="flex items-center gap-5 animate-pulse">
+            <div className="w-20 h-20 rounded-full bg-gray-200 flex-shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-5 bg-gray-200 rounded w-40" />
+              <div className="h-4 bg-gray-200 rounded w-56" />
             </div>
           </div>
-        </div>
+        ) : (
+          <div className={cn('flex items-center gap-5', isRTL && 'flex-row-reverse')}>
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#2D5A27] to-[#478c0b] flex items-center justify-center flex-shrink-0">
+              <span className="text-2xl font-bold text-white">
+                {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : 'C'}
+              </span>
+            </div>
+            <div className={cn(isRTL && 'text-right')}>
+              <h2 className="text-xl font-bold text-gray-900">{profile.fullName || 'Customer'}</h2>
+              <p className="text-sm text-gray-500">{profile.email}</p>
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
+                {memberSince && (
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400 stroke-[1.5]" />
+                    <span className="text-xs text-gray-400">Member since {memberSince}</span>
+                  </div>
+                )}
+                {points > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5 stroke-[1.5]" style={{ color: TIER_COLORS[loyaltyTier] }} />
+                    <span className="text-xs font-medium capitalize" style={{ color: TIER_COLORS[loyaltyTier] }}>
+                      {loyaltyTier} · {points} pts
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Personal Information Form */}
@@ -130,9 +226,9 @@ export default function CustomerProfile() {
               <input
                 type="email"
                 value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                disabled
                 placeholder={isRTL ? 'האימייל שלך' : 'Your email'}
-                className={cn(inputClasses, isRTL ? 'pr-10' : 'pl-10')}
+                className={cn(inputClasses, isRTL ? 'pr-10' : 'pl-10', 'bg-gray-50 cursor-not-allowed text-gray-500')}
               />
             </div>
           </FormField>
@@ -170,11 +266,11 @@ export default function CustomerProfile() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || loading}
             className={cn(
               'flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium text-white transition-all cursor-pointer',
               saved ? 'bg-emerald-500' : 'bg-[#2D5A27] hover:bg-[#234A1F]',
-              saving && 'opacity-70 cursor-wait'
+              (saving || loading) && 'opacity-70 cursor-wait'
             )}
           >
             {saving ? (

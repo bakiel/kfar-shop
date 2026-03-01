@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 import { sendTransactional } from '@/lib/services/email/email-service';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 
@@ -93,6 +94,16 @@ export async function POST(request: NextRequest) {
       country: body.customer.country || 'Israel',
     });
 
+    // Optionally link to authenticated customer account
+    let customerId: string | null = null;
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const tokenUser = verifyAccessToken(authHeader.slice(7));
+      if (tokenUser?.role === 'customer' && tokenUser.customerId) {
+        customerId = tokenUser.customerId;
+      }
+    }
+
     // Derive primary vendor_id from items (first vendor found)
     const primaryVendorId = body.items.find(i => i.vendorId)?.vendorId || null;
 
@@ -103,9 +114,9 @@ export async function POST(request: NextRequest) {
         total, subtotal, delivery_fee, payment_method,
         status, payment_status,
         delivery_address, items, delivery_notes,
-        vendor_id,
+        vendor_id, customer_id,
         created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
       RETURNING *`,
       [
         orderNumber,
@@ -122,6 +133,7 @@ export async function POST(request: NextRequest) {
         JSON.stringify(body.items),
         body.notes || null,
         primaryVendorId,
+        customerId,
       ]
     );
 
@@ -136,6 +148,19 @@ export async function POST(request: NextRequest) {
 
     // Items are stored as JSONB in orders.items column (no separate order_items table)
     console.log('Order created:', orderNumber, 'ID:', order.id, 'Items:', body.items.length);
+
+    // Update customer stats if linked to an account (fire-and-forget)
+    if (customerId) {
+      query(
+        `UPDATE customers SET
+           total_orders = total_orders + 1,
+           total_spent  = total_spent + $2,
+           last_order_at = NOW(),
+           updated_at   = NOW()
+         WHERE id = $1`,
+        [customerId, body.total]
+      ).catch(err => console.error('Failed to update customer stats:', err));
+    }
 
     // --- Send email notifications (fire-and-forget, don't block response) ---
     const emailPromises: Promise<any>[] = [];
