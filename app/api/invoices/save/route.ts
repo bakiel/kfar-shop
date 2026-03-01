@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
     try {
       let sqlQuery = `
         SELECT i.*,
-          o.id as order_id, o.order_number, o.customer_name, o.total_amount, o.status as order_status
+          o.id as order_id, o.order_number, o.customer_name, o.total as total_amount, o.status as order_status
         FROM invoices i
         LEFT JOIN orders o ON i.order_id = o.id
       `;

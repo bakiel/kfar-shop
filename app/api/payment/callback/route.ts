@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     if (paymentStatus === 'completed') {
       try {
         const { rows: fullOrder } = await query(
-          `SELECT customer_name, customer_email, total_amount, items, delivery_method FROM orders WHERE id = $1`,
+          `SELECT customer_name, customer_email, total, items, delivery_method FROM orders WHERE id = $1`,
           [orderId]
         );
         const o = fullOrder[0];
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
             customer_name: o.customer_name || 'Customer',
             order_number: orderNumber,
             items_html: itemsTable,
-            total: Number(o.total_amount).toFixed(2),
+            total: Number(o.total).toFixed(2),
             currency: 'ILS',
             payment_method: `Credit Card${last4 ? ` ****${last4}` : ''} (YPAY)`,
             delivery_method: o.delivery_method || 'Pickup',

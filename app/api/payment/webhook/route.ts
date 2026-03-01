@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       if (paymentStatus === 'completed') {
         try {
           const { rows: orderRows } = await query(
-            `SELECT order_number, customer_name, customer_email, total_amount, subtotal,
+            `SELECT order_number, customer_name, customer_email, total, subtotal,
                     delivery_fee, items, payment_method, delivery_method
              FROM orders WHERE id = $1`,
             [orderId]
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
                 last_order_at = NOW(),
                 updated_at = NOW()
               WHERE email = $2`,
-              [order.total_amount, order.customer_email]
+              [order.total, order.customer_email]
             );
 
             // Send payment receipt email (fire-and-forget)
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
               customer_name: order.customer_name || 'Customer',
               order_number: order.order_number,
               items_html: itemsTable,
-              total: Number(order.total_amount).toFixed(2),
+              total: Number(order.total).toFixed(2),
               currency: 'ILS',
               payment_method: 'Credit Card (YPAY)',
               delivery_method: order.delivery_method || 'Pickup',

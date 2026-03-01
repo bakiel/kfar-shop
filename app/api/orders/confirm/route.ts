@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       customer_name: customer.name,
       customer_email: customer.email,
       customer_phone: customer.phone,
-      total_amount: total,
+      total: total,
       subtotal: subtotal || total,
       delivery_fee: deliveryFee || 0,
       payment_method: paymentMethod || 'credit_card',
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const { rows: orderRows } = await query(
       `INSERT INTO orders (
         order_number, customer_name, customer_email, customer_phone,
-        total_amount, subtotal, delivery_fee, payment_method,
+        total, subtotal, delivery_fee, payment_method,
         status, payment_status, shipping_address, delivery_address,
         created_at, updated_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         orderRecord.customer_name,
         orderRecord.customer_email,
         orderRecord.customer_phone,
-        orderRecord.total_amount,
+        orderRecord.total,
         orderRecord.subtotal,
         orderRecord.delivery_fee,
         orderRecord.payment_method,

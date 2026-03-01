@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     ] = await Promise.all([
       // Total revenue (all non-cancelled orders)
       query(
-        `SELECT COALESCE(SUM(total_amount), 0) as total_revenue
+        `SELECT COALESCE(SUM(total), 0) as total_revenue
          FROM orders
          WHERE vendor_id = $1 AND status NOT IN ('cancelled', 'refunded')`,
         [vendorId]
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       query(
         `SELECT
            DATE(created_at) as date,
-           COALESCE(SUM(total_amount), 0) as revenue,
+           COALESCE(SUM(total), 0) as revenue,
            COUNT(*) as orders
          FROM orders
          WHERE vendor_id = $1

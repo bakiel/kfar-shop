@@ -44,13 +44,13 @@ export async function GET(request: NextRequest) {
         (o: any) => o.status === 'pending'
       ).length;
       totalRevenue = allOrders.reduce(
-        (sum: number, o: any) => sum + (parseFloat(o.total_amount) || 0),
+        (sum: number, o: any) => sum + (parseFloat(o.total) || 0),
         0
       );
 
       // Recent orders (last 5, from DB)
       const { rows: recentRows } = await query(
-        `SELECT o.id, o.order_number, o.total_amount, o.status, o.created_at,
+        `SELECT o.id, o.order_number, o.total, o.status, o.created_at,
                 c.name as customer_name, o.vendor_id
          FROM orders o
          LEFT JOIN customers c ON o.customer_id = c.id
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         id: r.order_number || r.id,
         customer: r.customer_name || 'Unknown',
         vendor: r.vendor_id || '',
-        total: parseFloat(r.total_amount) || 0,
+        total: parseFloat(r.total) || 0,
         status: r.status,
         date: r.created_at
           ? new Date(r.created_at).toISOString().split('T')[0]
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       const { rows: vRows } = await query(
         `SELECT v.id, v.name,
                 COUNT(o.id) as order_count,
-                COALESCE(SUM(o.total_amount), 0) as revenue
+                COALESCE(SUM(o.total), 0) as revenue
          FROM vendors v
          LEFT JOIN orders o ON o.vendor_id = v.id
          WHERE v.status = 'active'

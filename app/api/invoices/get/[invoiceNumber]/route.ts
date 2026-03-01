@@ -20,7 +20,7 @@ export async function GET(
       const { rows } = await query(
         `SELECT i.*,
           o.id as order_id, o.order_number, o.customer_name, o.customer_email,
-          o.customer_phone, o.total_amount, o.status as order_status
+          o.customer_phone, o.total as total_amount, o.status as order_status
         FROM invoices i
         LEFT JOIN orders o ON i.order_id = o.id
         WHERE i.invoice_number = $1`,

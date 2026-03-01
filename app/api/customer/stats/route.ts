@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       query(
         `SELECT
            COUNT(*) as total_orders,
-           COALESCE(SUM(total_amount), 0) as total_spent
+           COALESCE(SUM(total), 0) as total_spent
          FROM orders
          WHERE customer_id = $1`,
         [customerId]
