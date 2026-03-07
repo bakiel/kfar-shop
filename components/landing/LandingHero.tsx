@@ -156,7 +156,7 @@ function RotatingHeroImage({ shouldReduceMotion }: { shouldReduceMotion: boolean
   }, [shouldReduceMotion]);
 
   return (
-    <div className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-strong">
+    <div className="relative w-full h-full rounded-xl overflow-hidden shadow-strong hero-image-breathe">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
@@ -305,7 +305,7 @@ export default function LandingHero({
   return (
     <section
       dir={isRTL ? 'rtl' : 'ltr'}
-      className="relative bg-kfar-warm-white overflow-hidden"
+      className="relative bg-kfar-warm-white overflow-hidden hero-grain"
     >
       {/* Animated mesh gradient */}
       <MeshGradientBg shouldReduceMotion={shouldReduceMotion} />
@@ -387,7 +387,7 @@ export default function LandingHero({
             {/* Subtitle */}
             <motion.p
               variants={staggerItem}
-              className="text-base sm:text-lg text-gray-600 max-w-lg leading-relaxed"
+              className="text-base sm:text-lg text-gray-700 max-w-lg leading-relaxed"
             >
               {language === 'he'
                 ? 'חמישה מסעדות, שוק שישי, ויותר מ-50 שנות מורשת קהילתית -- הכל בפלטפורמה דיגיטלית אחת.'
@@ -421,7 +421,7 @@ export default function LandingHero({
                 <motion.span
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full border-2 border-kfar-gold text-kfar-gold-dark font-semibold hover:bg-kfar-gold/10 transition-colors cursor-pointer text-sm sm:text-base"
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 sm:py-3 rounded-full bg-kfar-gold-premium text-soil-brown font-semibold hover:bg-kfar-gold transition-colors cursor-pointer text-sm sm:text-base shadow-sm"
                 >
                   <Store className="w-5 h-5 stroke-[1.5]" />
                   {t('Explore Vendors')}
