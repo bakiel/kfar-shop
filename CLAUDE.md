@@ -171,6 +171,30 @@ pm2 logs kfar
 pm2 restart kfar
 ```
 
+## Reports, Handover Docs & PDFs (CRITICAL)
+
+**ALWAYS use Aleph Design System + Render Engine for ALL reports, PDFs, and handover documents.**
+
+### Rules:
+1. **NEVER use Google Fonts `<link>` tags** — they fail in headless Chrome. Always download woff2 files locally and use `@font-face`
+2. **Fonts location**: `handover/fonts/` (space-grotesk-400.woff2, space-grotesk-700.woff2, dm-mono-400.woff2)
+3. **Render command**:
+   ```bash
+   python3 /Users/mac/Downloads/aleph-pdf-engine/render.py input.html output.pdf
+   ```
+4. **Design must follow Aleph design rules**: full-page utilization, three-layer architecture (texture / content / footer), `overflow: hidden` on canvas, gold accent bars on section headers, KFAR brand palette
+5. **KFAR palette**: `--green: #1E3D1A`, `--gold: #C4A265`, `--cream: #F5F0E8`, `--warm-white: #FDFBF7`
+6. **NO emojis** — use SVG icons or CSS shapes
+7. Always open PDF after render to verify: `open output.pdf`
+
+### Font download (if fonts missing):
+```bash
+cd handover/fonts
+curl -sL -o space-grotesk-400.woff2 "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPbF4Cw.woff2"
+curl -sL -o space-grotesk-700.woff2 "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mDoQDjQSkFtoMM3T6r8E7mPb94C-s0.woff2"
+curl -sL -o dm-mono-400.woff2 "https://fonts.gstatic.com/s/dmmono/v16/aFTU7PB1QTsUX8KYthqQBA.woff2"
+```
+
 ## Important Notes
 1. Always check what exists before creating new features
 2. Mobile responsiveness is critical (many users on phones)

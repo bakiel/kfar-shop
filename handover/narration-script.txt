@@ -1,0 +1,35 @@
+Welcome to KFAR Marketplace. This is a complete overview of your multi-vendor e-commerce platform, built for the Village of Peace community in Dimona, Israel.
+
+KFAR Marketplace connects six local vendors with your community, supporting both Hebrew and English, multiple payment methods including community currency called Braysheet, and a full loyalty rewards system.
+
+Let me walk you through the platform.
+
+First, the technology. KFAR runs on Next.js 15, which is a modern React framework. It's backed by a PostgreSQL database with 24 tables, secure JWT authentication with bcrypt password hashing, and Tailwind CSS for a beautiful responsive design. The platform has 133 API routes and 205 static pages.
+
+Your six active vendors are: Teva Deli with 32 products, Queen's Cuisine with 25 products, People's Store with 18 products, Garden of Light with 14 products, Gahn Delight with 12 products, and VOP Shop with 12 products. That's 113 products total.
+
+Each vendor has their own dashboard where they can manage products, view orders, track analytics, create promotions, and generate QR codes. Vendors log in at their dedicated portal and get a full business management suite.
+
+For payments, the platform supports four methods. Cash on delivery is the default and is fully active. Braysheet tokens, your community digital currency, are active with QR-based wallets. Bank transfer is active with provided details. And credit card processing via YPAY, an Israeli payment gateway, is ready in sandbox mode, just waiting for production credentials.
+
+The order flow works like this: A customer places an order, payment is processed, the vendor accepts the order, prepares it, marks it as ready for pickup, and then when the customer picks it up, it's marked as completed and loyalty points are earned.
+
+For email, KFAR has its own dedicated email server with DKIM signing for reliable deliverability. You have three email accounts: noreply at kfarapp dot com for system emails, admin at kfarapp dot com for admin communications, and support at kfarapp dot com for customer support. There are 10 email templates covering order confirmations, status updates, vendor alerts, welcome emails, loyalty notifications, password resets, promotions, and QR loyalty cards. All templates are available in both English and Hebrew.
+
+The admin dashboard gives you full control. You can see revenue, orders, and customer overviews from the main dashboard. Manage your vendors, create product bundles, track all orders, run CRM for customer management and segmentation, manage user accounts, create and approve promotions, send broadcast notifications to all users, review driver applications, and configure store settings.
+
+Speaking of drivers, there's a complete driver application system. Community members can apply to become delivery drivers through a public form. Applications go to the admin queue for approval or rejection.
+
+The CRM system tracks customer profiles with orders, points, and activity timelines. You can create auto and manual customer segments for targeting, and view full interaction histories.
+
+The loyalty system has three tiers: Bronze for zero to 499 points with base rewards, Silver for 500 to 1499 points with a 5 percent bonus, and Gold for 1500 plus points with a 10 percent bonus. Customers earn points on every purchase, get 50 welcome bonus points on registration, and can redeem points for discount coupons.
+
+For performance, KFAR uses Cloudflare as a global CDN and security layer. Cloudflare provides SSL encryption, DDoS protection, intelligent caching at edge locations worldwide, and gzip compression achieving 87 percent size reduction. Static assets are cached for up to 365 days, authentication endpoints have rate limiting, and security headers include HSTS and Content Security Policy. This means fast load times for your community no matter where they are.
+
+The platform supports full Hebrew and English translation. There's a language toggle in the header, RTL layout auto-applied for Hebrew, and an AI Shopping Assistant powered by Google Gemini with voice support in both languages.
+
+Deploying updates is straightforward. Pull the latest code, build the application, and restart the service. The platform follows modern DevOps best practices with version control and zero-downtime deployments.
+
+That's KFAR Marketplace. A complete, production-ready multi-vendor e-commerce platform. Community powered, beautifully designed, and ready to serve the Village of Peace.
+
+Thank you for choosing KFAR.

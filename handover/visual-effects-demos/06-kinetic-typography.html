@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kinetic Typography</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #060608;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ===== SECTION 1: MASSIVE TITLE ===== */
+  .hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Morphing background shapes */
+  .morph-shape {
+    position: absolute;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .shape-1 {
+    width: 500px;
+    height: 500px;
+    top: 10%;
+    left: 10%;
+    background: linear-gradient(135deg, #f43f5e, #ec4899);
+    animation: morph1 8s ease-in-out infinite;
+  }
+
+  .shape-2 {
+    width: 600px;
+    height: 600px;
+    bottom: -10%;
+    right: 5%;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    animation: morph2 10s ease-in-out infinite;
+  }
+
+  .shape-3 {
+    width: 400px;
+    height: 400px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    animation: morph3 6s ease-in-out infinite;
+  }
+
+  @keyframes morph1 {
+    0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: translate(0, 0) scale(1); }
+    25% { border-radius: 50% 50% 30% 70% / 60% 40% 60% 40%; transform: translate(40px, -30px) scale(1.1); }
+    50% { border-radius: 70% 30% 50% 50% / 40% 60% 40% 60%; transform: translate(-20px, 40px) scale(0.9); }
+    75% { border-radius: 40% 60% 60% 40% / 50% 50% 50% 50%; transform: translate(30px, 20px) scale(1.05); }
+  }
+
+  @keyframes morph2 {
+    0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: translate(0, 0) scale(1); }
+    33% { border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%; transform: translate(-50px, 30px) scale(1.15); }
+    66% { border-radius: 50% 50% 50% 50% / 30% 70% 30% 70%; transform: translate(30px, -40px) scale(0.85); }
+  }
+
+  @keyframes morph3 {
+    0%, 100% { border-radius: 50% 50% 50% 50%; transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { border-radius: 30% 70% 70% 30% / 70% 30% 70% 30%; transform: translate(-50%, -50%) scale(1.3); opacity: 0.3; }
+  }
+
+  /* Noise */
+  .noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* ===== KINETIC TEXT ===== */
+  .kinetic-text {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+  }
+
+  .line {
+    overflow: hidden;
+    display: block;
+  }
+
+  .line-inner {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 140px;
+    letter-spacing: 4px;
+    line-height: 0.9;
+    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  }
+
+  .line:nth-child(1) .line-inner { animation-delay: 0.2s; }
+  .line:nth-child(2) .line-inner { animation-delay: 0.5s; }
+  .line:nth-child(3) .line-inner { animation-delay: 0.8s; }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Color sweep across text */
+  .color-sweep {
+    background: linear-gradient(90deg,
+      #fff 0%,
+      #fff 20%,
+      #f43f5e 30%,
+      #f59e0b 40%,
+      #10b981 50%,
+      #3b82f6 60%,
+      #8b5cf6 70%,
+      #fff 80%,
+      #fff 100%
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: colorSweep 4s ease-in-out infinite;
+  }
+
+  @keyframes colorSweep {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .line-accent {
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(255, 255, 255, 0.3);
+    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards,
+               strokePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes strokePulse {
+    0%, 100% { -webkit-text-stroke-color: rgba(255, 255, 255, 0.2); }
+    50% { -webkit-text-stroke-color: rgba(255, 255, 255, 0.5); }
+  }
+
+  /* ===== HORIZONTAL RULE ANIMATION ===== */
+  .animated-rule {
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #f43f5e, #f59e0b, #10b981, #3b82f6, transparent);
+    margin: 32px auto;
+    animation: ruleExpand 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1.2s forwards;
+  }
+
+  @keyframes ruleExpand {
+    to { width: 400px; }
+  }
+
+  /* ===== SUBTITLE WORDS ===== */
+  .subtitle-kinetic {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .word {
+    font-size: 18px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.4);
+    animation: wordFade 0.5s ease backwards;
+    transition: color 0.3s;
+  }
+
+  .word:nth-child(1)  { animation-delay: 1.4s; }
+  .word:nth-child(2)  { animation-delay: 1.5s; }
+  .word:nth-child(3)  { animation-delay: 1.6s; }
+  .word:nth-child(4)  { animation-delay: 1.7s; }
+  .word:nth-child(5)  { animation-delay: 1.8s; }
+  .word:nth-child(6)  { animation-delay: 1.9s; }
+  .word:nth-child(7)  { animation-delay: 2.0s; }
+  .word:nth-child(8)  { animation-delay: 2.1s; }
+  .word:nth-child(9)  { animation-delay: 2.2s; }
+  .word:nth-child(10) { animation-delay: 2.3s; }
+  .word:nth-child(11) { animation-delay: 2.4s; }
+  .word:nth-child(12) { animation-delay: 2.5s; }
+
+  .word-highlight {
+    color: #fff;
+    font-weight: 500;
+    animation: wordFade 0.5s ease backwards, wordGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes wordFade {
+    from { opacity: 0; transform: translateY(10px) scale(0.95); filter: blur(4px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  @keyframes wordGlow {
+    0%, 100% { text-shadow: none; }
+    50% { text-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+  }
+
+  /* ===== SECTION 2: SCROLLING MARQUEE ===== */
+  .marquee-section {
+    padding: 80px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .marquee-track {
+    display: flex;
+    animation: marqueeScroll 20s linear infinite;
+    gap: 60px;
+    white-space: nowrap;
+  }
+
+  .marquee-track-reverse {
+    animation-direction: reverse;
+    margin-top: 16px;
+  }
+
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .marquee-word {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    letter-spacing: 4px;
+    color: rgba(255, 255, 255, 0.04);
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .marquee-word-accent {
+    color: rgba(244, 63, 94, 0.08);
+    -webkit-text-stroke: 1px rgba(244, 63, 94, 0.15);
+  }
+
+  /* ===== SECTION 3: BENTO GRID ===== */
+  .bento-section {
+    padding: 0 60px 100px;
+    position: relative;
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 200px 200px;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .bento-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    animation: bentoEntrance 0.6s ease backwards;
+    transition: all 0.3s ease;
+  }
+
+  .bento-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .bento-card:nth-child(1) { grid-column: span 2; animation-delay: 2.6s; }
+  .bento-card:nth-child(2) { animation-delay: 2.7s; }
+  .bento-card:nth-child(3) { animation-delay: 2.8s; }
+  .bento-card:nth-child(4) { animation-delay: 2.9s; }
+  .bento-card:nth-child(5) { grid-column: span 2; animation-delay: 3.0s; }
+  .bento-card:nth-child(6) { animation-delay: 3.1s; }
+
+  @keyframes bentoEntrance {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Animated bar chart in first card */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 80px;
+    margin-top: 20px;
+  }
+
+  .bar {
+    width: 24px;
+    border-radius: 4px 4px 0 0;
+    animation: barGrow 1s ease backwards;
+  }
+
+  .bar:nth-child(1) { height: 40%; background: #f43f5e; animation-delay: 3.0s; }
+  .bar:nth-child(2) { height: 65%; background: #f59e0b; animation-delay: 3.1s; }
+  .bar:nth-child(3) { height: 45%; background: #10b981; animation-delay: 3.2s; }
+  .bar:nth-child(4) { height: 85%; background: #3b82f6; animation-delay: 3.3s; }
+  .bar:nth-child(5) { height: 55%; background: #8b5cf6; animation-delay: 3.4s; }
+  .bar:nth-child(6) { height: 90%; background: #ec4899; animation-delay: 3.5s; }
+  .bar:nth-child(7) { height: 70%; background: #06b6d4; animation-delay: 3.6s; }
+
+  /* Pulse the bars after initial grow */
+  .bar {
+    animation: barGrow 1s ease backwards, barPulse 2s ease-in-out infinite 4s;
+  }
+
+  @keyframes barGrow {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+
+  @keyframes barPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  /* Orbiting dots in card */
+  .orbit-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 20px auto 0;
+  }
+
+  .orbit-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #6366f1;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    animation: centerPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes centerPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+    50% { transform: translate(-50%, -50%) scale(1.3); box-shadow: 0 0 30px rgba(99, 102, 241, 0.8); }
+  }
+
+  .orbit-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    margin: -3px 0 0 -3px;
+  }
+
+  .orbit-dot-1 {
+    background: #f43f5e;
+    animation: orbit 3s linear infinite;
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+  }
+
+  .orbit-dot-2 {
+    background: #10b981;
+    animation: orbit 3s linear infinite 1s;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  }
+
+  .orbit-dot-3 {
+    background: #f59e0b;
+    animation: orbit 3s linear infinite 2s;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  }
+
+  @keyframes orbit {
+    0% { transform: rotate(0deg) translateX(35px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(35px) rotate(-360deg); }
+  }
+
+  /* Counter animation */
+  .counter {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    margin-top: 16px;
+    color: #fff;
+  }
+
+  .counter-animate {
+    display: inline-block;
+    animation: counterFlip 0.3s ease backwards;
+  }
+
+  .bento-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .bento-desc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: 4px;
+  }
+
+  /* Scanning line in a card */
+  .scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.5) 50%, transparent 100%);
+    animation: scanDown 3s ease-in-out infinite;
+    z-index: 5;
+  }
+
+  @keyframes scanDown {
+    0% { top: 0; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* Progress ring */
+  .progress-ring {
+    width: 70px;
+    height: 70px;
+    margin-top: 16px;
+  }
+
+  .progress-ring circle {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+
+  .ring-bg { stroke: rgba(255, 255, 255, 0.06); }
+
+  .ring-fill {
+    stroke: #10b981;
+    stroke-dasharray: 188;
+    stroke-dashoffset: 188;
+    animation: ringFill 2s ease 3.2s forwards, ringPulse 3s ease-in-out 5s infinite;
+    transform-origin: center;
+    transform: rotate(-90deg);
+  }
+
+  @keyframes ringFill {
+    to { stroke-dashoffset: 50; }
+  }
+
+  @keyframes ringPulse {
+    0%, 100% { stroke: #10b981; }
+    50% { stroke: #06b6d4; }
+  }
+
+  /* ===== DEMO LABEL ===== */
+  .demo-label {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 100;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- SECTION 1: Kinetic Hero -->
+<section class="hero">
+  <div class="morph-shape shape-1"></div>
+  <div class="morph-shape shape-2"></div>
+  <div class="morph-shape shape-3"></div>
+  <div class="noise"></div>
+
+  <div class="kinetic-text">
+    <span class="line"><span class="line-inner color-sweep">DESIGN</span></span>
+    <span class="line"><span class="line-inner line-accent">WITHOUT</span></span>
+    <span class="line"><span class="line-inner color-sweep">LIMITS</span></span>
+  </div>
+
+  <div class="animated-rule"></div>
+
+  <div class="subtitle-kinetic">
+    <span class="word">Every</span>
+    <span class="word word-highlight">pixel</span>
+    <span class="word">tells</span>
+    <span class="word">a</span>
+    <span class="word">story.</span>
+    <span class="word">Every</span>
+    <span class="word word-highlight">animation</span>
+    <span class="word">creates</span>
+    <span class="word">an</span>
+    <span class="word word-highlight">emotion.</span>
+    <span class="word">Pure</span>
+    <span class="word word-highlight">CSS.</span>
+  </div>
+</section>
+
+<!-- SECTION 2: Marquee -->
+<section class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-word">KINETIC</span>
+    <span class="marquee-word marquee-word-accent">TYPOGRAPHY</span>
+    <span class="marquee-word">MOTION</span>
+    <span class="marquee-word marquee-word-accent">DESIGN</span>
+    <span class="marquee-word">VISUAL</span>
+    <span class="marquee-word marquee-word-accent">EFFECTS</span>
+    <span class="marquee-word">KINETIC</span>
+    <span class="marquee-word marquee-word-accent">TYPOGRAPHY</span>
+    <span class="marquee-word">MOTION</span>
+    <span class="marquee-word marquee-word-accent">DESIGN</span>
+    <span class="marquee-word">VISUAL</span>
+    <span class="marquee-word marquee-word-accent">EFFECTS</span>
+  </div>
+  <div class="marquee-track marquee-track-reverse">
+    <span class="marquee-word marquee-word-accent">ANIMATION</span>
+    <span class="marquee-word">INTERACTION</span>
+    <span class="marquee-word marquee-word-accent">PREMIUM</span>
+    <span class="marquee-word">EXPERIENCE</span>
+    <span class="marquee-word marquee-word-accent">CRAFT</span>
+    <span class="marquee-word">DETAIL</span>
+    <span class="marquee-word marquee-word-accent">ANIMATION</span>
+    <span class="marquee-word">INTERACTION</span>
+    <span class="marquee-word marquee-word-accent">PREMIUM</span>
+    <span class="marquee-word">EXPERIENCE</span>
+    <span class="marquee-word marquee-word-accent">CRAFT</span>
+    <span class="marquee-word">DETAIL</span>
+  </div>
+</section>
+
+<!-- SECTION 3: Bento Grid -->
+<section class="bento-section">
+  <div class="bento-grid">
+    <!-- Wide card with bar chart -->
+    <div class="bento-card">
+      <div class="bento-title">Performance Metrics</div>
+      <div class="bento-desc">All animations under 16ms frame budget</div>
+      <div class="bar-chart">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+    </div>
+
+    <!-- Orbit animation -->
+    <div class="bento-card">
+      <div class="bento-title">Active Effects</div>
+      <div class="orbit-container">
+        <div class="orbit-center"></div>
+        <div class="orbit-dot orbit-dot-1"></div>
+        <div class="orbit-dot orbit-dot-2"></div>
+        <div class="orbit-dot orbit-dot-3"></div>
+      </div>
+    </div>
+
+    <!-- Scan line -->
+    <div class="bento-card">
+      <div class="scan-line"></div>
+      <div class="bento-title">Scanning</div>
+      <div class="bento-desc">Real-time visual audit</div>
+      <div class="counter" style="margin-top: 40px; color: #10b981;">60fps</div>
+    </div>
+
+    <!-- Counter -->
+    <div class="bento-card">
+      <div class="bento-title">Lines of JS</div>
+      <div class="counter" style="font-size: 56px; margin-top: 30px;">0</div>
+      <div class="bento-desc" style="margin-top: 8px;">Everything is CSS</div>
+    </div>
+
+    <!-- Wide card with progress ring -->
+    <div class="bento-card" style="display: flex; align-items: center; gap: 24px;">
+      <svg class="progress-ring" viewBox="0 0 70 70">
+        <circle class="ring-bg" cx="35" cy="35" r="30" />
+        <circle class="ring-fill" cx="35" cy="35" r="30" />
+      </svg>
+      <div>
+        <div class="bento-title">Browser Support</div>
+        <div class="bento-desc">All modern browsers, no polyfills</div>
+        <div style="font-family: 'Space Grotesk'; font-size: 24px; font-weight: 700; margin-top: 4px; color: #10b981;">97%</div>
+      </div>
+    </div>
+
+    <!-- Pulsing gradient card -->
+    <div class="bento-card" style="background: linear-gradient(135deg, rgba(244,63,94,0.08), rgba(99,102,241,0.08)); animation: bentoEntrance 0.6s ease backwards 3.1s, gradientPulse 3s ease-in-out infinite;">
+      <div class="bento-title">Zero Dependencies</div>
+      <div class="bento-desc" style="margin-top: 8px;">No GSAP. No Framer.<br>No libraries needed.</div>
+      <div style="font-family: 'Bebas Neue'; font-size: 48px; margin-top: 16px; letter-spacing: 2px; color: rgba(255,255,255,0.15);">CSS</div>
+    </div>
+  </div>
+</section>
+
+<style>
+  @keyframes gradientPulse {
+    0%, 100% { background: linear-gradient(135deg, rgba(244,63,94,0.08), rgba(99,102,241,0.08)); }
+    50% { background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(244,63,94,0.12)); }
+  }
+</style>
+
+<div class="demo-label">Demo 6/6 &mdash; Kinetic Typography + Morphing Shapes + Marquee + Bento Animations (Zero JS)</div>
+
+</body>
+</html>

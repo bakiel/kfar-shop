@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KFAR Marketplace — Registration Fix Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --green: #2D5A27;
+    --green-light: #4A7C59;
+    --gold: #C4A265;
+    --cream: #F5F0E8;
+    --white: #FDFBF7;
+    --dark: #1A1A1A;
+    --gray: #6B7280;
+    --pass: #16a34a;
+    --pass-bg: #f0fdf4;
+    --fail: #dc2626;
+    --fail-bg: #fef2f2;
+    --warn: #d97706;
+    --warn-bg: #fffbeb;
+    --border: #E5E0D8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: var(--green);
+    color: white;
+    padding: 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(196,162,101,0.15);
+  }
+  .header-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .header-sub {
+    font-size: 15px;
+    opacity: 0.75;
+  }
+  .header-meta {
+    margin-top: 20px;
+    display: flex;
+    gap: 32px;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  .header-meta span strong { color: var(--gold); }
+
+  /* Main */
+  .main { max-width: 900px; margin: 0 auto; padding: 48px 32px; }
+
+  /* Section */
+  .section { margin-bottom: 40px; }
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Status banner */
+  .status-banner {
+    background: var(--pass-bg);
+    border: 2px solid var(--pass);
+    border-radius: 12px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .status-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--pass);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 28px;
+  }
+  .status-banner h2 { font-size: 20px; font-weight: 700; color: var(--pass); }
+  .status-banner p { font-size: 14px; color: #374151; margin-top: 4px; }
+
+  /* Check cards */
+  .checks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .check-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .check-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .check-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gray);
+  }
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .badge-pass { background: var(--pass-bg); color: var(--pass); }
+  .badge-warn { background: var(--warn-bg); color: var(--warn); }
+  .badge-fail { background: var(--fail-bg); color: var(--fail); }
+  .check-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .check-card p { font-size: 13px; color: var(--gray); }
+  .check-steps { margin-top: 12px; }
+  .check-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    padding: 4px 0;
+    color: #374151;
+  }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .dot-pass { background: var(--pass); }
+  .dot-warn { background: var(--warn); }
+  .dot-fail { background: var(--fail); }
+
+  /* Fixes table */
+  .fixes-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .fixes-table thead {
+    background: var(--green);
+    color: white;
+  }
+  .fixes-table th {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  .fixes-table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .fixes-table tr:last-child td { border-bottom: none; }
+  .fixes-table tr:hover td { background: #fafaf8; }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    background: #f3f4f6;
+    color: #374151;
+  }
+  .tag-red { background: var(--fail-bg); color: var(--fail); }
+  .tag-green { background: var(--pass-bg); color: var(--pass); }
+
+  /* Email stats */
+  .email-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .email-stat {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .email-stat .num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .email-stat .num.red { color: var(--fail); }
+  .email-stat .label { font-size: 12px; color: var(--gray); }
+  .email-stat .sublabel { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+  /* Users */
+  .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .users-table th {
+    background: #f9f7f3;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .users-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+  .users-table tr:last-child td { border-bottom: none; }
+  .verified { color: var(--pass); font-weight: 600; }
+
+  /* Note box */
+  .note-box {
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 13px;
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .note-box.warn { background: var(--warn-bg); border-left: 4px solid var(--warn); }
+  .note-box.info { background: #eff6ff; border-left: 4px solid #3b82f6; }
+  .note-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .note-box strong { display: block; margin-bottom: 4px; font-weight: 600; }
+
+  /* Code */
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: #f3f4f6;
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: #374151;
+  }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px; top: 4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px var(--green);
+  }
+  .timeline-time {
+    font-size: 11px;
+    color: var(--gray);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 2px;
+  }
+  .timeline-text { font-size: 14px; }
+  .timeline-text strong { color: var(--green); }
+
+  /* Footer */
+  .footer {
+    background: var(--dark);
+    color: rgba(255,255,255,0.5);
+    padding: 24px 60px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer strong { color: white; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-tag">Incident Resolution Report</div>
+  <h1>KFAR Marketplace — Registration Fix</h1>
+  <div class="header-sub">Email verification and account creation pipeline restored</div>
+  <div class="header-meta">
+    <span><strong>Date:</strong> 22 February 2026</span>
+    <span><strong>Site:</strong> kfarapp.com</span>
+    <span><strong>Status:</strong> Resolved</span>
+    <span><strong>Verified by:</strong> 3 independent agents</span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Status Banner -->
+  <div class="status-banner">
+    <div class="status-icon">✓</div>
+    <div>
+      <h2>All Systems Operational</h2>
+      <p>Registration, email verification, and password reset are fully functional. 3/3 verification checks passed. Both previously stuck real users have been unblocked.</p>
+    </div>
+  </div>
+
+  <!-- 3 Agent Checks -->
+  <div class="section">
+    <div class="section-title">
+      <span>&#10003;</span> Triple Verification — 3 Independent Agents
+    </div>
+    <div class="checks-grid">
+
+      <!-- Check 1 -->
+      <div class="check-card">
+        <div class="check-card-header">
+          <span class="check-num">Check 1</span>
+          <span class="badge badge-pass">All Pass</span>
+        </div>
+        <h3>Registration Flow</h3>
+        <p>New user signup and welcome email delivery</p>
+        <div class="check-steps">
+          <div class="check-step"><div class="dot dot-pass"></div><span>POST /api/auth/register → HTTP 200</span></div>
+          <div class="check-step"><div class="dot dot-pass"></div><span>email_log: <code>welcome</code> → <strong>sent</strong></span></div>
+          <div class="check-step"><div class="dot dot-pass"></div><span>Template <code>welcome</code> active in DB</span></div>
+        </div>
+      </div>
+
+      <!-- Check 2 -->
+      <div class="check-card">
+        <div class="check-card-header">
+          <span class="check-num">Check 2</span>
+          <span class="badge badge-pass">All Pass</span>
+        </div>
+        <h3>Password Reset</h3>
+        <p>Reset email delivery for existing users</p>
+        <div class="check-steps">
+          <div class="check-step"><div class="dot dot-pass"></div><span>POST /api/auth/forgot-password → HTTP 200</span></div>
+          <div class="check-step"><div class="dot dot-pass"></div><span>email_log: <code>password_reset</code> → <strong>sent</strong></span></div>
+          <div class="check-step"><div class="dot dot-pass"></div><span>Both stuck users now <code>email_verified = true</code></span></div>
+          <div class="check-step"><div class="dot dot-pass"></div><span>Template <code>password_reset</code> active in DB</span></div>
+        </div>
+      </div>
+
+      <!-- Check 3 -->
+      <div class="check-card">
+        <div class="check-card-header">
+          <span class="check-num">Check 3</span>
+          <span class="badge badge-warn">Pass + Note</span>
+        </div>
+        <h3>Site Health</h3>
+        <p>Overall platform and infrastructure</p>
+        <div class="check-steps">
+          <div class="check-step"><div class="dot dot-pass"></div><span>kfarapp.com → HTTP 200 (live)</span></div>
+          <div class="check-step"><div class="dot dot-pass"></div><span>Admin login → JWT issued correctly</span></div>
+          <div class="check-step"><div class="dot dot-pass"></div><span>All 10 email templates active</span></div>
+          <div class="check-step"><div class="dot dot-warn"></div><span>Vendor mailboxes not set up on server (separate issue)</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- What Was Fixed -->
+  <div class="section">
+    <div class="section-title">&#9881; What Was Fixed</div>
+    <table class="fixes-table">
+      <thead>
+        <tr>
+          <th>Bug</th>
+          <th>Root Cause</th>
+          <th>Fix Applied</th>
+          <th>File / Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Verification emails never sent</strong></td>
+          <td>Code called template <span class="tag tag-red">'welcome'</span> but DB had <span class="tag tag-red">'welcome_customer'</span></td>
+          <td>Renamed DB template to <span class="tag tag-green">'welcome'</span></td>
+          <td><code>email_templates</code> table (DB change, no deploy)</td>
+        </tr>
+        <tr>
+          <td><strong>Welcome email had no verify button</strong></td>
+          <td>Template body was welcome text only — no <code>&#123;&#123;verification_url&#125;&#125;</code> placeholder</td>
+          <td>Rewrote template with styled "Verify My Email" button and link</td>
+          <td><code>email_templates</code> table (DB change)</td>
+        </tr>
+        <tr>
+          <td><strong>Password reset emails never sent</strong></td>
+          <td>Code called template <span class="tag tag-red">'status_update'</span> (wrong). Template does not exist</td>
+          <td>Changed to correct template <span class="tag tag-green">'password_reset'</span> with right variables</td>
+          <td><code>lib/services/auth-service.ts</code> line 390</td>
+        </tr>
+        <tr>
+          <td><strong>2 real users stuck — couldn't log in</strong></td>
+          <td><code>email_verified = false</code>, verification email never arrived, no way to verify</td>
+          <td>Manually set <code>email_verified = true</code> + sent password reset email to both</td>
+          <td><code>users</code> table (DB) + /api/auth/forgot-password</td>
+        </tr>
+        <tr>
+          <td><strong>Registration page never submitted data</strong><br><span style="font-size:11px;color:var(--gray)">(Fixed in previous session)</span></td>
+          <td>5-step wizard had <code>// TODO: Submit</code> stub — no data was ever sent</td>
+          <td>Replaced with redirect to working login page <code>?mode=register</code></td>
+          <td><code>app/customer/register/page.tsx</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Email Stats -->
+  <div class="section">
+    <div class="section-title">&#9993; Email Delivery Stats</div>
+    <div class="email-grid">
+      <div class="email-stat">
+        <div class="num">14</div>
+        <div class="label">Emails Sent Today</div>
+        <div class="sublabel">After fix applied</div>
+      </div>
+      <div class="email-stat">
+        <div class="num">0</div>
+        <div class="label">New Failures</div>
+        <div class="sublabel">Post-fix</div>
+      </div>
+      <div class="email-stat">
+        <div class="num">19</div>
+        <div class="num red" style="font-size:13px;font-weight:400">historical</div>
+        <div class="label">Old Failures</div>
+        <div class="sublabel">Pre-fix (archived)</div>
+      </div>
+      <div class="email-stat">
+        <div class="num">100%</div>
+        <div class="label">Current Success Rate</div>
+        <div class="sublabel">All new emails delivered</div>
+      </div>
+    </div>
+
+    <div class="note-box info">
+      <span class="note-icon">ℹ</span>
+      <div>
+        <strong>About the 19 "old failures"</strong>
+        The email log shows 19 historical failures — these are all pre-fix attempts from before this session (template name mismatches and vendor mailbox issues from Feb 15). They are not active failures. Every email sent since the fix has status <strong>sent</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Stuck Users -->
+  <div class="section">
+    <div class="section-title">&#128101; Previously Stuck Users — Now Unblocked</div>
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Email Address</th>
+          <th>Registered</th>
+          <th>Action Taken</th>
+          <th>Current Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>bengurionheritage@gmail.com</td>
+          <td>21 Feb 2026</td>
+          <td>Manually verified + password reset email sent</td>
+          <td><span class="verified">&#10003; Verified — can log in</span></td>
+        </tr>
+        <tr>
+          <td>peaceofparadise03@gmail.com</td>
+          <td>15 Feb 2026</td>
+          <td>Manually verified + password reset email sent</td>
+          <td><span class="verified">&#10003; Verified — can log in</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note-box warn" style="margin-top:12px;">
+      <span class="note-icon">&#9888;</span>
+      <div>
+        <strong>Action required from users</strong>
+        Both users have received a "Reset Your Password" email from noreply@kfarapp.com. They must click the link (valid for 1 hour from time sent) to set their password and access their account. If the link has expired, they can visit <strong>kfarapp.com/customer/login</strong> and click "Forgot password" to get a new link.
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="section">
+    <div class="section-title">&#128337; Fix Timeline</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-time">Feb 19 — Previous session</div>
+        <div class="timeline-text"><strong>Registration wizard replaced.</strong> The 5-step wizard with a broken TODO stub was replaced with a redirect to the working login page registration form.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">Feb 22, 04:45 UTC</div>
+        <div class="timeline-text"><strong>Root cause found.</strong> email_log showed every verification email failing with "Template 'welcome' not found or inactive" — template was named 'welcome_customer' in DB.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">Feb 22, 04:48 UTC</div>
+        <div class="timeline-text"><strong>DB template renamed.</strong> Renamed email_templates.name from 'welcome_customer' → 'welcome'. No deployment required.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">Feb 22, 04:49 UTC</div>
+        <div class="timeline-text"><strong>Template body updated.</strong> Added styled "Verify My Email" button with verification URL to the welcome template body.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">Feb 22, 04:50 UTC</div>
+        <div class="timeline-text"><strong>Both stuck users verified.</strong> Set email_verified = true for both accounts, sent password reset emails.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">Feb 22, 05:10 UTC</div>
+        <div class="timeline-text"><strong>Password reset bug fixed.</strong> auth-service.ts was calling wrong template 'status_update'. Fixed to use correct 'password_reset' template. Built and deployed to VPS.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-time">Feb 22, 05:31 UTC</div>
+        <div class="timeline-text"><strong>Triple verification passed.</strong> 3 independent agents confirmed all flows working. Registration, email delivery, and password reset all operational.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minor open item -->
+  <div class="section">
+    <div class="section-title">&#9888; Minor Open Item (Low Priority)</div>
+    <div class="note-box warn">
+      <span class="note-icon">&#9888;</span>
+      <div>
+        <strong>Vendor order notification emails failing</strong>
+        When a customer places an order, the system attempts to notify the vendor (e.g. teva@kfarapp.com). These are failing because vendor email addresses are not set up as mailboxes on the Postfix email server — the server rejects them with "User unknown". This does not affect customer registration or shopping. Vendor order notifications will need vendor mailboxes created on the VPS, or the notification address changed to a working email per vendor.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <span>KFAR Marketplace &nbsp;|&nbsp; Registration Incident Report &nbsp;|&nbsp; <strong>Resolved 22 Feb 2026</strong></span>
+  <span>Verified by 3 independent agents &nbsp;&#10003;</span>
+</div>
+
+</body>
+</html>

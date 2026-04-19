@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a1f0a;
+  }
+
+  /* Subtle background texture */
+  .bg-texture {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(45,90,39,0.15) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(196,162,101,0.08) 0%, transparent 40%);
+  }
+
+  /* Top section */
+  .top-section {
+    position: absolute;
+    top: 40px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+    padding: 0 60px;
+  }
+
+  .logo-row {
+    margin-bottom: 16px;
+  }
+
+  .logo-row img {
+    width: 80px;
+    height: auto;
+    filter: drop-shadow(0 0 20px rgba(196,162,101,0.3));
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 52px;
+    color: #F5F0E8;
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+
+  .headline .num { color: #C4A265; }
+
+  .subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: rgba(245,240,232,0.4);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  /* Bento Grid */
+  .bento-grid {
+    position: absolute;
+    top: 240px;
+    left: 50px;
+    right: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+    height: 580px;
+    z-index: 10;
+  }
+
+  .bento-cell {
+    border-radius: 20px;
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .bento-cell::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+
+  /* Vendor 1 - Teva Deli - Rich green */
+  .v1 {
+    background: linear-gradient(145deg, #1a4a2e 0%, #0d2a18 100%);
+  }
+  .v1::after {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(71,140,11,0.12);
+  }
+
+  /* Vendor 2 - Queen's Cuisine - Warm gold */
+  .v2 {
+    background: linear-gradient(145deg, #2a2010 0%, #1a1408 100%);
+  }
+  .v2::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(196,162,101,0.1);
+  }
+
+  /* Vendor 3 - People's Store - Earth tone */
+  .v3 {
+    background: linear-gradient(145deg, #2a1f15 0%, #1a130d 100%);
+  }
+  .v3::after {
+    content: '';
+    position: absolute;
+    top: -40px; left: 50%;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(232,145,45,0.08);
+  }
+
+  /* Vendor 4 - Garden of Light - Leaf green */
+  .v4 {
+    background: linear-gradient(145deg, #153a20 0%, #0a2210 100%);
+  }
+  .v4::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: rgba(71,140,11,0.1);
+  }
+
+  /* Vendor 5 - Gahn Delight - Deep teal */
+  .v5 {
+    background: linear-gradient(145deg, #0f2a2a 0%, #081a1a 100%);
+  }
+  .v5::after {
+    content: '';
+    position: absolute;
+    top: -30px; right: 20px;
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: rgba(78,168,160,0.1);
+  }
+
+  /* Vendor 6 - VOP Shop - Royal dark */
+  .v6 {
+    background: linear-gradient(145deg, #1a1a30 0%, #0d0d1a 100%);
+  }
+  .v6::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(100,120,200,0.08);
+  }
+
+  /* Vendor card content */
+  .vendor-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .vendor-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .v1 .vendor-icon { background: rgba(71,140,11,0.2); }
+  .v2 .vendor-icon { background: rgba(196,162,101,0.2); }
+  .v3 .vendor-icon { background: rgba(232,145,45,0.15); }
+  .v4 .vendor-icon { background: rgba(71,140,11,0.2); }
+  .v5 .vendor-icon { background: rgba(78,168,160,0.2); }
+  .v6 .vendor-icon { background: rgba(100,120,200,0.15); }
+
+  .vendor-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .v1 .vendor-icon svg { stroke: #478c0b; }
+  .v2 .vendor-icon svg { stroke: #C4A265; }
+  .v3 .vendor-icon svg { stroke: #E8912D; }
+  .v4 .vendor-icon svg { stroke: #5cb346; }
+  .v5 .vendor-icon svg { stroke: #4ea8a0; }
+  .v6 .vendor-icon svg { stroke: #7888cc; }
+
+  .product-count {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 42px;
+    line-height: 1;
+  }
+
+  .v1 .product-count { color: rgba(71,140,11,0.3); }
+  .v2 .product-count { color: rgba(196,162,101,0.25); }
+  .v3 .product-count { color: rgba(232,145,45,0.2); }
+  .v4 .product-count { color: rgba(92,179,70,0.25); }
+  .v5 .product-count { color: rgba(78,168,160,0.25); }
+  .v6 .product-count { color: rgba(120,136,204,0.25); }
+
+  .vendor-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .vendor-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: #F5F0E8;
+    line-height: 1.2;
+  }
+
+  .vendor-category {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .v1 .vendor-category { color: rgba(71,140,11,0.6); }
+  .v2 .vendor-category { color: rgba(196,162,101,0.5); }
+  .v3 .vendor-category { color: rgba(232,145,45,0.5); }
+  .v4 .vendor-category { color: rgba(92,179,70,0.5); }
+  .v5 .vendor-category { color: rgba(78,168,160,0.5); }
+  .v6 .vendor-category { color: rgba(120,136,204,0.5); }
+
+  .products-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.35);
+  }
+
+  .products-label strong {
+    color: rgba(245,240,232,0.7);
+    font-weight: 700;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    z-index: 10;
+  }
+
+  .bottom-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50px; right: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,162,101,0.2), transparent);
+  }
+
+  .bottom-tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: rgba(245,240,232,0.5);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  .bottom-tagline strong {
+    color: #C4A265;
+    font-weight: 700;
+  }
+
+  .qr-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .qr-section img {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    padding: 4px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(196,162,101,0.2);
+  }
+
+  .qr-url {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+</style>
+</head>
+<body>
+  <div class="bg-texture"></div>
+
+  <!-- Top Section -->
+  <div class="top-section">
+    <div class="logo-row">
+      <img src="assets/logo-gold.png" alt="KFAR">
+    </div>
+    <h1 class="headline"><span class="num">6</span> Vendors, <span class="num">113</span> Products</h1>
+    <div class="subtitle">Your community marketplace</div>
+  </div>
+
+  <!-- Bento Grid -->
+  <div class="bento-grid">
+    <!-- Teva Deli -->
+    <div class="bento-cell v1">
+      <div class="vendor-top">
+        <div class="vendor-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 00-6.88 17.23l.9-2.47A7 7 0 0112 4a7 7 0 016 3.37"/><circle cx="12" cy="12" r="3"/><path d="M2 12h4M18 12h4"/></svg>
+        </div>
+        <div class="product-count">32</div>
+      </div>
+      <div class="vendor-bottom">
+        <div class="vendor-name">Teva Deli</div>
+        <div class="vendor-category">Plant-based foods</div>
+        <div class="products-label"><strong>32</strong> products</div>
+      </div>
+    </div>
+
+    <!-- Queen's Cuisine -->
+    <div class="bento-cell v2">
+      <div class="vendor-top">
+        <div class="vendor-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>
+        </div>
+        <div class="product-count">25</div>
+      </div>
+      <div class="vendor-bottom">
+        <div class="vendor-name">Queen's Cuisine</div>
+        <div class="vendor-category">Heritage recipes</div>
+        <div class="products-label"><strong>25</strong> products</div>
+      </div>
+    </div>
+
+    <!-- People's Store -->
+    <div class="bento-cell v3">
+      <div class="vendor-top">
+        <div class="vendor-icon">
+          <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        </div>
+        <div class="product-count">18</div>
+      </div>
+      <div class="vendor-bottom">
+        <div class="vendor-name">People's Store</div>
+        <div class="vendor-category">General goods</div>
+        <div class="products-label"><strong>18</strong> products</div>
+      </div>
+    </div>
+
+    <!-- Garden of Light -->
+    <div class="bento-cell v4">
+      <div class="vendor-top">
+        <div class="vendor-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22V8"/><path d="M5 12H2a10 10 0 0020 0h-3"/><path d="M12 2a4.5 4.5 0 00-4.5 6.5L12 8l4.5.5A4.5 4.5 0 0012 2z"/></svg>
+        </div>
+        <div class="product-count">14</div>
+      </div>
+      <div class="vendor-bottom">
+        <div class="vendor-name">Garden of Light</div>
+        <div class="vendor-category">Organic produce</div>
+        <div class="products-label"><strong>14</strong> products</div>
+      </div>
+    </div>
+
+    <!-- Gahn Delight -->
+    <div class="bento-cell v5">
+      <div class="vendor-top">
+        <div class="vendor-icon">
+          <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <div class="product-count">12</div>
+      </div>
+      <div class="vendor-bottom">
+        <div class="vendor-name">Gahn Delight</div>
+        <div class="vendor-category">Beverages & treats</div>
+        <div class="products-label"><strong>12</strong> products</div>
+      </div>
+    </div>
+
+    <!-- VOP Shop -->
+    <div class="bento-cell v6">
+      <div class="vendor-top">
+        <div class="vendor-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="product-count">12</div>
+      </div>
+      <div class="vendor-bottom">
+        <div class="vendor-name">VOP Shop</div>
+        <div class="vendor-category">Community essentials</div>
+        <div class="products-label"><strong>12</strong> products</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <div class="bottom-tagline"><strong>Shop</strong> your community</div>
+    <div class="qr-section">
+      <div class="qr-url">kfarapp.com</div>
+      <img src="assets/qr-kfar.png" alt="QR Code">
+    </div>
+  </div>
+</body>
+</html>

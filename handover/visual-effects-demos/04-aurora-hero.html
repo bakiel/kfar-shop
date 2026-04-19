@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Borealis Hero</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #020810;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  .scene {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== STAR FIELD ===== */
+  .stars {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1.5px 1.5px at 40% 15%, rgba(255,255,255,0.9), transparent),
+      radial-gradient(1px 1px at 55% 70%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 70% 35%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1.5px 1.5px at 85% 55%, rgba(255,255,255,0.8), transparent),
+      radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 60% 10%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1px 1px at 90% 85%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 48% 42%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 78% 12%, rgba(255,255,255,0.9), transparent),
+      radial-gradient(1px 1px at 92% 30%, rgba(255,255,255,0.4), transparent);
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+  }
+
+  /* ===== AURORA BANDS ===== */
+  .aurora-container {
+    position: absolute;
+    top: -10%;
+    left: -20%;
+    width: 140%;
+    height: 80%;
+    pointer-events: none;
+  }
+
+  .aurora-band {
+    position: absolute;
+    width: 120%;
+    height: 300px;
+    filter: blur(60px);
+    opacity: 0.6;
+    mix-blend-mode: screen;
+    border-radius: 50%;
+  }
+
+  .aurora-1 {
+    top: 10%;
+    left: -10%;
+    background: linear-gradient(90deg, transparent 0%, #10b981 20%, #06b6d4 40%, #8b5cf6 60%, #10b981 80%, transparent 100%);
+    background-size: 200% 100%;
+    animation: auroraFlow1 4s ease-in-out infinite, auroraWave1 6s ease-in-out infinite;
+  }
+
+  .aurora-2 {
+    top: 25%;
+    left: 5%;
+    background: linear-gradient(90deg, transparent 0%, #06b6d4 25%, #3b82f6 50%, #8b5cf6 75%, transparent 100%);
+    background-size: 200% 100%;
+    animation: auroraFlow2 5s ease-in-out infinite, auroraWave2 7s ease-in-out infinite;
+    height: 250px;
+    opacity: 0.4;
+  }
+
+  .aurora-3 {
+    top: 5%;
+    left: -5%;
+    background: linear-gradient(90deg, transparent 0%, #34d399 30%, #22d3ee 50%, #a78bfa 70%, transparent 100%);
+    background-size: 200% 100%;
+    animation: auroraFlow3 3.5s ease-in-out infinite, auroraWave3 5s ease-in-out infinite;
+    height: 200px;
+    opacity: 0.5;
+  }
+
+  @keyframes auroraFlow1 {
+    0%, 100% { background-position: 0% 0%; }
+    50% { background-position: 100% 0%; }
+  }
+
+  @keyframes auroraFlow2 {
+    0%, 100% { background-position: 100% 0%; }
+    50% { background-position: 0% 0%; }
+  }
+
+  @keyframes auroraFlow3 {
+    0%, 100% { background-position: 50% 0%; }
+    25% { background-position: 0% 0%; }
+    75% { background-position: 100% 0%; }
+  }
+
+  @keyframes auroraWave1 {
+    0%, 100% { transform: translateY(0) scaleY(1) rotate(-2deg); }
+    25% { transform: translateY(-40px) scaleY(1.3) rotate(1deg); }
+    50% { transform: translateY(20px) scaleY(0.8) rotate(-3deg); }
+    75% { transform: translateY(-20px) scaleY(1.1) rotate(2deg); }
+  }
+
+  @keyframes auroraWave2 {
+    0%, 100% { transform: translateY(0) scaleY(1) rotate(1deg); }
+    33% { transform: translateY(30px) scaleY(1.4) rotate(-2deg); }
+    66% { transform: translateY(-30px) scaleY(0.7) rotate(3deg); }
+  }
+
+  @keyframes auroraWave3 {
+    0%, 100% { transform: translateY(0) scaleX(1) rotate(-1deg); }
+    50% { transform: translateY(-50px) scaleX(1.2) rotate(2deg); }
+  }
+
+  /* ===== GROUND GLOW ===== */
+  .ground-glow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to top, rgba(2, 8, 16, 1) 0%, rgba(2, 8, 16, 0.8) 30%, transparent 100%);
+    z-index: 2;
+  }
+
+  .ground-reflection {
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 200px;
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.06), transparent);
+    filter: blur(40px);
+    animation: reflectionPulse 4s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  @keyframes reflectionPulse {
+    0%, 100% { opacity: 0.5; transform: scaleX(1); }
+    50% { opacity: 1; transform: scaleX(1.1); }
+  }
+
+  /* ===== FLOATING PARTICLES ===== */
+  .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+  }
+
+  .p1 { left: 15%; bottom: 30%; animation: particleRise 6s ease-in infinite; }
+  .p2 { left: 30%; bottom: 25%; animation: particleRise 8s ease-in infinite 1s; width: 2px; height: 2px; }
+  .p3 { left: 50%; bottom: 35%; animation: particleRise 5s ease-in infinite 2s; }
+  .p4 { left: 65%; bottom: 28%; animation: particleRise 7s ease-in infinite 0.5s; width: 2px; height: 2px; }
+  .p5 { left: 80%; bottom: 32%; animation: particleRise 6.5s ease-in infinite 3s; }
+  .p6 { left: 22%; bottom: 22%; animation: particleRise 9s ease-in infinite 1.5s; width: 2px; height: 2px; }
+  .p7 { left: 72%; bottom: 38%; animation: particleRise 5.5s ease-in infinite 4s; }
+  .p8 { left: 42%; bottom: 20%; animation: particleRise 7.5s ease-in infinite 2.5s; width: 4px; height: 4px; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+
+  @keyframes particleRise {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-400px) translateX(30px); opacity: 0; }
+  }
+
+  /* ===== CONTENT ===== */
+  .content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 900px;
+    padding: 0 40px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 100px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #34d399;
+    margin-bottom: 32px;
+    animation: badgePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.2); }
+    50% { box-shadow: 0 0 20px 4px rgba(16, 185, 129, 0.15); }
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: #34d399;
+    border-radius: 50%;
+    animation: dotPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.8); opacity: 0.4; }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -4px;
+    margin-bottom: 24px;
+  }
+
+  .text-glow {
+    background: linear-gradient(90deg, #fff, #34d399, #22d3ee, #a78bfa, #fff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textGlow 3s ease infinite;
+    text-shadow: none;
+  }
+
+  @keyframes textGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .subtitle {
+    font-size: 18px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 300;
+    max-width: 540px;
+    margin: 0 auto 40px;
+  }
+
+  /* ===== GLASS STAT CARDS ===== */
+  .stat-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 24px 32px;
+    min-width: 140px;
+    animation: cardFloat 3s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: cardShine 4s ease-in-out infinite;
+  }
+
+  @keyframes cardShine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0s; }
+  .stat-card:nth-child(2) { animation-delay: 0.5s; }
+  .stat-card:nth-child(3) { animation-delay: 1s; }
+  .stat-card:nth-child(4) { animation-delay: 1.5s; }
+
+  .stat-card:nth-child(1)::before { animation-delay: 0s; }
+  .stat-card:nth-child(2)::before { animation-delay: 1s; }
+  .stat-card:nth-child(3)::before { animation-delay: 2s; }
+  .stat-card:nth-child(4)::before { animation-delay: 3s; }
+
+  @keyframes cardFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== CTA BUTTON ===== */
+  .cta-group {
+    margin-top: 40px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  .btn {
+    padding: 14px 36px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn:hover { transform: translateY(-2px); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: btnShine 3s ease-in-out infinite;
+  }
+
+  @keyframes btnShine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+  }
+
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+  }
+
+  .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  /* ===== DEMO LABEL ===== */
+  .demo-label {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<section class="scene">
+  <!-- Stars -->
+  <div class="stars"></div>
+
+  <!-- Aurora bands -->
+  <div class="aurora-container">
+    <div class="aurora-band aurora-1"></div>
+    <div class="aurora-band aurora-2"></div>
+    <div class="aurora-band aurora-3"></div>
+  </div>
+
+  <!-- Floating particles -->
+  <div class="particle p1"></div>
+  <div class="particle p2"></div>
+  <div class="particle p3"></div>
+  <div class="particle p4"></div>
+  <div class="particle p5"></div>
+  <div class="particle p6"></div>
+  <div class="particle p7"></div>
+  <div class="particle p8"></div>
+
+  <!-- Ground -->
+  <div class="ground-glow"></div>
+  <div class="ground-reflection"></div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Northern Lights UI
+    </div>
+
+    <h1><span class="text-glow">Design That<br>Feels Alive</span></h1>
+
+    <p class="subtitle">
+      Aurora bands sweep across the sky. Particles rise from the ground. Stars twinkle. Every element breathes with organic rhythm.
+    </p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Aurora Bands</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">8</div>
+        <div class="stat-label">Particles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">14</div>
+        <div class="stat-label">Star Points</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">JavaScript</div>
+      </div>
+    </div>
+
+    <div class="cta-group">
+      <a href="#" class="btn btn-primary">
+        Explore
+        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+      </a>
+      <a href="#" class="btn btn-ghost">View Source</a>
+    </div>
+  </div>
+</section>
+
+<div class="demo-label">Demo 4/6 &mdash; Aurora Borealis + Star Field + Rising Particles (Pure CSS)</div>
+
+</body>
+</html>

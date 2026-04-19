@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpha Masking & Blending - Visual Effects Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0c0f14;
+    --surface: #141820;
+    --accent: #c4956a;
+    --accent-light: #e8c9a8;
+    --text: rgba(255, 255, 255, 0.85);
+    --text-muted: rgba(255, 255, 255, 0.45);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ========== SECTION 1: HERO WITH ALPHA MASK ========== */
+  .hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .hero-image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+  }
+
+  /* Alpha mask: fade image to background at bottom */
+  .hero-image {
+    mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 40%,
+      rgba(0, 0, 0, 0.6) 65%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 40%,
+      rgba(0, 0, 0, 0.6) 65%,
+      transparent 100%
+    );
+  }
+
+  /* Color overlay for mood */
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(12, 15, 20, 0.2) 0%,
+      rgba(12, 15, 20, 0.4) 40%,
+      rgba(12, 15, 20, 0.85) 70%,
+      rgba(12, 15, 20, 1) 100%
+    );
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    padding: 0 80px 80px;
+    max-width: 700px;
+  }
+
+  .hero-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 56px;
+    line-height: 1.1;
+    font-weight: 400;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+
+  .hero-desc {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--text-muted);
+    font-weight: 300;
+    max-width: 480px;
+  }
+
+  /* ========== SECTION 2: BLEND MODES SHOWCASE ========== */
+  .blend-section {
+    position: relative;
+    padding: 100px 80px;
+    overflow: hidden;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .section-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+
+  .section-header p {
+    color: var(--text-muted);
+    font-size: 16px;
+    font-weight: 300;
+  }
+
+  .blend-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .blend-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 4/5;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .blend-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 32px 60px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Animated blend mode color pulse */
+  .blend-multiply .blend-color-overlay {
+    animation: pulseOverlay 3s ease-in-out infinite;
+  }
+  .blend-screen .blend-color-overlay {
+    animation: pulseOverlay 3s ease-in-out infinite 1s;
+  }
+  .blend-overlay .blend-color-overlay {
+    animation: pulseOverlay 3s ease-in-out infinite 2s;
+  }
+
+  @keyframes pulseOverlay {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Floating hero content */
+  .hero-content {
+    animation: floatContent 4s ease-in-out infinite;
+  }
+
+  @keyframes floatContent {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  /* Title gradient shimmer */
+  .hero h1 {
+    background: linear-gradient(90deg, #fff, #e8c9a8, #fff);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleShimmer 4s ease infinite;
+  }
+
+  @keyframes titleShimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .blend-card-image {
+    position: absolute;
+    inset: 0;
+  }
+
+  .blend-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Radial vignette mask on each card */
+  .blend-card-image {
+    mask-image: radial-gradient(ellipse 85% 85% at 50% 40%, black 50%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 40%, black 50%, transparent 100%);
+  }
+
+  /* Blend mode overlays */
+  .blend-color-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .blend-multiply .blend-color-overlay {
+    background: rgba(196, 149, 106, 0.6);
+    mix-blend-mode: multiply;
+  }
+
+  .blend-screen .blend-color-overlay {
+    background: rgba(79, 70, 229, 0.5);
+    mix-blend-mode: screen;
+  }
+
+  .blend-overlay .blend-color-overlay {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(124, 58, 237, 0.4));
+    mix-blend-mode: overlay;
+  }
+
+  /* Card content at bottom */
+  .blend-card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px;
+    z-index: 5;
+    background: linear-gradient(to top, rgba(12, 15, 20, 0.95) 0%, rgba(12, 15, 20, 0.6) 60%, transparent 100%);
+  }
+
+  .blend-card-mode {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .blend-card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .blend-card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* ========== SECTION 3: DIAGONAL MASK SPLIT ========== */
+  .split-section {
+    position: relative;
+    height: 70vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .split-left {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .split-left img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Diagonal mask: left image visible on left, fades diagonally */
+  .split-left {
+    mask-image: linear-gradient(135deg, black 35%, transparent 65%);
+    -webkit-mask-image: linear-gradient(135deg, black 35%, transparent 65%);
+  }
+
+  .split-right {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .split-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Reverse diagonal mask for right image */
+  .split-right {
+    mask-image: linear-gradient(135deg, transparent 35%, black 65%);
+    -webkit-mask-image: linear-gradient(135deg, transparent 35%, black 65%);
+  }
+
+  /* Overall tint overlay */
+  .split-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: linear-gradient(
+      180deg,
+      rgba(12, 15, 20, 0.3) 0%,
+      rgba(12, 15, 20, 0.1) 40%,
+      rgba(12, 15, 20, 0.5) 80%,
+      rgba(12, 15, 20, 1) 100%
+    );
+  }
+
+  .split-content {
+    position: absolute;
+    bottom: 60px;
+    left: 80px;
+    z-index: 10;
+    max-width: 500px;
+  }
+
+  .split-content h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 40px;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+
+  .split-content p {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ========== TECHNIQUE LABELS ========== */
+  .technique-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 20;
+    background: rgba(196, 149, 106, 0.15);
+    border: 1px solid rgba(196, 149, 106, 0.3);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* ========== DEMO LABEL ========== */
+  .demo-label {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.5px;
+    z-index: 100;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Seamless section transition */
+  .blend-section {
+    background: linear-gradient(to bottom, var(--bg) 0%, var(--surface) 50%, var(--bg) 100%);
+  }
+</style>
+</head>
+<body>
+
+<!-- SECTION 1: Hero with alpha mask fade -->
+<section class="hero">
+  <div class="technique-badge">mask-image: linear-gradient</div>
+
+  <div class="hero-image">
+    <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80" alt="Mountain landscape" />
+  </div>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <div class="hero-label">Alpha Masking</div>
+    <h1>Seamless Image<br>Blending</h1>
+    <p class="hero-desc">
+      The mountain image fades naturally into the dark background using a gradient mask. No hard edges. The overlay adds depth without cutting the visual flow.
+    </p>
+  </div>
+</section>
+
+<!-- SECTION 2: Blend modes showcase -->
+<section class="blend-section">
+  <div class="section-header">
+    <h2>Blend Mode Effects</h2>
+    <p>Three approaches to color-mixing layers for mood and atmosphere</p>
+  </div>
+
+  <div class="blend-grid">
+    <!-- Multiply -->
+    <div class="blend-card blend-multiply">
+      <div class="blend-card-image">
+        <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800&q=80" alt="Ocean" />
+      </div>
+      <div class="blend-color-overlay"></div>
+      <div class="blend-card-content">
+        <div class="blend-card-mode">mix-blend-mode: multiply</div>
+        <div class="blend-card-title">Warm Darken</div>
+        <div class="blend-card-desc">Multiplies colors to create rich, deep tones. Ideal for vintage or earthy aesthetics.</div>
+      </div>
+    </div>
+
+    <!-- Screen -->
+    <div class="blend-card blend-screen">
+      <div class="blend-card-image">
+        <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80" alt="Forest" />
+      </div>
+      <div class="blend-color-overlay"></div>
+      <div class="blend-card-content">
+        <div class="blend-card-mode">mix-blend-mode: screen</div>
+        <div class="blend-card-title">Cool Glow</div>
+        <div class="blend-card-desc">Lightens and glows. Creates ethereal, dreamy atmospheres on dark imagery.</div>
+      </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="blend-card blend-overlay">
+      <div class="blend-card-image">
+        <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&q=80" alt="Stars" />
+      </div>
+      <div class="blend-color-overlay"></div>
+      <div class="blend-card-content">
+        <div class="blend-card-mode">mix-blend-mode: overlay</div>
+        <div class="blend-card-title">Vivid Contrast</div>
+        <div class="blend-card-desc">Increases contrast while tinting. Best for dramatic gradients over textures.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: Diagonal mask split -->
+<section class="split-section">
+  <div class="technique-badge">Diagonal Mask Split</div>
+
+  <div class="split-left">
+    <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&q=80" alt="Forest morning" />
+  </div>
+  <div class="split-right">
+    <img src="https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=1600&q=80" alt="Desert evening" />
+  </div>
+  <div class="split-overlay"></div>
+
+  <div class="split-content">
+    <h2>Diagonal Mask Split</h2>
+    <p>Two images blended along a diagonal gradient mask. No hard seam. The transition zone is soft and organic, creating a natural dual-mood composition.</p>
+  </div>
+</section>
+
+<div class="demo-label">Demo 2/3 &mdash; Alpha Masking + Blend Modes + Diagonal Split</div>
+
+</body>
+</html>

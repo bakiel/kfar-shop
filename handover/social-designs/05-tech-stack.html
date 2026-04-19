@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #080f08;
+  }
+
+  /* Grid overlay */
+  .grid-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(196,162,101,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,162,101,0.02) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+
+  /* Glow accents */
+  .glow-1 {
+    position: absolute;
+    top: 100px; left: 100px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(71,140,11,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .glow-2 {
+    position: absolute;
+    bottom: 200px; right: 100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(196,162,101,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  /* Top section */
+  .top-section {
+    position: absolute;
+    top: 45px;
+    left: 60px;
+    right: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-area img {
+    width: 60px;
+    height: auto;
+  }
+
+  .logo-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.3);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  .version-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #478c0b;
+    background: rgba(71,140,11,0.1);
+    border: 1px solid rgba(71,140,11,0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  /* Headline */
+  .headline-area {
+    position: absolute;
+    top: 130px;
+    left: 60px;
+    right: 60px;
+    z-index: 10;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 64px;
+    color: #F5F0E8;
+    line-height: 1.05;
+    margin-bottom: 12px;
+  }
+
+  .headline span { color: #C4A265; }
+
+  .tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    color: rgba(245,240,232,0.5);
+    letter-spacing: 1px;
+  }
+
+  .tagline em {
+    font-style: normal;
+    color: #C4A265;
+  }
+
+  /* Tech cards grid */
+  .tech-grid {
+    position: absolute;
+    top: 320px;
+    left: 50px;
+    right: 50px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 14px;
+    height: 380px;
+    z-index: 10;
+  }
+
+  .tech-card {
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+  }
+
+  .tech-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 3px;
+  }
+
+  .tc-next::before { background: linear-gradient(90deg, #478c0b, transparent); }
+  .tc-pg::before { background: linear-gradient(90deg, #336791, transparent); }
+  .tc-cf::before { background: linear-gradient(90deg, #F6821F, transparent); }
+  .tc-jwt::before { background: linear-gradient(90deg, #C4A265, transparent); }
+  .tc-dkim::before { background: linear-gradient(90deg, #E8912D, transparent); }
+  .tc-tw::before { background: linear-gradient(90deg, #06B6D4, transparent); }
+
+  .tech-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .tc-next .tech-card-icon { background: rgba(71,140,11,0.15); }
+  .tc-pg .tech-card-icon { background: rgba(51,103,145,0.15); }
+  .tc-cf .tech-card-icon { background: rgba(246,130,31,0.15); }
+  .tc-jwt .tech-card-icon { background: rgba(196,162,101,0.15); }
+  .tc-dkim .tech-card-icon { background: rgba(232,145,45,0.15); }
+  .tc-tw .tech-card-icon { background: rgba(6,182,212,0.15); }
+
+  .tech-card-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .tc-next .tech-card-icon svg { stroke: #478c0b; }
+  .tc-pg .tech-card-icon svg { stroke: #336791; }
+  .tc-cf .tech-card-icon svg { stroke: #F6821F; }
+  .tc-jwt .tech-card-icon svg { stroke: #C4A265; }
+  .tc-dkim .tech-card-icon svg { stroke: #E8912D; }
+  .tc-tw .tech-card-icon svg { stroke: #06B6D4; }
+
+  .tech-card-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 18px;
+    color: #F5F0E8;
+    margin-bottom: 4px;
+  }
+
+  .tech-card-desc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(245,240,232,0.4);
+    line-height: 1.4;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    position: absolute;
+    top: 730px;
+    left: 50px;
+    right: 50px;
+    height: 90px;
+    background: linear-gradient(135deg, rgba(196,162,101,0.08) 0%, rgba(45,90,39,0.08) 100%);
+    border: 1px solid rgba(196,162,101,0.12);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+    z-index: 10;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 32px;
+    color: #C4A265;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(245,240,232,0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .stat-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(196,162,101,0.15);
+  }
+
+  /* Terminal line */
+  .terminal-line {
+    position: absolute;
+    top: 855px;
+    left: 50px;
+    right: 50px;
+    z-index: 10;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: rgba(71,140,11,0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .terminal-prompt {
+    color: #478c0b;
+  }
+
+  .terminal-cmd {
+    color: rgba(245,240,232,0.4);
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #478c0b;
+    opacity: 0.7;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    z-index: 10;
+  }
+
+  .bottom-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50px; right: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,162,101,0.15), transparent);
+  }
+
+  .bottom-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .bottom-claim {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: rgba(245,240,232,0.6);
+    font-style: italic;
+  }
+
+  .bottom-url {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+
+  .qr-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .qr-section img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    padding: 5px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(196,162,101,0.2);
+  }
+
+  .qr-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(245,240,232,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+</style>
+</head>
+<body>
+  <div class="grid-overlay"></div>
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+
+  <!-- Top Section -->
+  <div class="top-section">
+    <div class="logo-area">
+      <img src="assets/logo-africa.png" alt="KFAR">
+      <div class="logo-text">Engineering</div>
+    </div>
+    <div class="version-badge">v2.0 // Production</div>
+  </div>
+
+  <!-- Headline -->
+  <div class="headline-area">
+    <h1 class="headline">Built <span>Different</span></h1>
+    <p class="tagline">Enterprise technology, <em>community values</em></p>
+  </div>
+
+  <!-- Tech Cards -->
+  <div class="tech-grid">
+    <div class="tech-card tc-next">
+      <div class="tech-card-icon">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
+      <div>
+        <div class="tech-card-name">Next.js 15</div>
+        <div class="tech-card-desc">Server components, edge runtime, ISR</div>
+      </div>
+    </div>
+
+    <div class="tech-card tc-pg">
+      <div class="tech-card-icon">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      </div>
+      <div>
+        <div class="tech-card-name">PostgreSQL</div>
+        <div class="tech-card-desc">ACID transactions, 24 tables, full CRUD</div>
+      </div>
+    </div>
+
+    <div class="tech-card tc-cf">
+      <div class="tech-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <div>
+        <div class="tech-card-name">Cloudflare</div>
+        <div class="tech-card-desc">Edge CDN, DDoS protection, SSL</div>
+      </div>
+    </div>
+
+    <div class="tech-card tc-jwt">
+      <div class="tech-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="tech-card-name">JWT Auth</div>
+        <div class="tech-card-desc">Secure tokens, role-based access control</div>
+      </div>
+    </div>
+
+    <div class="tech-card tc-dkim">
+      <div class="tech-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div>
+        <div class="tech-card-name">DKIM Email</div>
+        <div class="tech-card-desc">Verified delivery, SPF + DMARC</div>
+      </div>
+    </div>
+
+    <div class="tech-card tc-tw">
+      <div class="tech-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="tech-card-name">Tailwind CSS</div>
+        <div class="tech-card-desc">Responsive design, RTL support, themes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value">133</div>
+      <div class="stat-label">API Routes</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-value">205</div>
+      <div class="stat-label">Pages</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-value">24</div>
+      <div class="stat-label">DB Tables</div>
+    </div>
+  </div>
+
+  <!-- Terminal Line -->
+  <div class="terminal-line">
+    <span class="terminal-prompt">$</span>
+    <span class="terminal-cmd">npm run build --production</span>
+    <span class="cursor-blink"></span>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <div class="bottom-left">
+      <div class="bottom-claim">Enterprise technology, community values</div>
+      <div class="bottom-url">kfarapp.com</div>
+    </div>
+    <div class="qr-section">
+      <div class="qr-label">Explore</div>
+      <img src="assets/qr-kfar.png" alt="QR Code">
+    </div>
+  </div>
+</body>
+</html>

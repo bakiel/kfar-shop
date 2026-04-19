@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<style>
+  @font-face {
+    font-family: 'Playfair Display';
+    src: url('assets/fonts/playfair-display.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('assets/fonts/dm-sans.woff2') format('woff2');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a1f0a;
+  }
+
+  /* Split design - two halves */
+  .split-left {
+    position: absolute;
+    top: 0; left: 0;
+    width: 540px; height: 1080px;
+    background: #1a1a1a;
+    overflow: hidden;
+  }
+
+  .split-left::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(40,40,40,0.6) 50%, rgba(0,0,0,0.8) 100%);
+    z-index: 1;
+  }
+
+  /* Corporate side - dark, cold, faceless */
+  .corporate-visual {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+  }
+
+  .corporate-visual .grid-pattern {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(60,60,60,0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(60,60,60,0.15) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.6;
+  }
+
+  .corporate-icons {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .corp-box {
+    width: 120px;
+    height: 120px;
+    border: 2px solid rgba(100,100,100,0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(30,30,30,0.8);
+  }
+
+  .corp-box svg {
+    width: 50px;
+    height: 50px;
+    stroke: rgba(150,150,150,0.5);
+    fill: none;
+    stroke-width: 1.5;
+  }
+
+  .corp-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(150,150,150,0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    z-index: 2;
+    position: relative;
+  }
+
+  /* Right side - warm, community, real food */
+  .split-right {
+    position: absolute;
+    top: 0; right: 0;
+    width: 540px; height: 1080px;
+    overflow: hidden;
+  }
+
+  .split-right .food-img {
+    position: absolute;
+    top: -5%; left: -5%;
+    width: 110%; height: 110%;
+    object-fit: cover;
+  }
+
+  .split-right::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.8) 100%);
+    z-index: 1;
+  }
+
+  .community-label {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .community-circle {
+    width: 120px;
+    height: 120px;
+    border: 2px solid rgba(196,162,101,0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(45,90,39,0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  .community-circle svg {
+    width: 50px;
+    height: 50px;
+    stroke: #C4A265;
+    fill: none;
+    stroke-width: 1.5;
+  }
+
+  .comm-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(196,162,101,0.8);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    z-index: 2;
+    position: relative;
+  }
+
+  /* Diagonal divider */
+  .divider {
+    position: absolute;
+    top: 0;
+    left: 530px;
+    width: 20px;
+    height: 1080px;
+    z-index: 10;
+    background: linear-gradient(90deg, #0a1f0a 0%, rgba(196,162,101,0.3) 50%, #0a1f0a 100%);
+  }
+
+  /* VS badge */
+  .vs-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 15;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #0a1f0a;
+    border: 2px solid #C4A265;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #C4A265;
+    letter-spacing: 1px;
+  }
+
+  /* Top bar */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 100px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+    background: linear-gradient(180deg, rgba(10,31,10,0.95) 0%, rgba(10,31,10,0.7) 60%, transparent 100%);
+  }
+
+  .logo-mark {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+  }
+
+  .top-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(196,162,101,0.7);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  /* Bottom content */
+  .bottom-zone {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 20;
+    padding: 0 50px 40px;
+    background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0.8) 70%, transparent 100%);
+    padding-top: 120px;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: #FFFFFF;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  .headline .accent {
+    color: #C4A265;
+  }
+
+  .sub-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: #FFFFFF;
+    line-height: 1.55;
+    max-width: 800px;
+    margin-bottom: 28px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 16px rgba(0,0,0,0.4);
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cta-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cta-main {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #C4A265;
+    letter-spacing: 1px;
+  }
+
+  .cta-url {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(196,162,101,0.5);
+    letter-spacing: 1px;
+  }
+
+  .qr-code {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid rgba(196,162,101,0.2);
+    padding: 4px;
+    background: rgba(245,240,232,0.95);
+  }
+
+  /* Gold accent line */
+  .gold-line {
+    position: absolute;
+    bottom: 160px;
+    left: 50px;
+    right: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,162,101,0.3), transparent);
+    z-index: 20;
+  }
+
+</style>
+</head>
+<body>
+  <!-- Left: Corporate / faceless -->
+  <div class="split-left">
+    <div class="corporate-visual">
+      <div class="grid-pattern"></div>
+    </div>
+    <div class="corporate-icons">
+      <div class="corp-box">
+        <!-- Building/warehouse icon -->
+        <svg viewBox="0 0 24 24"><path d="M3 21h18M3 21V7l9-4 9 4v14M9 21V12h6v9"/></svg>
+      </div>
+      <div class="corp-label">Faceless<br>Supply Chain</div>
+      <div style="width: 1px; height: 60px; background: rgba(100,100,100,0.3);"></div>
+      <div style="font-family: 'DM Sans'; font-size: 13px; color: rgba(100,100,100,0.4); text-align: center; line-height: 1.6;">
+        Your money leaves.<br>It never comes back.
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Community / warm -->
+  <div class="split-right">
+    <img class="food-img" src="assets/food-seitan-cutlets.jpg" alt="Local food">
+    <div class="community-label">
+      <div class="community-circle">
+        <!-- Heart/hands icon -->
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </div>
+      <div class="comm-label">Neighbor<br>to Neighbor</div>
+      <div style="width: 1px; height: 60px; background: rgba(196,162,101,0.3);"></div>
+      <div style="font-family: 'DM Sans'; font-size: 13px; color: rgba(196,162,101,0.7); text-align: center; line-height: 1.6;">
+        Your money stays.<br>Your village grows.
+      </div>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider"></div>
+  <div class="vs-badge">VS</div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <img class="logo-mark" src="assets/logo-africa.png" alt="KFAR">
+    <span class="top-tag">Community Marketplace</span>
+  </div>
+
+  <!-- Gold line -->
+  <div class="gold-line"></div>
+
+  <!-- Bottom content -->
+  <div class="bottom-zone">
+    <div class="headline">
+      Your Spending Is<br>Your <span class="accent">Vote</span>.
+    </div>
+    <div class="sub-text">
+      Every purchase is a ballot. Are you voting for your neighbors, or for a headquarters thousands of miles away?
+    </div>
+    <div class="cta-row">
+      <div class="cta-text">
+        <span class="cta-main">Vote local. Shop KFAR.</span>
+        <span class="cta-url">kfarapp.com</span>
+      </div>
+      <img class="qr-code" src="assets/qr-kfar.png" alt="QR">
+    </div>
+  </div>
+</body>
+</html>

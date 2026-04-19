@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a1f0a;
+  }
+
+  /* Background radial */
+  .bg-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 800px; height: 800px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(45,90,39,0.25) 0%, rgba(10,31,10,0.0) 70%);
+    border-radius: 50%;
+  }
+
+  /* Subtle grid */
+  .grid-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(196,162,101,0.05) 1px, transparent 0);
+    background-size: 32px 32px;
+  }
+
+  /* Top section */
+  .top-section {
+    position: absolute;
+    top: 50px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 56px;
+    color: #F5F0E8;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .headline span { color: #C4A265; }
+
+  .sub-line {
+    width: 100px;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, #C4A265, transparent);
+    margin: 0 auto;
+  }
+
+  /* Circular flow diagram */
+  .circle-flow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    z-index: 5;
+  }
+
+  /* Main orbit ring */
+  .orbit-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 480px; height: 480px;
+    transform: translate(-50%, -50%);
+    border: 1.5px solid rgba(196,162,101,0.15);
+    border-radius: 50%;
+  }
+
+  .orbit-ring-inner {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 320px; height: 320px;
+    transform: translate(-50%, -50%);
+    border: 1px dashed rgba(196,162,101,0.1);
+    border-radius: 50%;
+  }
+
+  /* Center logo */
+  .center-logo {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,162,101,0.15) 0%, rgba(10,31,10,0.8) 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border: 1.5px solid rgba(196,162,101,0.25);
+  }
+
+  .center-logo img {
+    width: 80px;
+    height: auto;
+    filter: drop-shadow(0 0 20px rgba(196,162,101,0.3));
+  }
+
+  /* Flow nodes positioned in circle */
+  .flow-node {
+    position: absolute;
+    width: 160px;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .node-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(196,162,101,0.3);
+    background: rgba(10,31,10,0.9);
+    box-shadow: 0 0 30px rgba(196,162,101,0.15);
+  }
+
+  .node-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: #C4A265;
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .node-label {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #C4A265;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .node-desc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(245,240,232,0.5);
+    line-height: 1.4;
+  }
+
+  /* Position nodes at compass points */
+  .node-top { top: 0; left: 50%; transform: translateX(-50%); }
+  .node-right { top: 50%; right: -20px; transform: translateY(-50%); }
+  .node-bottom { bottom: 0; left: 50%; transform: translateX(-50%); }
+  .node-left { top: 50%; left: -20px; transform: translateY(-50%); }
+
+  /* Curved arrows between nodes */
+  .arrow-arc {
+    position: absolute;
+    z-index: 6;
+  }
+
+  .arrow-segment {
+    position: absolute;
+    z-index: 7;
+  }
+
+  /* Top-right arrow */
+  .seg-tr {
+    top: 110px;
+    right: 50px;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(196,162,101,0.1), rgba(196,162,101,0.4));
+    transform: rotate(45deg);
+  }
+
+  .seg-rb {
+    bottom: 110px;
+    right: 50px;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(196,162,101,0.4), rgba(196,162,101,0.1));
+    transform: rotate(-45deg);
+  }
+
+  .seg-bl {
+    bottom: 110px;
+    left: 50px;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(196,162,101,0.1), rgba(196,162,101,0.4));
+    transform: rotate(45deg);
+  }
+
+  .seg-lt {
+    top: 110px;
+    left: 50px;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(196,162,101,0.4), rgba(196,162,101,0.1));
+    transform: rotate(-45deg);
+  }
+
+  /* Quote */
+  .quote-section {
+    position: absolute;
+    bottom: 200px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+    padding: 0 120px;
+  }
+
+  .quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: rgba(245,240,232,0.6);
+    line-height: 1.5;
+  }
+
+  .quote-line {
+    width: 40px;
+    height: 1px;
+    background: rgba(196,162,101,0.3);
+    margin: 16px auto;
+  }
+
+  /* Bottom */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    z-index: 10;
+  }
+
+  .bottom-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 60px; right: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,162,101,0.25), transparent);
+  }
+
+  /* Community photo strip */
+  .photo-strip {
+    position: absolute;
+    bottom: 140px;
+    left: 60px;
+    right: 200px;
+    height: 60px;
+    display: flex;
+    gap: 4px;
+    opacity: 0.4;
+    z-index: 8;
+    border-radius: 8px;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
+  }
+
+  .photo-strip img {
+    height: 100%;
+    width: 200px;
+    object-fit: cover;
+  }
+
+  .url-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+
+  .village-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(245,240,232,0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  .qr-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .qr-area img {
+    width: 90px;
+    height: 90px;
+    border-radius: 10px;
+    padding: 5px;
+    background: rgba(255,255,255,0.95);
+    border: 1.5px solid rgba(196,162,101,0.25);
+  }
+
+  .qr-side-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(245,240,232,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="grid-bg"></div>
+
+  <!-- Top Section -->
+  <div class="top-section">
+    <h1 class="headline">Every Order<br><span>Builds Your Village</span></h1>
+    <div class="sub-line"></div>
+  </div>
+
+  <!-- Circular Flow -->
+  <div class="circle-flow">
+    <div class="orbit-ring"></div>
+    <div class="orbit-ring-inner"></div>
+
+    <!-- Arrow segments -->
+    <div class="arrow-segment seg-tr"></div>
+    <div class="arrow-segment seg-rb"></div>
+    <div class="arrow-segment seg-bl"></div>
+    <div class="arrow-segment seg-lt"></div>
+
+    <!-- Center Logo -->
+    <div class="center-logo">
+      <img src="assets/logo-gold.png" alt="KFAR">
+    </div>
+
+    <!-- Customer Node - Top -->
+    <div class="flow-node node-top">
+      <div class="node-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="node-label">Customer</div>
+      <div class="node-desc">You place an order</div>
+    </div>
+
+    <!-- Vendor Node - Right -->
+    <div class="flow-node node-right">
+      <div class="node-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="node-label">Vendor</div>
+      <div class="node-desc">Local business earns</div>
+    </div>
+
+    <!-- Community Node - Bottom -->
+    <div class="flow-node node-bottom">
+      <div class="node-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div class="node-label">Community</div>
+      <div class="node-desc">Economy strengthens</div>
+    </div>
+
+    <!-- Growth Node - Left -->
+    <div class="flow-node node-left">
+      <div class="node-icon">
+        <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="node-label">Growth</div>
+      <div class="node-desc">Village prospers</div>
+    </div>
+  </div>
+
+  <!-- Quote -->
+  <div class="quote-section">
+    <div class="quote-line"></div>
+    <p class="quote">"Your spending is your vote for the kind of community you want."</p>
+    <div class="quote-line"></div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <div>
+      <div class="url-text">kfarapp.com</div>
+      <div class="village-text">Village of Peace, Dimona</div>
+    </div>
+    <div class="qr-area">
+      <div class="qr-side-text">Scan<br>to join</div>
+      <img src="assets/qr-kfar.png" alt="QR Code">
+    </div>
+  </div>
+</body>
+</html>

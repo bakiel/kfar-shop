@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.35) saturate(1.2);
+}
+
+/* Dark gradient overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(10, 31, 10, 0.92) 0%,
+    rgba(10, 31, 10, 0.75) 40%,
+    rgba(45, 90, 39, 0.6) 70%,
+    rgba(10, 31, 10, 0.85) 100%
+  );
+}
+
+/* Gold accent line at top */
+.top-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #2D5A27, #C4A265, #478c0b, #C4A265, #2D5A27);
+}
+
+/* Content */
+.content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  padding: 50px 70px;
+  z-index: 2;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.right {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Logo */
+.logo-mark {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 24px;
+}
+.logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Title */
+.title {
+  font-size: 62px;
+  font-weight: 900;
+  color: #FDFBF7;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+
+.title span {
+  color: #C4A265;
+}
+
+/* Tagline */
+.tagline {
+  font-size: 22px;
+  color: rgba(253, 251, 247, 0.75);
+  line-height: 1.5;
+  margin-bottom: 32px;
+  max-width: 580px;
+}
+
+/* Stats row */
+.stats {
+  display: flex;
+  gap: 30px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 900;
+  color: #C4A265;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: rgba(253, 251, 247, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 6px;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 50px;
+  background: rgba(196, 162, 101, 0.3);
+  align-self: center;
+}
+
+/* Right side - community mosaic */
+.mosaic {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 8px;
+  width: 280px;
+  height: 400px;
+}
+
+.mosaic-img {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(196, 162, 101, 0.2);
+}
+
+.mosaic-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mosaic-img:first-child {
+  grid-row: span 2;
+}
+
+/* Bottom bar */
+.bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 70px;
+  z-index: 3;
+}
+
+.url {
+  font-size: 18px;
+  font-weight: 700;
+  color: #C4A265;
+  letter-spacing: 2px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #478c0b;
+}
+
+/* Gold line separator */
+.gold-line {
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #C4A265, transparent);
+  margin-bottom: 24px;
+}
+</style>
+</head>
+<body>
+
+<!-- Background image -->
+<div class="bg">
+  <img src="images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_02.jpg" alt="">
+</div>
+<div class="overlay"></div>
+<div class="top-accent"></div>
+
+<!-- Content -->
+<div class="content">
+  <div class="left">
+    <div class="logo-mark">
+      <img src="images/logos/kfar_icon_leaf_gold.png" alt="KFAR">
+    </div>
+    <div class="gold-line"></div>
+    <div class="title">
+      <span>KFAR</span> Marketplace
+    </div>
+    <div class="tagline">
+      Authentic vegan products & services from the Village of Peace community in Dimona, Israel
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-number">6</div>
+        <div class="stat-label">Vendors</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-number">113</div>
+        <div class="stat-label">Products</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Plant-Based</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="mosaic">
+      <div class="mosaic-img">
+        <img src="images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_10.jpg" alt="">
+      </div>
+      <div class="mosaic-img">
+        <img src="images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_14.jpg" alt="">
+      </div>
+      <div class="mosaic-img">
+        <img src="images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_46.jpg" alt="">
+      </div>
+      <div class="mosaic-img">
+        <img src="images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_50.jpg" alt="">
+      </div>
+      <div class="mosaic-img">
+        <img src="images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_65.jpg" alt="">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <div class="url">kfarapp.com</div>
+  <div class="badge">
+    <div class="badge-dot"></div>
+    Village of Peace | Dimona, Israel
+  </div>
+</div>
+
+</body>
+</html>

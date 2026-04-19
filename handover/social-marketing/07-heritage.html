@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<style>
+  @font-face {
+    font-family: 'Playfair Display';
+    src: url('assets/fonts/playfair-display.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('assets/fonts/dm-sans.woff2') format('woff2');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a1f0a;
+  }
+
+  /* Full background image */
+  .bg-hero {
+    position: absolute;
+    top: -5%; left: -5%;
+    width: 110%; height: 110%;
+    overflow: hidden;
+  }
+
+  .bg-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  /* Rich overlay - warm heritage tones */
+  .bg-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.6) 0%,
+      rgba(0,0,0,0.3) 20%,
+      rgba(0,0,0,0.25) 35%,
+      rgba(0,0,0,0.65) 55%,
+      rgba(0,0,0,0.92) 75%,
+      rgba(0,0,0,1) 100%);
+    z-index: 1;
+  }
+
+  /* Gold warmth tint */
+  .warm-tint {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 30%, rgba(196,162,101,0.06) 0%, transparent 70%);
+    z-index: 2;
+  }
+
+  /* Top bar */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 36px 50px;
+  }
+
+  .logo-mark {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+
+  .heritage-tag {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .heritage-tag .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #C4A265;
+  }
+
+  .heritage-tag span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(196,162,101,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* 50 Years badge - floating */
+  .years-badge {
+    position: absolute;
+    top: 160px;
+    right: 60px;
+    z-index: 10;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(196,162,101,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,31,10,0.7);
+    backdrop-filter: blur(8px);
+  }
+
+  .years-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: #C4A265;
+    line-height: 1;
+  }
+
+  .years-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(196,162,101,0.7);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Product thumbnails strip */
+  .thumb-strip {
+    position: absolute;
+    top: 460px;
+    left: 50px;
+    z-index: 10;
+    display: flex;
+    gap: 12px;
+  }
+
+  .thumb {
+    width: 90px;
+    height: 90px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(196,162,101,0.2);
+  }
+
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .thumb-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Bottom content */
+  .bottom-zone {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 0 50px 42px;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 68px;
+    font-weight: 900;
+    color: #FFFFFF;
+    line-height: 1.08;
+    margin-bottom: 8px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  .headline .accent {
+    color: #C4A265;
+  }
+
+  .sub-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    font-style: italic;
+    color: #C4A265;
+    margin-bottom: 16px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  .body-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #FFFFFF;
+    line-height: 1.55;
+    max-width: 750px;
+    margin-bottom: 28px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 16px rgba(0,0,0,0.4);
+  }
+
+  .gold-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(196,162,101,0.4), rgba(196,162,101,0.1), transparent);
+    margin-bottom: 18px;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cta-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cta-main {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+
+  .cta-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(196,162,101,0.4);
+  }
+
+  .kfar-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: rgba(196,162,101,0.08);
+    border: 1px solid rgba(196,162,101,0.2);
+    border-radius: 8px;
+  }
+
+  .kfar-badge img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+  }
+
+  .kfar-badge span {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #C4A265;
+    letter-spacing: 2px;
+  }
+
+</style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="bg-hero">
+    <img src="assets/food-vop-banner.jpg" alt="VOP Shop">
+  </div>
+  <div class="bg-overlay"></div>
+  <div class="warm-tint"></div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <img class="logo-mark" src="assets/logo-africa.png" alt="KFAR">
+    <div class="heritage-tag">
+      <div class="dot"></div>
+      <span>Heritage Collection</span>
+    </div>
+  </div>
+
+  <!-- 50 Years badge -->
+  <div class="years-badge">
+    <div class="years-num">50</div>
+    <div class="years-text">Years</div>
+  </div>
+
+  <!-- Product thumbnails -->
+  <div class="thumb-strip">
+    <div class="thumb-col">
+      <div class="thumb"><img src="assets/heritage-books.jpg" alt="Books"></div>
+      <span class="thumb-label">Wisdom</span>
+    </div>
+    <div class="thumb-col">
+      <div class="thumb"><img src="assets/heritage-art.jpg" alt="Art"></div>
+      <span class="thumb-label">Culture</span>
+    </div>
+    <div class="thumb-col">
+      <div class="thumb"><img src="assets/community.jpg" alt="Community"></div>
+      <span class="thumb-label">Community</span>
+    </div>
+  </div>
+
+  <!-- Bottom content -->
+  <div class="bottom-zone">
+    <div class="headline">
+      <span class="accent">50 Years</span> of Heritage.<br>Now in your pocket.
+    </div>
+    <div class="sub-headline">Curated with love. Delivered to your door.</div>
+
+    <div class="body-text">
+      Books, apparel, art, and wellness from 50 years of Village of Peace culture. Every piece carries a story. Every purchase preserves a legacy.
+    </div>
+
+    <div class="gold-line"></div>
+
+    <div class="cta-row">
+      <div class="cta-left">
+        <span class="cta-main">Explore the collection. kfarapp.com</span>
+        <span class="cta-sub">Heritage, wellness, and community pride</span>
+      </div>
+      <div class="kfar-badge">
+        <img src="assets/logo-gold.png" alt="KFAR">
+        <span>KFAR</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

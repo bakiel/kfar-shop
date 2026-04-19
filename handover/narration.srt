@@ -1,0 +1,179 @@
+1
+00:00:00,050 --> 00:00:01,907
+Welcome to KFAR Marketplace.
+
+2
+00:00:01,907 --> 00:00:10,210
+This is a complete overview of your multi-vendor e-commerce platform, built for the Village of Peace community in Dimona, Israel.
+
+3
+00:00:10,210 --> 00:00:23,460
+KFAR Marketplace connects six local vendors with your community, supporting both Hebrew and English, multiple payment methods including community currency called Braysheet, and a full loyalty rewards system.
+
+4
+00:00:23,460 --> 00:00:25,381
+Let me walk you through the platform.
+
+5
+00:00:25,381 --> 00:00:27,250
+First, the technology.
+
+6
+00:00:27,250 --> 00:00:32,552
+KFAR runs on Next.js 15, which is a modern React framework.
+
+7
+00:00:32,552 --> 00:00:45,131
+It's backed by a PostgreSQL database with 24 tables, secure JWT authentication with bcrypt password hashing, and Tailwind CSS for a beautiful responsive design.
+
+8
+00:00:45,131 --> 00:00:50,802
+The platform has 133 API routes and 205 static pages.
+
+9
+00:00:50,802 --> 00:01:06,947
+Your six active vendors are: Teva Deli with 32 products, Queen's Cuisine with 25 products, People's Store with 18 products, Garden of Light with 14 products, Gahn Delight with 12 products, and VOP Shop with 12 products.
+
+10
+00:01:06,947 --> 00:01:09,460
+That's 113 products total.
+
+11
+00:01:09,460 --> 00:01:18,565
+Each vendor has their own dashboard where they can manage products, view orders, track analytics, create promotions, and generate QR codes.
+
+12
+00:01:18,565 --> 00:01:23,500
+Vendors log in at their dedicated portal and get a full business management suite.
+
+13
+00:01:23,500 --> 00:01:26,802
+For payments, the platform supports four methods.
+
+14
+00:01:26,802 --> 00:01:30,315
+Cash on delivery is the default and is fully active.
+
+15
+00:01:30,315 --> 00:01:36,236
+Braysheet tokens, your community digital currency, are active with QR-based wallets.
+
+16
+00:01:36,236 --> 00:01:39,486
+Bank transfer is active with provided details.
+
+17
+00:01:39,486 --> 00:01:48,565
+And credit card processing via YPAY, an Israeli payment gateway, is ready in sandbox mode, just waiting for production credentials.
+
+18
+00:01:48,565 --> 00:02:03,723
+The order flow works like this: A customer places an order, payment is processed, the vendor accepts the order, prepares it, marks it as ready for pickup, and then when the customer picks it up, it's marked as completed and loyalty points are earned.
+
+19
+00:02:03,723 --> 00:02:10,276
+For email, KFAR has its own dedicated email server with DKIM signing for reliable deliverability.
+
+20
+00:02:10,276 --> 00:02:21,763
+You have three email accounts: noreply at kfarapp dot com for system emails, admin at kfarapp dot com for admin communications, and support at kfarapp dot com for customer support.
+
+21
+00:02:21,763 --> 00:02:34,605
+There are 10 email templates covering order confirmations, status updates, vendor alerts, welcome emails, loyalty notifications, password resets, promotions, and QR loyalty cards.
+
+22
+00:02:34,605 --> 00:02:37,881
+All templates are available in both English and Hebrew.
+
+23
+00:02:37,881 --> 00:02:40,618
+The admin dashboard gives you full control.
+
+24
+00:02:40,618 --> 00:02:45,565
+You can see revenue, orders, and customer overviews from the main dashboard.
+
+25
+00:02:45,565 --> 00:03:03,855
+Manage your vendors, create product bundles, track all orders, run CRM for customer management and segmentation, manage user accounts, create and approve promotions, send broadcast notifications to all users, review driver applications, and configure store settings.
+
+26
+00:03:03,855 --> 00:03:08,013
+Speaking of drivers, there's a complete driver application system.
+
+27
+00:03:08,013 --> 00:03:12,710
+Community members can apply to become delivery drivers through a public form.
+
+28
+00:03:12,710 --> 00:03:16,710
+Applications go to the admin queue for approval or rejection.
+
+29
+00:03:16,710 --> 00:03:23,013
+The CRM system tracks customer profiles with orders, points, and activity timelines.
+
+30
+00:03:23,013 --> 00:03:29,460
+You can create auto and manual customer segments for targeting, and view full interaction histories.
+
+31
+00:03:29,460 --> 00:03:44,315
+The loyalty system has three tiers: Bronze for zero to 499 points with base rewards, Silver for 500 to 1499 points with a 5 percent bonus, and Gold for 1500 plus points with a 10 percent bonus.
+
+32
+00:03:44,315 --> 00:03:52,828
+Customers earn points on every purchase, get 50 welcome bonus points on registration, and can redeem points for discount coupons.
+
+33
+00:03:52,828 --> 00:03:58,368
+For performance, KFAR uses Cloudflare as a global CDN and security layer.
+
+34
+00:03:58,368 --> 00:04:10,171
+Cloudflare provides SSL encryption, DDoS protection, intelligent caching at edge locations worldwide, and gzip compression achieving 87 percent size reduction.
+
+35
+00:04:10,171 --> 00:04:21,618
+Static assets are cached for up to 365 days, authentication endpoints have rate limiting, and security headers include HSTS and Content Security Policy.
+
+36
+00:04:21,618 --> 00:04:25,644
+This means fast load times for your community no matter where they are.
+
+37
+00:04:26,569 --> 00:04:30,480
+The platform supports full Hebrew and English translation.
+
+38
+00:04:30,480 --> 00:04:41,230
+There's a language toggle in the header, RTL layout auto-applied for Hebrew, and an AI Shopping Assistant powered by Google Gemini with voice support in both languages.
+
+39
+00:04:41,230 --> 00:04:43,638
+Deploying updates is straightforward.
+
+40
+00:04:43,638 --> 00:04:48,046
+Pull the latest code, build the application, and restart the service.
+
+41
+00:04:48,046 --> 00:04:54,743
+The platform follows modern DevOps best practices with version control and zero-downtime deployments.
+
+42
+00:04:54,743 --> 00:04:56,414
+That's KFAR Marketplace.
+
+43
+00:04:56,414 --> 00:05:00,519
+A complete, production-ready multi-vendor e-commerce platform.
+
+44
+00:05:00,519 --> 00:05:05,861
+Community powered, beautifully designed, and ready to serve the Village of Peace.
+
+45
+00:05:05,861 --> 00:05:07,572
+Thank you for choosing KFAR.

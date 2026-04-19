@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #080f08;
+  }
+
+  /* Particle/sparkle background */
+  .sparkle-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(196,162,101,0.4);
+    box-shadow: 0 0 6px rgba(196,162,101,0.3);
+  }
+
+  .sparkle-lg {
+    width: 4px;
+    height: 4px;
+    background: rgba(196,162,101,0.6);
+    box-shadow: 0 0 12px rgba(196,162,101,0.4);
+  }
+
+  /* Background glow */
+  .bg-glow-gold {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(196,162,101,0.06) 0%, transparent 60%);
+  }
+
+  /* Top section */
+  .top-section {
+    position: absolute;
+    top: 45px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .logo-top img {
+    width: 70px;
+    height: auto;
+    filter: drop-shadow(0 0 16px rgba(196,162,101,0.3));
+    margin-bottom: 20px;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 60px;
+    color: #F5F0E8;
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+
+  .headline span { color: #C4A265; }
+
+  .sub-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: rgba(245,240,232,0.4);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+  }
+
+  /* Tier cards */
+  .tiers {
+    position: absolute;
+    top: 280px;
+    left: 50px;
+    right: 50px;
+    display: flex;
+    gap: 20px;
+    height: 440px;
+    z-index: 10;
+    align-items: flex-end;
+  }
+
+  .tier-card {
+    flex: 1;
+    border-radius: 24px;
+    padding: 36px 28px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Bronze */
+  .tier-bronze {
+    height: 380px;
+    background: linear-gradient(165deg, #2a1f15 0%, #1a130d 60%, #0d0a07 100%);
+    border: 1px solid rgba(180,120,60,0.15);
+  }
+
+  .tier-bronze .tier-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #B4783C, transparent);
+  }
+
+  /* Silver */
+  .tier-silver {
+    height: 400px;
+    background: linear-gradient(165deg, #1f2025 0%, #141418 60%, #0a0a0d 100%);
+    border: 1px solid rgba(180,180,200,0.12);
+  }
+
+  .tier-silver .tier-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #B4B4C8, transparent);
+  }
+
+  /* Gold */
+  .tier-gold {
+    height: 440px;
+    background: linear-gradient(165deg, #2a2210 0%, #1f1a0a 40%, #0d0a05 100%);
+    border: 1.5px solid rgba(196,162,101,0.25);
+    box-shadow:
+      0 0 60px rgba(196,162,101,0.1),
+      inset 0 0 40px rgba(196,162,101,0.03);
+  }
+
+  .tier-gold .tier-accent {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #C4A265, #E8C870, #C4A265, transparent);
+  }
+
+  /* Gold glow effect */
+  .tier-gold::after {
+    content: '';
+    position: absolute;
+    top: -50px; left: -50px;
+    width: calc(100% + 100px);
+    height: calc(100% + 100px);
+    background: radial-gradient(ellipse at 50% 30%, rgba(196,162,101,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Tier content */
+  .tier-header {
+    position: relative;
+    z-index: 2;
+  }
+
+  .tier-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .tier-bronze .tier-badge {
+    background: rgba(180,120,60,0.15);
+    border: 1.5px solid rgba(180,120,60,0.3);
+  }
+
+  .tier-silver .tier-badge {
+    background: rgba(180,180,200,0.1);
+    border: 1.5px solid rgba(180,180,200,0.2);
+  }
+
+  .tier-gold .tier-badge {
+    background: rgba(196,162,101,0.15);
+    border: 1.5px solid rgba(196,162,101,0.3);
+    box-shadow: 0 0 20px rgba(196,162,101,0.15);
+  }
+
+  .tier-badge svg {
+    width: 26px;
+    height: 26px;
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .tier-bronze .tier-badge svg { stroke: #B4783C; }
+  .tier-silver .tier-badge svg { stroke: #B4B4C8; }
+  .tier-gold .tier-badge svg { stroke: #C4A265; }
+
+  .tier-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .tier-bronze .tier-name { color: #B4783C; }
+  .tier-silver .tier-name { color: #B4B4C8; }
+  .tier-gold .tier-name { color: #C4A265; }
+
+  .tier-range {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.35);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  .tier-benefits {
+    position: relative;
+    z-index: 2;
+  }
+
+  .tier-benefit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(245,240,232,0.6);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tier-benefit:last-child { border-bottom: none; }
+
+  .check-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tier-bronze .check-icon { background: rgba(180,120,60,0.2); }
+  .tier-silver .check-icon { background: rgba(180,180,200,0.15); }
+  .tier-gold .check-icon { background: rgba(196,162,101,0.2); }
+
+  .check-icon svg {
+    width: 10px;
+    height: 10px;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .tier-bronze .check-icon svg { stroke: #B4783C; }
+  .tier-silver .check-icon svg { stroke: #B4B4C8; }
+  .tier-gold .check-icon svg { stroke: #C4A265; }
+
+  .bonus-percent {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 40px;
+    text-align: right;
+    margin-top: auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .tier-bronze .bonus-percent { color: rgba(180,120,60,0.25); }
+  .tier-silver .bonus-percent { color: rgba(180,180,200,0.2); }
+  .tier-gold .bonus-percent { color: rgba(196,162,101,0.3); }
+
+  .bonus-percent span {
+    font-size: 18px;
+    vertical-align: super;
+  }
+
+  /* Welcome bonus callout */
+  .welcome-callout {
+    position: absolute;
+    top: 750px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background: linear-gradient(135deg, rgba(196,162,101,0.1) 0%, rgba(45,90,39,0.08) 100%);
+    border: 1px solid rgba(196,162,101,0.15);
+    border-radius: 16px;
+    padding: 18px 40px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .welcome-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(196,162,101,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .welcome-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: #C4A265;
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .welcome-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+
+  .welcome-text span {
+    font-weight: 400;
+    color: rgba(245,240,232,0.5);
+    font-size: 14px;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Bottom */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    z-index: 10;
+  }
+
+  .bottom-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50px; right: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,162,101,0.15), transparent);
+  }
+
+  .bottom-url {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+
+  .qr-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .qr-area img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    padding: 5px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(196,162,101,0.2);
+  }
+
+  .qr-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(245,240,232,0.35);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="bg-glow-gold"></div>
+
+  <!-- Sparkle particles -->
+  <div class="sparkle-bg">
+    <div class="sparkle" style="top: 8%; left: 12%;"></div>
+    <div class="sparkle" style="top: 15%; right: 20%;"></div>
+    <div class="sparkle sparkle-lg" style="top: 25%; left: 30%;"></div>
+    <div class="sparkle" style="top: 35%; right: 8%;"></div>
+    <div class="sparkle sparkle-lg" style="top: 45%; left: 8%;"></div>
+    <div class="sparkle" style="top: 55%; right: 25%;"></div>
+    <div class="sparkle" style="top: 65%; left: 18%;"></div>
+    <div class="sparkle sparkle-lg" style="top: 72%; right: 12%;"></div>
+    <div class="sparkle" style="top: 80%; left: 35%;"></div>
+    <div class="sparkle" style="top: 88%; right: 35%;"></div>
+    <div class="sparkle sparkle-lg" style="top: 20%; left: 70%;"></div>
+    <div class="sparkle" style="top: 50%; left: 92%;"></div>
+    <div class="sparkle" style="top: 40%; left: 45%;"></div>
+    <div class="sparkle sparkle-lg" style="top: 60%; right: 40%;"></div>
+    <div class="sparkle" style="top: 75%; left: 55%;"></div>
+  </div>
+
+  <!-- Top -->
+  <div class="top-section">
+    <div class="logo-top">
+      <img src="assets/logo-gold.png" alt="KFAR">
+    </div>
+    <h1 class="headline">Earn While<br>You <span>Shop</span></h1>
+    <div class="sub-label">KFAR Loyalty Rewards</div>
+  </div>
+
+  <!-- Tier Cards -->
+  <div class="tiers">
+    <!-- Bronze -->
+    <div class="tier-card tier-bronze">
+      <div class="tier-accent"></div>
+      <div class="tier-header">
+        <div class="tier-badge">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+        </div>
+        <div class="tier-name">Bronze</div>
+        <div class="tier-range">0 - 499 points</div>
+      </div>
+      <div class="tier-benefits">
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          1x points earned
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Order tracking
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Community access
+        </div>
+      </div>
+      <div class="bonus-percent">1x<span> pts</span></div>
+    </div>
+
+    <!-- Silver -->
+    <div class="tier-card tier-silver">
+      <div class="tier-accent"></div>
+      <div class="tier-header">
+        <div class="tier-badge">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+        </div>
+        <div class="tier-name">Silver</div>
+        <div class="tier-range">500 - 1,499 points</div>
+      </div>
+      <div class="tier-benefits">
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          1.5x points earned
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Priority support
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Exclusive bundles
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          5% discount
+        </div>
+      </div>
+      <div class="bonus-percent">1.5x<span> pts</span></div>
+    </div>
+
+    <!-- Gold -->
+    <div class="tier-card tier-gold">
+      <div class="tier-accent"></div>
+      <div class="tier-header">
+        <div class="tier-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>
+        </div>
+        <div class="tier-name">Gold</div>
+        <div class="tier-range">1,500+ points</div>
+      </div>
+      <div class="tier-benefits">
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          2x points earned
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Free delivery
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          VIP early access
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          10% discount
+        </div>
+        <div class="tier-benefit">
+          <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Community rewards
+        </div>
+      </div>
+      <div class="bonus-percent">2x<span> pts</span></div>
+    </div>
+  </div>
+
+  <!-- Welcome Bonus Callout -->
+  <div class="welcome-callout">
+    <div class="welcome-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 12V8H6a2 2 0 01-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 000 4h4v-4h-4z"/></svg>
+    </div>
+    <div class="welcome-text">
+      50 Welcome Bonus Points
+      <span>Start earning from your first order</span>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="bottom-bar">
+    <div class="bottom-url">kfarapp.com</div>
+    <div class="qr-area">
+      <div class="qr-label">Start<br>earning</div>
+      <img src="assets/qr-kfar.png" alt="QR Code">
+    </div>
+  </div>
+</body>
+</html>

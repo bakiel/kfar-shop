@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<style>
+  @font-face {
+    font-family: 'Playfair Display';
+    src: url('assets/fonts/playfair-display.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('assets/fonts/dm-sans.woff2') format('woff2');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a1f0a;
+  }
+
+  /* Full background image */
+  .bg-hero {
+    position: absolute;
+    top: -5%; left: -5%;
+    width: 110%; height: 110%;
+    overflow: hidden;
+  }
+
+  .bg-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+  }
+
+  /* Warm cinematic overlay */
+  .bg-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.5) 0%,
+      rgba(0,0,0,0.25) 25%,
+      rgba(0,0,0,0.4) 45%,
+      rgba(0,0,0,0.85) 65%,
+      rgba(0,0,0,0.98) 85%,
+      rgba(0,0,0,1) 100%);
+    z-index: 1;
+  }
+
+  /* Warm color tint */
+  .warm-tint {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 30%, rgba(196,162,101,0.08) 0%, transparent 70%);
+    z-index: 2;
+  }
+
+  /* Top bar */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 36px 50px;
+  }
+
+  .logo-mark {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+
+  .vendor-tag {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .vendor-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #478c0b;
+  }
+
+  .vendor-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Pull quote - floating */
+  .pull-quote {
+    position: absolute;
+    top: 200px;
+    left: 50px;
+    z-index: 10;
+    max-width: 380px;
+  }
+
+  .pq-line {
+    width: 40px;
+    height: 2px;
+    background: #C4A265;
+    margin-bottom: 16px;
+  }
+
+  .pq-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    font-style: italic;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.4;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 12px rgba(0,0,0,0.4);
+  }
+
+  /* Bottom content zone */
+  .bottom-zone {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 0 50px 42px;
+  }
+
+  .category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: rgba(71,140,11,0.15);
+    border: 1px solid rgba(71,140,11,0.3);
+    border-radius: 24px;
+    margin-bottom: 24px;
+  }
+
+  .category-pill span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: #478c0b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: #FFFFFF;
+    line-height: 1.08;
+    margin-bottom: 20px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  .headline .accent {
+    color: #C4A265;
+  }
+
+  .body-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFFFFF;
+    line-height: 1.6;
+    max-width: 780px;
+    margin-bottom: 30px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 16px rgba(0,0,0,0.4);
+  }
+
+  .gold-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(196,162,101,0.4), rgba(196,162,101,0.1), transparent);
+    margin-bottom: 20px;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cta-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cta-main {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: #C4A265;
+    letter-spacing: 0.5px;
+  }
+
+  .cta-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(196,162,101,0.4);
+  }
+
+  .kfar-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: rgba(196,162,101,0.08);
+    border: 1px solid rgba(196,162,101,0.2);
+    border-radius: 8px;
+  }
+
+  .kfar-badge-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #C4A265;
+    letter-spacing: 2px;
+  }
+
+</style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="bg-hero">
+    <img src="assets/food-teva-banner.jpg" alt="Teva Deli Food">
+  </div>
+  <div class="bg-overlay"></div>
+  <div class="warm-tint"></div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <img class="logo-mark" src="assets/logo-africa.png" alt="KFAR">
+    <div class="vendor-tag">
+      <div class="vendor-dot"></div>
+      <span class="vendor-name">Vendor Spotlight</span>
+    </div>
+  </div>
+
+  <!-- Pull quote -->
+  <div class="pull-quote">
+    <div class="pq-line"></div>
+    <div class="pq-text">
+      "When you buy from your neighbor, the value stays in the loop."
+    </div>
+  </div>
+
+  <!-- Bottom content -->
+  <div class="bottom-zone">
+    <div class="category-pill">
+      <span>Artisan Vegan Kitchen</span>
+    </div>
+
+    <div class="headline">
+      Your food has<br>a <span class="accent">face</span> and<br>a <span class="accent">name</span>.
+    </div>
+
+    <div class="body-text">
+      In the global supply chain, you will never know who made your food. At KFAR, every product comes from a neighbor you can walk over and thank.
+    </div>
+
+    <div class="gold-line"></div>
+
+    <div class="cta-row">
+      <div class="cta-left">
+        <span class="cta-main">Know your food. Know your neighbor.</span>
+        <span class="cta-sub">kfarapp.com</span>
+      </div>
+      <div class="kfar-badge">
+        <span class="kfar-badge-text">KFAR</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

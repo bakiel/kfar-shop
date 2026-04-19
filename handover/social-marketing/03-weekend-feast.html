@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<style>
+  @font-face {
+    font-family: 'Playfair Display';
+    src: url('assets/fonts/playfair-display.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('assets/fonts/dm-sans.woff2') format('woff2');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a1f0a;
+  }
+
+  /* Hero food image */
+  .bg-hero {
+    position: absolute;
+    top: -5%; left: -5%;
+    width: 110%; height: 75%;
+    overflow: hidden;
+  }
+
+  .bg-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .bg-hero::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.5) 0%,
+      rgba(0,0,0,0.1) 30%,
+      rgba(0,0,0,0.4) 60%,
+      rgba(0,0,0,1) 95%);
+  }
+
+  /* Top bar */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 36px 50px;
+  }
+
+  .logo-mark {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+
+  .top-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(196,162,101,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* "One tap" badge - floating over image */
+  .tap-badge {
+    position: absolute;
+    top: 380px;
+    right: 50px;
+    z-index: 10;
+    padding: 14px 28px;
+    background: rgba(196,162,101,0.12);
+    border: 1px solid rgba(196,162,101,0.35);
+    border-radius: 32px;
+    backdrop-filter: blur(10px);
+  }
+
+  .tap-badge span {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+
+  /* Product cards strip */
+  .product-strip {
+    position: absolute;
+    top: 440px;
+    left: 50px;
+    z-index: 10;
+    display: flex;
+    gap: 12px;
+  }
+
+  .mini-card {
+    width: 110px;
+    height: 110px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(196,162,101,0.2);
+    position: relative;
+  }
+
+  .mini-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mini-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(10,31,10,0.7) 100%);
+  }
+
+  /* Bottom content area */
+  .bottom-zone {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 0 50px 42px;
+    background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.98) 50%, rgba(0,0,0,0.95) 70%, transparent 100%);
+    padding-top: 80px;
+  }
+
+  .bundle-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .bundle-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(71,140,11,0.2);
+    border: 1px solid rgba(71,140,11,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bundle-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: #478c0b;
+    fill: none;
+    stroke-width: 1.5;
+  }
+
+  .bundle-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: #478c0b;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: #FFFFFF;
+    line-height: 1.05;
+    margin-bottom: 6px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  .headline .accent {
+    color: #C4A265;
+  }
+
+  .sub-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    font-style: italic;
+    color: #C4A265;
+    margin-bottom: 16px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  .body-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #FFFFFF;
+    line-height: 1.55;
+    max-width: 700px;
+    margin-bottom: 28px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 2px 16px rgba(0,0,0,0.4);
+  }
+
+  .gold-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(196,162,101,0.3), rgba(196,162,101,0.1), transparent);
+    margin-bottom: 18px;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 30px;
+    background: linear-gradient(135deg, #2D5A27 0%, #1a3d15 100%);
+    border: 1px solid rgba(71,140,11,0.3);
+    border-radius: 8px;
+  }
+
+  .cta-btn-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #F5F0E8;
+    letter-spacing: 0.5px;
+  }
+
+  .cta-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: #C4A265;
+    fill: none;
+    stroke-width: 2;
+  }
+
+  .qr-code {
+    width: 76px;
+    height: 76px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid rgba(196,162,101,0.15);
+    padding: 4px;
+    background: rgba(245,240,232,0.95);
+  }
+
+</style>
+</head>
+<body>
+  <!-- Background food -->
+  <div class="bg-hero">
+    <img src="assets/food-queens-banner.jpg" alt="Queens Cuisine">
+  </div>
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <img class="logo-mark" src="assets/logo-africa.png" alt="KFAR">
+    <span class="top-tag">Weekend Special</span>
+  </div>
+
+  <!-- Floating badge -->
+  <div class="tap-badge"><span>One tap. Done.</span></div>
+
+  <!-- Product mini-cards -->
+  <div class="product-strip">
+    <div class="mini-card"><img src="assets/food-seitan-cutlets.jpg" alt=""></div>
+    <div class="mini-card"><img src="assets/food-burger.jpg" alt=""></div>
+    <div class="mini-card"><img src="assets/food-kabab.jpg" alt=""></div>
+  </div>
+
+  <!-- Bottom content -->
+  <div class="bottom-zone">
+    <div class="bundle-tag">
+      <div class="bundle-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      </div>
+      <span class="bundle-label">Weekend Feast Bundle</span>
+    </div>
+
+    <div class="headline">
+      One tap.<br><span class="accent">Saturday sorted.</span>
+    </div>
+    <div class="sub-headline">Fresh from the village kitchen</div>
+
+    <div class="body-text">
+      Artisan vegan cuisine, crafted by your neighbors, delivered to your table. Curated bundles that save you time and support your community.
+    </div>
+
+    <div class="gold-line"></div>
+
+    <div class="cta-row">
+      <div class="cta-btn">
+        <span class="cta-btn-text">Order now at kfarapp.com</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+      <img class="qr-code" src="assets/qr-kfar.png" alt="QR">
+    </div>
+  </div>
+</body>
+</html>

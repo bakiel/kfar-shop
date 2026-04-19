@@ -33,8 +33,9 @@
 
   @font-face {
     font-family: 'Inter';
-    src: local('Inter'), local('Inter-Regular');
+    src: url('fonts/inter-latin.woff2') format('woff2');
     font-weight: 100 900;
+    font-style: normal;
     font-display: swap;
   }
 
@@ -1050,7 +1051,7 @@
   <p class="intro-text">Each vendor has a dedicated login to manage their products, orders, and promotions.</p>
 
   <div class="callout">
-    <p><strong>Default Vendor Password:</strong> <span class="mono">KfarVendor2025!</span> &mdash; Each vendor should change this on first login.</p>
+    <p><strong>Default Vendor Password:</strong> <span class="mono">KfarVendor2025!</span> -Each vendor should change this on first login.</p>
   </div>
 
   <div class="vendor-grid">
@@ -1059,7 +1060,7 @@
       <div class="vendor-info">
         <div class="vendor-name">Teva Deli</div>
         <div class="vendor-email">teva@kfarapp.com</div>
-        <div class="vendor-id">32 products | teva-deli</div>
+        <div class="vendor-id">47 products | teva-deli</div>
       </div>
     </div>
     <div class="vendor-card">
@@ -1067,7 +1068,7 @@
       <div class="vendor-info">
         <div class="vendor-name">Queen's Cuisine</div>
         <div class="vendor-email">queens@kfarapp.com</div>
-        <div class="vendor-id">25 products | queens-cuisine</div>
+        <div class="vendor-id">12 products | queens-cuisine</div>
       </div>
     </div>
     <div class="vendor-card">
@@ -1075,7 +1076,7 @@
       <div class="vendor-info">
         <div class="vendor-name">People's Store</div>
         <div class="vendor-email">people@kfarapp.com</div>
-        <div class="vendor-id">18 products | people-store</div>
+        <div class="vendor-id">23 products | people-store</div>
       </div>
     </div>
     <div class="vendor-card">
@@ -1083,7 +1084,7 @@
       <div class="vendor-info">
         <div class="vendor-name">Garden of Light</div>
         <div class="vendor-email">garden@kfarapp.com</div>
-        <div class="vendor-id">14 products | garden-of-light</div>
+        <div class="vendor-id">9 products | garden-of-light</div>
       </div>
     </div>
     <div class="vendor-card">
@@ -1091,15 +1092,15 @@
       <div class="vendor-info">
         <div class="vendor-name">Gahn Delight</div>
         <div class="vendor-email">gahn@kfarapp.com</div>
-        <div class="vendor-id">12 products | gahn-delight</div>
+        <div class="vendor-id">7 products | gahn-delight</div>
       </div>
     </div>
     <div class="vendor-card">
       <img src="../public/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg" class="vendor-logo" alt="VOP Shop">
       <div class="vendor-info">
         <div class="vendor-name">VOP Shop</div>
-        <div class="vendor-email">kfar@kfarapp.com</div>
-        <div class="vendor-id">12 products | vop-shop</div>
+        <div class="vendor-email">vop@kfarapp.com</div>
+        <div class="vendor-id">15 products | vop-shop</div>
       </div>
     </div>
   </div>
@@ -1128,7 +1129,7 @@
 
   <h3>Vendor Login Flow</h3>
   <div class="flow">
-    <div class="flow-step">Select Store<small>Dropdown</small></div>
+    <div class="flow-step">Enter Email<small>vendor@kfarapp.com</small></div>
     <div class="flow-arrow">&rarr;</div>
     <div class="flow-step">Enter Password<small>KfarVendor2025!</small></div>
     <div class="flow-arrow">&rarr;</div>
@@ -1370,26 +1371,8 @@
     </div>
   </div>
 
-  <div class="divider"></div>
-
-  <h3>YPAY Integration Details</h3>
-  <div class="cred-grid">
-    <div class="cred-box">
-      <div class="cred-label">YPAY Sandbox API</div>
-      <div class="cred-value url">https://ypay.co.il/api/v1/</div>
-    </div>
-    <div class="cred-box">
-      <div class="cred-label">Sandbox Client ID</div>
-      <div class="cred-value">Mg==</div>
-    </div>
-    <div class="cred-box">
-      <div class="cred-label">Callback URL</div>
-      <div class="cred-value url">kfarapp.com/api/payment/callback</div>
-    </div>
-    <div class="cred-box">
-      <div class="cred-label">Webhook URL</div>
-      <div class="cred-value url">kfarapp.com/api/payment/webhook</div>
-    </div>
+  <div class="callout warning">
+    <p><strong>YPAY:</strong> Currently sandbox mode. Contact YPAY (ypay.co.il) for production credentials. Sandbox Client ID: <span class="mono">Mg==</span>. Callback: <span class="mono">kfarapp.com/api/payment/callback</span></p>
   </div>
 
   <div class="page-footer">
@@ -1503,40 +1486,8 @@
 
   <div class="divider"></div>
 
-  <h3>Language Support (Hebrew / English)</h3>
-  <div class="two-col">
-    <div>
-      <h4>How Language Works</h4>
-      <div class="step-item">
-        <span class="num">1</span>
-        <p>Language toggle in header switches between EN/HE</p>
-      </div>
-      <div class="step-item">
-        <span class="num">2</span>
-        <p>LanguageContext stores preference across all pages</p>
-      </div>
-      <div class="step-item">
-        <span class="num">3</span>
-        <p>RTL direction auto-applied for Hebrew layouts</p>
-      </div>
-    </div>
-    <div>
-      <h4>Translation Coverage</h4>
-      <p>All navigation, buttons, form labels, error messages, and status indicators are translated. Product names and descriptions available in both languages.</p>
-      <h4>AI Shopping Assistant</h4>
-      <p>Gemini-powered voice/text shopping with Hebrew and English TTS. Natural language product search and cart operations.</p>
-    </div>
-  </div>
-
-  <div class="img-hero" style="height: 22mm; margin-top: 3mm;">
-    <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_25.jpg" alt="">
-    <div class="overlay">
-      <div class="overlay-text" style="font-size: 10pt;">
-        Serving the Community Since 1969
-        <small>The Village of Peace | Dimona, Israel</small>
-      </div>
-    </div>
-  </div>
+  <h3>Language &amp; AI</h3>
+  <p>Full Hebrew/English support with RTL auto-layout. Language toggle in header persists via LanguageContext. All UI elements, product names, and descriptions translated. AI Shopping Assistant powered by Gemini with Hebrew/English TTS voice search.</p>
 
   <div class="page-footer">
     <div class="footer-line"></div>
@@ -1626,43 +1577,13 @@
   </table>
 
   <div class="callout">
-    <p><strong>Build:</strong> Always use <span class="mono">NODE_OPTIONS='--max-old-space-size=2048' node_modules/.bin/next build</span> (not npx). VPS builds take ~8.5 minutes.</p>
-  </div>
-  <div class="callout warning">
-    <p><strong>YPAY:</strong> Currently sandbox mode. Contact YPAY (ypay.co.il) for production credentials. Update YPAY_CLIENT_ID and YPAY_CLIENT_SECRET in PM2 ecosystem config.</p>
+    <p><strong>Build:</strong> Always use <span class="mono">NODE_OPTIONS='--max-old-space-size=2048' node_modules/.bin/next build</span> (not npx). VPS builds take ~8.5 minutes. Kill stale node processes first: <span class="mono">killall node</span></p>
   </div>
 
   <h3>Database Tables (24 total, indexed)</h3>
-  <div class="two-col" style="font-size: 7.5pt;">
-    <div>
-      <p><span class="mono">users</span> &mdash; Auth accounts<br>
-      <span class="mono">user_sessions</span> &mdash; JWT refresh tokens<br>
-      <span class="mono">customers</span> &mdash; Customer profiles<br>
-      <span class="mono">orders</span> &mdash; Order records<br>
-      <span class="mono">payment_transactions</span> &mdash; Payment log<br>
-      <span class="mono">rewards_points</span> &mdash; Point balances<br>
-      <span class="mono">points_transactions</span> &mdash; Points history<br>
-      <span class="mono">notifications</span> &mdash; In-app alerts<br>
-      <span class="mono">promotions</span> &mdash; Active promos<br>
-      <span class="mono">coupons</span> &mdash; Discount codes<br>
-      <span class="mono">email_templates</span> &mdash; Email templates<br>
-      <span class="mono">email_log</span> &mdash; Sent email tracking</p>
-    </div>
-    <div>
-      <p><span class="mono">crm_activity_log</span> &mdash; CRM activity<br>
-      <span class="mono">customer_segments</span> &mdash; Segments<br>
-      <span class="mono">customer_segment_members</span> &mdash; Membership<br>
-      <span class="mono">store_settings</span> &mdash; Key-value config<br>
-      <span class="mono">products</span> &mdash; Product catalog<br>
-      <span class="mono">vendors</span> &mdash; Vendor profiles<br>
-      <span class="mono">bundles</span> &mdash; Product bundles<br>
-      <span class="mono">flash_deals</span> &mdash; Time-limited deals<br>
-      <span class="mono">product_reviews</span> &mdash; Reviews<br>
-      <span class="mono">invoices</span> &mdash; Invoice records<br>
-      <span class="mono">customer_registrations</span> &mdash; Signups<br>
-      <span class="mono">vendor_registrations</span> &mdash; Applications</p>
-    </div>
-  </div>
+  <p style="font-size: 7pt; color: var(--text-body); line-height: 1.5;">
+    <span class="mono">users</span>, <span class="mono">user_sessions</span>, <span class="mono">customers</span>, <span class="mono">orders</span>, <span class="mono">payment_transactions</span>, <span class="mono">rewards_points</span>, <span class="mono">points_transactions</span>, <span class="mono">notifications</span>, <span class="mono">promotions</span>, <span class="mono">coupons</span>, <span class="mono">email_templates</span>, <span class="mono">email_log</span>, <span class="mono">crm_activity_log</span>, <span class="mono">customer_segments</span>, <span class="mono">customer_segment_members</span>, <span class="mono">store_settings</span>, <span class="mono">products</span>, <span class="mono">vendors</span>, <span class="mono">bundles</span>, <span class="mono">flash_deals</span>, <span class="mono">product_reviews</span>, <span class="mono">invoices</span>, <span class="mono">customer_registrations</span>, <span class="mono">vendor_registrations</span>
+  </p>
 
   <div class="page-footer">
     <div class="footer-line"></div>

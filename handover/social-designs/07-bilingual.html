@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Left - English */
+  .panel-en {
+    position: absolute;
+    top: 0; left: 0;
+    width: 540px;
+    height: 1080px;
+    background: #F5F0E8;
+    overflow: hidden;
+  }
+
+  .panel-en::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 70% 50%, rgba(45,90,39,0.04) 0%, transparent 50%);
+  }
+
+  /* Right - Hebrew */
+  .panel-he {
+    position: absolute;
+    top: 0; right: 0;
+    width: 540px;
+    height: 1080px;
+    background: #0a1f0a;
+    overflow: hidden;
+  }
+
+  .panel-he::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(196,162,101,0.06) 0%, transparent 50%);
+  }
+
+  /* Center logo bridge */
+  .logo-bridge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F5F0E8 0%, #F5F0E8 50%, #0a1f0a 50%, #0a1f0a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    border: 3px solid #C4A265;
+    box-shadow:
+      0 0 40px rgba(196,162,101,0.3),
+      inset 0 0 20px rgba(196,162,101,0.1);
+  }
+
+  .logo-bridge img {
+    width: 60px;
+    height: auto;
+  }
+
+  /* Center divider */
+  .center-divider {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 538px;
+    width: 4px;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      #C4A265 15%,
+      #C4A265 40%,
+      transparent 48%,
+      transparent 52%,
+      #C4A265 60%,
+      #C4A265 85%,
+      transparent 100%);
+    z-index: 20;
+  }
+
+  /* Top headline */
+  .top-headline {
+    position: absolute;
+    top: 50px;
+    left: 0; right: 0;
+    z-index: 25;
+    display: flex;
+  }
+
+  .hl-en {
+    width: 540px;
+    padding: 0 50px;
+    text-align: left;
+  }
+
+  .hl-he {
+    width: 540px;
+    padding: 0 50px;
+    text-align: right;
+    direction: rtl;
+  }
+
+  .hl-en h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 40px;
+    color: #1a3a1a;
+    line-height: 1.1;
+  }
+
+  .hl-en h1 span { color: #478c0b; }
+
+  .hl-he h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 40px;
+    color: #C4A265;
+    line-height: 1.1;
+  }
+
+  .hl-he h1 span { color: #F5F0E8; }
+
+  /* Sub headline */
+  .sub-hl {
+    position: absolute;
+    top: 160px;
+    left: 0; right: 0;
+    z-index: 25;
+    display: flex;
+  }
+
+  .sub-en {
+    width: 540px;
+    padding: 0 50px;
+  }
+
+  .sub-en p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(26,58,26,0.5);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  .sub-he {
+    width: 540px;
+    padding: 0 50px;
+    text-align: right;
+    direction: rtl;
+  }
+
+  .sub-he p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(245,240,232,0.35);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  /* Sample content blocks */
+  .content-en {
+    position: absolute;
+    top: 240px;
+    left: 50px;
+    width: 440px;
+    z-index: 15;
+  }
+
+  .content-he {
+    position: absolute;
+    top: 240px;
+    right: 50px;
+    width: 440px;
+    z-index: 15;
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Mock UI card */
+  .ui-card {
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+
+  .ui-card-en {
+    background: rgba(45,90,39,0.06);
+    border: 1px solid rgba(45,90,39,0.1);
+  }
+
+  .ui-card-he {
+    background: rgba(196,162,101,0.06);
+    border: 1px solid rgba(196,162,101,0.1);
+  }
+
+  .ui-card-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .ui-card-en .ui-card-label { color: #478c0b; }
+  .ui-card-he .ui-card-label { color: #C4A265; }
+
+  .ui-card-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .ui-card-en .ui-card-title { color: #1a3a1a; }
+  .ui-card-he .ui-card-title { color: #F5F0E8; }
+
+  .ui-card-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .ui-card-en .ui-card-body { color: rgba(26,58,26,0.6); }
+  .ui-card-he .ui-card-body { color: rgba(245,240,232,0.5); }
+
+  /* Button mock */
+  .mock-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 12px;
+  }
+
+  .btn-en {
+    background: #2D5A27;
+    color: #F5F0E8;
+  }
+
+  .btn-he {
+    background: #C4A265;
+    color: #0a1f0a;
+  }
+
+  .mock-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .btn-en svg { stroke: #F5F0E8; }
+  .btn-he svg { stroke: #0a1f0a; }
+
+  /* Product list mock */
+  .product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .product-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+  }
+
+  .product-item-en {
+    background: rgba(45,90,39,0.04);
+    border: 1px solid rgba(45,90,39,0.06);
+  }
+
+  .product-item-he {
+    background: rgba(196,162,101,0.04);
+    border: 1px solid rgba(196,162,101,0.06);
+  }
+
+  .product-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .product-info {
+    flex: 1;
+  }
+
+  .product-name {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .product-item-en .product-name { color: #1a3a1a; }
+  .product-item-he .product-name { color: #F5F0E8; }
+
+  .product-price {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+  }
+
+  .product-item-en .product-price { color: #478c0b; }
+  .product-item-he .product-price { color: #C4A265; }
+
+  /* AI Assistant callout */
+  .ai-callout {
+    position: absolute;
+    top: 700px;
+    left: 0; right: 0;
+    z-index: 25;
+    display: flex;
+  }
+
+  .ai-callout-en {
+    width: 540px;
+    padding: 0 50px;
+  }
+
+  .ai-callout-he {
+    width: 540px;
+    padding: 0 50px;
+    text-align: right;
+    direction: rtl;
+  }
+
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+  }
+
+  .ai-badge-en {
+    background: rgba(45,90,39,0.08);
+    border: 1px solid rgba(45,90,39,0.12);
+  }
+
+  .ai-badge-he {
+    background: rgba(196,162,101,0.08);
+    border: 1px solid rgba(196,162,101,0.12);
+  }
+
+  .ai-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ai-icon-en { background: rgba(71,140,11,0.15); }
+  .ai-icon-he { background: rgba(196,162,101,0.15); }
+
+  .ai-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .ai-icon-en svg { stroke: #478c0b; }
+  .ai-icon-he svg { stroke: #C4A265; }
+
+  .ai-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .ai-badge-en .ai-text { color: #2D5A27; }
+  .ai-badge-he .ai-text { color: #C4A265; }
+
+  .ai-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .ai-callout-en .ai-sub { color: rgba(26,58,26,0.4); }
+  .ai-callout-he .ai-sub { color: rgba(245,240,232,0.35); }
+
+  /* Voice badge */
+  .voice-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 10px;
+  }
+
+  .voice-badge-en {
+    background: rgba(45,90,39,0.06);
+    color: #478c0b;
+    border: 1px solid rgba(45,90,39,0.1);
+  }
+
+  .voice-badge-he {
+    background: rgba(196,162,101,0.06);
+    color: #C4A265;
+    border: 1px solid rgba(196,162,101,0.1);
+  }
+
+  .voice-badge svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  .voice-badge-en svg { stroke: #478c0b; }
+  .voice-badge-he svg { stroke: #C4A265; }
+
+  /* Bottom */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 140px;
+    z-index: 25;
+    display: flex;
+  }
+
+  .bottom-en {
+    width: 540px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 50px;
+    position: relative;
+  }
+
+  .bottom-en::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50px; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(45,90,39,0.15), transparent);
+  }
+
+  .bottom-he {
+    width: 540px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+    position: relative;
+  }
+
+  .bottom-he::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0; right: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,162,101,0.2));
+  }
+
+  .bottom-url-en {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2D5A27;
+  }
+
+  .bottom-url-he {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #C4A265;
+  }
+
+  .qr-bottom {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .qr-bottom img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    padding: 5px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(196,162,101,0.2);
+  }
+
+  .qr-bottom-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(245,240,232,0.35);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+</style>
+</head>
+<body>
+  <!-- English Panel -->
+  <div class="panel-en"></div>
+
+  <!-- Hebrew Panel -->
+  <div class="panel-he"></div>
+
+  <!-- Center Divider -->
+  <div class="center-divider"></div>
+
+  <!-- Logo Bridge -->
+  <div class="logo-bridge">
+    <img src="assets/logo-gold.png" alt="KFAR">
+  </div>
+
+  <!-- Top Headlines -->
+  <div class="top-headline">
+    <div class="hl-en">
+      <h1>One Platform,<br><span>Two Languages</span></h1>
+    </div>
+    <div class="hl-he">
+      <h1><span>פלטפורמה אחת,</span><br>שתי שפות</h1>
+    </div>
+  </div>
+
+  <div class="sub-hl">
+    <div class="sub-en"><p>Shop in English</p></div>
+    <div class="sub-he"><p>קנו בעברית</p></div>
+  </div>
+
+  <!-- English Content -->
+  <div class="content-en">
+    <div class="ui-card ui-card-en">
+      <div class="ui-card-label">Featured</div>
+      <div class="ui-card-title">Fresh This Week</div>
+      <div class="ui-card-body">Discover plant-based foods, organic produce, and heritage recipes from your community vendors.</div>
+      <div class="mock-btn btn-en">
+        Shop Now
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+    </div>
+    <div class="product-list">
+      <div class="product-item product-item-en">
+        <div class="product-swatch" style="background: linear-gradient(135deg, #478c0b, #2D5A27); border-radius: 8px;"></div>
+        <div class="product-info">
+          <div class="product-name">Organic Herb Bundle</div>
+          <div class="product-price">25 ILS</div>
+        </div>
+      </div>
+      <div class="product-item product-item-en">
+        <div class="product-swatch" style="background: linear-gradient(135deg, #C4A265, #8B7340); border-radius: 8px;"></div>
+        <div class="product-info">
+          <div class="product-name">Heritage Spice Mix</div>
+          <div class="product-price">18 ILS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hebrew Content -->
+  <div class="content-he">
+    <div class="ui-card ui-card-he">
+      <div class="ui-card-label">מומלץ</div>
+      <div class="ui-card-title">חדש השבוע</div>
+      <div class="ui-card-body">גלו מאכלים צמחיים, תוצרת אורגנית ומתכונים מסורתיים מספקי הקהילה שלכם.</div>
+      <div class="mock-btn btn-he">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        קנו עכשיו
+      </div>
+    </div>
+    <div class="product-list">
+      <div class="product-item product-item-he">
+        <div class="product-swatch" style="background: linear-gradient(135deg, #478c0b, #2D5A27); border-radius: 8px;"></div>
+        <div class="product-info">
+          <div class="product-name">חבילת עשבי תיבול</div>
+          <div class="product-price">25 ש"ח</div>
+        </div>
+      </div>
+      <div class="product-item product-item-he">
+        <div class="product-swatch" style="background: linear-gradient(135deg, #C4A265, #8B7340); border-radius: 8px;"></div>
+        <div class="product-info">
+          <div class="product-name">תערובת תבלינים מסורתית</div>
+          <div class="product-price">18 ש"ח</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Assistant Callout -->
+  <div class="ai-callout">
+    <div class="ai-callout-en">
+      <div class="ai-badge ai-badge-en">
+        <div class="ai-icon ai-icon-en">
+          <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+        <div class="ai-text">AI Shopping Assistant</div>
+      </div>
+      <div class="ai-sub">Powered by Google Gemini</div>
+      <div class="voice-badge voice-badge-en">
+        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
+        Voice Support
+      </div>
+    </div>
+    <div class="ai-callout-he">
+      <div class="ai-badge ai-badge-he">
+        <div class="ai-icon ai-icon-he">
+          <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+        <div class="ai-text">עוזר קניות חכם</div>
+      </div>
+      <div class="ai-sub">מופעל על ידי Google Gemini</div>
+      <div class="voice-badge voice-badge-he">
+        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
+        תמיכה קולית
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="bottom-bar">
+    <div class="bottom-en">
+      <div class="bottom-url-en">kfarapp.com</div>
+    </div>
+    <div class="bottom-he">
+      <div class="bottom-url-he">kfarapp.com</div>
+      <div class="qr-bottom">
+        <div class="qr-bottom-text">Scan</div>
+        <img src="assets/qr-kfar.png" alt="QR Code">
+      </div>
+    </div>
+  </div>
+</body>
+</html>

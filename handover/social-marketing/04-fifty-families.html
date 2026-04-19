@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<style>
+  @font-face {
+    font-family: 'Playfair Display';
+    src: url('assets/fonts/playfair-display.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'DM Sans';
+    src: url('assets/fonts/dm-sans.woff2') format('woff2');
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    background: #0a1f0a;
+  }
+
+  /* Subtle texture background */
+  .bg-texture {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(45,90,39,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(196,162,101,0.06) 0%, transparent 50%);
+  }
+
+  /* Network grid visualization */
+  .network-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.08;
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(196,162,101,0.8) 2px, transparent 2px),
+      radial-gradient(circle at 30% 40%, rgba(196,162,101,0.6) 2px, transparent 2px),
+      radial-gradient(circle at 50% 15%, rgba(196,162,101,0.7) 2px, transparent 2px),
+      radial-gradient(circle at 70% 35%, rgba(196,162,101,0.5) 2px, transparent 2px),
+      radial-gradient(circle at 90% 25%, rgba(196,162,101,0.6) 2px, transparent 2px),
+      radial-gradient(circle at 15% 60%, rgba(196,162,101,0.7) 2px, transparent 2px),
+      radial-gradient(circle at 40% 70%, rgba(196,162,101,0.5) 2px, transparent 2px),
+      radial-gradient(circle at 60% 55%, rgba(196,162,101,0.8) 2px, transparent 2px),
+      radial-gradient(circle at 85% 65%, rgba(196,162,101,0.6) 2px, transparent 2px),
+      radial-gradient(circle at 25% 85%, rgba(196,162,101,0.5) 2px, transparent 2px);
+  }
+
+  /* Top bar */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 36px 50px;
+  }
+
+  .logo-mark {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+  }
+
+  .top-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(196,162,101,0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Big center Africa logo */
+  .center-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    z-index: 1;
+    width: 400px;
+    height: 400px;
+    opacity: 0.06;
+    object-fit: contain;
+  }
+
+  /* Main content */
+  .content {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 100px 60px 160px;
+    text-align: center;
+  }
+
+  .number {
+    font-family: 'Playfair Display', serif;
+    font-size: 180px;
+    font-weight: 900;
+    color: #C4A265;
+    line-height: 0.85;
+    text-shadow: 0 4px 40px rgba(196,162,101,0.2);
+    margin-bottom: 0;
+  }
+
+  .families-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+
+  .tagline {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    font-style: italic;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 40px;
+  }
+
+  /* Progress bar */
+  .progress-section {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 40px;
+  }
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .progress-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .progress-label.active {
+    color: #C4A265;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(245,240,232,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    width: 35%;
+    height: 100%;
+    background: linear-gradient(90deg, #2D5A27, #478c0b, #C4A265);
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #C4A265;
+    box-shadow: 0 0 12px rgba(196,162,101,0.5);
+  }
+
+  .progress-count {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  .count-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: rgba(245,240,232,0.5);
+  }
+
+  .count-text strong {
+    color: #C4A265;
+    font-weight: 700;
+  }
+
+  /* Quote block */
+  .quote-block {
+    max-width: 550px;
+    padding: 20px 28px;
+    background: rgba(196,162,101,0.05);
+    border-left: 2px solid rgba(196,162,101,0.3);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 10px;
+  }
+
+  .quote-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.5;
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  /* Supporting stats row */
+  .support-stats {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .support-stat {
+    text-align: center;
+    padding: 16px 20px;
+    background: rgba(196,162,101,0.05);
+    border: 1px solid rgba(196,162,101,0.12);
+    border-radius: 12px;
+    flex: 1;
+  }
+
+  .support-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #C4A265;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .support-stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 10;
+    padding: 0 50px 40px;
+  }
+
+  .gold-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(196,162,101,0.3), transparent);
+    margin-bottom: 20px;
+  }
+
+  .cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cta-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cta-main {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #C4A265;
+    letter-spacing: 0.5px;
+  }
+
+  .cta-url {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: rgba(196,162,101,0.4);
+  }
+
+  .qr-code {
+    width: 76px;
+    height: 76px;
+    object-fit: contain;
+    border-radius: 6px;
+    border: 1px solid rgba(196,162,101,0.15);
+    padding: 4px;
+    background: rgba(245,240,232,0.95);
+  }
+
+</style>
+</head>
+<body>
+  <div class="bg-texture"></div>
+  <div class="network-bg"></div>
+  <img class="center-logo" src="assets/logo-africa.png" alt="">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <img class="logo-mark" src="assets/logo-africa.png" alt="KFAR">
+    <span class="top-tag">Join the Movement</span>
+  </div>
+
+  <!-- Main content -->
+  <div class="content">
+    <div class="number">50</div>
+    <div class="families-text">families.</div>
+    <div class="tagline">That is all it takes.</div>
+
+    <div class="progress-section">
+      <div class="progress-labels">
+        <span class="progress-label">Launching</span>
+        <span class="progress-label active">First 50</span>
+        <span class="progress-label">Self-sustaining</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="progress-count">
+        <span class="count-text"><strong>50</strong> engaged households can create a self-sustaining local economy.</span>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <div class="quote-text">
+        "In network theory, the first 50 nodes are the most important. Be one of them."
+      </div>
+    </div>
+
+    <div class="support-stats">
+      <div class="support-stat">
+        <div class="support-stat-num">6</div>
+        <div class="support-stat-label">Vendors</div>
+      </div>
+      <div class="support-stat">
+        <div class="support-stat-num">113</div>
+        <div class="support-stat-label">Products</div>
+      </div>
+      <div class="support-stat">
+        <div class="support-stat-num">100%</div>
+        <div class="support-stat-label">Local</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <div class="gold-line"></div>
+    <div class="cta-row">
+      <div class="cta-text">
+        <span class="cta-main">Join the first 50.</span>
+        <span class="cta-url">kfarapp.com</span>
+      </div>
+      <img class="qr-code" src="assets/qr-kfar.png" alt="QR">
+    </div>
+  </div>
+</body>
+</html>

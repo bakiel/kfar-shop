@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Mesh + Seamless Sections - Visual Effects Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-void: #050508;
+    --bg-deep: #0a0a0f;
+    --bg-surface: #10101a;
+    --accent-emerald: #10b981;
+    --accent-cyan: #06b6d4;
+    --accent-violet: #8b5cf6;
+  }
+
+  body {
+    background: var(--bg-void);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ========== SECTION 1: ANIMATED MESH HERO ========== */
+  .mesh-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 80px 40px;
+  }
+
+  /* Multi-point mesh gradient with animation */
+  .mesh-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      -45deg,
+      #050510,
+      #0d1a2a,
+      #1a0d25,
+      #0a1a1a,
+      #050510
+    );
+    background-size: 400% 400%;
+    animation: meshFlow 5s ease infinite;
+  }
+
+  @keyframes meshFlow {
+    0%   { background-position: 0% 50%; }
+    25%  { background-position: 50% 100%; }
+    50%  { background-position: 100% 50%; }
+    75%  { background-position: 50% 0%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Radial orbs over mesh */
+  .mesh-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+  }
+
+  .mesh-orb-1 {
+    width: 500px;
+    height: 500px;
+    top: 10%;
+    left: 15%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.5), transparent 70%);
+    animation: float1 4s ease-in-out infinite;
+  }
+
+  .mesh-orb-2 {
+    width: 600px;
+    height: 600px;
+    bottom: 5%;
+    right: 10%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.45), transparent 70%);
+    animation: float2 6s ease-in-out infinite;
+  }
+
+  .mesh-orb-3 {
+    width: 400px;
+    height: 400px;
+    top: 40%;
+    right: 30%;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.4), transparent 70%);
+    animation: float3 5s ease-in-out infinite;
+  }
+
+  @keyframes float1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(120px, -80px) scale(1.2); }
+    50% { transform: translate(-80px, 100px) scale(0.8); }
+    75% { transform: translate(100px, 60px) scale(1.15); }
+  }
+
+  @keyframes float2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-120px, 80px) scale(1.3); }
+    66% { transform: translate(100px, -100px) scale(0.7); }
+  }
+
+  @keyframes float3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(100px, 80px) scale(1.4); }
+  }
+
+  /* Noise overlay */
+  .noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    z-index: 1;
+  }
+
+  /* Hero content */
+  .mesh-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 800px;
+  }
+
+  .mesh-content h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 0.95;
+    margin-bottom: 24px;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6, #10b981);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Feature cards staggered entrance */
+  .feature-card {
+    animation: cardEntrance 0.6s ease-out backwards;
+  }
+  .feature-card:nth-child(1) { animation-delay: 0.1s; }
+  .feature-card:nth-child(2) { animation-delay: 0.2s; }
+  .feature-card:nth-child(3) { animation-delay: 0.3s; }
+  .feature-card:nth-child(4) { animation-delay: 0.4s; }
+  .feature-card:nth-child(5) { animation-delay: 0.5s; }
+  .feature-card:nth-child(6) { animation-delay: 0.6s; }
+
+  @keyframes cardEntrance {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .mesh-content .subtitle {
+    font-size: 18px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 300;
+    max-width: 550px;
+    margin: 0 auto 40px;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    gap: 48px;
+    justify-content: center;
+    margin-top: 48px;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-name {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ========== SVG WAVE DIVIDER ========== */
+  .wave-divider {
+    position: relative;
+    z-index: 5;
+    margin-top: -2px;
+  }
+
+  .wave-divider svg {
+    display: block;
+    width: 100%;
+    height: 80px;
+  }
+
+  /* ========== SECTION 2: FEATURE CARDS (Continuous background) ========== */
+  .features {
+    position: relative;
+    padding: 80px 60px 120px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  /* Subtle orb in features section for continuity */
+  .features-orb {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.12), transparent 70%);
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .features-header {
+    text-align: center;
+    margin-bottom: 64px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .features-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+
+  .features-header p {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 16px;
+    font-weight: 300;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .feature-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 36px 28px;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-6px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);
+  }
+
+  .feature-card:hover::before {
+    opacity: 1;
+  }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .icon-emerald { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.25); }
+  .icon-cyan { background: rgba(6, 182, 212, 0.15); border: 1px solid rgba(6, 182, 212, 0.25); }
+  .icon-violet { background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.25); }
+
+  .icon-svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .icon-emerald .icon-svg { stroke: #34d399; }
+  .icon-cyan .icon-svg { stroke: #22d3ee; }
+  .icon-violet .icon-svg { stroke: #a78bfa; }
+
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+
+  .feature-card p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 300;
+  }
+
+  /* ========== GRADIENT BRIDGE (features to CTA) ========== */
+  .gradient-bridge {
+    height: 160px;
+    background: linear-gradient(to bottom, var(--bg-surface), var(--bg-void));
+    position: relative;
+  }
+
+  /* Faint center line light effect */
+  .gradient-bridge::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.3), transparent);
+  }
+
+  /* ========== SECTION 3: CTA WITH OVERLAP ========== */
+  .cta-section {
+    position: relative;
+    padding: 80px 60px 120px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  /* Background gradient for CTA */
+  .cta-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(16, 185, 129, 0.08), transparent);
+  }
+
+  .cta-content {
+    position: relative;
+    z-index: 5;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .cta-content h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+    line-height: 1.05;
+  }
+
+  .cta-content p {
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    font-weight: 500;
+    font-size: 15px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(16, 185, 129, 0.3);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    font-size: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ========== TECHNIQUE BADGES ========== */
+  .technique-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 20;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #34d399;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .technique-badge-left {
+    right: auto;
+    left: 20px;
+  }
+
+  /* ========== DEMO LABEL ========== */
+  .demo-label {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.5px;
+    z-index: 100;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* ========== SECTION LABELS (right side) ========== */
+  .section-marker {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.15);
+    font-weight: 500;
+    z-index: 20;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<!-- SECTION 1: Animated Mesh Hero -->
+<section class="mesh-hero">
+  <div class="technique-badge">Animated Mesh Gradient</div>
+  <div class="technique-badge technique-badge-left">Floating Orbs</div>
+
+  <div class="mesh-bg"></div>
+  <div class="mesh-orb mesh-orb-1"></div>
+  <div class="mesh-orb mesh-orb-2"></div>
+  <div class="mesh-orb mesh-orb-3"></div>
+  <div class="noise"></div>
+
+  <div class="section-marker">Section 01 / Hero</div>
+
+  <div class="mesh-content">
+    <h1>
+      Build With<br>
+      <span class="gradient-text">Living Gradients</span>
+    </h1>
+    <p class="subtitle">
+      Animated mesh backgrounds with floating color orbs create atmosphere that static gradients never achieve. Sections flow into each other seamlessly.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-number">15s</div>
+        <div class="stat-name">Mesh Cycle</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">3</div>
+        <div class="stat-name">Color Orbs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">0.04</div>
+        <div class="stat-name">Noise Opacity</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100px</div>
+        <div class="stat-name">Orb Blur</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SVG Wave Divider (seamless transition) -->
+<div class="wave-divider">
+  <svg viewBox="0 0 1200 80" preserveAspectRatio="none">
+    <path d="M0,40 C200,70 400,10 600,40 C800,70 1000,10 1200,40 L1200,80 L0,80 Z" fill="#10101a" />
+    <path d="M0,50 C300,75 500,25 700,50 C900,75 1100,25 1200,50 L1200,80 L0,80 Z" fill="#10101a" opacity="0.5" />
+  </svg>
+</div>
+
+<!-- SECTION 2: Features (continuous background) -->
+<section class="features">
+  <div class="technique-badge">SVG Wave Divider</div>
+  <div class="section-marker">Section 02 / Features</div>
+
+  <div class="features-orb"></div>
+
+  <div class="features-header">
+    <h2>Seamless Section Flow</h2>
+    <p>No hard breaks between sections. Gradient bridges, wave dividers, and shared orbs.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon icon-emerald">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+      </div>
+      <h3>Gradient Bridges</h3>
+      <p>Background color transitions smoothly between sections using linear gradients. The eye never hits a hard line.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon icon-cyan">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <h3>Wave Dividers</h3>
+      <p>SVG wave paths create organic section boundaries. Configurable amplitude, frequency, and fill color.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon icon-violet">
+        <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <h3>Shared Orbs</h3>
+      <p>Color orbs bleed across section boundaries. One orb placed at the seam ties both sections together visually.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon icon-emerald">
+        <svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <h3>Overlapping Sections</h3>
+      <p>Negative margins let sections slide over each other. Combined with gradient masks for depth layering.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon icon-cyan">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </div>
+      <h3>Noise Continuity</h3>
+      <p>The same SVG noise texture spans all sections at consistent opacity. Unifies disparate backgrounds into one surface.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon icon-violet">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 3v18m-6-6 6 6 6-6"/></svg>
+      </div>
+      <h3>Performance Budget</h3>
+      <p>Max 3 backdrop-filter elements visible. Blur capped at 24px. Orbs reduced on mobile. 60fps guaranteed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Gradient Bridge (seamless transition to CTA) -->
+<div class="gradient-bridge">
+  <div class="technique-badge" style="top: 50%; transform: translateY(-50%);">Gradient Bridge</div>
+</div>
+
+<!-- SECTION 3: CTA -->
+<section class="cta-section">
+  <div class="section-marker">Section 03 / CTA</div>
+  <div class="cta-bg"></div>
+
+  <div class="cta-content">
+    <h2>
+      Every Section<br>
+      <span class="gradient-text">Flows Into the Next</span>
+    </h2>
+    <p>
+      Three transition techniques demonstrated: SVG wave divider, gradient bridge, and radial background glow. Zero hard breaks from hero to CTA.
+    </p>
+    <div class="cta-buttons">
+      <a href="#" class="btn-primary">
+        Get Started
+        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+      </a>
+      <a href="#" class="btn-secondary">
+        View Source
+        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="demo-label">Demo 3/3 &mdash; Animated Mesh + Wave Dividers + Gradient Bridges + Noise</div>
+
+</body>
+</html>

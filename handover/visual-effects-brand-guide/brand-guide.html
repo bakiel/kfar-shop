@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Web Visual Effects - Brand Guide</title>
+<style>
+  @font-face {
+    font-family: 'Syne';
+    src: url('syne-latin.woff2') format('woff2');
+    font-weight: 400 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Source Sans';
+    src: url('/Users/mac/Downloads/design-system/fonts/sourcesans-400.ttf') format('truetype');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'Source Sans';
+    src: url('/Users/mac/Downloads/design-system/fonts/sourcesans-300.ttf') format('truetype');
+    font-weight: 300;
+  }
+  @font-face {
+    font-family: 'Source Sans';
+    src: url('/Users/mac/Downloads/design-system/fonts/sourcesans-600.ttf') format('truetype');
+    font-weight: 600;
+  }
+  @font-face {
+    font-family: 'Source Sans';
+    src: url('/Users/mac/Downloads/design-system/fonts/sourcesans-700.ttf') format('truetype');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'Outfit';
+    src: url('/Users/mac/Downloads/design-system/fonts/outfit-500.ttf') format('truetype');
+    font-weight: 500;
+  }
+  @font-face {
+    font-family: 'Outfit';
+    src: url('/Users/mac/Downloads/design-system/fonts/outfit-700.ttf') format('truetype');
+    font-weight: 700;
+  }
+
+  :root {
+    --void: #050508;
+    --deep: #0a0a0f;
+    --surface: #111118;
+    --elevated: #1a1a24;
+    --border: rgba(255,255,255,0.08);
+    --border-accent: rgba(255,255,255,0.15);
+    --text-primary: rgba(255,255,255,0.92);
+    --text-secondary: rgba(255,255,255,0.55);
+    --text-muted: rgba(255,255,255,0.3);
+    --neon-cyan: #00ffff;
+    --neon-pink: #ff0080;
+    --neon-purple: #bf00ff;
+    --neon-green: #00ff88;
+    --accent-indigo: #6366f1;
+    --accent-violet: #8b5cf6;
+    --accent-cyan: #06b6d4;
+    --accent-emerald: #10b981;
+    --accent-rose: #f43f5e;
+    --accent-amber: #f59e0b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    font-family: 'Source Sans', -apple-system, sans-serif;
+    background: var(--void);
+    color: var(--text-primary);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 210mm;
+    height: 297mm;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    background: var(--deep);
+  }
+
+  .page:last-child { page-break-after: auto; }
+
+  /* Noise overlay for every page */
+  .noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Content zone */
+  .content {
+    position: relative;
+    z-index: 5;
+    padding: 22mm 24mm 24mm;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Page footer */
+  .page-footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 16mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 24mm 6mm;
+    z-index: 10;
+  }
+
+  .page-footer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 24mm; right: 24mm;
+    height: 0.5px;
+    background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+  }
+
+  .footer-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .footer-page {
+    font-family: 'Outfit', sans-serif;
+    font-size: 7pt;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  /* Section title styles */
+  .section-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--neon-cyan);
+    margin-bottom: 4mm;
+    opacity: 0.7;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28pt;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin-bottom: 3mm;
+  }
+
+  .section-subtitle {
+    font-size: 10pt;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 75%;
+    margin-bottom: 8mm;
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 13pt;
+    font-weight: 700;
+    margin-bottom: 2mm;
+    letter-spacing: -0.3px;
+  }
+
+  /* Cards */
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 5mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  }
+
+  /* Color swatch */
+  .swatch {
+    width: 100%;
+    height: 18mm;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .swatch-label {
+    position: absolute;
+    bottom: 2mm; left: 3mm;
+    font-family: 'Outfit', sans-serif;
+    font-size: 7pt;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  .swatch-hex {
+    position: absolute;
+    bottom: 2mm; right: 3mm;
+    font-family: 'Outfit', sans-serif;
+    font-size: 6.5pt;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.5px;
+  }
+
+  /* Code block */
+  .code-block {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3mm 4mm;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 7pt;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.7);
+    overflow: hidden;
+  }
+
+  .code-keyword { color: var(--neon-pink); }
+  .code-value { color: var(--neon-cyan); }
+  .code-property { color: var(--accent-violet); }
+  .code-comment { color: var(--text-muted); font-style: italic; }
+
+  /* Grid helpers */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 3mm; }
+  .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3mm; }
+
+  /* Table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+  }
+  .data-table th {
+    text-align: left;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 7pt;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 2mm 3mm;
+    border-bottom: 1px solid var(--border-accent);
+  }
+  .data-table td {
+    padding: 2mm 3mm;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+  .data-table td:first-child {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* Tags */
+  .tag {
+    display: inline-block;
+    padding: 1mm 3mm;
+    border-radius: 100px;
+    font-size: 6.5pt;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .tag-cyan { background: rgba(0,255,255,0.1); color: var(--neon-cyan); border: 1px solid rgba(0,255,255,0.2); }
+  .tag-pink { background: rgba(255,0,128,0.1); color: var(--neon-pink); border: 1px solid rgba(255,0,128,0.2); }
+  .tag-purple { background: rgba(191,0,255,0.1); color: var(--neon-purple); border: 1px solid rgba(191,0,255,0.2); }
+  .tag-green { background: rgba(0,255,136,0.1); color: var(--neon-green); border: 1px solid rgba(0,255,136,0.2); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-accent), transparent);
+    margin: 5mm 0;
+  }
+
+  /* Utility */
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .gap-2 { gap: 2mm; }
+  .gap-3 { gap: 3mm; }
+  .gap-4 { gap: 4mm; }
+  .flex-1 { flex: 1; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .text-center { text-align: center; }
+  .mt-auto { margin-top: auto; }
+  .mb-2 { margin-bottom: 2mm; }
+  .mb-3 { margin-bottom: 3mm; }
+  .mb-4 { margin-bottom: 4mm; }
+  .mb-6 { margin-bottom: 6mm; }
+
+  /* ==========================================
+     PAGE 1: COVER
+     ========================================== */
+  .cover {
+    background: var(--void);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .cover-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  /* Gradient orbs */
+  .cover-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+  }
+  .cover-orb-1 {
+    width: 400px; height: 400px;
+    top: -5%; left: -10%;
+    background: radial-gradient(circle, rgba(99,102,241,0.5), transparent 70%);
+  }
+  .cover-orb-2 {
+    width: 350px; height: 350px;
+    bottom: 10%; right: -5%;
+    background: radial-gradient(circle, rgba(0,255,255,0.3), transparent 70%);
+  }
+  .cover-orb-3 {
+    width: 300px; height: 300px;
+    top: 40%; left: 35%;
+    background: radial-gradient(circle, rgba(255,0,128,0.25), transparent 70%);
+  }
+
+  /* Grid lines */
+  .cover-grid {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 100%);
+  }
+
+  /* Portal rings */
+  .cover-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    border-radius: 50%;
+    border: 1px solid;
+  }
+  .cover-ring-1 {
+    width: 500px; height: 500px;
+    margin: -250px 0 0 -250px;
+    border-color: rgba(99,102,241,0.12);
+  }
+  .cover-ring-2 {
+    width: 380px; height: 380px;
+    margin: -190px 0 0 -190px;
+    border-color: rgba(0,255,255,0.1);
+    border-style: dashed;
+  }
+  .cover-ring-3 {
+    width: 260px; height: 260px;
+    margin: -130px 0 0 -130px;
+    border-color: rgba(255,0,128,0.08);
+  }
+
+  .cover-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 20mm;
+  }
+
+  .cover-eyebrow {
+    font-family: 'Outfit', sans-serif;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--neon-cyan);
+    opacity: 0.6;
+    margin-bottom: 6mm;
+  }
+
+  .cover-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 56pt;
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 0.95;
+    margin-bottom: 4mm;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 50%, #fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cover-title-accent {
+    display: block;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cover-subtitle {
+    font-size: 11pt;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto 10mm;
+  }
+
+  .cover-meta {
+    font-family: 'Outfit', sans-serif;
+    font-size: 7.5pt;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .cover-version {
+    display: inline-block;
+    padding: 1.5mm 5mm;
+    border: 1px solid rgba(0,255,255,0.2);
+    border-radius: 100px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 7pt;
+    font-weight: 500;
+    color: var(--neon-cyan);
+    letter-spacing: 1.5px;
+    margin-top: 4mm;
+  }
+
+  .cover-brand {
+    position: absolute;
+    bottom: 20mm; left: 0; right: 0;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .cover-brand-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ==========================================
+     PAGE 2: OVERVIEW
+     ========================================== */
+  .stat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4mm;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 28pt;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 1mm;
+  }
+
+  .stat-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 7pt;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ==========================================
+     PAGE 3: COLORS
+     ========================================== */
+  .color-strip {
+    height: 12mm;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ==========================================
+     PAGE 5: GLASS
+     ========================================== */
+  .glass-demo {
+    border-radius: 16px;
+    padding: 5mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-subtle-demo {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 4px 16px rgba(0,0,0,0.12);
+  }
+
+  .glass-medium-demo {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 10px 30px rgba(0,0,0,0.15);
+  }
+
+  .glass-liquid-demo {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05), rgba(255,255,255,0.08));
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.15), 0 16px 40px rgba(0,0,0,0.2);
+  }
+
+  /* ==========================================
+     PAGE 7: ANTI-PATTERNS
+     ========================================== */
+  .do-box {
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 10px;
+    padding: 4mm;
+  }
+
+  .dont-box {
+    background: rgba(255,0,128,0.05);
+    border: 1px solid rgba(255,0,128,0.15);
+    border-radius: 10px;
+    padding: 4mm;
+  }
+
+  .do-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--neon-green);
+    margin-bottom: 2mm;
+  }
+
+  .dont-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--neon-pink);
+    margin-bottom: 2mm;
+  }
+
+  /* List styles */
+  .effect-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .effect-list li {
+    padding: 1.5mm 0;
+    font-size: 8.5pt;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+  }
+
+  .effect-list li:last-child { border-bottom: none; }
+
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-cyan { background: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
+  .dot-pink { background: var(--neon-pink); box-shadow: 0 0 6px var(--neon-pink); }
+  .dot-purple { background: var(--neon-purple); box-shadow: 0 0 6px var(--neon-purple); }
+  .dot-green { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); }
+
+  /* Gradient text for accents */
+  .gradient-text-cyan {
+    background: linear-gradient(90deg, var(--neon-cyan), #00ccff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-pink {
+    background: linear-gradient(90deg, var(--neon-pink), #ff4da6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-text-multi {
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==========================================
+     PAGE 1: COVER
+     ========================================== -->
+<div class="page cover">
+  <div class="cover-bg">
+    <div class="cover-orb cover-orb-1"></div>
+    <div class="cover-orb cover-orb-2"></div>
+    <div class="cover-orb cover-orb-3"></div>
+    <div class="cover-grid"></div>
+    <div class="cover-ring cover-ring-1"></div>
+    <div class="cover-ring cover-ring-2"></div>
+    <div class="cover-ring cover-ring-3"></div>
+  </div>
+  <div class="noise"></div>
+
+  <div class="cover-content">
+    <div class="cover-eyebrow">Aleph Creative-Hub</div>
+    <div class="cover-title">
+      Web Visual
+      <span class="cover-title-accent">Effects</span>
+    </div>
+    <div class="cover-subtitle">
+      Production-ready CSS, Tailwind, and React patterns for premium visual effects. 12 pattern files. 9 HTML demos. Zero theory.
+    </div>
+    <div class="cover-meta">Brand &amp; Pattern Guide</div>
+    <div class="cover-version">v2.0 / February 2026</div>
+  </div>
+
+  <div class="cover-brand">
+    <div class="cover-brand-text">Aleph Creative-Hub</div>
+  </div>
+</div>
+
+<!-- ==========================================
+     PAGE 2: SYSTEM OVERVIEW
+     ========================================== -->
+<div class="page">
+  <div class="noise"></div>
+  <div class="content">
+    <div class="section-label">01 / System Overview</div>
+    <div class="section-title">Pattern Library</div>
+    <div class="section-subtitle">
+      A modular system of 12 pattern files covering every premium visual effect from glass morphism to dimensional portals. Each pattern is copy-paste ready.
+    </div>
+
+    <div class="grid-4 mb-6">
+      <div class="stat-card">
+        <div class="stat-value gradient-text-cyan">12</div>
+        <div class="stat-label">Pattern Files</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value gradient-text-pink">9</div>
+        <div class="stat-label">HTML Demos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value gradient-text-multi">60+</div>
+        <div class="stat-label">Effects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--neon-green)">60</div>
+        <div class="stat-label">FPS Target</div>
+      </div>
+    </div>
+
+    <div class="grid-2 gap-4">
+      <div>
+        <h3 style="color: var(--neon-cyan); margin-bottom: 3mm;">Pattern Files</h3>
+        <ul class="effect-list">
+          <li><span class="dot dot-cyan"></span><strong>glass.md</strong> &mdash; Frosted glass (3 tiers), light mode</li>
+          <li><span class="dot dot-cyan"></span><strong>gradients-orbs.md</strong> &mdash; Mesh gradients, noise</li>
+          <li><span class="dot dot-cyan"></span><strong>masking-blending.md</strong> &mdash; Alpha masks, blend modes</li>
+          <li><span class="dot dot-pink"></span><strong>atmospheric.md</strong> &mdash; Aurora, stars, rain, nebula</li>
+          <li><span class="dot dot-pink"></span><strong>text-effects.md</strong> &mdash; Glitch, neon, chromatic</li>
+          <li><span class="dot dot-pink"></span><strong>3d-depth.md</strong> &mdash; Holo foil, portals, orbits</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color: var(--neon-pink); margin-bottom: 3mm;">Pattern Files (cont.)</h3>
+        <ul class="effect-list">
+          <li><span class="dot dot-purple"></span><strong>svg-filters.md</strong> &mdash; SVG goo filter, lava blobs</li>
+          <li><span class="dot dot-purple"></span><strong>hud-cyber.md</strong> &mdash; CRT scanlines, HUD panels</li>
+          <li><span class="dot dot-purple"></span><strong>ui-elements.md</strong> &mdash; Bento grid, morphing blobs</li>
+          <li><span class="dot dot-green"></span><strong>section-transitions.md</strong> &mdash; Gradient bridges, waves</li>
+          <li><span class="dot dot-green"></span><strong>motion-choreography.md</strong> &mdash; Framer Motion patterns</li>
+          <li><span class="dot dot-green"></span><strong>mobile-performance.md</strong> &mdash; Mobile strategy, a11y</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider" style="margin-top: auto;"></div>
+
+    <div class="grid-3 gap-4" style="margin-top: 3mm;">
+      <div class="card" style="border-color: rgba(0,255,255,0.15);">
+        <div style="font-family: 'Syne', sans-serif; font-size: 11pt; font-weight: 700; margin-bottom: 1mm;">Foundations</div>
+        <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6;">Glass, gradients, masks, noise, blending. The building blocks every section needs.</div>
+      </div>
+      <div class="card" style="border-color: rgba(255,0,128,0.15);">
+        <div style="font-family: 'Syne', sans-serif; font-size: 11pt; font-weight: 700; margin-bottom: 1mm;">Atmosphere</div>
+        <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6;">Stars, aurora, particles, portals, HUD panels. The effects that create immersion.</div>
+      </div>
+      <div class="card" style="border-color: rgba(0,255,136,0.15);">
+        <div style="font-family: 'Syne', sans-serif; font-size: 11pt; font-weight: 700; margin-bottom: 1mm;">Motion</div>
+        <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6;">Framer Motion, transitions, mobile strategy. How effects move and perform.</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="footer-brand">Web Visual Effects</span>
+    <span class="footer-page">02</span>
+  </div>
+</div>
+
+<!-- ==========================================
+     PAGE 3: COLOR SYSTEM
+     ========================================== -->
+<div class="page">
+  <div class="noise"></div>
+  <div class="content">
+    <div class="section-label">02 / Colour System</div>
+    <div class="section-title">Dark Mode Palette</div>
+    <div class="section-subtitle">
+      Never use pure #000000. These dark values create depth while maintaining richness. All effects are designed for dark-mode-first.
+    </div>
+
+    <!-- Dark backgrounds -->
+    <h3 class="mb-3">Background Scale</h3>
+    <div class="grid-4 mb-6">
+      <div>
+        <div class="swatch" style="background: #050508;">
+          <span class="swatch-label">Void</span>
+          <span class="swatch-hex">#050508</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #0a0a0f;">
+          <span class="swatch-label">Deep (Default)</span>
+          <span class="swatch-hex">#0A0A0F</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #111118;">
+          <span class="swatch-label">Surface</span>
+          <span class="swatch-hex">#111118</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #1a1a24;">
+          <span class="swatch-label">Elevated</span>
+          <span class="swatch-hex">#1A1A24</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Neon Accents -->
+    <h3 class="mb-3">Neon Accents (Glow Effects)</h3>
+    <div class="grid-6 mb-6">
+      <div>
+        <div class="swatch" style="background: #0ff; box-shadow: 0 0 20px rgba(0,255,255,0.4);">
+          <span class="swatch-label" style="color: #000;">Cyan</span>
+          <span class="swatch-hex" style="color: rgba(0,0,0,0.5);">#00FFFF</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #ff0080; box-shadow: 0 0 20px rgba(255,0,128,0.4);">
+          <span class="swatch-label">Pink</span>
+          <span class="swatch-hex">#FF0080</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #bf00ff; box-shadow: 0 0 20px rgba(191,0,255,0.4);">
+          <span class="swatch-label">Purple</span>
+          <span class="swatch-hex">#BF00FF</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.4);">
+          <span class="swatch-label" style="color: #000;">Green</span>
+          <span class="swatch-hex" style="color: rgba(0,0,0,0.5);">#00FF88</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #ff8000; box-shadow: 0 0 20px rgba(255,128,0,0.4);">
+          <span class="swatch-label">Orange</span>
+          <span class="swatch-hex">#FF8000</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: #ffcc00; box-shadow: 0 0 20px rgba(255,204,0,0.4);">
+          <span class="swatch-label" style="color: #000;">Yellow</span>
+          <span class="swatch-hex" style="color: rgba(0,0,0,0.5);">#FFCC00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orb / Accent colours -->
+    <h3 class="mb-3">Gradient Orb Colours (40% Opacity for Blurs)</h3>
+    <div class="grid-6 mb-6">
+      <div>
+        <div class="swatch" style="background: radial-gradient(circle, rgba(99,102,241,0.8), rgba(99,102,241,0.2));">
+          <span class="swatch-label">Indigo</span>
+          <span class="swatch-hex">#6366F1</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: radial-gradient(circle, rgba(139,92,246,0.8), rgba(139,92,246,0.2));">
+          <span class="swatch-label">Violet</span>
+          <span class="swatch-hex">#8B5CF6</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: radial-gradient(circle, rgba(6,182,212,0.8), rgba(6,182,212,0.2));">
+          <span class="swatch-label">Cyan</span>
+          <span class="swatch-hex">#06B6D4</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: radial-gradient(circle, rgba(16,185,129,0.8), rgba(16,185,129,0.2));">
+          <span class="swatch-label">Emerald</span>
+          <span class="swatch-hex">#10B981</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: radial-gradient(circle, rgba(244,63,94,0.8), rgba(244,63,94,0.2));">
+          <span class="swatch-label">Rose</span>
+          <span class="swatch-hex">#F43F5E</span>
+        </div>
+      </div>
+      <div>
+        <div class="swatch" style="background: radial-gradient(circle, rgba(245,158,11,0.8), rgba(245,158,11,0.2));">
+          <span class="swatch-label">Amber</span>
+          <span class="swatch-hex">#F59E0B</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gradient combos -->
+    <h3 class="mb-3">Background Gradient Combos</h3>
+    <div class="grid-3 gap-3">
+      <div>
+        <div class="color-strip" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);"></div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 1mm;">Deep Space &mdash; Tech, SaaS</div>
+      </div>
+      <div>
+        <div class="color-strip" style="background: linear-gradient(135deg, #0a192f, #0f2b46, #0d1b2a);"></div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 1mm;">Ocean &mdash; Finance, Health</div>
+      </div>
+      <div>
+        <div class="color-strip" style="background: linear-gradient(135deg, #0a1a0f, #1a3a1f, #0f2518);"></div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 1mm;">Forest &mdash; Eco, Wellness</div>
+      </div>
+      <div>
+        <div class="color-strip" style="background: linear-gradient(135deg, #1a0a0a, #2a1515, #1f0f0f);"></div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 1mm;">Warm &mdash; Fashion, Luxury</div>
+      </div>
+      <div>
+        <div class="color-strip" style="background: linear-gradient(135deg, #0a0a0f, #12121a, #0e0e14);"></div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 1mm;">Neutral &mdash; Universal</div>
+      </div>
+      <div>
+        <div class="color-strip" style="background: linear-gradient(135deg, #0a0020, #050010, #000);"></div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 1mm;">Violet &mdash; Creative, Gaming</div>
+      </div>
+    </div>
+
+    <div style="margin-top: auto;">
+      <div class="card" style="border-color: rgba(255,0,128,0.2);">
+        <div style="font-size: 8pt; color: var(--neon-pink); font-weight: 600; margin-bottom: 1mm;">Never use pure #000000</div>
+        <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.5;">#0A0A0F minimum. Pure black kills depth, makes glass invisible, and looks cheap. Always add a subtle blue/purple tint to dark values.</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="footer-brand">Web Visual Effects</span>
+    <span class="footer-page">03</span>
+  </div>
+</div>
+
+<!-- ==========================================
+     PAGE 4: GLASS TIERS
+     ========================================== -->
+<div class="page">
+  <div class="noise"></div>
+  <!-- Background orbs for glass demo -->
+  <div style="position: absolute; inset: 0; z-index: 0; overflow: hidden;">
+    <div style="position: absolute; width: 300px; height: 300px; top: 20%; left: 10%; border-radius: 50%; background: radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%); filter: blur(60px);"></div>
+    <div style="position: absolute; width: 250px; height: 250px; top: 50%; right: 15%; border-radius: 50%; background: radial-gradient(circle, rgba(255,0,128,0.25), transparent 70%); filter: blur(60px);"></div>
+    <div style="position: absolute; width: 200px; height: 200px; bottom: 20%; left: 40%; border-radius: 50%; background: radial-gradient(circle, rgba(6,182,212,0.3), transparent 70%); filter: blur(60px);"></div>
+  </div>
+
+  <div class="content">
+    <div class="section-label">03 / Glass Morphism</div>
+    <div class="section-title">Three Glass Tiers</div>
+    <div class="section-subtitle">
+      Glass requires a rich background to work. Gradient orbs, mesh gradients, or vivid imagery. On white or flat grey, glass is invisible.
+    </div>
+
+    <div class="grid-3 gap-4 mb-6" style="flex: 1;">
+      <!-- Subtle -->
+      <div class="glass-demo glass-subtle-demo" style="border-radius: 16px;">
+        <div class="tag tag-cyan mb-3">Tier 1: Subtle</div>
+        <div style="font-family: 'Syne'; font-size: 14pt; font-weight: 700; margin-bottom: 2mm;">Cards &amp; Nav</div>
+        <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-bottom: 4mm;">Light background tint with minimal blur. Best for navigation bars and small cards.</div>
+        <div class="code-block">
+          <span class="code-property">background</span>: <span class="code-value">rgba(255,255,255, 0.06)</span>;<br>
+          <span class="code-property">backdrop-filter</span>: <span class="code-value">blur(12px) saturate(1.4)</span>;<br>
+          <span class="code-property">border</span>: <span class="code-value">1px solid rgba(255,255,255, 0.1)</span>;
+        </div>
+      </div>
+
+      <!-- Medium -->
+      <div class="glass-demo glass-medium-demo" style="border-radius: 16px;">
+        <div class="tag tag-pink mb-3">Tier 2: Medium</div>
+        <div style="font-family: 'Syne'; font-size: 14pt; font-weight: 700; margin-bottom: 2mm;">Hero Cards</div>
+        <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-bottom: 4mm;">Stronger blur with increased saturation. Pricing cards, modals, feature highlights.</div>
+        <div class="code-block">
+          <span class="code-property">background</span>: <span class="code-value">rgba(255,255,255, 0.08)</span>;<br>
+          <span class="code-property">backdrop-filter</span>: <span class="code-value">blur(20px) saturate(1.8)</span>;<br>
+          <span class="code-property">border</span>: <span class="code-value">1px solid rgba(255,255,255, 0.15)</span>;
+        </div>
+      </div>
+
+      <!-- Liquid -->
+      <div class="glass-demo glass-liquid-demo" style="border-radius: 16px;">
+        <div class="tag tag-purple mb-3">Tier 3: Liquid</div>
+        <div style="font-family: 'Syne'; font-size: 14pt; font-weight: 700; margin-bottom: 2mm;">Showcases</div>
+        <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-bottom: 4mm;">Deep blur with brightness boost and gradient background. Hero overlays.</div>
+        <div class="code-block">
+          <span class="code-property">background</span>: <span class="code-value">linear-gradient(135deg, ...)</span>;<br>
+          <span class="code-property">backdrop-filter</span>: <span class="code-value">blur(24px) saturate(2.0)</span>;<br>
+          <span class="code-property">border</span>: <span class="code-value">1px solid rgba(255,255,255, 0.18)</span>;
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3 class="mb-3">When Glass Works vs. Fails</h3>
+    <table class="data-table">
+      <tr><th>Background</th><th>Result</th><th>Fix</th></tr>
+      <tr><td>Rich gradient / mesh</td><td style="color: var(--neon-green);">Premium</td><td>None needed</td></tr>
+      <tr><td>Dark solid (#0a0a0a)</td><td style="color: var(--neon-cyan);">Elegant</td><td>Add gradient orbs behind</td></tr>
+      <tr><td>Vibrant image</td><td style="color: var(--neon-cyan);">Stunning</td><td>Reduce blur if image matters</td></tr>
+      <tr><td>White / light</td><td style="color: var(--neon-pink);">Invisible</td><td>Use glass-light variant</td></tr>
+      <tr><td>Flat medium grey</td><td style="color: var(--neon-pink);">Dull</td><td>Add noise or gradient</td></tr>
+    </table>
+  </div>
+  <div class="page-footer">
+    <span class="footer-brand">Web Visual Effects</span>
+    <span class="footer-page">04</span>
+  </div>
+</div>
+
+<!-- ==========================================
+     PAGE 5: ATMOSPHERIC EFFECTS
+     ========================================== -->
+<div class="page">
+  <div class="noise"></div>
+  <div class="content">
+    <div class="section-label">04 / Atmospheric Effects</div>
+    <div class="section-title">Immersive Backgrounds</div>
+    <div class="section-subtitle">
+      Aurora bands, star fields, particles, rain, nebula clouds. All pure CSS. Zero JavaScript required. Layer them for rich environments.
+    </div>
+
+    <div class="grid-2 gap-4 mb-4">
+      <!-- Aurora -->
+      <div class="card" style="min-height: 40mm; background: linear-gradient(180deg, #050510, #0a0a1a); border-color: rgba(0,255,128,0.15);">
+        <div style="position: absolute; left: -20%; right: -20%; top: 20%; height: 80px; background: linear-gradient(90deg, transparent, rgba(0,255,128,0.15), rgba(0,200,255,0.1), transparent); filter: blur(20px); opacity: 0.6;"></div>
+        <div style="position: absolute; left: -20%; right: -20%; top: 40%; height: 60px; background: linear-gradient(90deg, transparent, rgba(100,0,255,0.12), rgba(0,255,200,0.1), transparent); filter: blur(15px); opacity: 0.5;"></div>
+        <div style="position: relative; z-index: 2;">
+          <div class="tag tag-green mb-2">atmospheric.md</div>
+          <h3>Aurora Borealis</h3>
+          <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-top: 1mm;">3 overlapping gradient bands with blur(40px). Undulating wave animation at 5-8s cycles.</div>
+        </div>
+      </div>
+
+      <!-- Star Field -->
+      <div class="card" style="min-height: 40mm; background: radial-gradient(ellipse at 50% 50%, #0a0a1a, #050508); border-color: rgba(255,255,255,0.1);">
+        <div style="position: absolute; inset: 4mm; background-image: radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,0.4), transparent), radial-gradient(1.5px 1.5px at 55% 15%, rgba(200,220,255,0.6), transparent), radial-gradient(1px 1px at 75% 75%, rgba(255,255,255,0.3), transparent), radial-gradient(1.5px 1.5px at 85% 45%, rgba(200,220,255,0.5), transparent), radial-gradient(1px 1px at 25% 85%, rgba(255,255,255,0.4), transparent), radial-gradient(1px 1px at 65% 35%, rgba(255,255,255,0.5), transparent);"></div>
+        <div style="position: relative; z-index: 2;">
+          <div class="tag tag-cyan mb-2">atmospheric.md</div>
+          <h3>Star Field</h3>
+          <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-top: 1mm;">Multi-layer parallax. Far stars (1px, dim) + mid stars (1.5px, brighter). Twinkle with opacity keyframes.</div>
+        </div>
+      </div>
+
+      <!-- Rain -->
+      <div class="card" style="min-height: 40mm; background: linear-gradient(180deg, #0a0a12, #0d0d18); border-color: rgba(0,255,255,0.12);">
+        <div style="position: absolute; top: 0; bottom: 0; left: 20%; width: 1px; background: linear-gradient(to bottom, transparent, rgba(0,255,255,0.25), transparent); height: 60%;"></div>
+        <div style="position: absolute; top: 15%; bottom: 0; left: 45%; width: 1px; background: linear-gradient(to bottom, transparent, rgba(0,255,255,0.2), transparent); height: 50%;"></div>
+        <div style="position: absolute; top: 30%; bottom: 0; left: 70%; width: 1px; background: linear-gradient(to bottom, transparent, rgba(0,255,255,0.3), transparent); height: 45%;"></div>
+        <div style="position: absolute; top: 5%; bottom: 0; left: 85%; width: 1px; background: linear-gradient(to bottom, transparent, rgba(0,255,255,0.15), transparent); height: 55%;"></div>
+        <div style="position: relative; z-index: 2;">
+          <div class="tag tag-cyan mb-2">atmospheric.md</div>
+          <h3>Rain</h3>
+          <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-top: 1mm;">20-25 drops with varied height (65-140px), speed (0.8-1.6s), and position. Cyan tint.</div>
+        </div>
+      </div>
+
+      <!-- Nebula -->
+      <div class="card" style="min-height: 40mm; background: #050510; border-color: rgba(128,0,255,0.15);">
+        <div style="position: absolute; width: 150px; height: 150px; top: -20%; right: -10%; border-radius: 50%; background: rgba(100,50,255,0.15); filter: blur(40px);"></div>
+        <div style="position: absolute; width: 120px; height: 120px; bottom: -10%; left: -5%; border-radius: 50%; background: rgba(255,50,150,0.12); filter: blur(35px);"></div>
+        <div style="position: relative; z-index: 2;">
+          <div class="tag tag-purple mb-2">atmospheric.md</div>
+          <h3>Nebula Clouds</h3>
+          <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-top: 1mm;">Large blurred circles (400-500px, blur 80px) floating with translate + scale over 12-15s.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h3 class="mb-3">Layering Recipe</h3>
+    <div class="code-block">
+      <span class="code-comment">/* Z-order: furthest to closest */</span><br>
+      z: -1 &nbsp; Background gradient (mesh orbs, static gradient)<br>
+      z: 0 &nbsp;&nbsp; Star field (far layer)<br>
+      z: 1 &nbsp;&nbsp; Atmospheric (aurora bands, nebula clouds, rain)<br>
+      z: 2 &nbsp;&nbsp; Noise overlay (0.03-0.05 opacity)<br>
+      z: 3 &nbsp;&nbsp; Particles (rising, floating)<br>
+      z: 10 &nbsp; Content (cards, text, interactive elements)
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="footer-brand">Web Visual Effects</span>
+    <span class="footer-page">05</span>
+  </div>
+</div>
+
+<!-- ==========================================
+     PAGE 6: TEXT & HUD EFFECTS
+     ========================================== -->
+<div class="page">
+  <div class="noise"></div>
+  <div class="content">
+    <div class="section-label">05 / Text &amp; HUD Effects</div>
+    <div class="section-title">Typography &amp; Interface</div>
+    <div class="section-subtitle">
+      From subtle gradient shimmer to full cyberpunk glitch. Every text effect uses data-text attribute for pseudo-element layers.
+    </div>
+
+    <!-- Text Effects showcase -->
+    <div class="grid-2 gap-4 mb-4">
+      <div class="card" style="text-align: center; padding: 6mm 4mm;">
+        <div style="font-family: 'Syne'; font-size: 22pt; font-weight: 800; background: linear-gradient(90deg, #fff, #e8c9a8, #fff); background-size: 200% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 2mm;">SHIMMER</div>
+        <div class="tag tag-cyan">Gradient Shimmer</div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 2mm;">200% background-size, slide left to right. Premium, subtle. Works everywhere.</div>
+      </div>
+
+      <div class="card" style="text-align: center; padding: 6mm 4mm;">
+        <div style="font-family: 'Syne'; font-size: 22pt; font-weight: 800; background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #9b59b6); background-size: 300% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 2mm;">COLOUR SWEEP</div>
+        <div class="tag tag-pink">Full Rainbow</div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 2mm;">300% background-size, full spectrum sweep. Bold, editorial. Use sparingly.</div>
+      </div>
+
+      <div class="card" style="text-align: center; padding: 6mm 4mm; background: rgba(0,0,0,0.3);">
+        <div style="font-family: 'Syne'; font-size: 22pt; font-weight: 800; color: #0ff; text-shadow: 0 0 7px #0ff, 0 0 10px #0ff, 0 0 21px #0ff, 0 0 42px #0ff; margin-bottom: 2mm;">NEON GLOW</div>
+        <div class="tag tag-cyan">Multi-Layer Shadow</div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 2mm;">5 text-shadow layers (7/10/21/42/82px). Add flicker keyframes for neon sign effect.</div>
+      </div>
+
+      <div class="card" style="text-align: center; padding: 6mm 4mm;">
+        <div style="font-family: 'Syne'; font-size: 22pt; font-weight: 800; color: #fff; position: relative; margin-bottom: 2mm;">
+          GLITCH
+          <span style="position: absolute; top: 0; left: 0; width: 100%; color: #0ff; clip-path: inset(40% 0 30% 0); transform: translate(-3px, 1px);">GLITCH</span>
+          <span style="position: absolute; top: 0; left: 0; width: 100%; color: #ff0080; clip-path: inset(60% 0 10% 0); transform: translate(3px, -1px);">GLITCH</span>
+        </div>
+        <div class="tag tag-pink">Clip-Path Split</div>
+        <div style="font-size: 7pt; color: var(--text-muted); margin-top: 2mm;">Cyan + pink pseudo-elements with animated clip-path insets + translate offsets.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- HUD Panel -->
+    <h3 class="mb-3">HUD Panels (Cyberpunk UI)</h3>
+    <div class="grid-3 gap-3">
+      <div style="position: relative; background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.15); border-radius: 4px; padding: 4mm 3mm;">
+        <!-- Corner brackets -->
+        <div style="position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; border-top: 2px solid rgba(0,255,255,0.6); border-left: 2px solid rgba(0,255,255,0.6);"></div>
+        <div style="position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-bottom: 2px solid rgba(0,255,255,0.6); border-right: 2px solid rgba(0,255,255,0.6);"></div>
+        <div style="font-size: 7pt; letter-spacing: 2px; text-transform: uppercase; color: rgba(0,255,255,0.5); margin-bottom: 1mm;">NETWORK</div>
+        <div style="font-family: 'Syne'; font-size: 20pt; font-weight: 800; color: #ff0080; text-shadow: 0 0 8px rgba(255,0,128,0.4);">847ms</div>
+        <div style="height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 2mm; overflow: hidden;">
+          <div style="width: 78%; height: 100%; background: #ff0080; box-shadow: 0 0 6px #ff0080; border-radius: 2px;"></div>
+        </div>
+      </div>
+
+      <div style="position: relative; background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.15); border-radius: 4px; padding: 4mm 3mm;">
+        <div style="position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; border-top: 2px solid rgba(0,255,255,0.6); border-left: 2px solid rgba(0,255,255,0.6);"></div>
+        <div style="position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-bottom: 2px solid rgba(0,255,255,0.6); border-right: 2px solid rgba(0,255,255,0.6);"></div>
+        <div style="font-size: 7pt; letter-spacing: 2px; text-transform: uppercase; color: rgba(0,255,255,0.5); margin-bottom: 1mm;">UPTIME</div>
+        <div style="font-family: 'Syne'; font-size: 20pt; font-weight: 800; color: #0ff; text-shadow: 0 0 8px rgba(0,255,255,0.4);">99.7%</div>
+        <div style="height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 2mm; overflow: hidden;">
+          <div style="width: 92%; height: 100%; background: #0ff; box-shadow: 0 0 6px #0ff; border-radius: 2px;"></div>
+        </div>
+      </div>
+
+      <div style="position: relative; background: rgba(0,255,255,0.03); border: 1px solid rgba(0,255,255,0.15); border-radius: 4px; padding: 4mm 3mm;">
+        <div style="position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; border-top: 2px solid rgba(0,255,255,0.6); border-left: 2px solid rgba(0,255,255,0.6);"></div>
+        <div style="position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-bottom: 2px solid rgba(0,255,255,0.6); border-right: 2px solid rgba(0,255,255,0.6);"></div>
+        <div style="font-size: 7pt; letter-spacing: 2px; text-transform: uppercase; color: rgba(0,255,255,0.5); margin-bottom: 1mm;">MEMORY</div>
+        <div style="font-family: 'Syne'; font-size: 20pt; font-weight: 800; color: #00ff88; text-shadow: 0 0 8px rgba(0,255,128,0.4);">4.2GB</div>
+        <div style="height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 2mm; overflow: hidden;">
+          <div style="width: 65%; height: 100%; background: #00ff88; box-shadow: 0 0 6px #00ff88; border-radius: 2px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size: 7.5pt; color: var(--text-secondary); line-height: 1.6; margin-top: 3mm;">
+      HUD panels use corner brackets (::before/::after with 2px border), a horizontal scan line animation (2.5s cycle), and neon-coloured progress bars with box-shadow glow. Pair with Orbitron or Share Tech Mono fonts.
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="footer-brand">Web Visual Effects</span>
+    <span class="footer-page">06</span>
+  </div>
+</div>
+
+<!-- ==========================================
+     PAGE 7: PERFORMANCE & ANTI-PATTERNS
+     ========================================== -->
+<div class="page">
+  <div class="noise"></div>
+  <div class="content">
+    <div class="section-label">06 / Performance &amp; Rules</div>
+    <div class="section-title">Budgets &amp; Anti-Patterns</div>
+    <div class="section-subtitle">
+      Every effect has a cost. These budgets keep everything at 60fps across desktop, tablet, and mobile.
+    </div>
+
+    <h3 class="mb-3">Performance Budget</h3>
+    <table class="data-table" style="margin-bottom: 5mm;">
+      <tr><th>Metric</th><th>Target</th><th>Maximum</th></tr>
+      <tr><td>Backdrop-filter visible</td><td>2-3</td><td>5</td></tr>
+      <tr><td>Animated elements/viewport</td><td>5-8</td><td>15</td></tr>
+      <tr><td>Blur radius</td><td>16-24px</td><td>40px</td></tr>
+      <tr><td>Animation cycle (bg)</td><td>5-15s</td><td>25s</td></tr>
+      <tr><td>Stagger per child</td><td>0.05-0.1s</td><td>0.15s</td></tr>
+      <tr><td>Frame budget</td><td>&lt; 8ms</td><td>16ms (60fps)</td></tr>
+    </table>
+
+    <h3 class="mb-3">Mobile Reduction Matrix</h3>
+    <table class="data-table" style="margin-bottom: 5mm;">
+      <tr><th>Effect</th><th>Desktop</th><th>Tablet</th><th>Mobile</th></tr>
+      <tr><td>Gradient orbs</td><td>3</td><td>2</td><td>1</td></tr>
+      <tr><td>Blur radius</td><td>24px</td><td>16px</td><td>8px</td></tr>
+      <tr><td>Rain drops</td><td>25</td><td>12</td><td>6</td></tr>
+      <tr><td>Portal rings</td><td>7</td><td>4</td><td>2</td></tr>
+      <tr><td>Perspective grid</td><td>On</td><td>On</td><td>Off</td></tr>
+      <tr><td>3D card tilt</td><td>On</td><td>On</td><td>Off</td></tr>
+    </table>
+
+    <div class="divider"></div>
+
+    <h3 class="mb-3">Anti-Patterns</h3>
+    <div class="grid-2 gap-4">
+      <div class="dont-box">
+        <div class="dont-label">Never Do</div>
+        <ul class="effect-list">
+          <li style="border-color: rgba(255,0,128,0.1);"><span class="dot dot-pink"></span>Glass on white/flat background</li>
+          <li style="border-color: rgba(255,0,128,0.1);"><span class="dot dot-pink"></span>5+ backdrop-filter elements visible</li>
+          <li style="border-color: rgba(255,0,128,0.1);"><span class="dot dot-pink"></span>will-change: all (GPU memory bomb)</li>
+          <li style="border-color: rgba(255,0,128,0.1);"><span class="dot dot-pink"></span>Pure #000000 background</li>
+          <li style="border-color: rgba(255,0,128,0.1);"><span class="dot dot-pink"></span>Noise opacity &gt; 0.08</li>
+          <li style="border-color: rgba(255,0,128,0.1);"><span class="dot dot-pink"></span>Neon glow on light backgrounds</li>
+          <li style="border-color: rgba(255,0,128,0.1); border-bottom: none;"><span class="dot dot-pink"></span>CSS animations in Remotion</li>
+        </ul>
+      </div>
+
+      <div class="do-box">
+        <div class="do-label">Always Do</div>
+        <ul class="effect-list">
+          <li style="border-color: rgba(0,255,136,0.1);"><span class="dot dot-green"></span>Respect prefers-reduced-motion</li>
+          <li style="border-color: rgba(0,255,136,0.1);"><span class="dot dot-green"></span>will-change before, remove after</li>
+          <li style="border-color: rgba(0,255,136,0.1);"><span class="dot dot-green"></span>#0A0A0F minimum for dark bg</li>
+          <li style="border-color: rgba(0,255,136,0.1);"><span class="dot dot-green"></span>-webkit- prefix on backdrop-filter</li>
+          <li style="border-color: rgba(0,255,136,0.1);"><span class="dot dot-green"></span>pointer-events: none on decorative</li>
+          <li style="border-color: rgba(0,255,136,0.1);"><span class="dot dot-green"></span>aria-hidden on effect layers</li>
+          <li style="border-color: rgba(0,255,136,0.1); border-bottom: none;"><span class="dot dot-green"></span>Test at actual device size</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="footer-brand">Web Visual Effects</span>
+    <span class="footer-page">07</span>
+  </div>
+</div>
+
+<!-- ==========================================
+     PAGE 8: Z-INDEX & BACK COVER
+     ========================================== -->
+<div class="page">
+  <div class="noise"></div>
+  <!-- Back cover orbs -->
+  <div style="position: absolute; inset: 0; z-index: 0; overflow: hidden;">
+    <div style="position: absolute; width: 350px; height: 350px; bottom: 10%; right: -5%; border-radius: 50%; background: radial-gradient(circle, rgba(0,255,255,0.2), transparent 70%); filter: blur(60px);"></div>
+    <div style="position: absolute; width: 300px; height: 300px; top: 10%; left: -5%; border-radius: 50%; background: radial-gradient(circle, rgba(255,0,128,0.15), transparent 70%); filter: blur(60px);"></div>
+  </div>
+
+  <div class="content">
+    <div class="section-label">07 / Architecture</div>
+    <div class="section-title">Z-Index System</div>
+    <div class="section-subtitle">
+      A consistent z-index scale prevents layer conflicts. Every effect has a designated range.
+    </div>
+
+    <!-- Z-index visual -->
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 2mm; margin-bottom: 6mm;">
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-muted);">z: 100</div>
+        <div style="flex: 1; height: 8mm; background: rgba(255,0,128,0.08); border: 1px solid rgba(255,0,128,0.2); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 7.5pt; color: var(--neon-pink);">Custom cursor, CRT overlay</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-muted);">z: 50</div>
+        <div style="flex: 1; height: 8mm; background: rgba(191,0,255,0.06); border: 1px solid rgba(191,0,255,0.15); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 7.5pt; color: var(--neon-purple);">Modals + backdrops</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-muted);">z: 40</div>
+        <div style="flex: 1; height: 8mm; background: rgba(191,0,255,0.04); border: 1px solid rgba(191,0,255,0.1); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 7.5pt; color: rgba(191,0,255,0.7);">Toast notifications</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-muted);">z: 20-30</div>
+        <div style="flex: 1; height: 8mm; background: rgba(0,255,255,0.06); border: 1px solid rgba(0,255,255,0.15); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 7.5pt; color: var(--neon-cyan);">Sticky nav, floating elements (FAB, chat)</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-primary);">z: 10</div>
+        <div style="flex: 1; height: 10mm; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 8pt; font-weight: 600; color: var(--text-primary);">Content (cards, text, interactive)</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-muted);">z: 3-5</div>
+        <div style="flex: 1; height: 8mm; background: rgba(0,255,255,0.04); border: 1px solid rgba(0,255,255,0.1); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 7.5pt; color: rgba(0,255,255,0.6);">Mid-layer effects (portals, scan lines)</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-muted);">z: 1-2</div>
+        <div style="flex: 1; height: 8mm; background: rgba(0,255,136,0.04); border: 1px solid rgba(0,255,136,0.1); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 7.5pt; color: rgba(0,255,136,0.6);">Decorative (stars, rain, noise overlay)</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 3mm;">
+        <div style="width: 15mm; text-align: right; font-family: 'Outfit'; font-size: 8pt; font-weight: 700; color: var(--text-muted);">z: -1</div>
+        <div style="flex: 1; height: 8mm; background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.12); border-radius: 4px; display: flex; align-items: center; padding: 0 3mm; font-size: 7.5pt; color: rgba(99,102,241,0.7);">Background (gradient orbs, mesh, nebula)</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Quick recipes -->
+    <h3 class="mb-3">Quick Recipes</h3>
+    <div class="grid-2 gap-3">
+      <div class="card" style="border-color: rgba(0,255,255,0.15);">
+        <div style="font-family: 'Syne'; font-size: 10pt; font-weight: 700; color: var(--neon-cyan); margin-bottom: 1mm;">Premium Hero</div>
+        <div style="font-size: 7pt; color: var(--text-secondary); line-height: 1.7;">
+          bg: mesh gradient (2-3 orbs) + noise<br>
+          content: glass-liquid cards<br>
+          text: gradient shimmer heading<br>
+          divider: gradient bridge
+        </div>
+      </div>
+      <div class="card" style="border-color: rgba(255,0,128,0.15);">
+        <div style="font-family: 'Syne'; font-size: 10pt; font-weight: 700; color: var(--neon-pink); margin-bottom: 1mm;">Cyberpunk Dashboard</div>
+        <div style="font-size: 7pt; color: var(--text-secondary); line-height: 1.7;">
+          bg: grid floor + rain + scanlines<br>
+          content: HUD panels + neon bars<br>
+          text: glitch effect, mono font<br>
+          accents: cyan/pink/purple glow
+        </div>
+      </div>
+      <div class="card" style="border-color: rgba(191,0,255,0.15);">
+        <div style="font-family: 'Syne'; font-size: 10pt; font-weight: 700; color: var(--neon-purple); margin-bottom: 1mm;">Sci-Fi Portal</div>
+        <div style="font-size: 7pt; color: var(--text-secondary); line-height: 1.7;">
+          bg: star field + nebula clouds<br>
+          content: rotating rings + streams<br>
+          text: chromatic aberration<br>
+          cards: glass readouts + pulse
+        </div>
+      </div>
+      <div class="card" style="border-color: rgba(0,255,136,0.15);">
+        <div style="font-family: 'Syne'; font-size: 10pt; font-weight: 700; color: var(--neon-green); margin-bottom: 1mm;">Creative Agency</div>
+        <div style="font-size: 7pt; color: var(--text-secondary); line-height: 1.7;">
+          bg: lava blobs + SVG goo filter<br>
+          content: deep glass + conic shimmer<br>
+          text: chroma shift + stroke outline<br>
+          accents: orbit ring system
+        </div>
+      </div>
+    </div>
+
+    <!-- Back cover footer -->
+    <div style="margin-top: auto; text-align: center; padding-top: 6mm;">
+      <div style="font-family: 'Syne'; font-size: 10pt; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2mm;">Aleph Creative-Hub</div>
+      <div style="font-size: 7.5pt; color: var(--text-muted); letter-spacing: 1px;">~/.claude/skills/web-visual-effects/</div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="footer-brand">Web Visual Effects</span>
+    <span class="footer-page">08</span>
+  </div>
+</div>
+
+</body>
+</html>
