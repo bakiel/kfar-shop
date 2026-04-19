@@ -300,6 +300,14 @@
   --earth-flame-light: #d64a0c;
   --earth-flame-dark: #a82f07;
 
+  /* === CANONICAL BRAND PALETTE (Language 1: App UI) === */
+  --kfar-green-deep: #2D5A27;
+  --kfar-green-ink: #1E3D1A;
+  --kfar-gold-premium: #C4A265;
+  --kfar-amber: #E8B84D;
+  --kfar-cream: #F5F0E8;
+  --kfar-warm-white: #FDFBF7;
+
   --background: #fef9ef;
   --foreground: #3a3a1d;
 

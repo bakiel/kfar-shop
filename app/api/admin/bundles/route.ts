@@ -244,6 +244,15 @@ export async function PATCH(request: NextRequest) {
           setClauses.push(`image = $${paramIndex++}`);
           values.push(updates.image);
         }
+        // Task #5: home-page promotion toggle. Only one bundle may be
+        // promoted at a time — clear all others before setting this one.
+        if (updates.isPromoted !== undefined) {
+          if (updates.isPromoted === true) {
+            await query('UPDATE bundles SET is_promoted = false WHERE is_promoted = true AND id <> $1', [id]);
+          }
+          setClauses.push(`is_promoted = $${paramIndex++}`);
+          values.push(!!updates.isPromoted);
+        }
         setClauses.push(`updated_at = $${paramIndex++}`);
         values.push(now);
 

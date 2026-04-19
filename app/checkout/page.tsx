@@ -23,6 +23,14 @@ export default function EnhancedCheckoutPage() {
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCart();
   const { language, isRTL } = useLanguage();
+
+  // Task #4: Phase-1 launch uses the simple 3-field COD checkout by default.
+  // Set NEXT_PUBLIC_CHECKOUT_SIMPLE=false to restore the full multi-step flow.
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_CHECKOUT_SIMPLE !== 'false') {
+      router.replace('/checkout/simple');
+    }
+  }, [router]);
   const shouldReduceMotion = useReducedMotion();
   const [currentStep, setCurrentStep] = useState(1);
   const [isGuest, setIsGuest] = useState(false);

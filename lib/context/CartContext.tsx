@@ -26,6 +26,10 @@ interface CartContextType {
   getItemsByVendor: () => Record<string, CartItem[]>;
   isInCart: (id: string) => boolean;
   getQuantity: (id: string) => number;
+  // Persistent shopping list — authenticated customers only (Task #3)
+  loadFromServer: (accessToken: string) => Promise<void>;
+  syncToServer: (accessToken: string) => Promise<void>;
+  reorderFromOrder: (orderId: string, accessToken: string, mode?: 'replace' | 'merge') => Promise<number>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -131,6 +135,77 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return item ? item.quantity : 0;
   };
 
+  // --- Persistent shopping list (Task #3) -----------------------------------
+  // For authenticated customers, the cart is persisted server-side so the list
+  // survives device changes. Guest carts remain localStorage-only.
+
+  const loadFromServer = async (accessToken: string) => {
+    if (!accessToken) return;
+    try {
+      const res = await fetch('/api/customer/cart', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data.items) && data.items.length > 0) {
+        setItems(data.items);
+      }
+    } catch (e) {
+      console.warn('Cart load from server failed:', e);
+    }
+  };
+
+  const syncToServer = async (accessToken: string) => {
+    if (!accessToken) return;
+    try {
+      await fetch('/api/customer/cart', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ items }),
+      });
+    } catch (e) {
+      console.warn('Cart sync to server failed:', e);
+    }
+  };
+
+  const reorderFromOrder = async (
+    orderId: string,
+    accessToken: string,
+    mode: 'replace' | 'merge' = 'replace',
+  ): Promise<number> => {
+    if (!accessToken) return 0;
+    try {
+      const res = await fetch(`/api/customer/orders/${orderId}/reorder`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) return 0;
+      const data = await res.json();
+      const incoming: CartItem[] = Array.isArray(data.items) ? data.items : [];
+      if (incoming.length === 0) return 0;
+
+      setItems(prev => {
+        if (mode === 'replace') return incoming;
+        // merge: bump quantity if id already present, else append
+        const map = new Map(prev.map(it => [it.id, it]));
+        for (const it of incoming) {
+          const existing = map.get(it.id);
+          map.set(it.id, existing
+            ? { ...existing, quantity: existing.quantity + it.quantity }
+            : it);
+        }
+        return Array.from(map.values());
+      });
+      return incoming.length;
+    } catch (e) {
+      console.warn('Reorder failed:', e);
+      return 0;
+    }
+  };
+
   return (
     <CartContext.Provider value={{
       items,
@@ -142,7 +217,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       getCartCount,
       getItemsByVendor,
       isInCart,
-      getQuantity
+      getQuantity,
+      loadFromServer,
+      syncToServer,
+      reorderFromOrder,
     }}>
       {children}
     </CartContext.Provider>
@@ -168,6 +246,9 @@ const defaultCartContext: CartContextType = {
   getItemsByVendor: () => ({}),
   isInCart: () => false,
   getQuantity: () => 0,
+  loadFromServer: async () => {},
+  syncToServer: async () => {},
+  reorderFromOrder: async () => 0,
 };
 
 export const useCartSafe = (): CartContextType => {

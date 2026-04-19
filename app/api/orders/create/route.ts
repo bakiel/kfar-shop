@@ -3,6 +3,8 @@ import { query } from '@/lib/db/postgres-client';
 import { verifyAccessToken } from '@/lib/services/auth-service';
 import { sendTransactional } from '@/lib/services/email/email-service';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
+import { createNotification } from '@/lib/services/notification-service.server';
+import { sendOrderConfirmationSMS } from '@/lib/services/sms-service';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -10,21 +12,29 @@ import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limit
 
 interface OrderCreateBody {
   items: Array<{
+    id?: string;
     productId: string;
+    product_id?: string;
     name: string;
     quantity: number;
     price: number;
     vendorId?: string;
+    vendor_id?: string;
     vendorName?: string;
+    vendor_name?: string;
     image?: string;
   }>;
   subtotal: number;
   deliveryFee?: number;
   total: number;
   customer: {
-    firstName: string;
-    lastName: string;
-    email: string;
+    // Simple checkout (Task #4): fullName is the canonical field.
+    // firstName/lastName retained for backwards compatibility with existing
+    // enhanced-checkout payloads.
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;        // optional for COD flow
     phone?: string;
     address?: string;
     city?: string;
@@ -73,9 +83,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!body.customer?.firstName || !body.customer?.email) {
+    const normalizedItems = body.items.map((item) => {
+      const productId = item.productId || item.id || item.product_id || '';
+
+      return {
+        id: productId,
+        productId,
+        name: item.name,
+        quantity: Number(item.quantity) || 0,
+        price: Number(item.price) || 0,
+        vendorId: item.vendorId || item.vendor_id || '',
+        vendorName: item.vendorName || item.vendor_name || '',
+        image: item.image || '',
+      };
+    });
+
+    if (normalizedItems.some((item) => !item.id)) {
       return NextResponse.json(
-        { success: false, error: 'Customer name and email are required' },
+        { success: false, error: 'Each order item must include a product ID' },
+        { status: 400 }
+      );
+    }
+
+    // Derive canonical name (fullName wins; falls back to first+last)
+    const fullName = (body.customer?.fullName
+      || `${body.customer?.firstName || ''} ${body.customer?.lastName || ''}`
+    ).trim();
+
+    const isCOD = (body.paymentMethod || 'cash') === 'cash';
+
+    if (!fullName) {
+      return NextResponse.json(
+        { success: false, error: 'Customer name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Email is required for non-COD flows; COD allows phone-only.
+    if (!isCOD && !body.customer?.email) {
+      return NextResponse.json(
+        { success: false, error: 'Email is required for this payment method' },
+        { status: 400 }
+      );
+    }
+
+    // For COD, require at least a phone.
+    if (isCOD && !body.customer?.phone) {
+      return NextResponse.json(
+        { success: false, error: 'Phone is required for cash on delivery' },
         { status: 400 }
       );
     }
@@ -86,7 +141,12 @@ export async function POST(request: NextRequest) {
     const seq = Math.floor(Math.random() * 9000) + 1000;
     const orderNumber = `KFAR-${dateStr}-${seq}`;
 
-    const customerName = `${body.customer.firstName} ${body.customer.lastName}`.trim();
+    const customerName = fullName;
+    // Synthesize a placeholder email when the customer didn't provide one.
+    // Keeps downstream (vendor_emails, audit, etc) consistent with a non-null
+    // customer_email column and never attempts to send mail to it.
+    const customerEmail = body.customer?.email
+      || `cod+${(body.customer?.phone || 'unknown').replace(/[^\d+]/g, '')}@kfarapp.com`;
 
     const addressJson = JSON.stringify({
       address: body.customer.address || '',
@@ -105,7 +165,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Derive primary vendor_id from items (first vendor found)
-    const primaryVendorId = body.items.find(i => i.vendorId)?.vendorId || null;
+    const primaryVendorId = normalizedItems.find((item) => item.vendorId)?.vendorId || null;
 
     // Create order (columns match actual DB schema)
     const { rows: orderRows } = await query(
@@ -121,7 +181,7 @@ export async function POST(request: NextRequest) {
       [
         orderNumber,
         customerName,
-        body.customer.email,
+        customerEmail,
         body.customer.phone || null,
         body.total,
         body.subtotal || body.total,
@@ -130,7 +190,7 @@ export async function POST(request: NextRequest) {
         'pending',
         'pending',
         addressJson,
-        JSON.stringify(body.items),
+        JSON.stringify(normalizedItems),
         body.notes || null,
         primaryVendorId,
         customerId,
@@ -147,7 +207,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Items are stored as JSONB in orders.items column (no separate order_items table)
-    console.log('Order created:', orderNumber, 'ID:', order.id, 'Items:', body.items.length);
+    console.log('Order created:', orderNumber, 'ID:', order.id, 'Items:', normalizedItems.length);
 
     // Update customer stats if linked to an account (fire-and-forget)
     if (customerId) {
@@ -166,7 +226,7 @@ export async function POST(request: NextRequest) {
     const emailPromises: Promise<any>[] = [];
 
     // 1) Order confirmation to customer
-    const itemsHtml = body.items.map(item =>
+    const itemsHtml = normalizedItems.map(item =>
       `<tr>
         <td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.name}</td>
         <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
@@ -183,17 +243,20 @@ export async function POST(request: NextRequest) {
       <tbody>${itemsHtml}</tbody>
     </table>`;
 
-    emailPromises.push(
-      sendTransactional(body.customer.email, 'order_confirmation', {
-        customer_name: customerName,
-        order_number: orderNumber,
-        items_html: itemsTable,
-        total: body.total.toFixed(2),
-        currency: body.currency || 'ILS',
-        payment_method: body.paymentMethod || 'Cash on Delivery',
-        delivery_method: body.deliveryMethod || 'Pickup',
-      }).catch(err => console.error('Failed to send order confirmation email:', err))
-    );
+    // Skip customer confirmation email for COD flows with synthesized placeholder
+    if (body.customer?.email) {
+      emailPromises.push(
+        sendTransactional(body.customer.email, 'order_confirmation', {
+          customer_name: customerName,
+          order_number: orderNumber,
+          items_html: itemsTable,
+          total: body.total.toFixed(2),
+          currency: body.currency || 'ILS',
+          payment_method: body.paymentMethod || 'Cash on Delivery',
+          delivery_method: body.deliveryMethod || 'Pickup',
+        }).catch(err => console.error('Failed to send order confirmation email:', err))
+      );
+    }
 
     // 2) New order alert to each vendor
     const vendorEmails: Record<string, string> = {
@@ -205,11 +268,11 @@ export async function POST(request: NextRequest) {
       'vop-shop': 'vop@kfarapp.com',
     };
 
-    const vendorIds = [...new Set(body.items.map(i => i.vendorId).filter(Boolean))];
+    const vendorIds = [...new Set(normalizedItems.map((item) => item.vendorId).filter(Boolean))];
     for (const vendorId of vendorIds) {
       const vendorEmail = vendorEmails[vendorId as string];
       if (vendorEmail) {
-        const vendorItems = body.items.filter(i => i.vendorId === vendorId);
+        const vendorItems = normalizedItems.filter((item) => item.vendorId === vendorId);
         const vendorItemsHtml = vendorItems.map(item =>
           `<tr>
             <td style="padding:6px 8px;border-bottom:1px solid #eee;">${item.name}</td>
@@ -245,6 +308,32 @@ export async function POST(request: NextRequest) {
       const sent = results.filter(r => r.status === 'fulfilled').length;
       console.log(`Order ${orderNumber}: ${sent}/${results.length} emails dispatched`);
     });
+
+    // Task #6: admin in-app notification (broadcast, user_id=null)
+    createNotification({
+      type: 'order_update',
+      channel: 'in_app',
+      title: `New order ${orderNumber}`,
+      titleHe: `הזמנה חדשה ${orderNumber}`,
+      message: `${customerName} placed an order · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
+      messageHe: `${customerName} ביצע/ה הזמנה · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
+      data: {
+        orderId: order.id,
+        orderNumber,
+        total: body.total,
+        paymentMethod: body.paymentMethod || 'cash',
+        actionUrl: `/admin/orders`,
+        actionLabel: 'View order',
+      },
+    }).catch(err => console.error('Failed to create admin notification:', err));
+
+    // Task #6: SMS is off until client pays (SMS_ENABLED=false by default).
+    // Code path is wired — flipping the env var enables live sends.
+    if (body.customer?.phone) {
+      sendOrderConfirmationSMS(body.customer.phone, orderNumber, body.total)
+        .then(r => console.log(`Order ${orderNumber} SMS:`, r))
+        .catch(err => console.error('SMS dispatch error:', err));
+    }
 
     return NextResponse.json({
       success: true,

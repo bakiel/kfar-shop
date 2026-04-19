@@ -607,14 +607,102 @@ async function getMarketplaceStats(): Promise<MarketplaceStats> {
   };
 }
 
-/**
- * Main data fetcher -- runs all queries in parallel
- */
+function parseBundleProductIds(products: unknown): string[] {
+  if (Array.isArray(products)) {
+    return products.map((id) => String(id)).filter(Boolean);
+  }
+
+  if (typeof products === 'string') {
+    try {
+      const parsed = JSON.parse(products);
+      if (Array.isArray(parsed)) {
+        return parsed.map((id) => String(id)).filter(Boolean);
+      }
+    } catch {
+      return products
+        .split(/[,\n]/)
+        .map((id) => id.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
+function resolveBundleProduct(productId: string): BundleProduct {
+  const product = getProductById(productId);
+
+  return {
+    id: productId,
+    name: product?.name || productId,
+    image: product?.image || '',
+    price: product?.price || 0,
+  };
+}
+
+function mapDatabaseBundle(row: any): Bundle {
+  const products = parseBundleProductIds(row.products).map(resolveBundleProduct);
+  const bundlePrice = Number(row.price) || 0;
+  const originalPrice = Number(row.original_price) || bundlePrice;
+  const primaryProduct = products.length === 1 ? getProductById(products[0].id) : undefined;
+
+  return {
+    id: row.id,
+    name: row.name,
+    nameHe: row.name_he || undefined,
+    description: row.description || '',
+    descriptionHe: row.description_he || undefined,
+    products,
+    bundlePrice,
+    originalPrice,
+    savingsPercent: originalPrice > bundlePrice
+      ? Math.round(((originalPrice - bundlePrice) / originalPrice) * 100)
+      : 0,
+    image: row.image || products[0]?.image || '',
+    isFeatured: true,
+    loyaltyPointsBonus: 0,
+    vendorId: primaryProduct?.vendorId,
+    vendorName: primaryProduct?.vendorName,
+  };
+}
+
+async function getDatabaseBundles(): Promise<Bundle[]> {
+  const dbUp = await isDbAvailable();
+  if (!dbUp) return [];
+
+  try {
+    const { rows } = await query(
+      `SELECT *
+       FROM bundles
+       WHERE status = 'active'
+       ORDER BY COALESCE(is_promoted, false) DESC, updated_at DESC, created_at DESC`
+    );
+
+    return rows.map(mapDatabaseBundle);
+  } catch (error) {
+    console.log('DB bundle fetch failed, using static bundles only:', (error as Error).message);
+    return [];
+  }
+}
+
 /**
  * Get all bundles (for dedicated bundles page)
  */
 export async function getAllBundles(): Promise<Bundle[]> {
-  return getFeaturedBundles();
+  const [staticBundles, databaseBundles] = await Promise.all([
+    getFeaturedBundles(),
+    getDatabaseBundles(),
+  ]);
+
+  if (databaseBundles.length === 0) {
+    return staticBundles;
+  }
+
+  const merged = new Map<string, Bundle>();
+  for (const bundle of staticBundles) merged.set(bundle.id, bundle);
+  for (const bundle of databaseBundles) merged.set(bundle.id, bundle);
+
+  return Array.from(merged.values());
 }
 
 export async function getBundleById(id: string): Promise<Bundle | null> {

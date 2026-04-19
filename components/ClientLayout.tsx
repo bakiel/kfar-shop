@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ExtensionWarning from './ExtensionWarning';
+import CartSyncBridge from './cart/CartSyncBridge';
 
 // Dynamically import ShoppingAssistant for AI-powered shopping experience
 const ShoppingAssistant = dynamic(() => import('@/components/chat/ShoppingAssistant'), {
@@ -26,6 +27,8 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
 
   return (
     <>
+      {/* Persist cart as shopping list for authenticated customers (Task #3) */}
+      <CartSyncBridge />
       {children}
       <ExtensionWarning />
       {/* AI Shopping Assistant (Gemini-powered) */}

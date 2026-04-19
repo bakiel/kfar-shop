@@ -123,8 +123,8 @@ for (const testOrder of TEST_ORDERS) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(testOrder.data),
     });
-    assert(res.ok, `Order creation returned ${res.status}: ${await res.text()}`);
     const data = await res.json();
+    assert(res.ok, `Order creation returned ${res.status}: ${JSON.stringify(data)}`);
     assert(data.success, `Order creation failed: ${data.error}`);
     assert(data.order?.orderNumber, 'No order number returned');
     assert(data.order?.id, 'No order ID returned');

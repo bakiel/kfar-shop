@@ -46,11 +46,15 @@ export default {
         'cream-base': '#fef9ef',
         'soil-brown': '#3a3a1d',
         'herbal-mint': '#cfe7c1',
-        // Premium landing page palette
-        'kfar-gold-premium': '#C4A265',
-        'kfar-green-deep': '#2D5A27',
-        'kfar-cream': '#F5F0E8',
-        'kfar-warm-white': '#FDFBF7',
+        // === CANONICAL BRAND PALETTE (Language 1: App UI — warm/functional) ===
+        // Use these tokens for all NEW components. Legacy tokens above
+        // (leaf-green, sun-gold, earth-flame) remain for backwards compatibility.
+        'kfar-green-deep': '#2D5A27',   // primary brand, headers, CTAs
+        'kfar-green-ink': '#1E3D1A',    // darker — brand strip, bottom nav, footer
+        'kfar-gold-premium': '#C4A265', // editorial accent (posters, premium cards)
+        'kfar-amber': '#E8B84D',        // promo bar, pill badges, accent highlights
+        'kfar-cream': '#F5F0E8',        // secondary surface
+        'kfar-warm-white': '#FDFBF7',   // primary surface
       },
       scale: {
         '102': '1.02',

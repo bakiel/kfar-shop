@@ -14,6 +14,7 @@ import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import { vendorStores, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
+import SalesLeaderboards from '@/components/vendor/SalesLeaderboards';
 
 // --- Types ---
 interface RecentOrder {
@@ -327,6 +328,11 @@ export default function VendorDashboard() {
           icon={<Star className="w-5 h-5 stroke-[1.5]" />}
           color="purple"
         />
+      </motion.div>
+
+      {/* Task #7: Best-sellers + top-buyers leaderboards (real order data) */}
+      <motion.div variants={item} className="mb-8">
+        <SalesLeaderboards />
       </motion.div>
 
       <div className="grid lg:grid-cols-3 gap-6 mb-8">

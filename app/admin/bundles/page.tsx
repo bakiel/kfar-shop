@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, Package, X, Percent, ShoppingBag, AlertTriangle
+  Plus, Package, X, Percent, ShoppingBag, AlertTriangle, Star
 } from 'lucide-react';
 import { PageHeader, DataTable, StatusBadge, FormField, ConfirmDialog, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
@@ -15,9 +15,13 @@ interface Bundle {
   name: string;
   nameHe: string;
   productsCount: number;
+  products?: string[];
   price: number;
   originalPrice: number;
   status: 'active' | 'draft';
+  isPromoted?: boolean;
+  description?: string;
+  image?: string;
   [key: string]: unknown;
 }
 
@@ -38,15 +42,43 @@ const item = {
 //   { id: 'bnd-004', name: 'Sweet Treats Collection', nameHe: 'אוסף מתוקים', productsCount: 3, price: 69, originalPrice: 85, status: 'active' },
 // ];
 
+function normalizeProductIds(products: unknown): string[] {
+  if (Array.isArray(products)) {
+    return products.map((id) => String(id)).filter(Boolean);
+  }
+
+  if (typeof products === 'string') {
+    try {
+      const parsed = JSON.parse(products);
+      if (Array.isArray(parsed)) {
+        return parsed.map((id) => String(id)).filter(Boolean);
+      }
+    } catch {
+      return products
+        .split(/[,\n]/)
+        .map((id) => id.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
 function normalizeBundle(b: any): Bundle {
+  const productIds = normalizeProductIds(b.products);
+
   return {
     id: b.id,
     name: b.name || '',
     nameHe: b.nameHe || b.name_he || '',
-    productsCount: b.resolvedProducts?.length ?? (Array.isArray(b.products) ? b.products.length : (b.productsCount || 0)),
+    productsCount: b.resolvedProducts?.length ?? (productIds.length > 0 ? productIds.length : (b.productsCount || 0)),
+    products: productIds,
     price: b.price || 0,
     originalPrice: b.originalPrice || b.original_price || b.price || 0,
     status: b.status || 'draft',
+    isPromoted: !!(b.isPromoted ?? b.is_promoted),
+    description: b.description || '',
+    image: b.image || '',
   };
 }
 
@@ -60,14 +92,18 @@ export default function BundlesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingBundle, setEditingBundle] = useState<Bundle | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Bundle | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Form state
   const [formName, setFormName] = useState('');
   const [formNameHe, setFormNameHe] = useState('');
+  const [formDescription, setFormDescription] = useState('');
+  const [formImage, setFormImage] = useState('');
   const [formPrice, setFormPrice] = useState('');
   const [formOriginalPrice, setFormOriginalPrice] = useState('');
-  const [formProducts, setFormProducts] = useState('');
+  const [formProducts, setFormProducts] = useState(''); // comma-separated product IDs
   const [formStatus, setFormStatus] = useState<'active' | 'draft'>('draft');
+  const [formPromoted, setFormPromoted] = useState(false);
 
   const fetchBundles = useCallback(() => {
     setLoading(true);
@@ -100,10 +136,14 @@ export default function BundlesPage() {
     setEditingBundle(null);
     setFormName('');
     setFormNameHe('');
+    setFormDescription('');
+    setFormImage('');
     setFormPrice('');
     setFormOriginalPrice('');
     setFormProducts('');
     setFormStatus('draft');
+    setFormPromoted(false);
+    setFormError(null);
     setShowForm(true);
   };
 
@@ -111,73 +151,91 @@ export default function BundlesPage() {
     setEditingBundle(bundle);
     setFormName(bundle.name);
     setFormNameHe(bundle.nameHe);
+    // Description + image + products come back as raw fields from the API
+    setFormDescription((bundle as any).description || '');
+    setFormImage((bundle as any).image || '');
+    const products = (bundle as any).products;
+    setFormProducts(
+      Array.isArray(products) ? products.join(', ')
+        : (typeof products === 'string' ? products : '')
+    );
     setFormPrice(String(bundle.price));
     setFormOriginalPrice(String(bundle.originalPrice));
-    setFormProducts(String(bundle.productsCount));
     setFormStatus(bundle.status);
+    setFormPromoted(!!bundle.isPromoted);
+    setFormError(null);
     setShowForm(true);
   };
 
   const handleSave = () => {
-    setSaving(true);
-    const productIds = formProducts
-      ? Array.from({ length: Number(formProducts) || 1 }, (_, i) => `product-${i + 1}`)
-      : ['product-1'];
+    // Parse comma-separated product IDs (trimmed, de-duped, empty filtered)
+    const productIds = Array.from(new Set(
+      formProducts
+        .split(/[,\n]/)
+        .map(s => s.trim())
+        .filter(Boolean)
+    ));
 
-    if (editingBundle) {
-      // PATCH update
-      const patchHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (accessToken) patchHeaders['Authorization'] = `Bearer ${accessToken}`;
-      fetch('/api/admin/bundles', {
-        method: 'PATCH',
-        headers: patchHeaders,
-        body: JSON.stringify({
-          id: editingBundle.id,
-          name: formName,
-          nameHe: formNameHe,
-          price: Number(formPrice) || 0,
-          originalPrice: Number(formOriginalPrice) || 0,
-          products: productIds,
-          status: formStatus,
-        }),
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.json();
-        })
-        .then(() => {
-          setShowForm(false);
-          fetchBundles();
-        })
-        .catch((err) => console.error('Bundle update error:', err))
-        .finally(() => setSaving(false));
-    } else {
-      // POST create
-      const postHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (accessToken) postHeaders['Authorization'] = `Bearer ${accessToken}`;
-      fetch('/api/admin/bundles', {
-        method: 'POST',
-        headers: postHeaders,
-        body: JSON.stringify({
-          name: formName,
-          nameHe: formNameHe,
-          price: Number(formPrice) || 0,
-          originalPrice: Number(formOriginalPrice) || 0,
-          products: productIds,
-          status: formStatus,
-        }),
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.json();
-        })
-        .then(() => {
-          setShowForm(false);
-          fetchBundles();
-        })
-        .catch((err) => console.error('Bundle create error:', err))
-        .finally(() => setSaving(false));
+    if (!formName.trim()) {
+      setFormError(isRTL ? 'יש להזין שם חבילה.' : 'Bundle name is required.');
+      return;
     }
+
+    if (productIds.length === 0) {
+      setFormError(isRTL ? 'יש להזין לפחות מזהה מוצר אחד.' : 'Add at least one product ID.');
+      return;
+    }
+
+    if ((Number(formPrice) || 0) <= 0) {
+      setFormError(isRTL ? 'מחיר החבילה חייב להיות גדול מאפס.' : 'Bundle price must be greater than zero.');
+      return;
+    }
+
+    setFormError(null);
+    setSaving(true);
+
+    const payload = {
+      name: formName,
+      nameHe: formNameHe,
+      description: formDescription,
+      image: formImage || undefined,
+      price: Number(formPrice) || 0,
+      originalPrice: Number(formOriginalPrice) || 0,
+      products: productIds,
+      status: formStatus,
+      isPromoted: formPromoted,
+    };
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
+    const request = editingBundle
+      ? fetch('/api/admin/bundles', {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({ id: editingBundle.id, ...payload }),
+        })
+      : fetch('/api/admin/bundles', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload),
+        });
+
+    request
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(() => {
+        setFormError(null);
+        setShowForm(false);
+        fetchBundles();
+      })
+      .catch((err) => {
+        console.error('Bundle save error:', err);
+        setFormError(isRTL ? 'שמירת החבילה נכשלה. נסה שוב.' : 'Failed to save bundle. Please try again.');
+      })
+      .finally(() => setSaving(false));
   };
 
   const handleToggleStatus = (bundle: Bundle) => {
@@ -195,6 +253,23 @@ export default function BundlesPage() {
       })
       .then(() => fetchBundles())
       .catch((err) => console.error('Bundle status toggle error:', err));
+  };
+
+  // Task #5: toggle home-page promotion. Server enforces single-active.
+  const handleTogglePromoted = (bundle: Bundle) => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+    fetch('/api/admin/bundles', {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ id: bundle.id, isPromoted: !bundle.isPromoted }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(() => fetchBundles())
+      .catch((err) => console.error('Bundle promotion toggle error:', err));
   };
 
   const handleDelete = () => {
@@ -229,7 +304,15 @@ export default function BundlesPage() {
           <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
             <Package className="w-4.5 h-4.5 text-emerald-600 stroke-[1.5]" />
           </div>
-          <span className="font-medium text-gray-900">{isRTL ? row.nameHe : row.name}</span>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-gray-900">{isRTL ? row.nameHe : row.name}</span>
+            {row.isPromoted && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-[#8a6b1e] bg-[#E8B84D]/20 border border-[#E8B84D]/40 rounded px-1.5 py-0.5">
+                <Star className="w-2.5 h-2.5 stroke-[2] fill-[#E8B84D]" />
+                {isRTL ? 'בדף הבית' : 'On home'}
+              </span>
+            )}
+          </div>
         </div>
       ),
     },
@@ -326,6 +409,12 @@ export default function BundlesPage() {
           rowActions={(row) => [
             { label: t('Edit'), onClick: () => openEditForm(row) },
             { label: row.status === 'active' ? (isRTL ? 'הפוך לטיוטה' : 'Set as Draft') : (isRTL ? 'הפעל' : 'Activate'), onClick: () => handleToggleStatus(row) },
+            {
+              label: row.isPromoted
+                ? (isRTL ? 'הסר מדף הבית' : 'Remove from home')
+                : (isRTL ? 'הצג בדף הבית' : 'Promote on home'),
+              onClick: () => handleTogglePromoted(row),
+            },
             { label: t('Delete'), onClick: () => setDeleteTarget(row), destructive: true },
           ]}
         />
@@ -403,14 +492,40 @@ export default function BundlesPage() {
                     </FormField>
                   </div>
 
-                  <FormField label={isRTL ? 'מספר מוצרים' : 'Products Count'} isRTL={isRTL}>
+                  <FormField label={isRTL ? 'תיאור (אופציונלי)' : 'Description (optional)'} isRTL={isRTL}>
+                    <textarea
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      rows={2}
+                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] resize-none"
+                      placeholder={isRTL ? 'תיאור קצר שיוצג בכרטיס החבילה' : 'Short description shown on the bundle card'}
+                    />
+                  </FormField>
+
+                  <FormField label={isRTL ? 'תמונת חבילה (URL)' : 'Bundle image (URL)'} isRTL={isRTL}>
                     <input
-                      type="number"
+                      type="text"
+                      value={formImage}
+                      onChange={(e) => setFormImage(e.target.value)}
+                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
+                      placeholder="/images/bundles/weekend-feast.jpg"
+                    />
+                  </FormField>
+
+                  <FormField
+                    label={isRTL ? 'מזהי מוצרים (מופרד בפסיקים)' : 'Product IDs (comma-separated)'}
+                    isRTL={isRTL}
+                  >
+                    <textarea
                       value={formProducts}
                       onChange={(e) => setFormProducts(e.target.value)}
-                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
-                      placeholder="5"
+                      rows={2}
+                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] resize-none font-mono"
+                      placeholder="teva-deli-001, queens-003, gahn-07"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {isRTL ? 'הכנס את המזהים המדויקים של המוצרים מהרשימה הקיימת.' : 'Paste the exact product IDs as they appear in the catalogue.'}
+                    </p>
                   </FormField>
 
                   <FormField label={t('Status')} isRTL={isRTL}>
@@ -423,6 +538,31 @@ export default function BundlesPage() {
                       <option value="active">{isRTL ? 'פעיל' : 'Active'}</option>
                     </select>
                   </FormField>
+
+                  <label className="flex items-center gap-3 px-3 py-2.5 border border-[#E8B84D]/40 bg-[#E8B84D]/10 rounded-lg cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formPromoted}
+                      onChange={(e) => setFormPromoted(e.target.checked)}
+                      className="w-4 h-4 accent-[#2D5A27]"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-[#1E3D1A]">
+                        {isRTL ? 'הצג בדף הבית' : 'Promote on home page'}
+                      </div>
+                      <div className="text-[11px] text-gray-500">
+                        {isRTL
+                          ? 'רק חבילה אחת יכולה להיות מקודמת בכל זמן. שמירה תחליף את הקידום הקיים.'
+                          : 'Only one bundle can be promoted at a time — saving will replace the current one.'}
+                      </div>
+                    </div>
+                  </label>
+
+                  {formError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {formError}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3 mt-6 justify-end">

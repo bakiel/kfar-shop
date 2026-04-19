@@ -9,6 +9,7 @@ import { PageHeader, DataTable, StatusBadge } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
+import { useCart } from '@/lib/context/CartContext';
 
 const container = {
   hidden: { opacity: 0 },
@@ -36,9 +37,24 @@ interface Order {
 export default function CustomerOrders() {
   const { language, t, isRTL } = useLanguage();
   const { accessToken } = useAuth();
+  const { reorderFromOrder } = useCart();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reorderingId, setReorderingId] = useState<string | null>(null);
+
+  const handleReorder = async (orderId: string) => {
+    if (!accessToken) return;
+    setReorderingId(orderId);
+    try {
+      const count = await reorderFromOrder(orderId, accessToken, 'replace');
+      if (count > 0) {
+        router.push('/cart');
+      }
+    } finally {
+      setReorderingId(null);
+    }
+  };
 
   const fetchOrders = useCallback(async () => {
     if (!accessToken) {
@@ -205,8 +221,10 @@ export default function CustomerOrders() {
                 onClick: () => router.push(`/customer/orders/${row.id}`),
               },
               ...(row.status === 'delivered' ? [{
-                label: isRTL ? 'הזמן שוב' : 'Reorder',
-                onClick: () => router.push('/'),
+                label: reorderingId === row.id
+                  ? (isRTL ? 'טוען...' : 'Loading...')
+                  : (isRTL ? 'הזמן שוב' : 'Reorder'),
+                onClick: () => handleReorder(row.id),
               }] : []),
             ]}
           />

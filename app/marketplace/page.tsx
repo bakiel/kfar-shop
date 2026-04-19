@@ -15,6 +15,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import '@/styles/kfar-style-system.css';
 import VendorBrowseCard from '@/components/marketplace/VendorBrowseCard';
 import CompactPromotionalBanners from '@/components/marketplace/CompactPromotionalBanners';
+import PromotedBundleCard from '@/components/bundles/PromotedBundleCard';
 import MobileProductCard from '@/components/mobile/MobileProductCard';
 import MobileCartDrawer from '@/components/mobile/MobileCartDrawer';
 import { useMobileDetect } from '@/hooks/useMobileDetect';
@@ -606,6 +607,9 @@ export default function MarketplacePage() {
             </motion.div>
           </div>
         </section>
+
+        {/* Task #5: Admin-promoted bundle slot — renders null when none active */}
+        <PromotedBundleCard isRTL={isRTL} />
 
         {/* Promotional Banners */}
         <CompactPromotionalBanners />
