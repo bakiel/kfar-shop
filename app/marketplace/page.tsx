@@ -855,6 +855,7 @@ export default function MarketplacePage() {
                     product={{
                       id: product.id,
                       name: product.name,
+                      vendorId: product.vendorId,
                       vendor: product.vendorName || getVendorDisplayName(product.vendorId),
                       vendorLogo: vendorStores[product.vendorId]?.logo || '',
                       price: `₪${product.price}`,

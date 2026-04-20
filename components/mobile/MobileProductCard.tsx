@@ -10,6 +10,7 @@ interface MobileProductCardProps {
   product: {
     id: string | number;
     name: string;
+    vendorId: string;
     vendor: string;
     vendorLogo: string;
     price: string;
@@ -24,16 +25,18 @@ interface MobileProductCardProps {
 
 export default function MobileProductCard({ product }: MobileProductCardProps) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const { addItem } = useCart();
+  const [imageSrc, setImageSrc] = useState(product.image);
+  const { addToCart } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem({
+    addToCart({
       id: String(product.id),
       name: product.name,
       price: parseFloat(product.price.replace('₪', '')),
-      vendor: product.vendor,
+      vendorId: product.vendorId,
+      vendorName: product.vendor,
       image: product.image,
       quantity: 1
     });
@@ -68,7 +71,7 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
           </button>
 
           <Image
-            src={product.image}
+            src={imageSrc}
             alt={product.name || "Image"}
             fill
             quality={55}
@@ -76,6 +79,13 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
               isImageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setIsImageLoaded(true)}
+            onError={() => {
+              if (imageSrc !== '/images/placeholder-product.jpg') {
+                setImageSrc('/images/placeholder-product.jpg');
+                return;
+              }
+              setIsImageLoaded(true);
+            }}
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
           />
           

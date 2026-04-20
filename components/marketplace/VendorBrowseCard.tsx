@@ -19,6 +19,14 @@ interface VendorBrowseCardProps {
   index: number;
 }
 
+interface VendorBrowseProduct {
+  id: string;
+  name?: string;
+  image: string;
+  isFeatured?: boolean;
+  featured?: boolean;
+}
+
 export default function VendorBrowseCard({ vendorId, vendorInfo, products, index }: VendorBrowseCardProps) {
   // Get vendor color theme
   const vendorThemes: Record<string, { primary: string; secondary: string }> = {
@@ -34,7 +42,7 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
   
   // Calculate stats
   const totalProducts = products.length;
-  const featuredCount = products.filter(p => p.featured).length;
+  const featuredCount = (products as VendorBrowseProduct[]).filter((product) => product.isFeatured || product.featured).length;
   const avgRating = 4.5 + (Math.random() * 0.5); // Placeholder rating
 
   return (
@@ -143,7 +151,7 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
           {/* Product Preview Grid */}
           <div className="mb-4">
             <div className="grid grid-cols-4 gap-1.5">
-              {products.slice(0, 8).map((product, idx) => (
+              {(products as VendorBrowseProduct[]).slice(0, 8).map((product, idx) => (
                 <div 
                   key={product.id} 
                   className="relative aspect-square rounded overflow-hidden group/product"
