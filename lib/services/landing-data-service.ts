@@ -3,6 +3,7 @@
  * Server-only module: queries PostgreSQL with fallback to static data layer
  */
 
+import { unstable_cache } from 'next/cache';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
 import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import type {
@@ -60,73 +61,73 @@ const categoryDisplayNames: Record<string, { en: string; he: string }> = {
   'bbq-burgers': { en: 'BBQ Burgers', he: 'המבורגרי ברביקיו' },
 };
 
-/**
- * Get active vendors from DB with fallback to static data
- */
-async function getActiveVendors(): Promise<LandingVendor[]> {
-  try {
-    const { rows: dbVendors } = await query(
-      'SELECT * FROM vendors WHERE is_active = true ORDER BY name'
-    );
-
-    if (dbVendors.length > 0) {
-      // Get products for each vendor
-      const vendorsWithProducts: LandingVendor[] = await Promise.all(
-        dbVendors.map(async (v: any) => {
-          const { rows: products } = await query(
-            `SELECT * FROM products WHERE vendor_id = $1 AND status = 'published' ORDER BY view_count DESC LIMIT 3`,
-            [v.id]
-          );
-
-          const { rows: allProducts } = await query(
-            `SELECT COUNT(*) as count FROM products WHERE vendor_id = $1 AND status = 'published'`,
-            [v.id]
-          );
-
-          const vendorLogo = v.logo_url || v.logo || '';
-          return {
-            id: v.id,
-            name: v.name,
-            slug: v.slug,
-            description: v.description || '',
-            logo: vendorLogo,
-            banner: v.banner_url || v.banner,
-            productCount: parseInt(allProducts[0]?.count || '0'),
-            categories: v.categories || v.subcategories || [],
-            rating: v.rating ? parseFloat(v.rating) : 4.5,
-            reviewCount: v.total_reviews || v.review_count || 0,
-            established: v.established,
-            location: v.location,
-            specialty: v.specialty,
-            certifications: v.certifications || [],
-            topProducts: products.map((p: any) => ({
-              id: p.id,
-              name: p.name,
-              nameHe: p.name_he,
-              description: p.description || '',
-              price: parseFloat(p.price),
-              originalPrice: p.original_price ? parseFloat(p.original_price) : undefined,
-              category: p.category,
-              image: p.image_url || p.image || '',
-              vendorId: p.vendor_id,
-              vendorName: v.name,
-              vendorLogo: vendorLogo,
-              inStock: p.in_stock !== false,
-              isFeatured: p.is_featured || false,
-              rating: p.rating ? parseFloat(p.rating) : undefined,
-              tags: p.tags || [],
-            })),
-          };
-        })
-      );
-
-      return vendorsWithProducts;
-    }
-  } catch (error) {
-    console.log('DB vendor fetch failed, using static data:', (error as Error).message);
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item)).filter(Boolean);
   }
 
-  // Fallback to static data
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item)).filter(Boolean);
+      }
+    } catch {
+      return value
+        .split(/[,\n]/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
+function mapStaticLandingProduct(store: any, product: any): LandingProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    nameHe: product.nameHe || product.nameHebrew,
+    description: product.description,
+    price: product.price,
+    originalPrice: product.originalPrice,
+    category: product.category,
+    image: product.image,
+    vendorId: product.vendorId,
+    vendorName: product.vendorName,
+    vendorLogo: store.logo,
+    badge: product.badge,
+    rating: product.rating,
+    reviewCount: product.reviewCount || product.reviews || 0,
+    inStock: product.inStock,
+    isFeatured: product.isFeatured || product.featured || false,
+    tags: product.tags || [],
+  };
+}
+
+function mapDatabaseLandingProduct(row: any): LandingProduct {
+  return {
+    id: row.id,
+    name: row.name,
+    nameHe: row.name_he,
+    description: row.description || '',
+    price: parseFloat(row.price),
+    originalPrice: row.original_price ? parseFloat(row.original_price) : undefined,
+    category: row.category,
+    image: row.image_url || row.image || '',
+    vendorId: row.vendor_id,
+    vendorName: row.vendor_name,
+    vendorLogo: row.vendor_logo,
+    badge: row.badge,
+    rating: row.rating ? parseFloat(row.rating) : undefined,
+    reviewCount: row.review_count || row.total_reviews || 0,
+    inStock: row.in_stock !== false,
+    isFeatured: row.is_featured || false,
+    tags: toStringArray(row.tags),
+  };
+}
+
+function getStaticVendors(): LandingVendor[] {
   return Object.values(vendorStores).map((store) => ({
     id: store.id,
     name: store.name,
@@ -142,24 +143,165 @@ async function getActiveVendors(): Promise<LandingVendor[]> {
     location: store.metadata.location,
     specialty: store.metadata.specialty,
     certifications: store.metadata.certifications || [],
-    topProducts: store.products.slice(0, 3).map((p) => ({
-      id: p.id,
-      name: p.name,
-      nameHe: p.nameHe || p.nameHebrew,
-      description: p.description,
-      price: p.price,
-      originalPrice: p.originalPrice,
-      category: p.category,
-      image: p.image,
-      vendorId: p.vendorId,
-      vendorName: p.vendorName,
-      vendorLogo: store.logo,
-      inStock: p.inStock,
-      isFeatured: p.isFeatured || p.featured || false,
-      rating: p.rating,
-      tags: p.tags || [],
-    })),
+    topProducts: store.products.slice(0, 3).map((product) => mapStaticLandingProduct(store, product)),
   }));
+}
+
+function getStaticFeaturedProducts(limit: number = 12): LandingProduct[] {
+  const allProducts: LandingProduct[] = [];
+
+  Object.values(vendorStores).forEach((store) => {
+    store.products.forEach((product) => {
+      allProducts.push(mapStaticLandingProduct(store, product));
+    });
+  });
+
+  allProducts.sort((a, b) => {
+    if (a.isFeatured && !b.isFeatured) return -1;
+    if (!a.isFeatured && b.isFeatured) return 1;
+    return (b.rating || 0) - (a.rating || 0);
+  });
+
+  return allProducts.slice(0, limit);
+}
+
+function getStaticTopCategories(limit: number = 8): LandingCategory[] {
+  const categoryCounts: Record<string, number> = {};
+
+  Object.values(vendorStores).forEach((store) => {
+    store.products.forEach((product) => {
+      const category = product.category === 'ground-meat' ? 'ground-meatless' : product.category;
+      categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+    });
+  });
+
+  return Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([category, count], idx) => {
+      const slug = category.toLowerCase().replace(/\s+/g, '-');
+      const display = categoryDisplayNames[slug];
+
+      return {
+        id: `cat-${idx}`,
+        name: display?.en || category.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        nameHe: display?.he,
+        slug,
+        image: categoryImages[slug] || '/images/default_logo.svg',
+        productCount: count,
+      };
+    });
+}
+
+function getStaticMarketplaceStats(): MarketplaceStats {
+  const stores = Object.values(vendorStores);
+  const totalProducts = stores.reduce((sum, store) => sum + store.products.length, 0);
+  const categories = new Set<string>();
+
+  stores.forEach((store) => store.products.forEach((product) => categories.add(product.category)));
+
+  return {
+    totalVendors: stores.length,
+    totalProducts,
+    totalCategories: categories.size,
+    totalCustomers: 500,
+    yearsInBusiness: new Date().getFullYear() - 1973,
+  };
+}
+
+function getStaticLandingPageData(): LandingPageData {
+  return {
+    vendors: getStaticVendors(),
+    featuredProducts: getStaticFeaturedProducts(12),
+    categories: getStaticTopCategories(8),
+    flashDeals: [],
+    bundles: generateStaticBundles(),
+    promotions: [],
+    stats: getStaticMarketplaceStats(),
+  };
+}
+
+/**
+ * Get active vendors from DB with fallback to static data
+ */
+async function getActiveVendors(): Promise<LandingVendor[]> {
+  try {
+    const { rows: dbVendors } = await query(
+      'SELECT * FROM vendors WHERE is_active = true ORDER BY name'
+    );
+
+    if (dbVendors.length > 0) {
+      const vendorIds = dbVendors.map((vendor: any) => vendor.id);
+      const [{ rows: countRows }, { rows: topProductRows }] = await Promise.all([
+        query(
+          `SELECT vendor_id, COUNT(*)::int AS product_count
+           FROM products
+           WHERE status = 'published' AND vendor_id = ANY($1::text[])
+           GROUP BY vendor_id`,
+          [vendorIds]
+        ),
+        query(
+          `SELECT *
+           FROM (
+             SELECT
+               p.*,
+               v.name AS vendor_name,
+               v.logo_url AS vendor_logo,
+               ROW_NUMBER() OVER (
+                 PARTITION BY p.vendor_id
+                 ORDER BY COALESCE(p.is_featured, false) DESC, COALESCE(p.view_count, 0) DESC, p.created_at DESC
+               ) AS row_num
+             FROM products p
+             JOIN vendors v ON p.vendor_id = v.id
+             WHERE p.status = 'published' AND p.vendor_id = ANY($1::text[])
+           ) ranked
+           WHERE row_num <= 3
+           ORDER BY vendor_id, row_num`,
+          [vendorIds]
+        ),
+      ]);
+
+      const productCountByVendor = new Map<string, number>(
+        countRows.map((row: any) => [row.vendor_id, parseInt(row.product_count || '0', 10)])
+      );
+      const topProductsByVendor = new Map<string, LandingProduct[]>();
+
+      for (const row of topProductRows) {
+        const currentProducts = topProductsByVendor.get(row.vendor_id) || [];
+        currentProducts.push(mapDatabaseLandingProduct(row));
+        topProductsByVendor.set(row.vendor_id, currentProducts);
+      }
+
+      return dbVendors.map((vendor: any) => {
+        const vendorLogo = vendor.logo_url || vendor.logo || '';
+        const categories = toStringArray(vendor.categories);
+
+        return {
+          id: vendor.id,
+          name: vendor.name,
+          slug: vendor.slug,
+          description: vendor.description || '',
+          logo: vendorLogo,
+          banner: vendor.banner_url || vendor.banner,
+          productCount: productCountByVendor.get(vendor.id) || 0,
+          categories: categories.length > 0
+            ? categories
+            : toStringArray(vendor.subcategories),
+          rating: vendor.rating ? parseFloat(vendor.rating) : 4.5,
+          reviewCount: vendor.total_reviews || vendor.review_count || 0,
+          established: vendor.established,
+          location: vendor.location,
+          specialty: vendor.specialty,
+          certifications: toStringArray(vendor.certifications),
+          topProducts: topProductsByVendor.get(vendor.id) || [],
+        };
+      });
+    }
+  } catch (error) {
+    console.log('DB vendor fetch failed, using static data:', (error as Error).message);
+  }
+
+  return getStaticVendors();
 }
 
 /**
@@ -178,64 +320,13 @@ async function getFeaturedProducts(limit: number = 12): Promise<LandingProduct[]
     );
 
     if (rows.length > 0) {
-      return rows.map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        nameHe: p.name_he,
-        description: p.description || '',
-        price: parseFloat(p.price),
-        originalPrice: p.original_price ? parseFloat(p.original_price) : undefined,
-        category: p.category,
-        image: p.image_url || p.image || '',
-        vendorId: p.vendor_id,
-        vendorName: p.vendor_name,
-        vendorLogo: p.vendor_logo,
-        badge: p.badge,
-        rating: p.rating ? parseFloat(p.rating) : undefined,
-        reviewCount: p.review_count || p.total_reviews || 0,
-        inStock: p.in_stock !== false,
-        isFeatured: p.is_featured || false,
-        tags: p.tags || [],
-      }));
+      return rows.map(mapDatabaseLandingProduct);
     }
   } catch (error) {
     console.log('DB product fetch failed, using static data:', (error as Error).message);
   }
 
-  // Fallback to static data
-  const allProducts: LandingProduct[] = [];
-  Object.values(vendorStores).forEach((store) => {
-    store.products.forEach((p) => {
-      allProducts.push({
-        id: p.id,
-        name: p.name,
-        nameHe: p.nameHe || p.nameHebrew,
-        description: p.description,
-        price: p.price,
-        originalPrice: p.originalPrice,
-        category: p.category,
-        image: p.image,
-        vendorId: p.vendorId,
-        vendorName: p.vendorName,
-        vendorLogo: store.logo,
-        badge: p.badge,
-        rating: p.rating,
-        reviewCount: p.reviewCount || p.reviews || 0,
-        inStock: p.inStock,
-        isFeatured: p.isFeatured || p.featured || false,
-        tags: p.tags || [],
-      });
-    });
-  });
-
-  // Sort: featured first, then by rating
-  allProducts.sort((a, b) => {
-    if (a.isFeatured && !b.isFeatured) return -1;
-    if (!a.isFeatured && b.isFeatured) return 1;
-    return (b.rating || 0) - (a.rating || 0);
-  });
-
-  return allProducts.slice(0, limit);
+  return getStaticFeaturedProducts(limit);
 }
 
 /**
@@ -272,31 +363,7 @@ async function getTopCategories(limit: number = 8): Promise<LandingCategory[]> {
     console.log('DB category fetch failed, using static data:', (error as Error).message);
   }
 
-  // Fallback: derive from static data
-  const catMap: Record<string, number> = {};
-  Object.values(vendorStores).forEach((store) => {
-    store.products.forEach((p) => {
-      // Enforce language rule: merge "ground-meat" into "ground-meatless"
-      const cat = p.category === 'ground-meat' ? 'ground-meatless' : p.category;
-      catMap[cat] = (catMap[cat] || 0) + 1;
-    });
-  });
-
-  return Object.entries(catMap)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([cat, count], idx) => {
-      const slug = cat.toLowerCase().replace(/\s+/g, '-');
-      const display = categoryDisplayNames[slug];
-      return {
-        id: `cat-${idx}`,
-        name: display?.en || cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-        nameHe: display?.he,
-        slug,
-        image: categoryImages[slug] || '/images/default_logo.svg',
-        productCount: count,
-      };
-    });
+  return getStaticTopCategories(limit);
 }
 
 /**
@@ -350,50 +417,60 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
     );
 
     if (rows.length > 0) {
-      const bundles: Bundle[] = await Promise.all(
-        rows.map(async (b: any) => {
-          // Resolve product details for the bundle
-          const productIds = b.product_ids || [];
-          let products: BundleProduct[] = [];
+      const bundleProductIds = rows.map((bundle: any) => parseBundleProductIds(bundle.product_ids ?? bundle.products));
+      const allProductIds = Array.from(new Set(bundleProductIds.flat())).filter(Boolean);
+      const productMap = new Map<string, BundleProduct>();
 
-          if (productIds.length > 0) {
-            try {
-              const placeholders = productIds.map((_: string, i: number) => `$${i + 1}`).join(',');
-              const { rows: prodRows } = await query(
-                `SELECT id, name, image_url, price FROM products WHERE id IN (${placeholders})`,
-                productIds
-              );
-              products = prodRows.map((p: any) => ({
-                id: p.id,
-                name: p.name,
-                image: p.image_url || '',
-                price: parseFloat(p.price),
-              }));
-            } catch {
-              // Products not found, use empty
-            }
+      if (allProductIds.length > 0) {
+        try {
+          const { rows: productRows } = await query(
+            `SELECT id, name, image_url, price FROM products WHERE id = ANY($1::text[])`,
+            [allProductIds]
+          );
+
+          for (const product of productRows) {
+            productMap.set(product.id, {
+              id: product.id,
+              name: product.name,
+              image: product.image_url || '',
+              price: parseFloat(product.price),
+            });
           }
+        } catch {
+          // Use empty product map if the lookup fails.
+        }
+      }
 
-          return {
-            id: b.id,
-            name: b.name,
-            nameHe: b.name_he,
-            description: b.description || '',
-            descriptionHe: b.description_he,
-            products,
-            bundlePrice: parseFloat(b.bundle_price),
-            originalPrice: parseFloat(b.original_price),
-            savingsPercent: b.savings_percent ? parseFloat(b.savings_percent) : Math.round((1 - parseFloat(b.bundle_price) / parseFloat(b.original_price)) * 100),
-            image: b.image || '',
-            isFeatured: b.is_featured || false,
-            loyaltyPointsBonus: b.loyalty_points_bonus || 0,
-            vendorId: b.vendor_id,
-            vendorName: b.vendor_name,
-          };
-        })
-      );
+      return rows.map((bundle: any, idx: number) => {
+        const productIds = bundleProductIds[idx];
+        const products = productIds
+          .map((productId) => productMap.get(productId))
+          .filter((product): product is BundleProduct => !!product);
+        const bundlePrice = parseFloat(bundle.bundle_price ?? bundle.price);
+        const originalPrice = parseFloat(bundle.original_price ?? bundle.price);
+        const savingsPercent = bundle.savings_percent
+          ? parseFloat(bundle.savings_percent)
+          : (originalPrice > bundlePrice && originalPrice > 0
+              ? Math.round((1 - bundlePrice / originalPrice) * 100)
+              : 0);
 
-      return bundles;
+        return {
+          id: bundle.id,
+          name: bundle.name,
+          nameHe: bundle.name_he,
+          description: bundle.description || '',
+          descriptionHe: bundle.description_he,
+          products,
+          bundlePrice,
+          originalPrice,
+          savingsPercent,
+          image: bundle.image || '',
+          isFeatured: bundle.is_featured || false,
+          loyaltyPointsBonus: bundle.loyalty_points_bonus || 0,
+          vendorId: bundle.vendor_id,
+          vendorName: bundle.vendor_name,
+        };
+      });
     }
   } catch (error) {
     console.log('DB bundles fetch failed:', (error as Error).message);
@@ -592,19 +669,7 @@ async function getMarketplaceStats(): Promise<MarketplaceStats> {
     console.log('DB stats fetch failed, using static:', (error as Error).message);
   }
 
-  // Fallback
-  const stores = Object.values(vendorStores);
-  const totalProducts = stores.reduce((sum, s) => sum + s.products.length, 0);
-  const categories = new Set<string>();
-  stores.forEach((s) => s.products.forEach((p) => categories.add(p.category)));
-
-  return {
-    totalVendors: stores.length,
-    totalProducts,
-    totalCategories: categories.size,
-    totalCustomers: 500,
-    yearsInBusiness: new Date().getFullYear() - 1973,
-  };
+  return getStaticMarketplaceStats();
 }
 
 function parseBundleProductIds(products: unknown): string[] {
@@ -688,7 +753,7 @@ async function getDatabaseBundles(): Promise<Bundle[]> {
 /**
  * Get all bundles (for dedicated bundles page)
  */
-export async function getAllBundles(): Promise<Bundle[]> {
+async function loadAllBundles(): Promise<Bundle[]> {
   const [staticBundles, databaseBundles] = await Promise.all([
     getFeaturedBundles(),
     getDatabaseBundles(),
@@ -703,6 +768,14 @@ export async function getAllBundles(): Promise<Bundle[]> {
   for (const bundle of databaseBundles) merged.set(bundle.id, bundle);
 
   return Array.from(merged.values());
+}
+
+const getAllBundlesCached = unstable_cache(loadAllBundles, ['landing-all-bundles'], {
+  revalidate: 300,
+});
+
+export async function getAllBundles(): Promise<Bundle[]> {
+  return getAllBundlesCached();
 }
 
 export async function getBundleById(id: string): Promise<Bundle | null> {
@@ -735,12 +808,13 @@ export async function getEnrichedBundle(id: string): Promise<EnrichedBundle | nu
   };
 }
 
-export async function getLandingPageData(): Promise<LandingPageData> {
+async function loadLandingPageData(): Promise<LandingPageData> {
   // Gate: check DB availability once before running 7 parallel queries.
   // If DB is down this returns in <2s instead of waiting for every query to timeout.
   const dbUp = await isDbAvailable();
   if (!dbUp) {
     console.log('DB unreachable — using static data for landing page');
+    return getStaticLandingPageData();
   }
 
   const [vendors, featuredProducts, categories, flashDeals, bundles, promotions, stats] =
@@ -763,4 +837,12 @@ export async function getLandingPageData(): Promise<LandingPageData> {
     promotions,
     stats,
   };
+}
+
+const getLandingPageDataCached = unstable_cache(loadLandingPageData, ['landing-page-data'], {
+  revalidate: 300,
+});
+
+export async function getLandingPageData(): Promise<LandingPageData> {
+  return getLandingPageDataCached();
 }
