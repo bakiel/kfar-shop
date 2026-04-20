@@ -2,6 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { completeProductCatalog } from '@/lib/data/complete-catalog';
 import { query } from '@/lib/db/postgres-client';
 
+function parseMetadata(metadata: unknown): Record<string, any> {
+  if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
+    return metadata as Record<string, any>;
+  }
+
+  if (typeof metadata === 'string') {
+    try {
+      const parsed = JSON.parse(metadata);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, any>;
+      }
+    } catch {
+      return {};
+    }
+  }
+
+  return {};
+}
+
 // This is the route the vendor store page is actually calling
 export async function GET(
   request: NextRequest,
@@ -38,7 +57,7 @@ export async function GET(
     const vendorResult = await query(
       `SELECT
         id, name, name_he, slug, email, phone,
-        logo, banner, description, description_he,
+        logo_url, banner_url, description, description_he,
         address, delivery_options, business_hours,
         about_owner, status, featured, metadata,
         created_at, updated_at
@@ -52,12 +71,13 @@ export async function GET(
     }
 
     const vendor = vendorResult.rows[0];
+    const metadata = parseMetadata(vendor.metadata);
 
     // Get vendor products
     const productsResult = await query(
       `SELECT
         id, name, name_he, description, price,
-        category, image, is_vegan, is_kosher, in_stock
+        category, image_url, is_vegan, is_kosher, in_stock
       FROM products
       WHERE vendor_id = $1
       ORDER BY created_at DESC`,
@@ -72,24 +92,26 @@ export async function GET(
         nameHe: vendor.name_he,
         description: vendor.description,
         descriptionHe: vendor.description_he,
-        logo: vendor.logo || '/images/placeholder-logo.jpg',
-        banner: vendor.banner || '/images/default-store-banner.svg',
+        logo: vendor.logo_url || '/images/placeholder-logo.jpg',
+        banner: vendor.banner_url || '/images/default-store-banner.svg',
         products: productsResult.rows.map((p: any) => ({
           id: p.id,
           name: p.name,
           nameHe: p.name_he || p.name,
           description: p.description,
           price: p.price,
-          image: p.image_url,
+          image: p.image_url || '/images/placeholder-product.jpg',
           category: p.category,
           inStock: p.in_stock,
           isVegan: p.is_vegan,
           isKosher: p.is_kosher
         })),
-        categories: vendor.metadata?.categories || [vendor.metadata?.specialty] || ['general'],
+        categories: Array.isArray(metadata.categories) && metadata.categories.length > 0
+          ? metadata.categories
+          : (metadata.specialty ? [metadata.specialty] : ['general']),
         metadata: {
-          ...vendor.metadata,
-          established: vendor.metadata?.established || new Date(vendor.created_at).getFullYear().toString(),
+          ...metadata,
+          established: metadata.established || new Date(vendor.created_at).getFullYear().toString(),
           location: vendor.address || 'Dimona, Israel',
           deliveryOptions: vendor.delivery_options,
           businessHours: vendor.business_hours,
@@ -102,7 +124,7 @@ export async function GET(
 
   } catch (error) {
     console.error('Error fetching vendor from database:', error);
-    return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Failed to load vendor' }, { status: 500 });
   }
 }
 

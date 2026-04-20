@@ -20,22 +20,47 @@ const pool = new Pool({
 // Success cached 5min, failure cached only 5s (allows quick recovery after restart)
 let _dbAvailable: boolean | null = null;
 let _dbCheckTime = 0;
+let _dbCheckPromise: Promise<boolean> | null = null;
 const DB_CHECK_TTL_OK = 300_000;  // 5 minutes when DB is up
 const DB_CHECK_TTL_FAIL = 5_000;  // 5 seconds when DB is down (retry quickly)
+const DB_CHECK_TIMEOUT_MS = 1_500;
 
 export async function isDbAvailable(): Promise<boolean> {
   const ttl = _dbAvailable === false ? DB_CHECK_TTL_FAIL : DB_CHECK_TTL_OK;
   if (_dbAvailable !== null && Date.now() - _dbCheckTime < ttl) {
     return _dbAvailable;
   }
-  try {
-    await pool.query('SELECT 1');
-    _dbAvailable = true;
-  } catch {
-    _dbAvailable = false;
+
+  if (_dbCheckPromise) {
+    return _dbCheckPromise;
   }
-  _dbCheckTime = Date.now();
-  return _dbAvailable;
+
+  const dbCheck = pool.query('SELECT 1');
+  _dbCheckPromise = new Promise<boolean>((resolve) => {
+    const timeout = setTimeout(() => {
+      _dbAvailable = false;
+      _dbCheckTime = Date.now();
+      resolve(false);
+    }, DB_CHECK_TIMEOUT_MS);
+
+    dbCheck
+      .then(() => {
+        clearTimeout(timeout);
+        _dbAvailable = true;
+        _dbCheckTime = Date.now();
+        resolve(true);
+      })
+      .catch(() => {
+        clearTimeout(timeout);
+        _dbAvailable = false;
+        _dbCheckTime = Date.now();
+        resolve(false);
+      });
+  }).finally(() => {
+    _dbCheckPromise = null;
+  });
+
+  return _dbCheckPromise;
 }
 
 // Test connection on startup
