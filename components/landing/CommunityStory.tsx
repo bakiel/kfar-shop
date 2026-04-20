@@ -206,6 +206,7 @@ export default function CommunityStory() {
                 alt={language === 'he' ? photo.captionHe : photo.caption}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                quality={60}
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
               {/* Hover caption overlay */}

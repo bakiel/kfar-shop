@@ -196,6 +196,7 @@ export default function Testimonials() {
                     alt={language === 'he' ? t.nameHe : t.nameEn}
                     fill
                     sizes="40px"
+                    quality={40}
                     className="object-cover"
                   />
                 </div>
@@ -238,6 +239,7 @@ export default function Testimonials() {
                       alt={language === 'he' ? t.nameHe : t.nameEn}
                       fill
                       sizes="36px"
+                      quality={40}
                       className="object-cover"
                     />
                   </div>

@@ -81,6 +81,8 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
                   src={vendorInfo.logo}
                   alt={`${vendorInfo.name} logo`}
                   fill
+                  sizes="72px"
+                  quality={45}
                   className="object-cover"
                   onError={(e) => {
                     e.currentTarget.src = '/images/fallbacks/vendor-logo-fallback.svg';
@@ -150,6 +152,8 @@ export default function VendorBrowseCard({ vendorId, vendorInfo, products, index
                     src={product.image}
                     alt={product.name || "Product"}
                     fill
+                    sizes="64px"
+                    quality={50}
                     className="object-cover group-hover/product:scale-110 transition-transform duration-300"
                     onError={(e) => {
                       e.currentTarget.src = `/images/fallbacks/${vendorId}-product.svg`;

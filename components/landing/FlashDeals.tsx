@@ -167,6 +167,7 @@ function DealCard({
           fill
           className="object-cover"
           sizes="(max-width: 768px) 220px, 240px"
+          quality={60}
         />
       </div>
 

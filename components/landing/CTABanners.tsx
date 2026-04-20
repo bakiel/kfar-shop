@@ -81,6 +81,7 @@ export default function CTABanners() {
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                quality={60}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
 
@@ -158,6 +159,7 @@ export default function CTABanners() {
                 fill
                 className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                quality={60}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#2D5A27]/90 via-[#2D5A27]/40 to-black/10" />
 
@@ -234,6 +236,7 @@ export default function CTABanners() {
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                quality={60}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1a3a5c]/90 via-[#1a3a5c]/40 to-black/10" />
 

@@ -258,6 +258,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
             fill
             className="object-cover opacity-30 mix-blend-luminosity transition-transform duration-500 group-hover:scale-110"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            quality={60}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
 
@@ -294,6 +295,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
                       fill
                       className="object-cover"
                       sizes="44px"
+                      quality={50}
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                   </div>
@@ -443,6 +445,7 @@ function FeaturedProductCard({ product, language, isRTL, t }: FeaturedProductCar
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              quality={60}
             />
             {product.badge && (
               <div className="absolute top-3 left-3">
@@ -468,6 +471,7 @@ function FeaturedProductCard({ product, language, isRTL, t }: FeaturedProductCar
                     fill
                     className="object-cover"
                     sizes="20px"
+                    quality={40}
                   />
                 </div>
               )}

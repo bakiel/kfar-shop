@@ -71,11 +71,12 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
             src={product.image}
             alt={product.name || "Image"}
             fill
+            quality={55}
             className={`object-cover transition-opacity duration-300 ${
               isImageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setIsImageLoaded(true)}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"
           />
           
           {!isImageLoaded && (
@@ -95,6 +96,8 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
                   src={product.vendorLogo}
                   alt={product.vendor || "Vendor"}
                   fill
+                  sizes="20px"
+                  quality={40}
                   className="object-cover"
                   onError={(e) => {
                     // Hide broken image

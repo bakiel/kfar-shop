@@ -11,8 +11,10 @@ const nextConfig: NextConfig = {
   
   images: {
     minimumCacheTTL: 2592000, // 30 days - prevents re-optimization
-    deviceSizes: [640, 750, 828, 1080, 1200],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Include smaller responsive widths so card grids and small logos
+    // don't over-fetch desktop-sized variants on mobile.
+    deviceSizes: [360, 480, 640, 750, 828, 1080, 1200],
+    imageSizes: [16, 20, 24, 32, 40, 44, 48, 64, 72, 96, 128, 256, 384],
     formats: ['image/webp'],
     remotePatterns: [
       {

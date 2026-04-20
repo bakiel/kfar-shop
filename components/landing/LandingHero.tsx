@@ -171,6 +171,7 @@ function RotatingHeroImage({ shouldReduceMotion }: { shouldReduceMotion: boolean
             alt={heroImages[current].alt}
             fill
             sizes="(max-width: 640px) 100vw, 50vw"
+            quality={65}
             className="object-cover"
             priority={current === 0}
           />

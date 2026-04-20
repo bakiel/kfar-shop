@@ -230,6 +230,8 @@ const FeaturedProducts = () => {
                   src={product.image}
                   alt={product.name || "Image"}
                   fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  quality={60}
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 
@@ -284,6 +286,8 @@ const FeaturedProducts = () => {
                       src={product.vendorLogo}
                       alt={product.vendor || "Image"}
                       fill
+                      sizes="32px"
+                      quality={40}
                       className="object-cover rounded-full border-2"
                       style={{ borderColor: '#e5e7eb' }}
                     />

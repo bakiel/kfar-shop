@@ -403,6 +403,8 @@ export default function MarketplacePage() {
               src="/images/marketplace-banner-bg.jpg"
               alt="KiFar Marketplace Banner"
               fill
+              sizes="100vw"
+              quality={55}
               className="object-cover scale-110 grayscale"
               priority
             />
@@ -881,6 +883,8 @@ export default function MarketplacePage() {
                         src={product.image}
                         alt={product.name || "Image"}
                         fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                        quality={60}
                         className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                         onError={(e) => {
                           const vendorFallbacks: Record<string, string> = {

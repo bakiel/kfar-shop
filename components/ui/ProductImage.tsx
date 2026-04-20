@@ -11,6 +11,7 @@ interface ProductImageProps {
   className?: string;
   priority?: boolean;
   sizes?: string;
+  quality?: number;
   style?: React.CSSProperties;
 }
 
@@ -23,6 +24,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
   className = '',
   priority = false,
   sizes,
+  quality = 60,
   style
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -54,6 +56,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
   
   // Ensure the image path is correct using the resolver
   const processedSrc = resolveImagePath(imageSrc);
+  const responsiveSizes = sizes ?? (fill ? '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw' : undefined);
   
   if (fill) {
     return (
@@ -63,7 +66,8 @@ const ProductImage: React.FC<ProductImageProps> = ({
         fill
         className={className}
         priority={priority}
-        sizes={sizes}
+        sizes={responsiveSizes}
+        quality={quality}
         style={style}
         onError={handleImageError}
         placeholder="blur"
@@ -80,6 +84,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
       height={height || 300}
       className={className}
       priority={priority}
+      quality={quality}
       style={style}
       onError={handleImageError}
       placeholder="blur"
