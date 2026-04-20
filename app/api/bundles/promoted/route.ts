@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
+import {
+  getBundleRecordOriginalPrice,
+  getBundleRecordPrice,
+  getBundleRecordProductIds,
+  getBundleSavingsPercent,
+  isBundleRecordActive,
+  sortBundleRecords,
+} from '@/lib/db/bundles';
 import { getProductById } from '@/lib/data/wordpress-style-data-layer';
 
 // GET /api/bundles/promoted
@@ -15,22 +23,17 @@ export async function GET() {
       return NextResponse.json({ bundle: null });
     }
 
-    const { rows } = await query(
-      `SELECT * FROM bundles
-       WHERE is_promoted = true AND status = 'active'
-       ORDER BY updated_at DESC
-       LIMIT 1`,
-      []
-    );
+    const { rows } = await query('SELECT * FROM bundles');
 
-    if (rows.length === 0) {
+    const bundle = sortBundleRecords(rows).find((row) => row.is_promoted === true && isBundleRecordActive(row));
+
+    if (!bundle) {
       return NextResponse.json({ bundle: null });
     }
 
-    const bundle = rows[0];
-    const productIds: string[] = Array.isArray(bundle.products)
-      ? bundle.products
-      : (typeof bundle.products === 'string' ? JSON.parse(bundle.products || '[]') : []);
+    const productIds = getBundleRecordProductIds(bundle);
+    const price = getBundleRecordPrice(bundle);
+    const originalPrice = getBundleRecordOriginalPrice(bundle);
 
     const resolvedProducts = productIds.map((pid) => {
       const product = getProductById(pid);
@@ -52,13 +55,11 @@ export async function GET() {
         name: bundle.name,
         nameHe: bundle.name_he,
         description: bundle.description,
-        price: Number(bundle.price) || 0,
-        originalPrice: Number(bundle.original_price) || 0,
+        price,
+        originalPrice,
         image: bundle.image,
         products: resolvedProducts,
-        discount: bundle.original_price
-          ? Math.round(((bundle.original_price - bundle.price) / bundle.original_price) * 100)
-          : 0,
+        discount: getBundleSavingsPercent(originalPrice, price),
       },
     });
   } catch (err) {

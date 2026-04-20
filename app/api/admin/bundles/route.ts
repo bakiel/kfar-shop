@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductById } from '@/lib/data/wordpress-style-data-layer';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
+import {
+  getBundleRecordOriginalPrice,
+  getBundleRecordPrice,
+  getBundleRecordStatus,
+  getBundleSavingsPercent,
+  getBundleTableSchema,
+  normalizeBundleRecord,
+  sortBundleRecords,
+} from '@/lib/db/bundles';
 import { verifyAccessToken } from '@/lib/services/auth-service';
 
 // Enrich bundle with resolved product details
 function enrichBundle(bundle: any) {
-  const resolvedProducts = (bundle.products || []).map((pid: string) => {
+  const normalized = normalizeBundleRecord(bundle);
+  const resolvedProducts = normalized.products.map((pid: string) => {
     const product = getProductById(pid);
     if (product) {
       return {
@@ -22,10 +32,17 @@ function enrichBundle(bundle: any) {
 
   return {
     ...bundle,
+    nameHe: normalized.nameHe,
+    description: normalized.description,
+    products: normalized.products,
+    price: normalized.price,
+    originalPrice: normalized.originalPrice,
+    status: normalized.status,
+    image: normalized.image,
+    isPromoted: normalized.isPromoted,
+    is_promoted: normalized.isPromoted,
     resolvedProducts,
-    discount: bundle.originalPrice
-      ? Math.round(((bundle.originalPrice - bundle.price) / bundle.originalPrice) * 100)
-      : 0,
+    discount: normalized.savingsPercent,
   };
 }
 
@@ -53,21 +70,13 @@ export async function GET(request: NextRequest) {
 
     if (dbUp) {
       try {
-        let sql = 'SELECT * FROM bundles';
-        const params: any[] = [];
+        const result = await query('SELECT * FROM bundles');
+        bundles = sortBundleRecords(result.rows);
 
         if (bundleId) {
-          sql += ' WHERE id = $1';
-          params.push(bundleId);
+          bundles = bundles.filter((bundle) => bundle.id === bundleId);
         } else if (status && status !== 'all') {
-          sql += ' WHERE status = $1';
-          params.push(status);
-        }
-
-        sql += ' ORDER BY created_at DESC';
-        const result = await query(sql, params);
-        if (result.rows.length > 0) {
-          bundles = result.rows;
+          bundles = bundles.filter((bundle) => getBundleRecordStatus(bundle) === status);
         }
       } catch {
         // Table may not exist -- return empty result
@@ -108,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, nameHe, description, products, price, originalPrice, image, status } = body;
+    const { name, nameHe, description, products, price, originalPrice, image, status, isPromoted } = body;
 
     if (!name || !products || !Array.isArray(products) || products.length === 0) {
       return NextResponse.json(
@@ -125,8 +134,11 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date().toISOString();
+    const bundleId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `bundle-${Date.now()}`;
     const newBundle: any = {
-      id: `bundle-${Date.now()}`,
+      id: bundleId,
       name,
       nameHe: nameHe || '',
       description: description || '',
@@ -140,25 +152,91 @@ export async function POST(request: NextRequest) {
     };
 
     // Try DB insert
-    const dbUp = await isDbAvailable();
-    if (dbUp) {
+    const schema = await getBundleTableSchema();
+    if (schema) {
       try {
+        if (schema.hasIsPromoted && isPromoted === true) {
+          await query('UPDATE bundles SET is_promoted = false WHERE is_promoted = true');
+        }
+
+        const columns = ['id', 'name'];
+        const values: any[] = [newBundle.id, newBundle.name];
+
+        if (schema.hasNameHe) {
+          columns.push('name_he');
+          values.push(newBundle.nameHe);
+        }
+        if (schema.hasDescription) {
+          columns.push('description');
+          values.push(newBundle.description);
+        }
+        if (schema.hasDescriptionHe) {
+          columns.push('description_he');
+          values.push('');
+        }
+        if (schema.hasProducts) {
+          columns.push('products');
+          values.push(JSON.stringify(newBundle.products));
+        } else if (schema.hasProductIds) {
+          columns.push('product_ids');
+          values.push(JSON.stringify(newBundle.products));
+        }
+        if (schema.hasPrice) {
+          columns.push('price');
+          values.push(newBundle.price);
+        } else if (schema.hasBundlePrice) {
+          columns.push('bundle_price');
+          values.push(newBundle.price);
+        }
+        if (schema.hasOriginalPrice) {
+          columns.push('original_price');
+          values.push(newBundle.originalPrice);
+        }
+        if (schema.hasSavingsPercent) {
+          columns.push('savings_percent');
+          values.push(getBundleSavingsPercent(newBundle.originalPrice, newBundle.price));
+        }
+        if (schema.hasStatus) {
+          columns.push('status');
+          values.push(newBundle.status);
+        } else if (schema.hasIsActive) {
+          columns.push('is_active');
+          values.push(newBundle.status === 'active');
+        }
+        if (schema.hasImage) {
+          columns.push('image');
+          values.push(newBundle.image);
+        }
+        if (schema.hasIsFeatured) {
+          columns.push('is_featured');
+          values.push(false);
+        }
+        if (schema.hasLoyaltyPointsBonus) {
+          columns.push('loyalty_points_bonus');
+          values.push(0);
+        }
+        if (schema.hasVendorId) {
+          columns.push('vendor_id');
+          values.push(null);
+        }
+        if (schema.hasIsPromoted) {
+          columns.push('is_promoted');
+          values.push(!!isPromoted);
+        }
+        if (schema.hasCreatedAt) {
+          columns.push('created_at');
+          values.push(newBundle.createdAt);
+        }
+        if (schema.hasUpdatedAt) {
+          columns.push('updated_at');
+          values.push(newBundle.updatedAt);
+        }
+
+        const placeholders = columns.map((_, index) => `$${index + 1}`).join(', ');
         const result = await query(
-          `INSERT INTO bundles (id, name, name_he, description, products, price, original_price, status, image, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-          [
-            newBundle.id,
-            newBundle.name,
-            newBundle.nameHe,
-            newBundle.description,
-            JSON.stringify(newBundle.products),
-            newBundle.price,
-            newBundle.originalPrice,
-            newBundle.status,
-            newBundle.image,
-            newBundle.createdAt,
-            newBundle.updatedAt,
-          ]
+          `INSERT INTO bundles (${columns.join(', ')})
+           VALUES (${placeholders}) RETURNING *`,
+          values
         );
         if (result.rows[0]) {
           return NextResponse.json(
@@ -201,13 +279,19 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const now = new Date().toISOString();
-    updates.updatedAt = now;
-
-    // Try DB update
-    const dbUp = await isDbAvailable();
-    if (dbUp) {
+    const schema = await getBundleTableSchema();
+    if (schema) {
       try {
+        const existingResult = await query('SELECT * FROM bundles WHERE id = $1', [id]);
+        const existingBundle = existingResult.rows[0];
+        if (!existingBundle) {
+          return NextResponse.json(
+            { error: `Bundle ${id} not found or database unavailable` },
+            { status: 404 }
+          );
+        }
+
+        const now = new Date().toISOString();
         const setClauses: string[] = [];
         const values: any[] = [id];
         let paramIndex = 2;
@@ -216,45 +300,72 @@ export async function PATCH(request: NextRequest) {
           setClauses.push(`name = $${paramIndex++}`);
           values.push(updates.name);
         }
-        if (updates.nameHe !== undefined) {
+        if (updates.nameHe !== undefined && schema.hasNameHe) {
           setClauses.push(`name_he = $${paramIndex++}`);
           values.push(updates.nameHe);
         }
-        if (updates.description !== undefined) {
+        if (updates.description !== undefined && schema.hasDescription) {
           setClauses.push(`description = $${paramIndex++}`);
           values.push(updates.description);
         }
         if (updates.products !== undefined) {
-          setClauses.push(`products = $${paramIndex++}`);
-          values.push(JSON.stringify(updates.products));
+          if (schema.hasProducts) {
+            setClauses.push(`products = $${paramIndex++}`);
+            values.push(JSON.stringify(updates.products));
+          } else if (schema.hasProductIds) {
+            setClauses.push(`product_ids = $${paramIndex++}`);
+            values.push(JSON.stringify(updates.products));
+          }
         }
         if (updates.price !== undefined) {
-          setClauses.push(`price = $${paramIndex++}`);
-          values.push(updates.price);
+          if (schema.hasPrice) {
+            setClauses.push(`price = $${paramIndex++}`);
+            values.push(updates.price);
+          } else if (schema.hasBundlePrice) {
+            setClauses.push(`bundle_price = $${paramIndex++}`);
+            values.push(updates.price);
+          }
         }
         if (updates.originalPrice !== undefined) {
-          setClauses.push(`original_price = $${paramIndex++}`);
-          values.push(updates.originalPrice);
+          if (schema.hasOriginalPrice) {
+            setClauses.push(`original_price = $${paramIndex++}`);
+            values.push(updates.originalPrice);
+          }
         }
         if (updates.status !== undefined) {
-          setClauses.push(`status = $${paramIndex++}`);
-          values.push(updates.status);
+          if (schema.hasStatus) {
+            setClauses.push(`status = $${paramIndex++}`);
+            values.push(updates.status);
+          } else if (schema.hasIsActive) {
+            setClauses.push(`is_active = $${paramIndex++}`);
+            values.push(updates.status === 'active');
+          }
         }
-        if (updates.image !== undefined) {
+        if (updates.image !== undefined && schema.hasImage) {
           setClauses.push(`image = $${paramIndex++}`);
           values.push(updates.image);
         }
         // Task #5: home-page promotion toggle. Only one bundle may be
         // promoted at a time — clear all others before setting this one.
-        if (updates.isPromoted !== undefined) {
+        if (updates.isPromoted !== undefined && schema.hasIsPromoted) {
           if (updates.isPromoted === true) {
             await query('UPDATE bundles SET is_promoted = false WHERE is_promoted = true AND id <> $1', [id]);
           }
           setClauses.push(`is_promoted = $${paramIndex++}`);
           values.push(!!updates.isPromoted);
         }
-        setClauses.push(`updated_at = $${paramIndex++}`);
-        values.push(now);
+        if (schema.hasSavingsPercent && (updates.price !== undefined || updates.originalPrice !== undefined)) {
+          const nextPrice = updates.price !== undefined ? Number(updates.price) || 0 : getBundleRecordPrice(existingBundle);
+          const nextOriginalPrice = updates.originalPrice !== undefined
+            ? Number(updates.originalPrice) || nextPrice
+            : getBundleRecordOriginalPrice(existingBundle);
+          setClauses.push(`savings_percent = $${paramIndex++}`);
+          values.push(getBundleSavingsPercent(nextOriginalPrice, nextPrice));
+        }
+        if (schema.hasUpdatedAt) {
+          setClauses.push(`updated_at = $${paramIndex++}`);
+          values.push(now);
+        }
 
         if (setClauses.length > 0) {
           const result = await query(

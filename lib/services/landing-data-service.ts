@@ -4,6 +4,15 @@
  */
 
 import { unstable_cache } from 'next/cache';
+import {
+  getBundleRecordOriginalPrice,
+  getBundleRecordPrice,
+  getBundleRecordProductIds,
+  getBundleRecordStatus,
+  getBundleSavingsPercent,
+  normalizeBundleRecord,
+  sortBundleRecords,
+} from '@/lib/db/bundles';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
 import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import type {
@@ -408,16 +417,11 @@ async function getActiveFlashDeals(): Promise<FlashDeal[]> {
  */
 async function getFeaturedBundles(): Promise<Bundle[]> {
   try {
-    const { rows } = await query(
-      `SELECT b.*, v.name as vendor_name
-       FROM bundles b
-       LEFT JOIN vendors v ON b.vendor_id = v.id
-       WHERE b.is_active = true
-       ORDER BY b.is_featured DESC, b.created_at DESC`
-    );
+    const { rows } = await query('SELECT * FROM bundles');
+    const activeRows = sortBundleRecords(rows).filter((bundle) => getBundleRecordStatus(bundle) === 'active');
 
-    if (rows.length > 0) {
-      const bundleProductIds = rows.map((bundle: any) => parseBundleProductIds(bundle.product_ids ?? bundle.products));
+    if (activeRows.length > 0) {
+      const bundleProductIds = activeRows.map((bundle: any) => getBundleRecordProductIds(bundle));
       const allProductIds = Array.from(new Set(bundleProductIds.flat())).filter(Boolean);
       const productMap = new Map<string, BundleProduct>();
 
@@ -441,18 +445,16 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
         }
       }
 
-      return rows.map((bundle: any, idx: number) => {
+      return activeRows.map((bundle: any, idx: number) => {
         const productIds = bundleProductIds[idx];
         const products = productIds
           .map((productId) => productMap.get(productId))
           .filter((product): product is BundleProduct => !!product);
-        const bundlePrice = parseFloat(bundle.bundle_price ?? bundle.price);
-        const originalPrice = parseFloat(bundle.original_price ?? bundle.price);
+        const bundlePrice = getBundleRecordPrice(bundle);
+        const originalPrice = getBundleRecordOriginalPrice(bundle);
         const savingsPercent = bundle.savings_percent
           ? parseFloat(bundle.savings_percent)
-          : (originalPrice > bundlePrice && originalPrice > 0
-              ? Math.round((1 - bundlePrice / originalPrice) * 100)
-              : 0);
+          : getBundleSavingsPercent(originalPrice, bundlePrice);
 
         return {
           id: bundle.id,
@@ -468,7 +470,6 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
           isFeatured: bundle.is_featured || false,
           loyaltyPointsBonus: bundle.loyalty_points_bonus || 0,
           vendorId: bundle.vendor_id,
-          vendorName: bundle.vendor_name,
         };
       });
     }
@@ -672,28 +673,6 @@ async function getMarketplaceStats(): Promise<MarketplaceStats> {
   return getStaticMarketplaceStats();
 }
 
-function parseBundleProductIds(products: unknown): string[] {
-  if (Array.isArray(products)) {
-    return products.map((id) => String(id)).filter(Boolean);
-  }
-
-  if (typeof products === 'string') {
-    try {
-      const parsed = JSON.parse(products);
-      if (Array.isArray(parsed)) {
-        return parsed.map((id) => String(id)).filter(Boolean);
-      }
-    } catch {
-      return products
-        .split(/[,\n]/)
-        .map((id) => id.trim())
-        .filter(Boolean);
-    }
-  }
-
-  return [];
-}
-
 function resolveBundleProduct(productId: string): BundleProduct {
   const product = getProductById(productId);
 
@@ -706,27 +685,26 @@ function resolveBundleProduct(productId: string): BundleProduct {
 }
 
 function mapDatabaseBundle(row: any): Bundle {
-  const products = parseBundleProductIds(row.products).map(resolveBundleProduct);
-  const bundlePrice = Number(row.price) || 0;
-  const originalPrice = Number(row.original_price) || bundlePrice;
+  const normalized = normalizeBundleRecord(row);
+  const products = normalized.products.map(resolveBundleProduct);
+  const bundlePrice = normalized.price;
+  const originalPrice = normalized.originalPrice;
   const primaryProduct = products.length === 1 ? getProductById(products[0].id) : undefined;
 
   return {
-    id: row.id,
-    name: row.name,
-    nameHe: row.name_he || undefined,
-    description: row.description || '',
-    descriptionHe: row.description_he || undefined,
+    id: normalized.id,
+    name: normalized.name,
+    nameHe: normalized.nameHe || undefined,
+    description: normalized.description || '',
+    descriptionHe: normalized.descriptionHe || undefined,
     products,
     bundlePrice,
     originalPrice,
-    savingsPercent: originalPrice > bundlePrice
-      ? Math.round(((originalPrice - bundlePrice) / originalPrice) * 100)
-      : 0,
-    image: row.image || products[0]?.image || '',
-    isFeatured: true,
-    loyaltyPointsBonus: 0,
-    vendorId: primaryProduct?.vendorId,
+    savingsPercent: normalized.savingsPercent,
+    image: normalized.image || products[0]?.image || '',
+    isFeatured: normalized.isFeatured,
+    loyaltyPointsBonus: normalized.loyaltyPointsBonus,
+    vendorId: normalized.vendorId || primaryProduct?.vendorId,
     vendorName: primaryProduct?.vendorName,
   };
 }
@@ -736,14 +714,10 @@ async function getDatabaseBundles(): Promise<Bundle[]> {
   if (!dbUp) return [];
 
   try {
-    const { rows } = await query(
-      `SELECT *
-       FROM bundles
-       WHERE status = 'active'
-       ORDER BY COALESCE(is_promoted, false) DESC, updated_at DESC, created_at DESC`
-    );
+    const { rows } = await query('SELECT * FROM bundles');
+    const activeRows = sortBundleRecords(rows).filter((row) => getBundleRecordStatus(row) === 'active');
 
-    return rows.map(mapDatabaseBundle);
+    return activeRows.map(mapDatabaseBundle);
   } catch (error) {
     console.log('DB bundle fetch failed, using static bundles only:', (error as Error).message);
     return [];
