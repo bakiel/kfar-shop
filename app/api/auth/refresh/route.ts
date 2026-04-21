@@ -16,7 +16,12 @@ export async function POST(request: NextRequest) {
     const refreshToken = request.cookies.get('refreshToken')?.value;
 
     if (!refreshToken) {
-      return NextResponse.json({ error: 'No refresh token' }, { status: 401 });
+      return new NextResponse(null, {
+        status: 204,
+        headers: {
+          'Cache-Control': 'no-store, no-cache',
+        },
+      });
     }
 
     const result = await refreshAccessToken(refreshToken);

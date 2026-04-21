@@ -41,6 +41,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshAuth = useCallback(async (): Promise<boolean> => {
     try {
       const res = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
+      if (res.status === 204) {
+        setUser(null);
+        setAccessToken(null);
+        return false;
+      }
       if (!res.ok) {
         setUser(null);
         setAccessToken(null);
