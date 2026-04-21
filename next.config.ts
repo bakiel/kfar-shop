@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
+
   // Server-only packages (never bundled for the browser)
   serverExternalPackages: ['nodemailer'],
 
