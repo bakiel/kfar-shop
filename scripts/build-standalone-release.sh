@@ -39,12 +39,12 @@ if [[ ! -f .next/standalone/server.js ]]; then
 fi
 
 rm -rf "$RELEASE_ROOT"
-mkdir -p "$RELEASE_ROOT/.next"
+mkdir -p "$RELEASE_ROOT/.next" "$RELEASE_ROOT/public"
 
 echo "[build-release] Staging release files..."
 cp -R .next/standalone/. "$RELEASE_ROOT/"
 cp -R .next/static "$RELEASE_ROOT/.next/static"
-cp -R public "$RELEASE_ROOT/public"
+cp -R public/. "$RELEASE_ROOT/public/"
 git rev-parse HEAD > "$RELEASE_ROOT/REVISION"
 
 ARTIFACT_SHA="$(git rev-parse --short HEAD)"
