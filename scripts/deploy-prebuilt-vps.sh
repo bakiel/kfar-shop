@@ -10,6 +10,7 @@ VPS_RELEASES_DIR="${VPS_RELEASES_DIR:-/opt/kfar-releases}"
 VPS_CURRENT_LINK="${VPS_CURRENT_LINK:-/opt/kfar-live}"
 VPS_TMP_DIR="${VPS_TMP_DIR:-/root}"
 VPS_PORT="${VPS_PORT:-3006}"
+VPS_NGINX_CACHE_DIR="${VPS_NGINX_CACHE_DIR:-/var/cache/nginx/kfar}"
 
 bash "$ROOT_DIR/scripts/build-standalone-release.sh"
 
@@ -33,6 +34,7 @@ ssh -o StrictHostKeyChecking=no "$VPS_HOST" \
    VPS_RELEASES_DIR='$VPS_RELEASES_DIR' \
    VPS_CURRENT_LINK='$VPS_CURRENT_LINK' \
    VPS_PORT='$VPS_PORT' \
+   VPS_NGINX_CACHE_DIR='$VPS_NGINX_CACHE_DIR' \
    REMOTE_ARTIFACT='$REMOTE_ARTIFACT' \
    bash -s" <<'REMOTE_SCRIPT'
 set -euo pipefail
@@ -84,6 +86,10 @@ pm2 save
 
 sleep 5
 curl -fsS "http://127.0.0.1:${VPS_PORT}/api/health" >/dev/null
+
+if [[ -d "$VPS_NGINX_CACHE_DIR" ]]; then
+  find "$VPS_NGINX_CACHE_DIR" -mindepth 1 -delete
+fi
 
 ls -1dt "$VPS_RELEASES_DIR"/* 2>/dev/null | tail -n +4 | xargs -r rm -rf
 rm -f "$REMOTE_ARTIFACT"
