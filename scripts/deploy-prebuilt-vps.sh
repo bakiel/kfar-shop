@@ -74,7 +74,12 @@ fs.writeFileSync(targetPath, `module.exports = ${JSON.stringify({ apps: clonedAp
 NODE
 
 ln -sfn "$release_dir" "$VPS_CURRENT_LINK"
-pm2 startOrReload "$VPS_CURRENT_LINK/ecosystem.config.js" --only kfar --update-env
+
+if pm2 describe kfar >/dev/null 2>&1; then
+  pm2 delete kfar
+fi
+
+pm2 start "$VPS_CURRENT_LINK/ecosystem.config.js" --only kfar --update-env
 pm2 save
 
 sleep 5
