@@ -7,6 +7,24 @@ cd "$ROOT_DIR"
 DEPLOY_DIR="$ROOT_DIR/.deploy"
 RELEASE_ROOT="$DEPLOY_DIR/release"
 
+if [[ -z "${JWT_SECRET:-}" && -f "$ROOT_DIR/ecosystem.config.js" ]]; then
+  echo "[build-release] Loading environment from ecosystem.config.js..."
+  eval "$(
+    node - <<'NODE'
+const config = require('./ecosystem.config.js');
+const apps = Array.isArray(config.apps) ? config.apps : [config];
+const app = apps.find((entry) => entry.name === 'kfar') || apps[0] || {};
+const env = app.env || {};
+
+for (const [key, value] of Object.entries(env)) {
+  if (typeof value === 'string') {
+    process.stdout.write(`export ${key}=${JSON.stringify(value)}\n`);
+  }
+}
+NODE
+  )"
+fi
+
 if [[ ! -d node_modules ]]; then
   echo "[build-release] Installing dependencies with npm ci..."
   npm ci --no-audit --no-fund
