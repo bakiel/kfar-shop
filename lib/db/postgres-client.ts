@@ -3,18 +3,29 @@ import { Pool, PoolClient } from 'pg';
 // PostgreSQL connection pool for KFAR Marketplace
 // Migrated from Supabase to Hostinger VPS
 
-const pool = new Pool({
-  host: process.env.POSTGRES_HOST || '72.61.201.237',
-  port: parseInt(process.env.POSTGRES_PORT || '5432'),
-  database: process.env.POSTGRES_DB || 'kfar_marketplace',
-  user: process.env.POSTGRES_USER || 'kfar',
-  password: process.env.POSTGRES_PASSWORD || 'kfar_secure_2025',
-  max: 10,
-  idleTimeoutMillis: 60000,
-  connectionTimeoutMillis: 5000,
-  keepAlive: true,
-  keepAliveInitialDelayMillis: 10000,
-});
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        max: 10,
+        idleTimeoutMillis: 60000,
+        connectionTimeoutMillis: 5000,
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 10000,
+      }
+    : {
+        host: process.env.POSTGRES_HOST || '127.0.0.1',
+        port: parseInt(process.env.POSTGRES_PORT || '5432'),
+        database: process.env.POSTGRES_DB || 'kfar_marketplace',
+        user: process.env.POSTGRES_USER || process.env.USER || 'postgres',
+        password: process.env.POSTGRES_PASSWORD || '',
+        max: 10,
+        idleTimeoutMillis: 60000,
+        connectionTimeoutMillis: 5000,
+        keepAlive: true,
+        keepAliveInitialDelayMillis: 10000,
+      }
+);
 
 // Fast DB availability check -- caches result to avoid repeated timeouts
 // Success cached 5min, failure cached only 5s (allows quick recovery after restart)
@@ -23,7 +34,7 @@ let _dbCheckTime = 0;
 let _dbCheckPromise: Promise<boolean> | null = null;
 const DB_CHECK_TTL_OK = 300_000;  // 5 minutes when DB is up
 const DB_CHECK_TTL_FAIL = 5_000;  // 5 seconds when DB is down (retry quickly)
-const DB_CHECK_TIMEOUT_MS = 1_500;
+const DB_CHECK_TIMEOUT_MS = 3_000;
 
 export async function isDbAvailable(): Promise<boolean> {
   const ttl = _dbAvailable === false ? DB_CHECK_TTL_FAIL : DB_CHECK_TTL_OK;
@@ -68,7 +79,7 @@ pool.on('connect', () => {
   console.log('✅ PostgreSQL connected to kfar_marketplace');
 });
 
-pool.on('error', (err) => {
+pool.on('error', (err: Error) => {
   console.error('❌ PostgreSQL pool error:', err);
 });
 

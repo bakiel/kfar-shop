@@ -1,17 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Pool } from 'pg';
 
-// Create database connection for server-side only
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  database: process.env.DB_NAME || 'kfar_marketplace',
-  user: process.env.DB_USER || 'kfar_user',
-  password: process.env.DB_PASSWORD || 'kfar_password',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+interface ChatProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string | null;
+  vendor: string;
+  vendorId: string;
+  link: string;
+}
 
-async function searchProducts(searchQuery: string) {
+// Create database connection for server-side only
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? {
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      }
+    : {
+        host: process.env.DB_HOST || process.env.POSTGRES_HOST || '127.0.0.1',
+        port: parseInt(process.env.DB_PORT || process.env.POSTGRES_PORT || '5432'),
+        database: process.env.DB_NAME || process.env.POSTGRES_DB || 'kfar_marketplace',
+        user: process.env.DB_USER || process.env.POSTGRES_USER || process.env.USER || 'postgres',
+        password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || '',
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      }
+);
+
+async function searchProducts(searchQuery: string): Promise<ChatProduct[]> {
   try {
     const keywords = searchQuery.toLowerCase()
       .replace(/show|find|products?|מוצר|חפש/gi, '')
@@ -59,7 +76,7 @@ async function searchProducts(searchQuery: string) {
   }
 }
 
-async function getSuggestedProducts(excludeVendorId?: string) {
+async function getSuggestedProducts(excludeVendorId?: string): Promise<ChatProduct[]> {
   try {
     const result = await pool.query(
       `SELECT 
@@ -100,8 +117,8 @@ export async function POST(request: NextRequest) {
     const { query: userQuery, includeProducts } = await request.json();
 
     let response = '';
-    let products = [];
-    let suggestedProducts = [];
+    let products: ChatProduct[] = [];
+    let suggestedProducts: ChatProduct[] = [];
     
     // Check for common queries
     if (userQuery.toLowerCase().includes('hello') || userQuery.toLowerCase().includes('שלום')) {
