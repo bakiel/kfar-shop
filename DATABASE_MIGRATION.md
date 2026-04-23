@@ -4,32 +4,32 @@
 
 **Migration Date:** December 31, 2025
 **From:** Supabase (pesxvleblcdwgojrxjmo.supabase.co)
-**To:** Hostinger VPS PostgreSQL (72.61.201.237)
+**To:** Hostinger VPS PostgreSQL (production host)
 
 ## Database Connection Details
 
 ### VPS PostgreSQL
 ```
-Host: 72.61.201.237
+Host: production VPS host (see secure ops vault)
 Port: 5432
 Database: kfar_marketplace
 User: kfar
-Password: kfar_secure_2025
+Password: stored in secure credential vault
 ```
 
 ### Connection String
 ```
-postgresql://kfar:kfar_secure_2025@72.61.201.237:5432/kfar_marketplace
+postgresql://<db-user>:<db-password>@<db-host>:5432/kfar_marketplace
 ```
 
 ### For Vercel Environment Variables
 ```env
-DATABASE_URL=postgresql://kfar:kfar_secure_2025@72.61.201.237:5432/kfar_marketplace
-POSTGRES_HOST=72.61.201.237
+DATABASE_URL=postgresql://<db-user>:<db-password>@<db-host>:5432/kfar_marketplace
+POSTGRES_HOST=<db-host>
 POSTGRES_PORT=5432
 POSTGRES_DB=kfar_marketplace
 POSTGRES_USER=kfar
-POSTGRES_PASSWORD=kfar_secure_2025
+POSTGRES_PASSWORD=<db-password>
 ```
 
 ## Data Migrated
@@ -82,12 +82,12 @@ Replace Supabase Auth with JWT-based auth:
 
 ### Test Connection
 ```bash
-PGPASSWORD='kfar_secure_2025' psql -h 72.61.201.237 -U kfar -d kfar_marketplace -c "SELECT COUNT(*) FROM vendors"
+PGPASSWORD='<db-password>' psql -h <db-host> -U <db-user> -d kfar_marketplace -c "SELECT COUNT(*) FROM vendors"
 ```
 
 ### SSH Access
 ```bash
-ssh root@72.61.201.237
+ssh root@<server-host>
 sudo -u postgres psql kfar_marketplace
 ```
 
@@ -95,14 +95,14 @@ sudo -u postgres psql kfar_marketplace
 
 ### Export from VPS
 ```bash
-ssh root@72.61.201.237 'pg_dump -U postgres kfar_marketplace > /tmp/kfar_backup.sql'
-scp root@72.61.201.237:/tmp/kfar_backup.sql ./backups/
+ssh root@<server-host> 'pg_dump -U postgres kfar_marketplace > /tmp/kfar_backup.sql'
+scp root@<server-host>:/tmp/kfar_backup.sql ./backups/
 ```
 
 ### Restore to VPS
 ```bash
-scp ./backup.sql root@72.61.201.237:/tmp/
-ssh root@72.61.201.237 'psql -U postgres kfar_marketplace < /tmp/backup.sql'
+scp ./backup.sql root@<server-host>:/tmp/
+ssh root@<server-host> 'psql -U postgres kfar_marketplace < /tmp/backup.sql'
 ```
 
 ## Old Supabase Details (for reference)

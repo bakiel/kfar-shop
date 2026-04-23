@@ -68,8 +68,8 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=kfar_marketplace
 POSTGRES_USER=kfar
-POSTGRES_PASSWORD=kfar_secure_2025
-DATABASE_URL=postgresql://kfar:kfar_secure_2025@localhost:5432/kfar_marketplace
+POSTGRES_PASSWORD=<from secure credential store>
+DATABASE_URL=postgresql://<db-user>:<db-password>@localhost:5432/kfar_marketplace
 
 # AI (Required for Shopping Assistant)
 GEMINI_API_KEY=your_gemini_key_here
@@ -88,7 +88,7 @@ npm run dev
 npm run build
 
 # Deploy to VPS
-ssh root@72.61.201.237 "cd /opt/kfar && git pull && npm run build && pm2 restart kfar"
+ssh root@<server-host> "cd /opt/kfar && git pull && npm run build && pm2 restart kfar"
 
 # Check live site
 https://kfar.sproutsapp.cloud (temporary domain)
@@ -135,7 +135,7 @@ const { language, t } = useLanguage();
 - Customer: Use `/customer/login`
 
 ## Deployment (Hostinger VPS)
-- **Platform**: Hostinger VPS (72.61.201.237)
+- **Platform**: Hostinger VPS (see secure ops vault for host details)
 - **App Location**: `/opt/kfar`
 - **Port**: 3006
 - **PM2 Process**: `kfar`
@@ -146,11 +146,11 @@ const { language, t } = useLanguage();
 
 ## Database (PostgreSQL on VPS)
 ```
-Host: localhost (from VPS) / 72.61.201.237 (external - blocked for security)
+Host: localhost (from VPS) / production VPS host (see secure ops vault)
 Port: 5432
 Database: kfar_marketplace
 User: kfar
-Password: kfar_secure_2025
+Password: stored in secure credential vault
 ```
 
 ### Database Files
@@ -159,7 +159,7 @@ Password: kfar_secure_2025
 ### SSH Access
 ```bash
 # SSH to VPS
-ssh root@72.61.201.237
+ssh root@<server-host>
 
 # Access database
 sudo -u postgres psql kfar_marketplace

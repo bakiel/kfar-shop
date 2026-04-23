@@ -91,7 +91,7 @@
 
 ### Database Migration
 - Migrated from Supabase to Hostinger VPS PostgreSQL
-- Database: `kfar_marketplace` on 72.61.201.237
+- Database: `kfar_marketplace` on the production VPS
 - Created `/lib/db/postgres-client.ts` for new connections
 
 ### Previous Features
@@ -110,7 +110,7 @@
 GEMINI_API_KEY=your_key_here
 
 # Database (Hostinger VPS)
-DATABASE_URL=postgresql://kfar:kfar_secure_2025@72.61.201.237:5432/kfar_marketplace
+DATABASE_URL=postgresql://<db-user>:<db-password>@<db-host>:5432/kfar_marketplace
 
 # Optional
 ELEVENLABS_API_KEY=fallback_tts
@@ -120,8 +120,8 @@ OPENROUTER_API_KEY=alternative_ai
 ## Deployment Notes
 
 ### VPS Details
-- Host: 72.61.201.237 (srv1145603.hstgr.cloud)
-- SSH: `ssh root@72.61.201.237`
+- Host: production Hostinger VPS (see secure ops vault)
+- SSH: `ssh root@<server-host>`
 - PostgreSQL: Port 5432
 
 ### Build Commands
