@@ -25,7 +25,7 @@ RELEASE_ID="$(date +%Y%m%d-%H%M%S)-${RELEASE_SHA}"
 REMOTE_ARTIFACT="${VPS_TMP_DIR}/$(basename "$ARTIFACT_PATH")"
 
 echo "[deploy-prebuilt] Uploading artifact to $VPS_HOST..."
-scp -o StrictHostKeyChecking=no "$ARTIFACT_PATH" "$VPS_HOST:$REMOTE_ARTIFACT"
+ssh -o StrictHostKeyChecking=no "$VPS_HOST" "cat > '$REMOTE_ARTIFACT'" < "$ARTIFACT_PATH"
 
 echo "[deploy-prebuilt] Activating release $RELEASE_ID on VPS..."
 ssh -o StrictHostKeyChecking=no "$VPS_HOST" \
