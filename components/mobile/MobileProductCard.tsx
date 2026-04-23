@@ -43,8 +43,8 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
   };
 
   return (
-    <Link href={`/product/${product.id}`} className="block">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <Link href={`/product/${product.id}`} className="block h-full">
+      <div className="h-full bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
         {/* Image Container - Clickable */}
         <div className="relative aspect-square bg-gray-100">
           {product.badge && (
@@ -138,8 +138,8 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
           </div>
 
           {/* Price and Add to Cart */}
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
               <span className="text-lg font-bold" style={{ color: '#478c0b' }}>
                 {product.price}
               </span>
@@ -153,7 +153,7 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
             {/* Add to Cart Button - Mobile Optimized */}
             <button
               onClick={handleAddToCart}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
+              className="touch-target !h-10 !w-10 !min-h-[40px] !min-w-[40px] !p-0 shrink-0 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
               style={{ backgroundColor: '#478c0b' }}
             >
               <Plus className="w-4 h-4 stroke-[1.5]" />

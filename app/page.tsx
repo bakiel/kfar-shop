@@ -1,6 +1,7 @@
 import EnhancedLayout from '@/components/layout/EnhancedLayout';
 import { getLandingPageData } from '@/lib/services/landing-data-service';
 import LandingHero from '@/components/landing/LandingHero';
+import PromotedBundleCard from '@/components/bundles/PromotedBundleCard';
 import PromoBundles from '@/components/landing/PromoBundles';
 import FeaturesBar from '@/components/landing/FeaturesBar';
 import CTABanners from '@/components/landing/CTABanners';
@@ -23,6 +24,10 @@ export default async function Home() {
           vendors={data.vendors}
           stats={data.stats}
         />
+
+        <div className="container mx-auto px-4">
+          <PromotedBundleCard />
+        </div>
 
         {/* Bundles — key value prop, right after hero */}
         <PromoBundles bundles={data.bundles} featuredProducts={data.featuredProducts} />

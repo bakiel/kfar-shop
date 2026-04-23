@@ -69,11 +69,6 @@
     margin-bottom: 16px;
   }
   
-  /* Stack elements on mobile */
-  .grid {
-    grid-template-columns: 1fr !important;
-  }
-  
   /* Mobile typography adjustments */
   h1 {
     font-size: 2rem !important;
@@ -92,9 +87,14 @@
   
   /* Mobile button improvements */
   .btn,
-  button {
+  .mobile-action,
+  .touch-target {
     min-height: 44px;
     font-size: 16px !important;
+  }
+
+  .btn,
+  .mobile-action {
     padding: 12px 20px !important;
   }
   

@@ -176,21 +176,8 @@ export default function CustomerPreferences() {
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="sms" className="cursor-pointer flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                SMS
-              </Label>
-              <Switch
-                id="sms"
-                checked={preferences.communication.sms}
-                onCheckedChange={(checked) =>
-                  setPreferences({
-                    ...preferences,
-                    communication: { ...preferences.communication, sms: checked }
-                  })
-                }
-              />
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              SMS is temporarily unavailable during the current cash-on-delivery launch phase.
             </div>
 
             <div className="flex items-center justify-between">

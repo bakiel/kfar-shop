@@ -76,12 +76,8 @@ select {
 
 /* ===== Grid and Flex Fixes ===== */
 @media (max-width: 640px) {
-  /* Force single column on mobile */
-  .grid-cols-2,
-  .grid-cols-3,
-  .grid-cols-4,
-  .grid-cols-5,
-  .grid-cols-6 {
+  /* Opt-in helpers instead of overriding Tailwind utilities globally */
+  .single-column-mobile {
     grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
   }
   
@@ -90,8 +86,8 @@ select {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
   
-  /* Stack flex items */
-  .flex-row {
+  /* Stack flex items only when explicitly requested */
+  .stack-on-mobile {
     flex-direction: column !important;
   }
   

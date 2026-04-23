@@ -105,9 +105,11 @@ export default function NotificationsPage() {
     }
   };
 
-  const notificationIcons: Record<string, React.ReactNode> = {
+  const notificationIcons: Record<Notification['type'], React.ReactNode> = {
     order: <ShoppingBag className="w-5 h-5 stroke-[1.5]" />,
+    order_update: <ShoppingBag className="w-5 h-5 stroke-[1.5]" />,
     reward: <Star className="w-5 h-5 stroke-[1.5]" />,
+    points: <Star className="w-5 h-5 stroke-[1.5]" />,
     product: <Package className="w-5 h-5 stroke-[1.5]" />,
     vendor: <Store className="w-5 h-5 stroke-[1.5]" />,
     system: <Info className="w-5 h-5 stroke-[1.5]" />,
@@ -115,9 +117,11 @@ export default function NotificationsPage() {
   };
 
   const getNotificationColor = (type: Notification['type']) => {
-    const colors = {
+    const colors: Record<Notification['type'], string> = {
       order: 'text-green-600 bg-green-50',
+      order_update: 'text-green-600 bg-green-50',
       reward: 'text-yellow-600 bg-yellow-50',
+      points: 'text-yellow-600 bg-yellow-50',
       product: 'text-blue-600 bg-blue-50',
       vendor: 'text-purple-600 bg-purple-50',
       system: 'text-gray-600 bg-gray-50',
@@ -354,20 +358,11 @@ export default function NotificationsPage() {
                             className="w-5 h-5 text-green-600"
                           />
                         </label>
-                        
-                        <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div>
-                            <span className="font-medium">SMS Notifications</span>
-                            <p className="text-sm text-gray-600">Get text messages for important updates</p>
-                          </div>
-                          <input
-                            type="checkbox"
-                            checked={preferences.sms}
-                            onChange={(e) => handlePreferenceChange('sms', e.target.checked)}
-                            className="w-5 h-5 text-green-600"
-                          />
-                        </label>
-                        
+
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                          SMS notifications are temporarily disabled during the cash-on-delivery launch phase.
+                        </div>
+
                         <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div>
                             <span className="font-medium">Push Notifications</span>

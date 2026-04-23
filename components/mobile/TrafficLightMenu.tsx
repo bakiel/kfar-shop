@@ -68,7 +68,7 @@ export default function TrafficLightMenu({
               exit={{ scale: 0 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsExpanded(true)}
-              className="w-16 h-16 bg-white rounded-full shadow-2xl flex items-center justify-center relative border-2 border-[#478c0b]"
+              className="!h-16 !w-16 !min-h-0 !min-w-0 !p-0 bg-white rounded-full shadow-2xl flex items-center justify-center relative border-2 border-[#478c0b] overflow-hidden"
             >
               <Image
                 src="/images/logos/kfar_eats_icon_leaf_green_vertical.png"
@@ -101,7 +101,7 @@ export default function TrafficLightMenu({
                   onVoiceClick();
                   setIsExpanded(false);
                 }}
-                className="w-14 h-14 bg-[#c23c09] text-white rounded-full shadow-lg flex items-center justify-center relative"
+                className="!h-14 !w-14 !min-h-0 !min-w-0 !p-0 bg-[#c23c09] text-white rounded-full shadow-lg flex items-center justify-center relative"
               >
                 <Mic className="w-5 h-5 stroke-[1.5]" />
               </motion.button>
@@ -113,7 +113,7 @@ export default function TrafficLightMenu({
                   onFilterClick();
                   setIsExpanded(false);
                 }}
-                className="w-14 h-14 bg-[#f6af0d] text-white rounded-full shadow-lg flex items-center justify-center relative"
+                className="!h-14 !w-14 !min-h-0 !min-w-0 !p-0 bg-[#f6af0d] text-white rounded-full shadow-lg flex items-center justify-center relative"
               >
                 <SlidersHorizontal className="w-5 h-5 stroke-[1.5]" />
                 {filterCount > 0 && (
@@ -130,7 +130,7 @@ export default function TrafficLightMenu({
                   onCartClick();
                   setIsExpanded(false);
                 }}
-                className="w-14 h-14 bg-[#478c0b] text-white rounded-full shadow-lg flex items-center justify-center relative"
+                className="!h-14 !w-14 !min-h-0 !min-w-0 !p-0 bg-[#478c0b] text-white rounded-full shadow-lg flex items-center justify-center relative"
               >
                 <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
                 {cartCount > 0 && (

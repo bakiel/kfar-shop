@@ -31,6 +31,14 @@ const vendorBanners = {
   'gahn-delight': '/images/banners/6.jpg'
 }
 
+function getVendorCategory(vendorId: string, categories: string[]) {
+  if (vendorId === 'vop-shop') return 'merchandise'
+  if (categories.some((category) => ['apparel', 'mugs', 'accessories', 'home-decor'].includes(category))) {
+    return 'merchandise'
+  }
+  return 'food'
+}
+
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,10 +66,10 @@ export default function VendorsPage() {
         description: store.description,
         logo: store.logo,
         banner: vendorBanners[id as keyof typeof vendorBanners] || '/images/banners/1.jpg',
-        category: store.tags?.includes('food') ? 'food' : store.tags?.includes('merchandise') ? 'merchandise' : 'wellness',
-        rating: store.rating || 4.5,
+        category: getVendorCategory(id, store.categories),
+        rating: store.analytics?.averageRating || 4.5,
         product_count: store.products?.length || 0,
-        tags: store.tags
+        tags: store.categories
       }))
       setVendors(vendorData)
     } catch (error) {
@@ -92,10 +100,30 @@ export default function VendorsPage() {
   })
 
   const categories = [
-    { id: 'all', name: language === 'he' ? 'כל החנויות' : 'All Vendors', icon: Store },
-    { id: 'food', name: language === 'he' ? 'מזון ומשקאות' : 'Food & Beverages', icon: Leaf },
-    { id: 'merchandise', name: language === 'he' ? 'סחורות ומורשת' : 'Merchandise & Heritage', icon: Package },
-    { id: 'wellness', name: language === 'he' ? 'בריאות ורווחה' : 'Health & Wellness', icon: Heart }
+    {
+      id: 'all',
+      name: language === 'he' ? 'כל החנויות' : 'All Vendors',
+      shortName: language === 'he' ? 'הכל' : 'All',
+      icon: Store
+    },
+    {
+      id: 'food',
+      name: language === 'he' ? 'מזון ומשקאות' : 'Food & Beverages',
+      shortName: language === 'he' ? 'מזון' : 'Food',
+      icon: Leaf
+    },
+    {
+      id: 'merchandise',
+      name: language === 'he' ? 'סחורות ומורשת' : 'Merchandise & Heritage',
+      shortName: language === 'he' ? 'מורשת' : 'Merch',
+      icon: Package
+    },
+    {
+      id: 'wellness',
+      name: language === 'he' ? 'בריאות ורווחה' : 'Health & Wellness',
+      shortName: language === 'he' ? 'בריאות' : 'Health',
+      icon: Heart
+    }
   ]
 
   return (
@@ -194,43 +222,46 @@ export default function VendorsPage() {
         style={{ backgroundColor: 'rgba(253, 251, 247, 0.95)', backdropFilter: 'blur(16px)' }}
       >
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             {/* Category Pills */}
-            <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
-              {categories.map((cat, index) => {
-                const IconComponent = cat.icon
-                return (
-                  <motion.button
-                    key={cat.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: 0.6 + index * 0.05 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-colors cursor-pointer ${
-                      selectedCategory === cat.id
-                        ? 'bg-[var(--leaf-green)] text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    <IconComponent className="w-4 h-4 stroke-[1.5]" />
-                    <span>{cat.name}</span>
-                  </motion.button>
-                )
-              })}
+            <div className="w-full pb-1 md:w-auto md:pb-0">
+              <div className="grid grid-cols-4 gap-2 sm:flex sm:min-w-max sm:gap-2 sm:pr-4 md:pr-0">
+                {categories.map((cat, index) => {
+                  const IconComponent = cat.icon
+                  return (
+                    <motion.button
+                      key={cat.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.6 + index * 0.05 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`touch-target inline-flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-medium whitespace-nowrap transition-colors cursor-pointer sm:w-auto sm:shrink-0 sm:gap-2 sm:px-4 sm:text-sm ${
+                        selectedCategory === cat.id
+                          ? 'bg-[var(--leaf-green)] text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 stroke-[1.5]" />
+                      <span className="sm:hidden">{cat.shortName}</span>
+                      <span className="hidden sm:inline">{cat.name}</span>
+                    </motion.button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Sort Dropdown */}
-            <div className="flex items-center gap-4">
-              <span className="text-gray-600">
+            <div className="flex w-full items-center justify-between gap-3 md:w-auto md:shrink-0 md:justify-end">
+              <span className="shrink-0 text-sm text-gray-600">
                 {language === 'he' ? 'מיין לפי:' : 'Sort by:'}
               </span>
               <motion.select
                 whileHover={{ scale: 1.02 }}
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border-2 border-[var(--leaf-green)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--leaf-green)] focus:ring-opacity-20 cursor-pointer"
+                className="min-w-0 flex-1 rounded-lg border-2 border-[var(--leaf-green)] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--leaf-green)] focus:ring-opacity-20 cursor-pointer md:w-auto md:flex-none"
               >
                 <option value="featured">{language === 'he' ? 'מומלצים' : 'Featured'}</option>
                 <option value="rating">{language === 'he' ? 'דירוג גבוה' : 'Highest Rated'}</option>

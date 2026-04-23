@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { refreshAccessToken } from '@/lib/services/auth-service';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 
 export async function POST(request: NextRequest) {
@@ -24,6 +23,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const { refreshAccessToken } = await import('@/lib/services/auth-service');
     const result = await refreshAccessToken(refreshToken);
 
     if (!result.success || !result.tokens || !result.user) {

@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
-import { verifyAccessToken } from '@/lib/services/auth-service';
 import { sendTransactional } from '@/lib/services/email/email-service';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 import { createNotification } from '@/lib/services/notification-service.server';
-import { sendOrderConfirmationSMS } from '@/lib/services/sms-service';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -158,6 +156,7 @@ export async function POST(request: NextRequest) {
     let customerId: string | null = null;
     const authHeader = request.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
+      const { verifyAccessToken } = await import('@/lib/services/auth-service');
       const tokenUser = verifyAccessToken(authHeader.slice(7));
       if (tokenUser?.role === 'customer' && tokenUser.customerId) {
         customerId = tokenUser.customerId;
@@ -318,6 +317,7 @@ export async function POST(request: NextRequest) {
       message: `${customerName} placed an order · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
       messageHe: `${customerName} ביצע/ה הזמנה · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
       data: {
+        audience: 'admin',
         orderId: order.id,
         orderNumber,
         total: body.total,
@@ -326,14 +326,6 @@ export async function POST(request: NextRequest) {
         actionLabel: 'View order',
       },
     }).catch(err => console.error('Failed to create admin notification:', err));
-
-    // Task #6: SMS is off until client pays (SMS_ENABLED=false by default).
-    // Code path is wired — flipping the env var enables live sends.
-    if (body.customer?.phone) {
-      sendOrderConfirmationSMS(body.customer.phone, orderNumber, body.total)
-        .then(r => console.log(`Order ${orderNumber} SMS:`, r))
-        .catch(err => console.error('SMS dispatch error:', err));
-    }
 
     return NextResponse.json({
       success: true,
