@@ -31,11 +31,22 @@ export interface LoginResult {
 // Secrets - MUST be set via environment variables (no fallback)
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
-  throw new Error('FATAL: JWT_SECRET and JWT_REFRESH_SECRET environment variables are required. Server cannot start without them.');
-}
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
+
+function requireJwtSecret(): string {
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required for auth operations.');
+  }
+  return JWT_SECRET;
+}
+
+function requireRefreshSecret(): string {
+  if (!JWT_REFRESH_SECRET) {
+    throw new Error('JWT_REFRESH_SECRET environment variable is required for auth operations.');
+  }
+  return JWT_REFRESH_SECRET;
+}
 
 // Generate JWT access token (short-lived)
 function generateAccessToken(user: AuthUser): string {
@@ -47,7 +58,7 @@ function generateAccessToken(user: AuthUser): string {
       vendorId: user.vendorId,
       customerId: user.customerId,
     },
-    JWT_SECRET,
+    requireJwtSecret(),
     { expiresIn: ACCESS_TOKEN_EXPIRY }
   );
 }
@@ -56,13 +67,17 @@ function generateAccessToken(user: AuthUser): string {
 function generateRefreshToken(user: AuthUser): string {
   return jwt.sign(
     { userId: user.id, type: 'refresh' },
-    JWT_REFRESH_SECRET,
+    requireRefreshSecret(),
     { expiresIn: REFRESH_TOKEN_EXPIRY }
   );
 }
 
 // Verify access token
 export function verifyAccessToken(token: string): AuthUser | null {
+  if (!JWT_SECRET) {
+    return null;
+  }
+
   try {
     const payload = jwt.verify(token, JWT_SECRET) as any;
     return {
@@ -81,6 +96,10 @@ export function verifyAccessToken(token: string): AuthUser | null {
 
 // Verify refresh token
 export function verifyRefreshToken(token: string): { userId: string } | null {
+  if (!JWT_REFRESH_SECRET) {
+    return null;
+  }
+
   try {
     const payload = jwt.verify(token, JWT_REFRESH_SECRET) as any;
     if (payload.type !== 'refresh') return null;
