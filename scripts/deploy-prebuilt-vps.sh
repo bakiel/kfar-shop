@@ -84,8 +84,18 @@ fi
 pm2 start "$VPS_CURRENT_LINK/ecosystem.config.js" --only kfar --update-env
 pm2 save
 
-sleep 5
-curl -fsS "http://127.0.0.1:${VPS_PORT}/api/health" >/dev/null
+for attempt in $(seq 1 15); do
+  if curl -fsS "http://127.0.0.1:${VPS_PORT}/api/health" >/dev/null; then
+    break
+  fi
+
+  if [[ "$attempt" -eq 15 ]]; then
+    echo "[deploy-prebuilt] ERROR: app failed health check on port ${VPS_PORT}"
+    exit 1
+  fi
+
+  sleep 2
+done
 
 if [[ -d "$VPS_NGINX_CACHE_DIR" ]]; then
   find "$VPS_NGINX_CACHE_DIR" -mindepth 1 -delete
