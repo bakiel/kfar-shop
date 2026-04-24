@@ -30,31 +30,38 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        'kfar-gold': '#f6af0d',
-        'kfar-gold-dark': '#e09b00',
-        'kfar-mint': '#478c0b',
-        'kfar-mint-dark': '#3a7209',
-        'leaf-green': '#478c0b',
-        'leaf-green-light': '#5ba00f',
-        'leaf-green-dark': '#3a7209',
-        'sun-gold': '#f6af0d',
-        'sun-gold-light': '#f8c547',
-        'sun-gold-dark': '#e09b00',
-        'earth-flame': '#c23c09',
-        'earth-flame-light': '#d64a0c',
-        'earth-flame-dark': '#a82f07',
-        'cream-base': '#fef9ef',
-        'soil-brown': '#3a3a1d',
-        'herbal-mint': '#cfe7c1',
+
         // === CANONICAL BRAND PALETTE (Language 1: App UI — warm/functional) ===
-        // Use these tokens for all NEW components. Legacy tokens above
-        // (leaf-green, sun-gold, earth-flame) remain for backwards compatibility.
+        // Use these tokens for all NEW components.
         'kfar-green-deep': '#2D5A27',   // primary brand, headers, CTAs
         'kfar-green-ink': '#1E3D1A',    // darker — brand strip, bottom nav, footer
         'kfar-gold-premium': '#C4A265', // editorial accent (posters, premium cards)
         'kfar-amber': '#E8B84D',        // promo bar, pill badges, accent highlights
         'kfar-cream': '#F5F0E8',        // secondary surface
         'kfar-warm-white': '#FDFBF7',   // primary surface
+
+        // kfar-gold / kfar-mint retained (used in existing components)
+        'kfar-gold': '#f6af0d',
+        'kfar-gold-dark': '#e09b00',
+        'kfar-mint': '#478c0b',
+        'kfar-mint-dark': '#3a7209',
+
+        // === LEGACY ALIASES ===
+        // These names appear in existing components and must not be removed.
+        // They point to the same hex values as the corresponding canonical tokens
+        // so both the old class names and the new ones resolve identically.
+        'leaf-green': '#478c0b',        // alias: kfar-mint
+        'leaf-green-light': '#5ba00f',
+        'leaf-green-dark': '#3a7209',   // alias: kfar-mint-dark
+        'sun-gold': '#f6af0d',          // alias: kfar-gold
+        'sun-gold-light': '#f8c547',
+        'sun-gold-dark': '#e09b00',     // alias: kfar-gold-dark
+        'earth-flame': '#c23c09',
+        'earth-flame-light': '#d64a0c',
+        'earth-flame-dark': '#a82f07',
+        'cream-base': '#fef9ef',        // alias: kfar-cream (lighter variant)
+        'soil-brown': '#3a3a1d',
+        'herbal-mint': '#cfe7c1',
       },
       scale: {
         '102': '1.02',

@@ -38,41 +38,38 @@ export default function AccessibleButton({
   // Variant styles with WCAG AA compliant color combinations
   const variantStyles = {
     primary: {
-      base: `text-white hover:shadow-lg transition-all duration-300`,
+      base: `bg-earth-flame text-white hover:shadow-lg transition-all duration-300`,
       bgColor: KFAR_COLORS.earthFlame,
       hoverBgColor: '#a33408', // Darker earth flame
       disabledBgColor: KFAR_COLORS.gray300,
-      style: { backgroundColor: KFAR_COLORS.earthFlame }
+      style: {} as React.CSSProperties
     },
     secondary: {
-      base: `text-white hover:shadow-lg transition-all duration-300`,
+      base: `bg-leaf-green text-white hover:shadow-lg transition-all duration-300`,
       bgColor: KFAR_COLORS.leafGreen,
       hoverBgColor: '#3a6d08', // Darker leaf green
       disabledBgColor: KFAR_COLORS.gray300,
-      style: { backgroundColor: KFAR_COLORS.leafGreen }
+      style: {} as React.CSSProperties
     },
     outline: {
-      base: `bg-transparent border-2 hover:shadow-md transition-all duration-300`,
+      base: `bg-transparent border-2 border-leaf-green text-leaf-green hover:shadow-md transition-all duration-300`,
       borderColor: KFAR_COLORS.leafGreen,
       textColor: KFAR_COLORS.leafGreen,
       hoverBgColor: KFAR_COLORS.leafGreen,
       hoverTextColor: KFAR_COLORS.white,
-      style: { 
-        borderColor: KFAR_COLORS.leafGreen,
-        color: KFAR_COLORS.leafGreen
-      }
+      style: {} as React.CSSProperties
     },
     ghost: {
-      base: `bg-transparent hover:bg-gray-100 transition-all duration-300`,
+      base: `bg-transparent text-soil-brown hover:bg-gray-100 transition-all duration-300`,
       textColor: KFAR_COLORS.soilBrown,
-      style: { color: KFAR_COLORS.soilBrown }
+      style: {} as React.CSSProperties
     },
     danger: {
-      base: `text-white hover:shadow-lg transition-all duration-300`,
+      base: `bg-red-600 text-white hover:shadow-lg transition-all duration-300`,
       bgColor: '#dc2626', // Red for danger
       hoverBgColor: '#b91c1c',
       disabledBgColor: KFAR_COLORS.gray300,
-      style: { backgroundColor: '#dc2626' }
+      style: {} as React.CSSProperties
     }
   };
 
@@ -113,9 +110,9 @@ export default function AccessibleButton({
     }
   };
 
-  // Apply disabled styles
-  const buttonStyle = disabled && (variant === 'primary' || variant === 'secondary' || variant === 'danger')
-    ? { ...variantConfig.style, backgroundColor: variantConfig.disabledBgColor }
+  // Apply disabled styles — only override background when disabled (Tailwind classes handle normal state)
+  const buttonStyle: React.CSSProperties = disabled && (variant === 'primary' || variant === 'secondary' || variant === 'danger')
+    ? { backgroundColor: (variantConfig as { disabledBgColor?: string }).disabledBgColor }
     : variantConfig.style;
 
   return (

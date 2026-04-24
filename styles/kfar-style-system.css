@@ -4,21 +4,33 @@
 
 /* CSS Variables - KFAR Brand Colors */
 :root {
-  /* Primary Brand Colors */
-  --leaf-green: #478c0b;
-  --sun-gold: #f6af0d;
-  --earth-flame: #c23c09;
-  --cream-base: #fef9ef;
-  --soil-brown: #3a3a1d;
-  --herbal-mint: #cfe7c1;
+  /* === CANONICAL BRAND TOKENS (use these in new rules) === */
+  --kfar-green-deep: #478c0b;     /* primary green — maps to legacy --leaf-green */
+  --kfar-green-mid: #5ba00f;      /* lighter green — maps to legacy --leaf-green-light */
+  --kfar-green-ink: #3a7209;      /* darkest green — maps to legacy --leaf-green-dark */
+  --kfar-amber: #f6af0d;          /* primary gold — maps to legacy --sun-gold */
+  --kfar-amber-light: #f8c547;    /* lighter gold — maps to legacy --sun-gold-light */
+  --kfar-amber-dark: #e09b00;     /* darker gold — maps to legacy --sun-gold-dark */
+  --kfar-flame: #c23c09;          /* primary flame — maps to legacy --earth-flame */
+  --kfar-flame-light: #d64a0c;    /* lighter flame — maps to legacy --earth-flame-light */
+  --kfar-flame-dark: #a82f07;     /* darker flame — maps to legacy --earth-flame-dark */
+  --kfar-cream: #fef9ef;          /* cream base — maps to legacy --cream-base */
+  --kfar-soil: #3a3a1d;           /* soil brown — maps to legacy --soil-brown */
+  --kfar-mint: #cfe7c1;           /* herbal mint — maps to legacy --herbal-mint */
 
-  /* Extended Color Palette */
-  --leaf-green-light: #5ba00f;
-  --leaf-green-dark: #3a7209;
-  --sun-gold-light: #f8c547;
-  --sun-gold-dark: #e09b00;
-  --earth-flame-light: #d64a0c;
-  --earth-flame-dark: #a82f07;
+  /* === LEGACY ALIASES (kept for backwards compatibility with any external consumers) === */
+  --leaf-green: var(--kfar-green-deep);
+  --leaf-green-light: var(--kfar-green-mid);
+  --leaf-green-dark: var(--kfar-green-ink);
+  --sun-gold: var(--kfar-amber);
+  --sun-gold-light: var(--kfar-amber-light);
+  --sun-gold-dark: var(--kfar-amber-dark);
+  --earth-flame: var(--kfar-flame);
+  --earth-flame-light: var(--kfar-flame-light);
+  --earth-flame-dark: var(--kfar-flame-dark);
+  --cream-base: var(--kfar-cream);
+  --soil-brown: var(--kfar-soil);
+  --herbal-mint: var(--kfar-mint);
 
   /* Neutral Colors */
   --white: #ffffff;
@@ -137,22 +149,22 @@
 }
 
 /* Color Utility Classes */
-.kfar-bg-leaf-green { background-color: var(--leaf-green); }
-.kfar-bg-sun-gold { background-color: var(--sun-gold); }
-.kfar-bg-earth-flame { background-color: var(--earth-flame); }
-.kfar-bg-cream { background-color: var(--cream-base); }
-.kfar-bg-soil { background-color: var(--soil-brown); }
-.kfar-bg-mint { background-color: var(--herbal-mint); }
-.kfar-bg-earth-flame-dark { background-color: var(--earth-flame-dark); }
-.kfar-bg-leaf-green-dark { background-color: var(--leaf-green-dark); }
+.kfar-bg-leaf-green { background-color: var(--kfar-green-deep); }
+.kfar-bg-sun-gold { background-color: var(--kfar-amber); }
+.kfar-bg-earth-flame { background-color: var(--kfar-flame); }
+.kfar-bg-cream { background-color: var(--kfar-cream); }
+.kfar-bg-soil { background-color: var(--kfar-soil); }
+.kfar-bg-mint { background-color: var(--kfar-mint); }
+.kfar-bg-earth-flame-dark { background-color: var(--kfar-flame-dark); }
+.kfar-bg-leaf-green-dark { background-color: var(--kfar-green-ink); }
 
-.kfar-text-leaf-green { color: var(--leaf-green); }
-.kfar-text-sun-gold { color: var(--sun-gold); }
-.kfar-text-earth-flame { color: var(--earth-flame); }
-.kfar-text-cream { color: var(--cream-base); }
-.kfar-text-soil { color: var(--soil-brown); }
-.kfar-text-mint { color: var(--herbal-mint); }
-.kfar-text-earth-flame-dark { color: var(--earth-flame-dark); }
+.kfar-text-leaf-green { color: var(--kfar-green-deep); }
+.kfar-text-sun-gold { color: var(--kfar-amber); }
+.kfar-text-earth-flame { color: var(--kfar-flame); }
+.kfar-text-cream { color: var(--kfar-cream); }
+.kfar-text-soil { color: var(--kfar-soil); }
+.kfar-text-mint { color: var(--kfar-mint); }
+.kfar-text-earth-flame-dark { color: var(--kfar-flame-dark); }
 
 /* Gray scale utilities */
 .kfar-bg-gray-50 { background-color: var(--gray-50); }
@@ -167,9 +179,9 @@
 .kfar-text-gray-800 { color: var(--gray-800); }
 
 /* Border utilities */
-.kfar-border-leaf-green { border-color: var(--leaf-green); }
-.kfar-border-sun-gold { border-color: var(--sun-gold); }
-.kfar-border-earth-flame { border-color: var(--earth-flame); }
+.kfar-border-leaf-green { border-color: var(--kfar-green-deep); }
+.kfar-border-sun-gold { border-color: var(--kfar-amber); }
+.kfar-border-earth-flame { border-color: var(--kfar-flame); }
 .kfar-border-gray-300 { border-color: var(--gray-300); }
 
 /* Shadow utilities */
@@ -180,11 +192,11 @@
 
 /* Gradient utilities */
 .kfar-gradient-primary {
-  background: linear-gradient(135deg, var(--leaf-green), var(--leaf-green-dark));
+  background: linear-gradient(135deg, var(--kfar-green-deep), var(--kfar-green-ink));
 }
 
 .kfar-gradient-secondary {
-  background: linear-gradient(135deg, var(--sun-gold), var(--sun-gold-dark));
+  background: linear-gradient(135deg, var(--kfar-amber), var(--kfar-amber-dark));
 }
 
 /* Component Library */
@@ -205,7 +217,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--leaf-green), var(--leaf-green-dark));
+  background: linear-gradient(135deg, var(--kfar-green-deep), var(--kfar-green-ink));
   color: white;
   box-shadow: var(--shadow-md);
 }
@@ -213,29 +225,29 @@
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  background: linear-gradient(135deg, var(--leaf-green-light), var(--leaf-green));
+  background: linear-gradient(135deg, var(--kfar-green-mid), var(--kfar-green-deep));
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, var(--sun-gold), var(--sun-gold-dark));
-  color: var(--soil-brown);
+  background: linear-gradient(135deg, var(--kfar-amber), var(--kfar-amber-dark));
+  color: var(--kfar-soil);
   box-shadow: var(--shadow-md);
 }
 
 .btn-secondary:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  background: linear-gradient(135deg, var(--sun-gold-light), var(--sun-gold));
+  background: linear-gradient(135deg, var(--kfar-amber-light), var(--kfar-amber));
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--leaf-green);
-  border: 2px solid var(--leaf-green);
+  color: var(--kfar-green-deep);
+  border: 2px solid var(--kfar-green-deep);
 }
 
 .btn-outline:hover {
-  background: var(--leaf-green);
+  background: var(--kfar-green-deep);
   color: white;
 }
 
@@ -265,7 +277,7 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--leaf-green);
+  border-color: var(--kfar-green-deep);
   box-shadow: 0 0 0 3px rgba(71, 140, 11, 0.1);
 }
 
@@ -279,28 +291,28 @@
 }
 
 .badge-success {
-  background: var(--herbal-mint);
-  color: var(--leaf-green-dark);
+  background: var(--kfar-mint);
+  color: var(--kfar-green-ink);
 }
 
 .badge-warning {
   background: rgba(246, 175, 13, 0.2);
-  color: var(--sun-gold-dark);
+  color: var(--kfar-amber-dark);
 }
 
 .badge-error {
   background: rgba(194, 60, 9, 0.2);
-  color: var(--earth-flame-dark);
+  color: var(--kfar-flame-dark);
 }
 
 /* Cultural Elements */
 .cultural-pattern {
-  background: linear-gradient(45deg, 
-    var(--herbal-mint) 0%, 
-    var(--cream-base) 25%, 
-    var(--herbal-mint) 50%, 
-    var(--cream-base) 75%, 
-    var(--herbal-mint) 100%);
+  background: linear-gradient(45deg,
+    var(--kfar-mint) 0%,
+    var(--kfar-cream) 25%,
+    var(--kfar-mint) 50%,
+    var(--kfar-cream) 75%,
+    var(--kfar-mint) 100%);
   background-size: 20px 20px;
   opacity: 0.1;
 }
@@ -310,8 +322,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, var(--sun-gold), var(--sun-gold-light));
-  color: var(--soil-brown);
+  background: linear-gradient(135deg, var(--kfar-amber), var(--kfar-amber-light));
+  color: var(--kfar-soil);
   border-radius: var(--radius-full);
   font-weight: 600;
   font-size: 0.875rem;
@@ -372,7 +384,7 @@
 }
 
 .focus-visible:focus {
-  outline: 2px solid var(--leaf-green);
+  outline: 2px solid var(--kfar-green-deep);
   outline-offset: 2px;
 }
 
@@ -395,7 +407,7 @@
   background: white;
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  border: 2px solid var(--leaf-green);
+  border: 2px solid var(--kfar-green-deep);
 }
 
 .qr-placeholder {

@@ -153,7 +153,7 @@ const FeaturedProducts = () => {
   };
 
   return (
-    <section className="py-12 md:py-20 relative overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
+    <section className="py-12 md:py-20 relative overflow-hidden bg-white">
       {/* Background Pattern */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 opacity-5" style={{
@@ -171,16 +171,16 @@ const FeaturedProducts = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-6">
-            <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg inline-flex items-center gap-2" style={{ backgroundColor: '#f6af0d' }}>
+            <span className="px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg inline-flex items-center gap-2 bg-sun-gold">
               <ShoppingBag className="w-4 h-4 stroke-[1.5]" />
               Marketplace Favorites
             </span>
           </div>
           
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6" style={{ color: '#3a3a1d' }}>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6 text-soil-brown">
             Featured Products
           </h2>
-          <p className="text-lg md:text-xl max-w-3xl mx-auto leading-relaxed" style={{ color: '#4b5563' }}>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto leading-relaxed text-gray-600">
             Handpicked selections from our founding businesses, showcasing the best of 
             Village of Peace vegan excellence
           </p>
@@ -195,16 +195,15 @@ const FeaturedProducts = () => {
               className={`px-4 py-2 md:px-6 md:py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center gap-2 whitespace-nowrap flex-shrink-0 ${
                 activeCategory === category.id
                   ? 'text-white shadow-xl scale-105'
-                  : 'bg-white text-gray-700 hover:text-gray-900 border-2'
+                  : 'bg-white text-gray-700 hover:text-gray-900 border-2 border-gray-200'
               }`}
               style={{
-                backgroundColor: activeCategory === category.id ? category.color : undefined,
-                borderColor: activeCategory !== category.id ? '#e5e7eb' : undefined
+                backgroundColor: activeCategory === category.id ? category.color : undefined
               }}
             >
               {faToLucide[category.icon] && React.createElement(faToLucide[category.icon], { className: 'w-5 h-5 stroke-[1.5]' })}
               <span className="text-sm md:text-base">{category.name}</span>
-              <span className="text-xs opacity-75 hidden sm:inline">
+              <span className="text-xs opacity-75 hidden xs:inline">
                 ({products.filter(p => category.id === 'all' || p.category === category.id).length})
               </span>
             </button>
@@ -262,8 +261,7 @@ const FeaturedProducts = () => {
                 {/* Add to Cart Overlay - Hidden on Mobile */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden md:block">
                   <button
-                    className="w-full py-3 rounded-xl text-white font-semibold shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl inline-flex items-center justify-center gap-2"
-                    style={{ backgroundColor: 'rgba(71, 140, 11, 0.9)' }}
+                    className="w-full py-3 rounded-xl text-white font-semibold shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl inline-flex items-center justify-center gap-2 bg-leaf-green/90"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -288,22 +286,21 @@ const FeaturedProducts = () => {
                       fill
                       sizes="32px"
                       quality={40}
-                      className="object-cover rounded-full border-2"
-                      style={{ borderColor: '#e5e7eb' }}
+                      className="object-cover rounded-full border-2 border-gray-200"
                     />
                   </div>
-                  <span className="text-sm font-medium" style={{ color: '#6b7280' }}>
+                  <span className="text-sm font-medium text-gray-500">
                     {product.vendor}
                   </span>
                 </div>
                 
                 {/* Product Name */}
-                <h3 className="text-lg font-bold mb-1 line-clamp-1 group-hover:text-green-700 transition-colors" style={{ color: '#3a3a1d' }}>
+                <h3 className="text-lg font-bold mb-1 line-clamp-1 text-soil-brown group-hover:text-green-700 transition-colors">
                   {product.name}
                 </h3>
                 
                 {/* Description */}
-                <p className="text-sm mb-3 line-clamp-2" style={{ color: '#6b7280' }}>
+                <p className="text-sm mb-3 line-clamp-2 text-gray-500">
                   {product.description}
                 </p>
                 
@@ -315,7 +312,7 @@ const FeaturedProducts = () => {
                       className={`w-3 h-3 stroke-[1.5] ${i < product.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
                     />
                   ))}
-                  <span className="text-xs ml-1" style={{ color: '#6b7280' }}>
+                  <span className="text-xs ml-1 text-gray-500">
                     ({product.rating}.0)
                   </span>
                 </div>
@@ -323,11 +320,11 @@ const FeaturedProducts = () => {
                 {/* Price */}
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <span className="text-2xl font-bold" style={{ color: '#c23c09' }}>
+                    <span className="text-2xl font-bold text-earth-flame">
                       {product.price}
                     </span>
                     {product.originalPrice && (
-                      <span className="text-sm line-through ml-2" style={{ color: '#9ca3af' }}>
+                      <span className="text-sm line-through ml-2 text-gray-400">
                         {product.originalPrice}
                       </span>
                     )}
@@ -351,25 +348,25 @@ const FeaturedProducts = () => {
 
         {/* Bottom CTA Section */}
         <div className="mt-16 text-center">
-          <div className="inline-flex items-center gap-6 mb-8">
+          <div className="inline-flex items-center gap-3 xs:gap-6 mb-8">
             <div className="text-center">
-              <div className="text-3xl font-bold mb-1" style={{ color: '#478c0b' }}>400+</div>
-              <div className="text-sm" style={{ color: '#6b7280' }}>Products Available</div>
+              <div className="text-2xl xs:text-3xl font-bold mb-1 text-leaf-green">400+</div>
+              <div className="text-xs xs:text-sm text-gray-500">Products Available</div>
             </div>
-            <div className="w-px h-12" style={{ backgroundColor: '#e5e7eb' }}></div>
+            <div className="w-px h-12 bg-gray-200"></div>
             <div className="text-center">
-              <div className="text-3xl font-bold mb-1" style={{ color: '#f6af0d' }}>6</div>
-              <div className="text-sm" style={{ color: '#6b7280' }}>Trusted Vendors</div>
+              <div className="text-2xl xs:text-3xl font-bold mb-1 text-sun-gold">6</div>
+              <div className="text-xs xs:text-sm text-gray-500">Trusted Vendors</div>
             </div>
-            <div className="w-px h-12" style={{ backgroundColor: '#e5e7eb' }}></div>
+            <div className="w-px h-12 bg-gray-200"></div>
             <div className="text-center">
-              <div className="text-3xl font-bold mb-1" style={{ color: '#c23c09' }}>100%</div>
-              <div className="text-sm" style={{ color: '#6b7280' }}>Vegan Certified</div>
+              <div className="text-2xl xs:text-3xl font-bold mb-1 text-earth-flame">100%</div>
+              <div className="text-xs xs:text-sm text-gray-500">Vegan Certified</div>
             </div>
           </div>
           
           <Link href="/shop">
-            <button className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3 mx-auto" style={{ backgroundColor: '#478c0b' }}>
+            <button className="px-8 py-4 rounded-xl text-white font-semibold shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3 mx-auto bg-leaf-green">
               <Store className="w-5 h-5 stroke-[1.5]" />
               Explore Full Shop
               <ArrowRight className="w-5 h-5 stroke-[1.5]" />

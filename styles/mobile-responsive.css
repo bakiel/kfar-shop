@@ -2,65 +2,65 @@
 
 /* Hide floating navigation on mobile phones */
 @media screen and (max-width: 767px) {
-  .floating-navigation {
-    display: none !important;
+  nav.floating-navigation {
+    display: none;
   }
-  
+
   /* Ensure mobile bottom nav is visible */
-  .mobile-bottom-nav {
-    display: flex !important;
+  nav.mobile-bottom-nav {
+    display: flex;
   }
-  
+
   /* Adjust main content padding for mobile nav */
-  main {
-    padding-bottom: 80px !important;
+  body main {
+    padding-bottom: 80px;
   }
 }
 
 /* Tablet styles - show floating nav, hide mobile nav */
 @media screen and (min-width: 768px) and (max-width: 1023px) {
-  .floating-navigation {
-    display: block !important;
+  nav.floating-navigation {
+    display: block;
   }
-  
-  .mobile-bottom-nav {
-    display: none !important;
+
+  nav.mobile-bottom-nav {
+    display: none;
   }
-  
+
   /* Floating nav tablet adjustments */
-  .floating-navigation {
-    right: 4px !important;
+  nav.floating-navigation {
+    right: 4px;
     transform: scale(0.9);
   }
 }
 
 /* Desktop styles */
 @media screen and (min-width: 1024px) {
-  .floating-navigation {
-    display: block !important;
+  nav.floating-navigation {
+    display: block;
   }
-  
-  .mobile-bottom-nav {
-    display: none !important;
+
+  nav.mobile-bottom-nav {
+    display: none;
   }
 }
 
 /* Mobile-specific improvements */
 @media screen and (max-width: 767px) {
   /* Improve touch targets */
-  .mobile-bottom-nav a {
+  nav.mobile-bottom-nav a {
     min-height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
+
   /* Better spacing for mobile content */
-  .container {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+  div.container {
+    padding-left: 16px;
+    padding-right: 16px;
   }
-  
+
   /* Optimize cards for mobile */
   .product-card,
   .vendor-card,
@@ -68,41 +68,41 @@
     width: 100%;
     margin-bottom: 16px;
   }
-  
-  /* Stack elements on mobile */
-  .grid {
-    grid-template-columns: 1fr !important;
+
+  /* Stack elements on mobile — only targets generic .grid not Tailwind grid utilities */
+  div.grid:not([class*="grid-cols"]) {
+    grid-template-columns: 1fr;
   }
-  
-  /* Mobile typography adjustments */
-  h1 {
-    font-size: 2rem !important;
-    line-height: 1.2 !important;
+
+  /* Mobile typography adjustments — scoped under body to raise specificity */
+  body h1 {
+    font-size: 2rem;
+    line-height: 1.2;
   }
-  
-  h2 {
-    font-size: 1.5rem !important;
-    line-height: 1.3 !important;
+
+  body h2 {
+    font-size: 1.5rem;
+    line-height: 1.3;
   }
-  
-  h3 {
-    font-size: 1.25rem !important;
-    line-height: 1.4 !important;
+
+  body h3 {
+    font-size: 1.25rem;
+    line-height: 1.4;
   }
-  
-  /* Mobile button improvements */
+
+  /* Mobile button improvements — .btn class raises specificity over bare element */
   .btn,
-  button {
+  button.btn {
     min-height: 44px;
-    font-size: 16px !important;
-    padding: 12px 20px !important;
+    font-size: 16px;
+    padding: 12px 20px;
   }
-  
-  /* Mobile form improvements */
-  input,
-  select,
-  textarea {
-    font-size: 16px !important; /* Prevents zoom on iOS */
+
+  /* Mobile form improvements — 16px prevents iOS auto-zoom */
+  input.form-control,
+  select.form-control,
+  textarea.form-control {
+    font-size: 16px; /* Prevents zoom on iOS */
     min-height: 44px;
   }
 }
@@ -114,46 +114,46 @@
 
 /* Landscape orientation fixes */
 @media screen and (max-width: 767px) and (orientation: landscape) {
-  .mobile-bottom-nav {
+  nav.mobile-bottom-nav {
     height: 56px;
   }
-  
-  .mobile-bottom-nav .text-xs {
+
+  nav.mobile-bottom-nav .text-xs {
     display: none;
   }
-  
-  .mobile-bottom-nav i {
+
+  nav.mobile-bottom-nav i {
     font-size: 1.25rem;
   }
 }
 
 /* iPad specific fixes */
 @media screen and (min-width: 768px) and (max-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) {
-  .floating-navigation {
-    right: 20px !important;
+  nav.floating-navigation {
+    right: 20px;
   }
 }
 
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
   }
 }
 
-/* Dark mode support */
+/* Dark mode support — keep as-is, this is the good part */
 @media (prefers-color-scheme: dark) {
   .mobile-bottom-nav {
     background-color: #1f2937;
     border-top-color: #374151;
   }
-  
+
   .mobile-bottom-nav a {
     color: #9ca3af;
   }
-  
+
   .mobile-bottom-nav a.active {
     color: #478c0b;
   }

@@ -186,54 +186,52 @@ const CommunityServices = () => {
       <div className="container mx-auto px-4 relative z-10">
         {/* Enhanced Header */}
         <div className={`text-center mb-16 transition-all duration-1000 relative ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold mb-6 border"
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold mb-6 border text-leaf-green border-leaf-green/20"
           style={{
-            background: 'linear-gradient(to right, rgba(71, 140, 11, 0.1), rgba(246, 175, 13, 0.1))',
-            color: '#478c0b',
-            borderColor: 'rgba(71, 140, 11, 0.2)'
+            background: 'linear-gradient(to right, rgba(71, 140, 11, 0.1), rgba(246, 175, 13, 0.1))'
           }}>
-            <Star className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
+            <Star className="w-4 h-4 stroke-[1.5] text-sun-gold" />
             <span>{activeServicesCount} {t('Active Businesses')}</span>
           </div>
           
-          <h2 className="text-5xl md:text-6xl font-bold mb-8 relative font-['Poppins']" style={{ color: '#3a3a1d' }}>
+          <h2 className="text-4xl xs:text-5xl md:text-6xl font-bold mb-8 relative font-['Poppins'] text-soil-brown">
             {t('Community Services Hub')}
-            <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-32 h-1.5 rounded-full shadow-sm" 
+            <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-32 h-1.5 rounded-full shadow-sm"
             style={{ background: 'linear-gradient(to right, #478c0b, #f6af0d, #c23c09)' }} />
           </h2>
-          
-          <p className="text-xl max-w-3xl mx-auto leading-relaxed" style={{ color: '#3a3a1d' }}>
+
+          <p className="text-xl max-w-3xl mx-auto leading-relaxed text-soil-brown">
             {t('Your gateway to authentic Village of Peace services. From our pioneering vegan food businesses to essential community services, everything you need in one place.')}
           </p>
           
           {/* Stats Bar - Enhanced with Colors */}
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 max-w-3xl mx-auto mt-10 border-2" style={{ borderColor: '#f6af0d' }}>
-            <div className="grid grid-cols-3 gap-8">
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-4 xs:p-8 max-w-3xl mx-auto mt-10 border-2 border-sun-gold">
+            <div className="grid grid-cols-3 gap-4 xs:gap-8">
               <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg group-hover:shadow-xl transition-shadow" style={{ backgroundColor: '#478c0b' }}>
-                  <CheckCircle className="w-8 h-8 stroke-[1.5] text-white" />
+                <div className="inline-flex items-center justify-center w-14 h-14 xs:w-20 xs:h-20 rounded-2xl mb-3 xs:mb-4 shadow-lg group-hover:shadow-xl transition-shadow bg-leaf-green">
+                  <CheckCircle className="w-6 h-6 xs:w-8 xs:h-8 stroke-[1.5] text-white" />
                 </div>
-                <div className="text-5xl font-bold mb-2" style={{ color: '#478c0b' }}>{activeServicesCount}</div>
-                <div className="text-xs sm:text-sm font-bold mb-1" style={{ color: '#3a3a1d' }}>{t('Active')}</div>
-                <div className="text-xs font-semibold hidden sm:block" style={{ color: '#478c0b' }}>{t('Currently operating')}</div>
+                <div className="text-3xl xs:text-5xl font-bold mb-2 text-leaf-green">{activeServicesCount}</div>
+                <div className="text-xs sm:text-sm font-bold mb-1 text-soil-brown">{t('Active')}</div>
+                <div className="text-xs font-semibold hidden xs:block text-leaf-green">{t('Currently operating')}</div>
               </div>
-              
-              <div className="text-center group hover:scale-105 transition-transform duration-300 border-x-2" style={{ borderColor: '#f6af0d' }}>
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg group-hover:shadow-xl transition-shadow" style={{ backgroundColor: '#f6af0d' }}>
-                  <Clock className="w-8 h-8 stroke-[1.5] text-white" />
+
+              <div className="text-center group hover:scale-105 transition-transform duration-300 border-x-2 border-sun-gold">
+                <div className="inline-flex items-center justify-center w-14 h-14 xs:w-20 xs:h-20 rounded-2xl mb-3 xs:mb-4 shadow-lg group-hover:shadow-xl transition-shadow bg-sun-gold">
+                  <Clock className="w-6 h-6 xs:w-8 xs:h-8 stroke-[1.5] text-white" />
                 </div>
-                <div className="text-5xl font-bold mb-2" style={{ color: '#f6af0d' }}>{totalServicesCount - activeServicesCount}</div>
-                <div className="text-xs sm:text-sm font-bold mb-1" style={{ color: '#3a3a1d' }}>{t('Coming')}</div>
-                <div className="text-xs font-semibold hidden sm:block" style={{ color: '#f6af0d' }}>{t('Launching shortly')}</div>
+                <div className="text-3xl xs:text-5xl font-bold mb-2 text-sun-gold">{totalServicesCount - activeServicesCount}</div>
+                <div className="text-xs sm:text-sm font-bold mb-1 text-soil-brown">{t('Coming')}</div>
+                <div className="text-xs font-semibold hidden xs:block text-sun-gold">{t('Launching shortly')}</div>
               </div>
-              
+
               <div className="text-center group hover:scale-105 transition-transform duration-300">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg group-hover:shadow-xl transition-shadow" style={{ backgroundColor: '#c23c09' }}>
-                  <LayoutGrid className="w-8 h-8 stroke-[1.5] text-white" />
+                <div className="inline-flex items-center justify-center w-14 h-14 xs:w-20 xs:h-20 rounded-2xl mb-3 xs:mb-4 shadow-lg group-hover:shadow-xl transition-shadow bg-earth-flame">
+                  <LayoutGrid className="w-6 h-6 xs:w-8 xs:h-8 stroke-[1.5] text-white" />
                 </div>
-                <div className="text-5xl font-bold mb-2" style={{ color: '#c23c09' }}>{totalServicesCount}</div>
-                <div className="text-xs sm:text-sm font-bold mb-1" style={{ color: '#3a3a1d' }}>{t('Total')}</div>
-                <div className="text-xs font-semibold hidden sm:block" style={{ color: '#c23c09' }}>{t('Growing daily')}</div>
+                <div className="text-3xl xs:text-5xl font-bold mb-2 text-earth-flame">{totalServicesCount}</div>
+                <div className="text-xs sm:text-sm font-bold mb-1 text-soil-brown">{t('Total')}</div>
+                <div className="text-xs font-semibold hidden xs:block text-earth-flame">{t('Growing daily')}</div>
               </div>
             </div>
           </div>
@@ -296,17 +294,13 @@ const CommunityServices = () => {
                     </div>
                     <div>
                       <h3 className={`text-xl sm:text-2xl font-bold transition-colors duration-500 break-words ${
-                        expandedCategory === category.id ? 'text-white' : ''
-                      }`}
-                      style={{ 
-                        color: expandedCategory === category.id ? 'white' : '#3a3a1d'
-                      }}>
+                        expandedCategory === category.id ? 'text-white' : 'text-soil-brown'
+                      }`}>
                         {t(category.name)}
                       </h3>
-                      <p className={`text-sm transition-colors duration-500`}
-                      style={{ 
-                        color: expandedCategory === category.id ? 'rgba(255,255,255,0.9)' : '#6B7280'
-                      }}>
+                      <p className={`text-sm transition-colors duration-500 ${
+                        expandedCategory === category.id ? 'text-white/90' : 'text-gray-500'
+                      }`}>
                         {category.services.filter(s => s.status === 'active').length} active • {' '}
                         {category.services.filter(s => s.status === 'coming-soon').length} coming soon
                       </p>
@@ -328,12 +322,11 @@ const CommunityServices = () => {
                     {/* Service Count Pills */}
                     <div className="flex gap-2">
                       {category.services.filter(s => s.status === 'active').length > 0 && (
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-500 border`}
-                        style={{
-                          backgroundColor: expandedCategory === category.id ? 'rgba(255,255,255,0.2)' : 'rgba(71, 140, 11, 0.1)',
-                          color: expandedCategory === category.id ? 'white' : '#478c0b',
-                          borderColor: expandedCategory === category.id ? 'transparent' : 'rgba(71, 140, 11, 0.2)'
-                        }}>
+                        <div className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-500 border ${
+                          expandedCategory === category.id
+                            ? 'bg-white/20 text-white border-transparent'
+                            : 'bg-leaf-green/10 text-leaf-green border-leaf-green/20'
+                        }`}>
                           {category.services.filter(s => s.status === 'active').length} {t('Active')}
                         </div>
                       )}
@@ -400,10 +393,9 @@ const CommunityServices = () => {
                               </div>
                               
                               <div className="flex-1">
-                                <h4 className={`font-semibold mb-1 transition-colors duration-300 break-words line-clamp-2`}
-                                style={{
-                                  color: service.status === 'active' ? '#3a3a1d' : '#6B7280'
-                                }}>
+                                <h4 className={`font-semibold mb-1 transition-colors duration-300 break-words line-clamp-2 ${
+                                  service.status === 'active' ? 'text-soil-brown' : 'text-gray-500'
+                                }`}>
                                   {service.name}
                                 </h4>
                                 {service.description && (
@@ -426,12 +418,7 @@ const CommunityServices = () => {
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-xs border px-2 py-1 rounded-full font-medium"
-                                style={{
-                                  backgroundColor: 'rgba(246, 175, 13, 0.1)',
-                                  color: '#f6af0d',
-                                  borderColor: 'rgba(246, 175, 13, 0.2)'
-                                }}>
+                                <span className="text-xs border border-sun-gold/20 px-2 py-1 rounded-full font-medium bg-sun-gold/10 text-sun-gold">
                                   {t('Soon')}
                                 </span>
                               )}
@@ -457,8 +444,8 @@ const CommunityServices = () => {
               {/* Header */}
               <div className="p-8">
                 <div className="text-center mb-6">
-                  <h3 className="text-3xl font-bold mb-2 flex items-center justify-center gap-3" style={{ color: '#3a3a1d' }}>
-                    <Store className="w-7 h-7 stroke-[1.5]" style={{ color: '#478c0b' }} />
+                  <h3 className="text-3xl font-bold mb-2 flex items-center justify-center gap-3 text-soil-brown">
+                    <Store className="w-7 h-7 stroke-[1.5] text-leaf-green" />
                     {t('Join Our Shop')}
                   </h3>
                   <p className="text-lg text-gray-600">{t('Grow your business with us')}</p>
@@ -472,14 +459,14 @@ const CommunityServices = () => {
                   {/* Buttons */}
                   <div className="flex flex-col gap-4 mb-8">
                   <Link href="/vendor/onboarding" className="w-full">
-                    <button className="w-full py-3 px-4 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 whitespace-nowrap" style={{ backgroundColor: '#c23c09' }}>
+                    <button className="w-full py-3 px-4 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 whitespace-nowrap bg-earth-flame">
                       <Store className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] flex-shrink-0" />
                       {t('Join as Vendor')}
                       <ArrowRight className="w-4 h-4 stroke-[1.5]" />
                     </button>
                   </Link>
                   
-                  <button className="w-full py-3 px-4 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 whitespace-nowrap" style={{ backgroundColor: '#f6af0d' }}>
+                  <button className="w-full py-3 px-4 text-white rounded-xl font-semibold text-base sm:text-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 whitespace-nowrap bg-sun-gold">
                     <Info className="w-5 h-5 sm:w-6 sm:h-6 stroke-[1.5] flex-shrink-0" />
                     {t('Learn More')}
                   </button>
