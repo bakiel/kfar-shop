@@ -1,0 +1,23 @@
+/* Featured Products Component Styles */
+
+/* Hide scrollbar for category filter on mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Ensure category buttons don't wrap on mobile */
+  .scrollbar-hide {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .scrollbar-hide > button {
+    scroll-snap-align: start;
+  }
+}

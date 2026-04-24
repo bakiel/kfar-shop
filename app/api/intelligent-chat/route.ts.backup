@@ -1,0 +1,277 @@
+// app/api/intelligent-chat/route.ts
+import { streamText } from 'ai';
+import { aiModels, voiceCommerceTools } from '@/lib/ai/vercel-ai-integration';
+import { kfarKnowledgeBase } from '@/lib/ai/knowledge-base';
+import { NextRequest } from 'next/server';
+import { z } from 'zod';
+
+// Extended tools with knowledge base access
+const intelligentTools = {
+  ...voiceCommerceTools,
+  
+  searchKnowledge: {
+    description: 'Search the KFAR knowledge base for information',
+    parameters: z.object({
+      query: z.string().describe('What to search for'),
+      type: z.enum(['product', 'vendor', 'policy', 'faq', 'community', 'recipe', 'general']).optional(),
+    }),
+    execute: async ({ query, type }) => {
+      const results = await kfarKnowledgeBase.search(query, { type, limit: 3 });
+      return {
+        found: results.length,
+        results: results.map(doc => ({
+          title: doc.title,
+          content: doc.content.substring(0, 200) + '...',
+          type: doc.type,
+          metadata: doc.metadata,
+        })),
+      };
+    },
+  },
+  
+  getVendorInfo: {
+    description: 'Get detailed information about a specific vendor',
+    parameters: z.object({
+      vendorName: z.string().describe('Name of the vendor'),
+    }),
+    execute: async ({ vendorName }) => {
+      const vendors = kfarKnowledgeBase.getDocumentsByType('vendor');
+      const vendor = vendors.find(v => 
+        v.title.toLowerCase().includes(vendorName.toLowerCase())
+      );
+      
+      if (!vendor) {
+        return { found: false, message: 'Vendor not found' };
+      }
+      
+      return {
+        found: true,
+        name: vendor.title,
+        info: vendor.content,
+        metadata: vendor.metadata,
+      };
+    },
+  },
+  
+  getPolicyInfo: {
+    description: 'Get shipping, return, or other policy information',
+    parameters: z.object({
+      policyType: z.enum(['shipping', 'return', 'kosher', 'general']),
+    }),
+    execute: async ({ policyType }) => {
+      const policies = kfarKnowledgeBase.getDocumentsByType('policy');
+      const relevantPolicies = policies.filter(p => 
+        p.title.toLowerCase().includes(policyType)
+      );
+      
+      return {
+        policies: relevantPolicies.map(p => ({
+          title: p.title,
+          content: p.content,
+        })),
+      };
+    },
+  },
+  
+  findRecipe: {
+    description: 'Find recipes using KFAR marketplace products',
+    parameters: z.object({
+      ingredients: z.array(z.string()).optional(),
+      mealType: z.enum(['breakfast', 'lunch', 'dinner', 'dessert', 'snack']).optional(),
+    }),
+    execute: async ({ ingredients, mealType }) => {
+      const recipes = kfarKnowledgeBase.getDocumentsByType('recipe');
+      
+      // Filter by ingredients if provided
+      let filtered = recipes;
+      if (ingredients && ingredients.length > 0) {
+        filtered = recipes.filter(r => 
+          ingredients.some(ing => r.content.toLowerCase().includes(ing.toLowerCase()))
+        );
+      }
+      
+      return {
+        recipes: filtered.map(r => ({
+          title: r.title,
+          content: r.content,
+        })),
+      };
+    },
+  },
+  
+  getCommunityInfo: {
+    description: 'Get information about the Village of Peace community',
+    parameters: z.object({
+      topic: z.string().optional().describe('Specific topic about the community'),
+    }),
+    execute: async ({ topic }) => {
+      const communityDocs = kfarKnowledgeBase.getDocumentsByType('community');
+      
+      if (topic) {
+        const relevant = await kfarKnowledgeBase.search(topic, { type: 'community' });
+        if (relevant.length > 0) {
+          return { info: relevant[0].content };
+        }
+      }
+      
+      return {
+        info: communityDocs[0]?.content || 'Community information not available',
+      };
+    },
+  },
+};
+
+// Intelligent system prompt with knowledge base context
+const INTELLIGENT_SYSTEM_PROMPT = `You are an intelligent AI assistant for KFAR Vegan Marketplace with access to comprehensive knowledge about:
+
+1. PRODUCTS: Full catalog with prices, ingredients, dietary info
+2. VENDORS: Detailed information about all 6 vendors
+3. COMMUNITY: Village of Peace history, values, and lifestyle
+4. POLICIES: Shipping, returns, kosher/vegan certification
+5. RECIPES: How to use products in delicious vegan meals
+6. FAQ: Common questions and answers
+
+You can:
+- Search for any information in the knowledge base
+- Provide detailed product recommendations
+- Explain community history and values
+- Help with recipes and meal planning
+- Answer policy questions
+- Process orders and manage cart
+
+PERSONALITY:
+- Knowledgeable and helpful
+- Enthusiastic about vegan lifestyle
+- Respectful of community values
+- Can discuss health, nutrition, and sustainability
+- Provides context and education, not just transactions
+
+IMPORTANT CONTEXT:
+- The Village of Peace has been 100% vegan since 1967
+- All products are vegan, many are kosher and organic
+- Community members don't consume alcohol or tobacco
+- Emphasis on holistic health and sustainable living
+- Located in Dimona, Israel
+
+When answering:
+1. Use your knowledge base tools to find accurate information
+2. Provide specific product recommendations with prices
+3. Share relevant community context when appropriate
+4. Be conversational but informative
+5. If discussing health benefits, mention the community's success with vegan lifestyle`;
+
+export async function POST(req: NextRequest) {
+  try {
+    const { messages, context = {} } = await req.json();
+
+    // Initialize knowledge base if needed
+    await kfarKnowledgeBase.initialize();
+
+    // Get relevant context from knowledge base
+    let enhancedContext = INTELLIGENT_SYSTEM_PROMPT;
+    
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      const relevantContext = await kfarKnowledgeBase.getContextForQuery(lastMessage.content);
+      
+      if (relevantContext) {
+        enhancedContext += `\n\nRelevant Context:\n${relevantContext}`;
+      }
+    }
+
+    // Add user context if provided
+    if (context.userName) {
+      enhancedContext += `\n\nUser: ${context.userName}`;
+    }
+    if (context.preferences) {
+      enhancedContext += `\nPreferences: ${JSON.stringify(context.preferences)}`;
+    }
+    if (context.orderHistory) {
+      enhancedContext += `\nPrevious orders: ${context.orderHistory.length} orders`;
+    }
+
+    // Create streaming response with all tools
+    const result = await streamText({
+      model: aiModels.default,
+      system: enhancedContext,
+      messages,
+      tools: intelligentTools,
+      temperature: 0.7,
+      maxTokens: 500, // Allow longer responses for detailed information
+      toolChoice: 'auto',
+    });
+
+    // Return streaming response with metadata
+    return result.toAIStreamResponse({
+      headers: {
+        'X-Knowledge-Enabled': 'true',
+        'X-Marketplace': 'KFAR',
+        'X-Community': 'Village-of-Peace',
+      },
+    });
+
+  } catch (error) {
+    console.error('Intelligent chat error:', error);
+    
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to process chat request',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
+}
+
+// Knowledge base management endpoints
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const action = searchParams.get('action');
+  
+  switch (action) {
+    case 'stats':
+      const stats = {
+        products: kfarKnowledgeBase.getDocumentsByType('product').length,
+        vendors: kfarKnowledgeBase.getDocumentsByType('vendor').length,
+        policies: kfarKnowledgeBase.getDocumentsByType('policy').length,
+        faqs: kfarKnowledgeBase.getDocumentsByType('faq').length,
+        recipes: kfarKnowledgeBase.getDocumentsByType('recipe').length,
+        community: kfarKnowledgeBase.getDocumentsByType('community').length,
+      };
+      
+      return Response.json({
+        initialized: true,
+        totalDocuments: Object.values(stats).reduce((a, b) => a + b, 0),
+        breakdown: stats,
+      });
+      
+    case 'search':
+      const query = searchParams.get('q');
+      if (!query) {
+        return Response.json({ error: 'Query required' }, { status: 400 });
+      }
+      
+      const results = await kfarKnowledgeBase.search(query);
+      return Response.json({ results });
+      
+    default:
+      return Response.json({
+        service: 'KFAR Intelligent Chat',
+        version: '1.0',
+        features: [
+          'Full product knowledge',
+          'Vendor information',
+          'Community history',
+          'Policy details',
+          'Recipe suggestions',
+          'Semantic search',
+          'Contextual responses',
+        ],
+      });
+  }
+}

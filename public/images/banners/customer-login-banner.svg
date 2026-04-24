@@ -1,0 +1,55 @@
+<svg width="1920" height="350" viewBox="0 0 1920 350" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#478c0b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#5ba00f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f6af0d;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Pattern for decorative elements -->
+    <pattern id="pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Main background -->
+  <rect width="1920" height="350" fill="url(#bg-gradient)"/>
+  
+  <!-- Pattern overlay -->
+  <rect width="1920" height="350" fill="url(#pattern)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="150" cy="100" r="60" fill="white" opacity="0.05"/>
+  <circle cx="1770" cy="250" r="80" fill="white" opacity="0.05"/>
+  <circle cx="960" cy="175" r="100" fill="white" opacity="0.03"/>
+  
+  <!-- Wave shape at bottom -->
+  <path d="M0,280 C320,260 640,320 960,300 C1280,280 1600,340 1920,320 L1920,350 L0,350 Z" fill="white" opacity="0.1"/>
+  
+  <!-- Icons representing community -->
+  <g transform="translate(200, 150)">
+    <circle cx="0" cy="0" r="30" fill="white" opacity="0.2"/>
+    <path d="M-15,-5 C-15,5 -5,15 0,15 C5,15 15,5 15,-5 C15,-15 5,-15 0,-10 C-5,-15 -15,-15 -15,-5 Z" fill="white" opacity="0.4"/>
+  </g>
+  
+  <g transform="translate(1720, 150)">
+    <circle cx="0" cy="0" r="30" fill="white" opacity="0.2"/>
+    <rect x="-15" y="-15" width="30" height="30" rx="5" fill="white" opacity="0.4"/>
+  </g>
+  
+  <!-- Shopping cart icon -->
+  <g transform="translate(300, 250)">
+    <circle cx="0" cy="0" r="25" fill="white" opacity="0.15"/>
+    <path d="M-10,-10 L-8,-5 L8,-5 L6,5 L-6,5 L-8,0 M-6,10 C-6,11 -5,12 -4,12 C-3,12 -2,11 -2,10 C-2,9 -3,8 -4,8 C-5,8 -6,9 -6,10 M2,10 C2,11 3,12 4,12 C5,12 6,11 6,10 C6,9 5,8 4,8 C3,8 2,9 2,10" stroke="white" stroke-width="2" fill="none" opacity="0.3"/>
+  </g>
+  
+  <!-- QR code representation -->
+  <g transform="translate(1620, 250)">
+    <rect x="-20" y="-20" width="40" height="40" fill="white" opacity="0.15" rx="5"/>
+    <rect x="-15" y="-15" width="10" height="10" fill="white" opacity="0.3"/>
+    <rect x="5" y="-15" width="10" height="10" fill="white" opacity="0.3"/>
+    <rect x="-15" y="5" width="10" height="10" fill="white" opacity="0.3"/>
+    <rect x="5" y="5" width="10" height="10" fill="white" opacity="0.3"/>
+  </g>
+</svg>

@@ -1,0 +1,132 @@
+/* Voice Button Global Styles */
+
+/* Ensure voice button is always on top */
+.voice-floating-button {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 99999 !important;
+  width: 72px !important;
+  height: 72px !important;
+  border-radius: 50% !important;
+  /* High contrast: Earth Flame (red) background for maximum visibility */
+  background: #c23c09 !important;
+  /* Strong multi-layer shadow for depth and visibility */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 
+              0 8px 24px rgba(0, 0, 0, 0.3),
+              0 0 0 3px #ffffff,
+              0 0 0 6px #f6af0d,
+              0 0 20px rgba(194, 60, 9, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  border: none !important;
+  outline: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.voice-floating-button:hover {
+  transform: scale(1.15) translateY(-4px) !important;
+  /* Sun Gold on hover for brand consistency and high contrast */
+  background: #f6af0d !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 
+              0 12px 32px rgba(0, 0, 0, 0.4),
+              0 0 0 3px #ffffff,
+              0 0 0 6px #c23c09,
+              0 0 30px rgba(246, 175, 13, 0.5) !important;
+}
+
+.voice-floating-button:active {
+  transform: scale(0.95) !important;
+}
+
+/* High contrast white icon with strong shadow */
+.voice-floating-button svg {
+  width: 32px !important;
+  height: 32px !important;
+  color: #ffffff !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .voice-floating-button {
+    bottom: 16px !important;
+    right: 16px !important;
+    width: 56px !important;
+    height: 56px !important;
+  }
+}
+
+/* Ensure voice modal is on top */
+.voice-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 100000 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Prevent other elements from covering voice button */
+body > * {
+  max-z-index: 9998 !important;
+}
+
+/* Alternative high-contrast brand color version */
+.voice-floating-button-brand {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 99999 !important;
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 50% !important;
+  /* Earth flame (dark red) background for contrast */
+  background: #c23c09 !important;
+  /* Strong shadow with cream outline */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4), 
+              0 10px 20px rgba(0, 0, 0, 0.5),
+              0 0 0 3px #fef9ef,
+              0 0 0 5px rgba(254, 249, 239, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  border: none !important;
+  outline: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.voice-floating-button-brand:hover {
+  transform: scale(1.1) !important;
+  /* Sun gold on hover */
+  background: #f6af0d !important;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.5), 
+              0 15px 30px rgba(0, 0, 0, 0.6),
+              0 0 0 4px #fef9ef,
+              0 0 0 6px rgba(254, 249, 239, 0.6) !important;
+}
+
+/* Accessibility - Add focus styles */
+.voice-floating-button:focus,
+.voice-floating-button-brand:focus {
+  outline: 3px solid #ffffff !important;
+  outline-offset: 2px !important;
+}
+
+/* Add a subtle breathing animation */
+@keyframes voice-button-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.voice-floating-button,
+.voice-floating-button-brand {
+  animation: voice-button-breathe 3s ease-in-out infinite !important;
+}
+
+.voice-floating-button:hover,
+.voice-floating-button-brand:hover {
+  animation: none !important;
+}

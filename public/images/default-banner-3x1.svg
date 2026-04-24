@@ -1,0 +1,43 @@
+<svg width="1200" height="400" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bannerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8CBF44;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5A8F22;stop-opacity:1" />
+    </linearGradient>
+    <pattern id="leafPattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <circle cx="50" cy="50" r="3" fill="#ffffff" opacity="0.1"/>
+      <circle cx="25" cy="25" r="2" fill="#ffffff" opacity="0.08"/>
+      <circle cx="75" cy="75" r="2" fill="#ffffff" opacity="0.08"/>
+    </pattern>
+  </defs>
+  
+  <!-- Main background -->
+  <rect width="1200" height="400" fill="url(#bannerGradient)"/>
+  
+  <!-- Pattern overlay -->
+  <rect width="1200" height="400" fill="url(#leafPattern)"/>
+  
+  <!-- Center content area -->
+  <g transform="translate(600, 200)">
+    <!-- Decorative circles -->
+    <circle cx="-300" cy="0" r="150" fill="#ffffff" opacity="0.05"/>
+    <circle cx="300" cy="0" r="120" fill="#ffffff" opacity="0.05"/>
+    
+    <!-- Center text placeholder -->
+    <rect x="-200" y="-40" width="400" height="80" rx="10" fill="#ffffff" opacity="0.15"/>
+    
+    <!-- Store name placeholder -->
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#ffffff" text-anchor="middle">
+      Your Store Banner
+    </text>
+    
+    <!-- Tagline placeholder -->
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" opacity="0.9" text-anchor="middle">
+      Professional marketplace presence
+    </text>
+  </g>
+  
+  <!-- Bottom wave decoration -->
+  <path d="M 0 350 Q 300 320 600 350 T 1200 350 L 1200 400 L 0 400 Z" fill="#ffffff" opacity="0.1"/>
+</svg>

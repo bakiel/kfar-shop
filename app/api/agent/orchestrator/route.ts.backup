@@ -1,0 +1,234 @@
+// app/api/agent/orchestrator/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { masterOrchestrator } from '@/lib/ai/master-orchestrator-agent';
+import { z } from 'zod';
+
+// Request validation schemas
+const TaskRequestSchema = z.object({
+  task: z.string(),
+  context: z.any().optional(),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+});
+
+const WebhookRequestSchema = z.object({
+  type: z.enum(['database.change', 'vendor.request', 'order.new', 'system.alert']),
+  table: z.string().optional(),
+  action: z.string().optional(),
+  data: z.any(),
+});
+
+// POST /api/agent/orchestrator - Execute agent task
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    
+    // Check if it's a webhook
+    if (body.type && body.type.includes('.')) {
+      return handleWebhook(body);
+    }
+    
+    // Otherwise it's a task request
+    const { task, context, priority } = TaskRequestSchema.parse(body);
+    
+    console.log(`[Orchestrator] Executing task: ${task} (Priority: ${priority})`);
+    
+    const result = await masterOrchestrator.executeTask(task, context);
+    
+    return NextResponse.json({
+      success: result.success,
+      result: result.result,
+      error: result.error,
+      timestamp: new Date().toISOString(),
+    });
+    
+  } catch (error) {
+    console.error('[Orchestrator] Error:', error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request',
+          details: error.errors,
+        },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json(
+      {
+        error: 'Failed to execute task',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// GET /api/agent/orchestrator - Get agent status and capabilities
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const action = searchParams.get('action');
+  
+  switch (action) {
+    case 'status':
+      return NextResponse.json({
+        status: 'active',
+        capabilities: {
+          canUpdateKnowledge: true,
+          canOnboardVendors: true,
+          canManageProducts: true,
+          canHandleOrders: true,
+          canGenerateReports: true,
+          canSendNotifications: true,
+          canManagePromotions: true,
+          canAnalyzeData: true,
+        },
+        tools: [
+          'updateKnowledgeBase',
+          'onboardNewVendor',
+          'addBulkProducts',
+          'syncDatabaseWithKnowledge',
+          'generateVendorReport',
+          'createPromotion',
+          'sendBulkNotification',
+        ],
+        version: '1.0.0',
+      });
+      
+    case 'tasks':
+      // Return available task templates
+      return NextResponse.json({
+        taskTemplates: [
+          {
+            name: 'Onboard New Vendor',
+            task: 'Onboard a new vendor named {vendorName} with email {email}',
+            requiredContext: ['vendorName', 'email', 'description', 'specialties'],
+          },
+          {
+            name: 'Sync Products',
+            task: 'Synchronize all products from database to knowledge base',
+            requiredContext: [],
+          },
+          {
+            name: 'Generate Vendor Report',
+            task: 'Generate analytics report for vendor {vendorId} for the last {days} days',
+            requiredContext: ['vendorId', 'days'],
+          },
+          {
+            name: 'Create Promotion',
+            task: 'Create a {type} promotion named {name} with {discount}% off',
+            requiredContext: ['name', 'type', 'discount', 'startDate', 'endDate'],
+          },
+        ],
+      });
+      
+    case 'logs':
+      // Return recent agent activity (placeholder)
+      return NextResponse.json({
+        logs: [
+          {
+            timestamp: new Date().toISOString(),
+            task: 'Database sync completed',
+            status: 'success',
+            details: 'Synchronized 150 products',
+          },
+        ],
+      });
+      
+    default:
+      return NextResponse.json({
+        service: 'KFAR Master Orchestrator Agent',
+        description: 'AI-powered marketplace management system',
+        endpoints: [
+          'POST /api/agent/orchestrator - Execute task',
+          'GET /api/agent/orchestrator?action=status - Get status',
+          'GET /api/agent/orchestrator?action=tasks - Get task templates',
+          'GET /api/agent/orchestrator?action=logs - Get recent logs',
+        ],
+      });
+  }
+}
+
+// Handle webhook events
+async function handleWebhook(body: any) {
+  try {
+    const webhook = WebhookRequestSchema.parse(body);
+    
+    console.log(`[Orchestrator] Webhook received: ${webhook.type}`);
+    
+    // Handle database changes
+    if (webhook.type === 'database.change' && webhook.table && webhook.action) {
+      await masterOrchestrator.handleDatabaseChange(
+        webhook.table,
+        webhook.action,
+        webhook.data
+      );
+    }
+    
+    // Handle other webhook types
+    switch (webhook.type) {
+      case 'vendor.request':
+        await masterOrchestrator.executeTask(
+          'Process vendor request',
+          { request: webhook.data }
+        );
+        break;
+        
+      case 'order.new':
+        await masterOrchestrator.executeTask(
+          'Process new order and update inventory',
+          { order: webhook.data }
+        );
+        break;
+        
+      case 'system.alert':
+        await masterOrchestrator.executeTask(
+          'Handle system alert',
+          { alert: webhook.data }
+        );
+        break;
+    }
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Webhook processed',
+      type: webhook.type,
+    });
+    
+  } catch (error) {
+    console.error('[Orchestrator] Webhook error:', error);
+    
+    return NextResponse.json(
+      {
+        error: 'Failed to process webhook',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH /api/agent/orchestrator - Update agent configuration
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    
+    // Placeholder for configuration updates
+    // In production, this would update agent settings
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Configuration updated',
+      updates: body,
+    });
+    
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: 'Failed to update configuration',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,340 @@
+// lib/ai/vercel-ai-integration.ts
+import { streamText, generateText, tool } from 'ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
+import { z } from 'zod';
+import { elevenLabsV3 } from '../services/elevenlabs-v3';
+
+// Initialize AI providers
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
+});
+
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '',
+});
+
+// Model selection for different use cases
+export const aiModels = {
+  // Use existing Gemini for consistency
+  default: google('gemini-1.5-pro'),
+  // Fast model for quick responses
+  fast: google('gemini-1.5-flash'),
+  // Use OpenAI for complex reasoning if needed
+  reasoning: process.env.OPENAI_API_KEY ? openai('gpt-4-turbo') : google('gemini-1.5-pro'),
+};
+
+// Enhanced system prompt for KFAR marketplace
+const KFAR_SYSTEM_PROMPT = `You are an intelligent voice shopping assistant for KFAR Vegan Marketplace in Dimona, Israel.
+
+ROLE & PERSONALITY:
+- Warm, friendly, and knowledgeable about vegan lifestyle
+- Speak naturally and conversationally for voice interaction
+- Keep responses concise (under 100 words for voice)
+- Use the voice personality context provided
+
+MARKETPLACE INFO:
+- 100% vegan marketplace from Village of Peace community
+- 6 vendors: Teva Deli, People Store, Queen's Cuisine, Gahn Delight, Garden of Light, VOP Shop
+- All products are vegan, many kosher and organic
+- Prices in Israeli Shekels (₪)
+
+CAPABILITIES:
+- Search products by name, category, or vendor
+- Add items to cart with quantity
+- Provide cart information and totals
+- Suggest complementary products
+- Answer questions about vegan lifestyle
+
+VOICE INTERACTION RULES:
+1. Acknowledge user's request immediately
+2. If searching, say "Let me find that for you"
+3. When listing products, mention price and vendor
+4. Always ask if they want to add to cart
+5. Confirm additions with total
+
+Remember: You're speaking, not writing. Be natural!`;
+
+// Tool definitions for structured actions
+export const voiceCommerceTools = {
+  searchProducts: tool({
+    description: 'Search for products in the KFAR marketplace',
+    parameters: z.object({
+      query: z.string().describe('What to search for'),
+      vendor: z.string().optional().describe('Specific vendor name'),
+      maxPrice: z.number().optional().describe('Maximum price filter'),
+      category: z.enum(['food', 'dessert', 'beverage', 'grocery', 'merchandise']).optional(),
+    }),
+    execute: async ({ query, vendor, maxPrice, category }) => {
+      // Integration with existing product search
+      const params = new URLSearchParams({ search: query });
+      if (vendor) params.append('vendor', vendor);
+      if (maxPrice) params.append('maxPrice', maxPrice.toString());
+      if (category) params.append('category', category);
+      
+      const response = await fetch(`/api/products?${params}`);
+      const data = await response.json();
+      
+      return {
+        products: data.products || [],
+        count: data.products?.length || 0,
+      };
+    },
+  }),
+
+  addToCart: tool({
+    description: 'Add a product to the shopping cart',
+    parameters: z.object({
+      productId: z.string().describe('Product ID to add'),
+      productName: z.string().describe('Product name for confirmation'),
+      quantity: z.number().min(1).default(1).describe('Quantity to add'),
+      price: z.number().describe('Product price'),
+    }),
+    execute: async ({ productId, productName, quantity, price }) => {
+      // This would integrate with your cart context
+      // For now, return a success response
+      return {
+        success: true,
+        message: `Added ${quantity} ${productName} to cart`,
+        itemTotal: price * quantity,
+      };
+    },
+  }),
+
+  getCartInfo: tool({
+    description: 'Get current shopping cart information',
+    parameters: z.object({}),
+    execute: async () => {
+      // This would get actual cart data from context
+      // Mock response for example
+      return {
+        items: [],
+        total: 0,
+        count: 0,
+      };
+    },
+  }),
+
+  checkDeals: tool({
+    description: 'Check for special deals and promotions',
+    parameters: z.object({
+      type: z.enum(['daily', 'weekly', 'all']).default('all'),
+    }),
+    execute: async ({ type }) => {
+      // Fetch deals from your API
+      const response = await fetch(`/api/products?special=true`);
+      const data = await response.json();
+      
+      return {
+        deals: data.products?.slice(0, 3) || [],
+        type,
+      };
+    },
+  }),
+};
+
+// Enhanced voice command processor with streaming
+export class VercelAIVoiceProcessor {
+  private conversationHistory: any[] = [];
+  private voiceContext: {
+    currentVoice: 'yaakov' | 'daniella';
+    language: 'en' | 'he' | 'ar';
+  } = {
+    currentVoice: 'daniella',
+    language: 'en',
+  };
+
+  setVoiceContext(voice: 'yaakov' | 'daniella', language: 'en' | 'he' | 'ar' = 'en') {
+    this.voiceContext = { currentVoice: voice, language };
+  }
+
+  async processVoiceCommand(transcript: string, options?: {
+    streaming?: boolean;
+    onPartialResponse?: (text: string) => void;
+  }) {
+    // Add user message to history
+    this.conversationHistory.push({
+      role: 'user',
+      content: transcript,
+    });
+
+    // Keep conversation history limited
+    if (this.conversationHistory.length > 10) {
+      this.conversationHistory = this.conversationHistory.slice(-10);
+    }
+
+    try {
+      if (options?.streaming) {
+        // Streaming response for real-time feedback
+        const result = await streamText({
+          model: aiModels.fast,
+          system: KFAR_SYSTEM_PROMPT + `\nCurrent voice: ${this.voiceContext.currentVoice}`,
+          messages: this.conversationHistory,
+          tools: voiceCommerceTools,
+          temperature: 0.7,
+          maxTokens: 150, // Keep responses concise for voice
+        });
+
+        let fullResponse = '';
+        let lastChunk = '';
+        
+        for await (const chunk of result.textStream) {
+          fullResponse += chunk;
+          lastChunk += chunk;
+          
+          // Stream to callback for real-time UI updates
+          if (options.onPartialResponse) {
+            options.onPartialResponse(fullResponse);
+          }
+          
+          // When we have a complete sentence, speak it
+          if (lastChunk.match(/[.!?]\s*$/)) {
+            await this.speakResponse(lastChunk);
+            lastChunk = '';
+          }
+        }
+
+        // Speak any remaining text
+        if (lastChunk.trim()) {
+          await this.speakResponse(lastChunk);
+        }
+
+        // Add assistant response to history
+        this.conversationHistory.push({
+          role: 'assistant',
+          content: fullResponse,
+        });
+
+        return {
+          response: fullResponse,
+          toolCalls: result.toolCalls,
+          usage: result.usage,
+        };
+      } else {
+        // Non-streaming for simpler integration
+        const result = await generateText({
+          model: aiModels.default,
+          system: KFAR_SYSTEM_PROMPT + `\nCurrent voice: ${this.voiceContext.currentVoice}`,
+          messages: this.conversationHistory,
+          tools: voiceCommerceTools,
+          temperature: 0.7,
+          maxTokens: 150,
+        });
+
+        // Speak the complete response
+        await this.speakResponse(result.text);
+
+        // Add to history
+        this.conversationHistory.push({
+          role: 'assistant',
+          content: result.text,
+        });
+
+        return {
+          response: result.text,
+          toolCalls: result.toolCalls,
+          usage: result.usage,
+        };
+      }
+    } catch (error) {
+      console.error('Voice processing error:', error);
+      const errorResponse = "I'm having trouble processing that. Could you try again?";
+      await this.speakResponse(errorResponse);
+      
+      return {
+        response: errorResponse,
+        error: true,
+      };
+    }
+  }
+
+  private async speakResponse(text: string) {
+    try {
+      // Use existing ElevenLabs TTS
+      const audio = await elevenLabsV3.textToSpeech({
+        text,
+        voice_id: elevenLabsV3.voices[this.voiceContext.currentVoice],
+        voice_settings: elevenLabsV3.getVoiceSettings('conversation'),
+      });
+
+      // Play audio using existing audio queue or Web Audio API
+      await this.playAudio(audio);
+    } catch (error) {
+      console.error('TTS error:', error);
+    }
+  }
+
+  private async playAudio(audioBuffer: ArrayBuffer) {
+    // Use Web Audio API for immediate playback
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const source = audioContext.createBufferSource();
+    
+    try {
+      const buffer = await audioContext.decodeAudioData(audioBuffer);
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.start(0);
+      
+      // Wait for playback to complete
+      await new Promise(resolve => {
+        source.onended = resolve;
+      });
+    } catch (error) {
+      console.error('Audio playback error:', error);
+    }
+  }
+
+  // Helper method to extract product info from tool results
+  extractProductsFromToolCalls(toolCalls: any[]): any[] {
+    const products = [];
+    
+    for (const call of toolCalls || []) {
+      if (call.toolName === 'searchProducts' && call.result?.products) {
+        products.push(...call.result.products);
+      }
+    }
+    
+    return products;
+  }
+
+  // Get conversation context for UI
+  getConversationHistory() {
+    return this.conversationHistory;
+  }
+
+  // Clear conversation history
+  clearHistory() {
+    this.conversationHistory = [];
+  }
+}
+
+// Singleton instance
+export const vercelAIProcessor = new VercelAIVoiceProcessor();
+
+// React hook for easy integration
+export function useVercelAIVoice() {
+  const processCommand = async (
+    transcript: string,
+    options?: {
+      streaming?: boolean;
+      onPartialResponse?: (text: string) => void;
+    }
+  ) => {
+    return vercelAIProcessor.processVoiceCommand(transcript, options);
+  };
+
+  const setVoice = (voice: 'yaakov' | 'daniella', language?: 'en' | 'he' | 'ar') => {
+    vercelAIProcessor.setVoiceContext(voice, language);
+  };
+
+  const clearHistory = () => {
+    vercelAIProcessor.clearHistory();
+  };
+
+  return {
+    processCommand,
+    setVoice,
+    clearHistory,
+    getHistory: () => vercelAIProcessor.getConversationHistory(),
+  };
+}

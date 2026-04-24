@@ -1,0 +1,121 @@
+// app/api/voice-assistant/route.ts
+import { streamText } from 'ai';
+import { aiModels, voiceCommerceTools } from '@/lib/ai/vercel-ai-integration';
+import { NextRequest } from 'next/server';
+
+// Enhanced system prompt with marketplace context
+const SYSTEM_PROMPT = `You are a helpful voice shopping assistant for KFAR Vegan Marketplace in Dimona, Israel.
+
+CONTEXT:
+- You represent the Village of Peace community's 100% vegan marketplace
+- All products are vegan, many are kosher and organic
+- Prices are in Israeli Shekels (₪)
+- Speaking naturally for voice interaction
+
+CURRENT VENDORS:
+1. Teva Deli - 46 vegan meat alternatives (seitan, tofu products)
+2. People Store - 23 organic groceries and household items  
+3. Queen's Cuisine - Plant-based prepared meals and burgers
+4. Gahn Delight - Vegan ice cream and desserts (8 products)
+5. Garden of Light - Fresh salads and healthy prepared foods
+6. VOP Shop - Community merchandise and cultural items
+
+VOICE INTERACTION GUIDELINES:
+- Keep responses under 100 words for voice clarity
+- Always acknowledge the user's request first
+- When listing products, mention name, price, and vendor
+- Ask if they want to add items to cart
+- Confirm cart additions with running total
+- Be warm and conversational
+
+TOOLS AVAILABLE:
+- searchProducts: Find products by name, vendor, price, or category
+- addToCart: Add items with quantity to shopping cart
+- getCartInfo: Check current cart contents and total
+- checkDeals: Show today's special offers
+
+Remember: Users are listening, not reading. Be concise and clear!`;
+
+export async function POST(req: NextRequest) {
+  try {
+    const { messages, voiceContext } = await req.json();
+
+    // Validate request
+    if (!messages || !Array.isArray(messages)) {
+      return new Response('Invalid request: messages array required', { 
+        status: 400 
+      });
+    }
+
+    // Add voice context to system prompt if provided
+    const enhancedSystemPrompt = voiceContext 
+      ? `${SYSTEM_PROMPT}\n\nCurrent voice personality: ${voiceContext.voice} (${voiceContext.language})`
+      : SYSTEM_PROMPT;
+
+    // Create streaming response with tools
+    const result = await streamText({
+      model: aiModels.fast, // Use fast model for voice responsiveness
+      system: enhancedSystemPrompt,
+      messages,
+      tools: voiceCommerceTools,
+      temperature: 0.7,
+      maxTokens: 150, // Keep responses concise for voice
+      toolChoice: 'auto', // Let AI decide when to use tools
+    });
+
+    // Return streaming response
+    return result.toAIStreamResponse({
+      headers: {
+        'X-Voice-Optimized': 'true',
+        'X-Marketplace': 'KFAR',
+      },
+    });
+
+  } catch (error) {
+    console.error('Voice assistant error:', error);
+    
+    // Return error response
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to process voice request',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
+}
+
+// Optional: GET endpoint for testing
+export async function GET() {
+  return new Response(
+    JSON.stringify({
+      service: 'KFAR Voice Assistant',
+      version: '2.0',
+      features: [
+        'Streaming responses',
+        'Product search',
+        'Cart management',
+        'Multi-language support',
+        'Voice-optimized responses',
+      ],
+      vendors: [
+        'Teva Deli',
+        'People Store',
+        'Queens Cuisine',
+        'Gahn Delight',
+        'Garden of Light',
+        'VOP Shop',
+      ],
+    }),
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+}

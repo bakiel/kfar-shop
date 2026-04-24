@@ -1,0 +1,35 @@
+{
+  "updated": "2025-06-06T04:21:42.276Z",
+  "banners": {
+    "gahn-delight": {
+      "path": "/images/vendors/gahn-delight/banner.jpg",
+      "description": "Ice cream and frozen desserts banner",
+      "originalFile": "1.jpg"
+    },
+    "garden-of-light": {
+      "path": "/images/vendors/garden-of-light/banner.jpg",
+      "description": "Vegan deli products banner",
+      "originalFile": "2.jpg"
+    },
+    "vop-shop": {
+      "path": "/images/vendors/vop-shop/banner.jpg",
+      "description": "Community merchandise and apparel banner",
+      "originalFile": "3.jpg"
+    },
+    "people-store": {
+      "path": "/images/vendors/people-store/banner.jpg",
+      "description": "Community store and fresh produce banner",
+      "originalFile": "4.jpg"
+    },
+    "teva-deli": {
+      "path": "/images/vendors/teva-deli/banner.jpg",
+      "description": "Plant-based protein products banner",
+      "originalFile": "5.jpg"
+    },
+    "queens-cuisine": {
+      "path": "/images/vendors/queens-cuisine/banner.jpg",
+      "description": "Artisanal vegan meat alternatives banner",
+      "originalFile": "6.jpg"
+    }
+  }
+}

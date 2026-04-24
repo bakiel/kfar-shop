@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KFAR Marketplace - Digital Handover</title>
+<style>
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    --green-deep: #2D5A27;
+    --green-leaf: #478c0b;
+    --green-light: #6db33f;
+    --gold-premium: #C4A265;
+    --gold-dark: #8B7340;
+    --gold-light: #D4B87A;
+    --cream: #F5F0E8;
+    --warm-white: #FDFBF7;
+    --soil-brown: #3a3a1d;
+    --text-dark: #1a1a1a;
+    --text-body: #444;
+    --text-muted: #777;
+  }
+
+  @font-face {
+    font-family: 'Inter';
+    src: local('Inter'), local('Inter-Regular');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-dark);
+    background: white;
+    line-height: 1.6;
+  }
+
+  .page {
+    width: 210mm;
+    height: 297mm;
+    overflow: hidden;
+    position: relative;
+    page-break-after: always;
+    background: var(--warm-white);
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+
+  /* Page shield for footer protection */
+  .page::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 18mm;
+    background: inherit;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .page-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 14mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20mm 4mm;
+    z-index: 10;
+    font-size: 7pt;
+    color: var(--text-muted);
+  }
+
+  .page-footer .footer-line {
+    position: absolute;
+    top: 0;
+    left: 20mm;
+    right: 20mm;
+    height: 0.5pt;
+    background: var(--gold-premium);
+    opacity: 0.3;
+  }
+
+  .page-footer img {
+    height: 12px;
+    opacity: 0.4;
+  }
+
+  /* ================================================================ */
+  /* COVER PAGE */
+  /* ================================================================ */
+  .cover {
+    background: linear-gradient(160deg, #1a3d17 0%, var(--green-deep) 30%, #0f2810 70%, #0a1f0a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+  }
+
+  .cover::after {
+    display: none;
+  }
+
+  /* Background community photo on cover */
+  .cover .bg-photo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .cover .bg-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.12;
+    filter: saturate(0.3);
+  }
+
+  .cover .bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(196, 162, 101, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(71, 140, 11, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 70%);
+    z-index: 1;
+  }
+
+  /* Africa icon watermark */
+  .cover .watermark {
+    position: absolute;
+    bottom: 20mm;
+    right: 15mm;
+    width: 100px;
+    height: auto;
+    opacity: 0.06;
+    z-index: 1;
+  }
+
+  .cover .content {
+    position: relative;
+    z-index: 2;
+    padding: 0 30mm;
+  }
+
+  .cover .logo-container {
+    margin-bottom: 10mm;
+  }
+
+  .cover .logo-container img {
+    height: 80px;
+    width: auto;
+  }
+
+  .cover .gold-line {
+    width: 80mm;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-premium), transparent);
+    margin: 6mm auto;
+  }
+
+  .cover h1 {
+    font-size: 32pt;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 3mm;
+    line-height: 1.15;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+
+  .cover .subtitle {
+    font-size: 11pt;
+    color: var(--gold-premium);
+    font-weight: 500;
+    margin-bottom: 8mm;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .cover .tagline {
+    font-size: 9.5pt;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4mm;
+    letter-spacing: 1px;
+    max-width: 120mm;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+  }
+
+  .cover .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 15mm;
+    margin-top: 18mm;
+    padding: 5mm 8mm;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4mm;
+    border: 1px solid rgba(196, 162, 101, 0.15);
+  }
+
+  .cover .meta-item {
+    text-align: center;
+  }
+
+  .cover .meta-label {
+    font-size: 6.5pt;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--gold-premium);
+    margin-bottom: 1.5mm;
+  }
+
+  .cover .meta-value {
+    font-size: 10pt;
+    color: rgba(255,255,255,0.9);
+    font-weight: 500;
+  }
+
+  .cover .footer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 6mm;
+    background: linear-gradient(90deg, var(--gold-premium), var(--green-leaf), var(--gold-premium));
+    opacity: 0.8;
+    z-index: 2;
+  }
+
+  .cover .cover-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-premium), var(--green-leaf), var(--gold-premium));
+    opacity: 0.6;
+    z-index: 2;
+  }
+
+  /* ================================================================ */
+  /* CONTENT PAGES */
+  /* ================================================================ */
+  .content-page {
+    padding: 18mm 20mm 22mm 20mm;
+  }
+
+  /* Green side accent */
+  .content-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--green-deep), var(--green-leaf), var(--gold-premium));
+    z-index: 2;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6mm;
+    padding-bottom: 3mm;
+    border-bottom: 1.5px solid rgba(196, 162, 101, 0.25);
+  }
+
+  .page-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+  }
+
+  .page-header .logo-small {
+    height: 28px;
+    width: auto;
+  }
+
+  .page-header .header-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(196, 162, 101, 0.3);
+  }
+
+  .page-header .section-tag {
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--gold-premium);
+    font-weight: 600;
+  }
+
+  .page-header .page-num {
+    font-size: 7pt;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  h2 {
+    font-size: 18pt;
+    font-weight: 700;
+    color: var(--green-deep);
+    margin-bottom: 4mm;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--soil-brown);
+    margin-top: 5mm;
+    margin-bottom: 2.5mm;
+  }
+
+  h4 {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: var(--green-deep);
+    margin-top: 3mm;
+    margin-bottom: 1.5mm;
+  }
+
+  p {
+    font-size: 9pt;
+    color: var(--text-body);
+    margin-bottom: 2.5mm;
+    line-height: 1.6;
+  }
+
+  .intro-text {
+    font-size: 9.5pt;
+    color: var(--text-body);
+    margin-bottom: 5mm;
+    line-height: 1.7;
+    max-width: 150mm;
+  }
+
+  /* Credential boxes */
+  .cred-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+    margin: 3mm 0;
+  }
+
+  .cred-box {
+    background: white;
+    border: 1px solid rgba(45, 90, 39, 0.1);
+    border-radius: 2.5mm;
+    padding: 3.5mm 4.5mm;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cred-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--green-leaf);
+    border-radius: 3px 0 0 3px;
+  }
+
+  .cred-box.gold::before {
+    background: var(--gold-premium);
+  }
+
+  .cred-label {
+    font-size: 6.5pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 1mm;
+    font-weight: 600;
+  }
+
+  .cred-value {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    word-break: break-all;
+  }
+
+  .cred-value.url {
+    color: var(--green-deep);
+    font-weight: 500;
+  }
+
+  /* Feature cards */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3mm;
+    margin: 3mm 0;
+  }
+
+  .feature-card {
+    background: white;
+    border: 1px solid rgba(45, 90, 39, 0.08);
+    border-radius: 3mm;
+    padding: 3.5mm;
+    text-align: center;
+  }
+
+  .feature-card .icon {
+    width: 9mm;
+    height: 9mm;
+    margin: 0 auto 2mm;
+    background: linear-gradient(135deg, var(--green-deep), var(--green-leaf));
+    border-radius: 2mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .feature-card .label {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: var(--soil-brown);
+  }
+
+  .feature-card .desc {
+    font-size: 6.5pt;
+    color: var(--text-muted);
+    margin-top: 0.5mm;
+    line-height: 1.3;
+  }
+
+  /* Stat cards */
+  .stat-row {
+    display: flex;
+    gap: 3mm;
+    margin: 4mm 0;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: white;
+    border: 1px solid rgba(196, 162, 101, 0.15);
+    border-radius: 3mm;
+    padding: 4mm 3mm;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 22pt;
+    font-weight: 800;
+    color: var(--green-deep);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 7pt;
+    color: var(--text-muted);
+    margin-top: 1mm;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2.5mm 0;
+    font-size: 8pt;
+  }
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--green-deep);
+    padding: 2mm 3mm;
+    border-bottom: 1.5px solid var(--green-deep);
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 2mm 3mm;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    color: var(--text-body);
+    vertical-align: top;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 7.5pt;
+    color: var(--text-dark);
+    background: rgba(45, 90, 39, 0.04);
+    padding: 0.5mm 1.5mm;
+    border-radius: 2px;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold-premium), transparent);
+    margin: 5mm 0;
+    opacity: 0.3;
+  }
+
+  /* Alert / callout */
+  .callout {
+    background: rgba(45, 90, 39, 0.05);
+    border-left: 3px solid var(--green-leaf);
+    padding: 3mm 4mm;
+    border-radius: 0 2mm 2mm 0;
+    margin: 3mm 0;
+  }
+
+  .callout p {
+    font-size: 8pt;
+    margin: 0;
+    color: var(--soil-brown);
+  }
+
+  .callout.warning {
+    background: rgba(196, 162, 101, 0.08);
+    border-left-color: var(--gold-premium);
+  }
+
+  /* Vendor cards with logos */
+  .vendor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3mm;
+    margin: 3mm 0;
+  }
+
+  .vendor-card {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 2.5mm;
+    padding: 3mm 4mm;
+  }
+
+  .vendor-card .vendor-logo {
+    width: 12mm;
+    height: 12mm;
+    border-radius: 2mm;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .vendor-card .vendor-info .vendor-name {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: var(--soil-brown);
+  }
+
+  .vendor-card .vendor-info .vendor-email {
+    font-size: 7pt;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  .vendor-card .vendor-info .vendor-id {
+    font-size: 6.5pt;
+    color: var(--green-leaf);
+    font-weight: 500;
+  }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2mm;
+    margin: 4mm 0;
+    flex-wrap: wrap;
+  }
+
+  .flow-step {
+    background: white;
+    border: 1px solid rgba(45, 90, 39, 0.15);
+    border-radius: 2.5mm;
+    padding: 2.5mm 4mm;
+    font-size: 7pt;
+    font-weight: 600;
+    color: var(--green-deep);
+    text-align: center;
+    min-width: 22mm;
+  }
+
+  .flow-step small {
+    display: block;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 6pt;
+  }
+
+  .flow-arrow {
+    color: var(--gold-premium);
+    font-size: 10pt;
+    font-weight: bold;
+  }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm;
+    margin: 3mm 0;
+  }
+
+  /* Image hero */
+  .img-hero {
+    width: 100%;
+    height: 38mm;
+    border-radius: 3mm;
+    overflow: hidden;
+    margin: 4mm 0;
+    background: linear-gradient(135deg, var(--green-deep), var(--green-leaf));
+    position: relative;
+  }
+
+  .img-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .img-hero .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(45,90,39,0.75) 0%, rgba(45,90,39,0.3) 60%, transparent 100%);
+    display: flex;
+    align-items: center;
+    padding: 0 6mm;
+  }
+
+  .img-hero .overlay-text {
+    color: white;
+    font-size: 13pt;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .img-hero .overlay-text small {
+    display: block;
+    font-size: 7.5pt;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-top: 1mm;
+  }
+
+  /* Community image strip */
+  .img-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2mm;
+    margin: 3mm 0;
+    height: 28mm;
+  }
+
+  .img-strip .img-cell {
+    border-radius: 2.5mm;
+    overflow: hidden;
+  }
+
+  .img-strip .img-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 0.8mm 2.5mm;
+    border-radius: 1.5mm;
+    font-size: 6.5pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-green {
+    background: rgba(71, 140, 11, 0.1);
+    color: var(--green-leaf);
+  }
+  .badge-gold {
+    background: rgba(196, 162, 101, 0.15);
+    color: var(--gold-dark);
+  }
+
+  /* Number circle */
+  .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 5.5mm;
+    height: 5.5mm;
+    border-radius: 50%;
+    background: var(--green-deep);
+    color: white;
+    font-size: 7.5pt;
+    font-weight: 700;
+    margin-right: 2mm;
+    flex-shrink: 0;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 2mm;
+    margin-bottom: 2.5mm;
+  }
+
+  .step-item p {
+    margin: 0;
+    font-size: 8.5pt;
+  }
+
+  /* Decorative leaf icon in corners */
+  .corner-leaf {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    opacity: 0.08;
+    z-index: 0;
+  }
+  .corner-leaf.top-right {
+    top: 15mm;
+    right: 15mm;
+  }
+  .corner-leaf.bottom-left {
+    bottom: 20mm;
+    left: 15mm;
+  }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ -->
+<!-- PAGE 1: COVER -->
+<!-- ================================================================ -->
+<div class="page cover">
+  <div class="cover-top-bar"></div>
+  <div class="bg-photo">
+    <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_03.jpg" alt="">
+  </div>
+  <div class="bg-pattern"></div>
+  <img src="../public/images/logos/kfar_icon_africa_gold.png" class="watermark" alt="">
+  <div class="content">
+    <div class="logo-container">
+      <img src="../public/images/logos/kfar_logo_gold_premium.png" alt="KFAR Marketplace">
+    </div>
+
+    <div class="gold-line"></div>
+
+    <h1>Digital Handover<br>Documentation</h1>
+    <div class="subtitle">Platform Administration Guide</div>
+
+    <div class="tagline">
+      Multi-vendor e-commerce platform for the Village of Peace community.<br>
+      Authentic vegan products. African heritage. Community powered.
+    </div>
+
+    <div class="meta-row">
+      <div class="meta-item">
+        <div class="meta-label">Prepared</div>
+        <div class="meta-value">February 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Version</div>
+        <div class="meta-value">2.0 Production</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Domain</div>
+        <div class="meta-value">kfarapp.com</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Vendors</div>
+        <div class="meta-value">6 Active</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAGE 2: PLATFORM OVERVIEW -->
+<!-- ================================================================ -->
+<div class="page content-page">
+  <img src="../public/images/logos/kfar_icon_leaf_gold.png" class="corner-leaf top-right" alt="">
+  <div class="page-header">
+    <div class="header-left">
+      <img src="../public/images/logos/kfar_logo_primary_horizontal.png" class="logo-small" alt="KFAR">
+      <div class="header-divider"></div>
+      <span class="section-tag">Platform Overview</span>
+    </div>
+    <span class="page-num">02 / 08</span>
+  </div>
+
+  <h2>Platform Overview</h2>
+  <p class="intro-text">
+    KFAR Marketplace is a multi-vendor e-commerce platform built for the Village of Peace community
+    in Dimona, Israel. Connecting 6 local vendors with the community, supporting Hebrew
+    and English, multiple payment methods including community currency (Braysheet), and a full
+    loyalty rewards system.
+  </p>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-number">6</div>
+      <div class="stat-label">Active Vendors</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">113</div>
+      <div class="stat-label">Products Listed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">133</div>
+      <div class="stat-label">API Routes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">205</div>
+      <div class="stat-label">Static Pages</div>
+    </div>
+  </div>
+
+  <div class="img-hero">
+    <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_01.jpg" alt="Village of Peace">
+    <div class="overlay">
+      <div class="overlay-text">
+        Village of Peace<br>Community Marketplace
+        <small>Authentic vegan products | African heritage | Community powered</small>
+      </div>
+    </div>
+  </div>
+
+  <h3>Technology Stack</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">N</div>
+      <div class="label">Next.js 15</div>
+      <div class="desc">React framework, App Router</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">P</div>
+      <div class="label">PostgreSQL</div>
+      <div class="desc">24 tables, relational DB</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">J</div>
+      <div class="label">JWT Auth</div>
+      <div class="desc">bcrypt + token auth</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">Y</div>
+      <div class="label">YPAY</div>
+      <div class="desc">Israeli payment gateway</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">M</div>
+      <div class="label">Postfix</div>
+      <div class="desc">Email + DKIM on VPS</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">T</div>
+      <div class="label">Tailwind CSS</div>
+      <div class="desc">Premium responsive UI</div>
+    </div>
+  </div>
+
+  <div class="img-strip">
+    <div class="img-cell">
+      <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_10.jpg" alt="">
+    </div>
+    <div class="img-cell">
+      <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_20.jpg" alt="">
+    </div>
+    <div class="img-cell">
+      <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_30.jpg" alt="">
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-line"></div>
+    <span style="display:flex;align-items:center;gap:2mm;"><img src="../public/images/logos/kfar_icon_leaf_green_small.png" style="height:10px;opacity:0.5;">KFAR Marketplace | Digital Handover</span>
+    <span>Page 2 of 8</span>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAGE 3: ACCESS CREDENTIALS -->
+<!-- ================================================================ -->
+<div class="page content-page">
+  <img src="../public/images/logos/kfar_icon_leaf_gold.png" class="corner-leaf top-right" alt="">
+  <div class="page-header">
+    <div class="header-left">
+      <img src="../public/images/logos/kfar_logo_primary_horizontal.png" class="logo-small" alt="KFAR">
+      <div class="header-divider"></div>
+      <span class="section-tag">Access Credentials</span>
+    </div>
+    <span class="page-num">03 / 08</span>
+  </div>
+
+  <h2>Access Credentials</h2>
+  <p class="intro-text">All credentials for the production system. Store securely and change passwords after first login.</p>
+
+  <h3>Website &amp; Domain</h3>
+  <div class="cred-grid">
+    <div class="cred-box gold">
+      <div class="cred-label">Live Website</div>
+      <div class="cred-value url">https://kfarapp.com</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Domain Registrar</div>
+      <div class="cred-value">Hostinger (DNS managed)</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">GitHub Repository</div>
+      <div class="cred-value url">github.com/bakiel/kfar-shop</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">SSL Certificate</div>
+      <div class="cred-value">Let's Encrypt (auto-renew)</div>
+    </div>
+  </div>
+
+  <h3>Admin Account</h3>
+  <div class="cred-grid">
+    <div class="cred-box gold">
+      <div class="cred-label">Admin Email</div>
+      <div class="cred-value">admin@kfarapp.com</div>
+    </div>
+    <div class="cred-box gold">
+      <div class="cred-label">Admin Password</div>
+      <div class="cred-value">KfarAdmin2025!</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Admin Login URL</div>
+      <div class="cred-value url">kfarapp.com/admin/login</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Admin Dashboard</div>
+      <div class="cred-value url">kfarapp.com/admin/dashboard</div>
+    </div>
+  </div>
+
+  <h3>VPS Server (Hostinger)</h3>
+  <div class="cred-grid">
+    <div class="cred-box">
+      <div class="cred-label">Server IP</div>
+      <div class="cred-value">72.61.201.237</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">SSH Access</div>
+      <div class="cred-value">ssh root@72.61.201.237</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">App Location</div>
+      <div class="cred-value">/opt/kfar</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Process Manager</div>
+      <div class="cred-value">PM2 (process: kfar, port 3006)</div>
+    </div>
+  </div>
+
+  <h3>Database (PostgreSQL)</h3>
+  <div class="cred-grid">
+    <div class="cred-box">
+      <div class="cred-label">Host</div>
+      <div class="cred-value">localhost (from VPS only)</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Database Name</div>
+      <div class="cred-value">kfar_marketplace</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Username</div>
+      <div class="cred-value">kfar</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Password</div>
+      <div class="cred-value">kfar_secure_2025</div>
+    </div>
+  </div>
+
+  <div class="callout warning">
+    <p><strong>Security:</strong> Change all default passwords after handover. The database is only accessible from the VPS (not exposed to the internet). SSH keys are recommended over password authentication.</p>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-line"></div>
+    <span style="display:flex;align-items:center;gap:2mm;"><img src="../public/images/logos/kfar_icon_leaf_green_small.png" style="height:10px;opacity:0.5;">KFAR Marketplace | Digital Handover</span>
+    <span>Page 3 of 8</span>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAGE 4: VENDOR ACCOUNTS -->
+<!-- ================================================================ -->
+<div class="page content-page">
+  <img src="../public/images/logos/kfar_icon_leaf_gold.png" class="corner-leaf top-right" alt="">
+  <div class="page-header">
+    <div class="header-left">
+      <img src="../public/images/logos/kfar_logo_primary_horizontal.png" class="logo-small" alt="KFAR">
+      <div class="header-divider"></div>
+      <span class="section-tag">Vendor Accounts</span>
+    </div>
+    <span class="page-num">04 / 08</span>
+  </div>
+
+  <h2>Vendor Accounts</h2>
+  <p class="intro-text">Each vendor has a dedicated login to manage their products, orders, and promotions.</p>
+
+  <div class="callout">
+    <p><strong>Default Vendor Password:</strong> <span class="mono">KfarVendor2025!</span> &mdash; Each vendor should change this on first login.</p>
+  </div>
+
+  <div class="vendor-grid">
+    <div class="vendor-card">
+      <img src="../public/images/vendors/teva_deli_logo_vegan_factory.jpg" class="vendor-logo" alt="Teva Deli">
+      <div class="vendor-info">
+        <div class="vendor-name">Teva Deli</div>
+        <div class="vendor-email">teva@kfarapp.com</div>
+        <div class="vendor-id">32 products | teva-deli</div>
+      </div>
+    </div>
+    <div class="vendor-card">
+      <img src="../public/images/vendors/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg" class="vendor-logo" alt="Queen's Cuisine">
+      <div class="vendor-info">
+        <div class="vendor-name">Queen's Cuisine</div>
+        <div class="vendor-email">queens@kfarapp.com</div>
+        <div class="vendor-id">25 products | queens-cuisine</div>
+      </div>
+    </div>
+    <div class="vendor-card">
+      <img src="../public/images/vendors/people_store_logo_community_retail.jpg" class="vendor-logo" alt="People's Store">
+      <div class="vendor-info">
+        <div class="vendor-name">People's Store</div>
+        <div class="vendor-email">people@kfarapp.com</div>
+        <div class="vendor-id">18 products | people-store</div>
+      </div>
+    </div>
+    <div class="vendor-card">
+      <img src="../public/images/vendors/Garden of Light Logo.jpg" class="vendor-logo" alt="Garden of Light">
+      <div class="vendor-info">
+        <div class="vendor-name">Garden of Light</div>
+        <div class="vendor-email">garden@kfarapp.com</div>
+        <div class="vendor-id">14 products | garden-of-light</div>
+      </div>
+    </div>
+    <div class="vendor-card">
+      <img src="../public/images/vendors/gahn_delight_official_logo_master_brand_ice_cream.jpg" class="vendor-logo" alt="Gahn Delight">
+      <div class="vendor-info">
+        <div class="vendor-name">Gahn Delight</div>
+        <div class="vendor-email">gahn@kfarapp.com</div>
+        <div class="vendor-id">12 products | gahn-delight</div>
+      </div>
+    </div>
+    <div class="vendor-card">
+      <img src="../public/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg" class="vendor-logo" alt="VOP Shop">
+      <div class="vendor-info">
+        <div class="vendor-name">VOP Shop</div>
+        <div class="vendor-email">kfar@kfarapp.com</div>
+        <div class="vendor-id">12 products | vop-shop</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Vendor Portal Features</h3>
+  <div class="two-col">
+    <div>
+      <h4>Dashboard</h4>
+      <p>Sales overview, revenue analytics, order stats, and customer insights at a glance.</p>
+      <h4>Product Management</h4>
+      <p>Add, edit, remove products. Manage stock levels, pricing, images, and descriptions.</p>
+      <h4>Order Management</h4>
+      <p>View incoming orders, update status (processing, ready, completed), WhatsApp alerts.</p>
+    </div>
+    <div>
+      <h4>Promotions</h4>
+      <p>Create discount offers, bundles, seasonal promotions. Submit for admin approval.</p>
+      <h4>QR Codes</h4>
+      <p>Generate QR codes for products, store pages, and promotional materials.</p>
+      <h4>Store Settings</h4>
+      <p>Edit store name, description, banner image, operating hours, and delivery zones.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>Vendor Login Flow</h3>
+  <div class="flow">
+    <div class="flow-step">Select Store<small>Dropdown</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Enter Password<small>KfarVendor2025!</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">JWT Issued<small>15min access</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Dashboard<small>/vendor/dashboard</small></div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-line"></div>
+    <span style="display:flex;align-items:center;gap:2mm;"><img src="../public/images/logos/kfar_icon_leaf_green_small.png" style="height:10px;opacity:0.5;">KFAR Marketplace | Digital Handover</span>
+    <span>Page 4 of 8</span>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAGE 5: EMAIL SYSTEM -->
+<!-- ================================================================ -->
+<div class="page content-page">
+  <img src="../public/images/logos/kfar_icon_leaf_gold.png" class="corner-leaf top-right" alt="">
+  <div class="page-header">
+    <div class="header-left">
+      <img src="../public/images/logos/kfar_logo_primary_horizontal.png" class="logo-small" alt="KFAR">
+      <div class="header-divider"></div>
+      <span class="section-tag">Email &amp; Notifications</span>
+    </div>
+    <span class="page-num">05 / 08</span>
+  </div>
+
+  <h2>Email System</h2>
+  <p class="intro-text">KFAR runs its own email server on the VPS using Postfix and Dovecot. All transactional emails are sent from <span class="mono">noreply@kfarapp.com</span> with DKIM signing for deliverability.</p>
+
+  <h3>Email Accounts</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Address</th>
+        <th>Purpose</th>
+        <th>Access</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">noreply@kfarapp.com</span></td>
+        <td>Transactional emails (orders, notifications)</td>
+        <td>System only (Postfix)</td>
+      </tr>
+      <tr>
+        <td><span class="mono">admin@kfarapp.com</span></td>
+        <td>Admin contact, support inbox</td>
+        <td>Roundcube webmail</td>
+      </tr>
+      <tr>
+        <td><span class="mono">support@kfarapp.com</span></td>
+        <td>Customer support queries</td>
+        <td>Roundcube webmail</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Email Infrastructure</h3>
+  <div class="two-col">
+    <div>
+      <h4>Sending (Postfix)</h4>
+      <p>Mail transfer agent on VPS. SMTP on port 25 (local delivery). Handles all outbound email.</p>
+      <h4>DKIM Signing</h4>
+      <p>All emails digitally signed with DKIM key for deliverability and spam prevention.</p>
+    </div>
+    <div>
+      <h4>Receiving (Dovecot)</h4>
+      <p>IMAP server for receiving and storing emails. Port 993 (SSL encrypted).</p>
+      <h4>DNS Authentication</h4>
+      <p>MX, SPF, DKIM, and DMARC records configured on Hostinger DNS.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>Notification Channels</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon" style="background: linear-gradient(135deg, #25D366, #128C7E);">W</div>
+      <div class="label">WhatsApp</div>
+      <div class="desc">Order alerts to vendors via URL scheme</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">E</div>
+      <div class="label">Email</div>
+      <div class="desc">Order confirmations, updates, receipts</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background: linear-gradient(135deg, var(--gold-premium), var(--gold-dark));">B</div>
+      <div class="label">In-App</div>
+      <div class="desc">Real-time dashboard notifications</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Admin Broadcast:</strong> Send notifications to all users via <span class="mono">POST /api/admin/notifications/broadcast</span>. Supports in-app and email channels simultaneously. Fire-and-forget pattern ensures emails never block the HTTP response.</p>
+  </div>
+
+  <h3>Transactional Email Templates (EN + HE)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Template</th>
+        <th>Trigger</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Order Confirmation</td><td>Customer completes checkout</td></tr>
+      <tr><td>Order Status Update</td><td>Vendor updates order status</td></tr>
+      <tr><td>New Order Alert</td><td>New order received by vendor</td></tr>
+      <tr><td>Welcome Customer</td><td>New customer registration</td></tr>
+      <tr><td>Points Earned</td><td>Loyalty points credited</td></tr>
+      <tr><td>Tier Upgrade</td><td>Customer reaches new loyalty tier</td></tr>
+      <tr><td>Password Reset</td><td>User requests password reset</td></tr>
+      <tr><td>Promotion Alert</td><td>New promotion published</td></tr>
+      <tr><td>Welcome Vendor</td><td>New vendor onboarded</td></tr>
+      <tr><td>QR Loyalty Card</td><td>Customer requests loyalty card via email</td></tr>
+    </tbody>
+  </table>
+
+  <div class="img-hero" style="height: 24mm; margin-top: 3mm;">
+    <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_15.jpg" alt="">
+    <div class="overlay">
+      <div class="overlay-text" style="font-size: 10pt;">
+        Community-First Communication
+        <small>Every notification strengthens the Village of Peace connection</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-line"></div>
+    <span style="display:flex;align-items:center;gap:2mm;"><img src="../public/images/logos/kfar_icon_leaf_green_small.png" style="height:10px;opacity:0.5;">KFAR Marketplace | Digital Handover</span>
+    <span>Page 5 of 8</span>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAGE 6: PAYMENT & ORDERS -->
+<!-- ================================================================ -->
+<div class="page content-page">
+  <img src="../public/images/logos/kfar_icon_leaf_gold.png" class="corner-leaf top-right" alt="">
+  <div class="page-header">
+    <div class="header-left">
+      <img src="../public/images/logos/kfar_logo_primary_horizontal.png" class="logo-small" alt="KFAR">
+      <div class="header-divider"></div>
+      <span class="section-tag">Payments &amp; Orders</span>
+    </div>
+    <span class="page-num">06 / 08</span>
+  </div>
+
+  <h2>Payment Methods &amp; Order Flow</h2>
+  <p class="intro-text">Multiple payment methods tailored for the community. Credit card processing via YPAY (Israeli gateway) in sandbox mode until production credentials obtained.</p>
+
+  <h3>Accepted Payment Methods</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Status</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Cash on Delivery</strong></td>
+        <td><span class="badge badge-green">Active</span></td>
+        <td>Pay cash at pickup or delivery. Default method.</td>
+      </tr>
+      <tr>
+        <td><strong>Braysheet Token</strong></td>
+        <td><span class="badge badge-green">Active</span></td>
+        <td>Community digital currency. QR-based wallet.</td>
+      </tr>
+      <tr>
+        <td><strong>Bank Transfer</strong></td>
+        <td><span class="badge badge-green">Active</span></td>
+        <td>Direct bank transfer with provided details.</td>
+      </tr>
+      <tr>
+        <td><strong>Credit Card (YPAY)</strong></td>
+        <td><span class="badge badge-gold">Sandbox</span></td>
+        <td>YPAY hosted payment page. Installments (1-12).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Order Lifecycle</h3>
+  <div class="flow">
+    <div class="flow-step">Customer<small>Places Order</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Payment<small>Processed</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Vendor<small>Accepts</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Processing<small>Preparing</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Ready<small>For Pickup</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Completed<small>Points Earned</small></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>Invoicing</h3>
+  <div class="two-col">
+    <div>
+      <h4>Invoice Features</h4>
+      <p>Auto-generated invoice number, line items with quantities and prices, tax calculation, total in ILS, payment method reference, QR code for tracking.</p>
+    </div>
+    <div>
+      <h4>Invoice API Routes</h4>
+      <p>
+        <span class="mono">POST /api/invoice/generate</span><br>
+        <span class="mono">GET /api/invoices/get/[id]</span><br>
+        <span class="mono">POST /api/invoices/save</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>Loyalty &amp; Rewards System</h3>
+  <div class="two-col">
+    <div>
+      <h4>Point Earning</h4>
+      <p>Points on every purchase. 50 welcome bonus on registration. Redeem for discount coupons.</p>
+    </div>
+    <div>
+      <h4>Loyalty Tiers</h4>
+      <table>
+        <tr><td><strong>Bronze</strong></td><td>0-499 pts</td><td>Base rewards</td></tr>
+        <tr><td><strong>Silver</strong></td><td>500-1499 pts</td><td>5% bonus</td></tr>
+        <tr><td><strong>Gold</strong></td><td>1500+ pts</td><td>10% bonus</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h3>YPAY Integration Details</h3>
+  <div class="cred-grid">
+    <div class="cred-box">
+      <div class="cred-label">YPAY Sandbox API</div>
+      <div class="cred-value url">https://ypay.co.il/api/v1/</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Sandbox Client ID</div>
+      <div class="cred-value">Mg==</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Callback URL</div>
+      <div class="cred-value url">kfarapp.com/api/payment/callback</div>
+    </div>
+    <div class="cred-box">
+      <div class="cred-label">Webhook URL</div>
+      <div class="cred-value url">kfarapp.com/api/payment/webhook</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-line"></div>
+    <span style="display:flex;align-items:center;gap:2mm;"><img src="../public/images/logos/kfar_icon_leaf_green_small.png" style="height:10px;opacity:0.5;">KFAR Marketplace | Digital Handover</span>
+    <span>Page 6 of 8</span>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAGE 7: ADMIN DASHBOARD & CRM -->
+<!-- ================================================================ -->
+<div class="page content-page">
+  <img src="../public/images/logos/kfar_icon_leaf_gold.png" class="corner-leaf top-right" alt="">
+  <div class="page-header">
+    <div class="header-left">
+      <img src="../public/images/logos/kfar_logo_primary_horizontal.png" class="logo-small" alt="KFAR">
+      <div class="header-divider"></div>
+      <span class="section-tag">Admin &amp; CRM</span>
+    </div>
+    <span class="page-num">07 / 08</span>
+  </div>
+
+  <h2>Admin Dashboard &amp; CRM</h2>
+  <p class="intro-text">Full control over the marketplace. CRM tracks customer relationships, segments, and activity.</p>
+
+  <h3>Admin Portal Sections</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Section</th>
+        <th>URL</th>
+        <th>Features</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Dashboard</strong></td>
+        <td><span class="mono">/admin/dashboard</span></td>
+        <td>Revenue, orders, customers overview</td>
+      </tr>
+      <tr>
+        <td><strong>Vendors</strong></td>
+        <td><span class="mono">/admin/vendors</span></td>
+        <td>Manage vendors, view analytics</td>
+      </tr>
+      <tr>
+        <td><strong>Bundles</strong></td>
+        <td><span class="mono">/admin/bundles</span></td>
+        <td>Product bundle management</td>
+      </tr>
+      <tr>
+        <td><strong>Orders</strong></td>
+        <td><span class="mono">/admin/orders</span></td>
+        <td>All orders, status tracking, export</td>
+      </tr>
+      <tr>
+        <td><strong>CRM</strong></td>
+        <td><span class="mono">/admin/crm</span></td>
+        <td>Customer management, segments</td>
+      </tr>
+      <tr>
+        <td><strong>Accounts</strong></td>
+        <td><span class="mono">/admin/accounts</span></td>
+        <td>User accounts, vendor users</td>
+      </tr>
+      <tr>
+        <td><strong>Promotions</strong></td>
+        <td><span class="mono">/admin/promotions</span></td>
+        <td>Create/approve promotions, coupons</td>
+      </tr>
+      <tr>
+        <td><strong>Notifications</strong></td>
+        <td><span class="mono">/admin/notifications</span></td>
+        <td>Broadcast to all, manage alerts</td>
+      </tr>
+      <tr>
+        <td><strong>Drivers</strong></td>
+        <td><span class="mono">/admin/drivers</span></td>
+        <td>Driver applications, approval queue</td>
+      </tr>
+      <tr>
+        <td><strong>Settings</strong></td>
+        <td><span class="mono">/admin/settings</span></td>
+        <td>Store config, email settings</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>CRM Capabilities</h3>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">C</div>
+      <div class="label">Customer Profiles</div>
+      <div class="desc">Orders, points, activity timeline</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon" style="background: linear-gradient(135deg, var(--gold-premium), var(--gold-dark));">S</div>
+      <div class="label">Segmentation</div>
+      <div class="desc">Auto/manual segments for targeting</div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">A</div>
+      <div class="label">Activity Log</div>
+      <div class="desc">Full customer interaction timeline</div>
+    </div>
+  </div>
+
+  <h3>Driver Application System</h3>
+  <p>Community members can apply to become delivery drivers at <span class="mono">/become-driver</span>. Applications are reviewed by admin at <span class="mono">/admin/drivers</span> with approve/reject workflow. Contact form submissions go to <span class="mono">admin@kfarapp.com</span>.</p>
+
+  <div class="divider"></div>
+
+  <h3>Language Support (Hebrew / English)</h3>
+  <div class="two-col">
+    <div>
+      <h4>How Language Works</h4>
+      <div class="step-item">
+        <span class="num">1</span>
+        <p>Language toggle in header switches between EN/HE</p>
+      </div>
+      <div class="step-item">
+        <span class="num">2</span>
+        <p>LanguageContext stores preference across all pages</p>
+      </div>
+      <div class="step-item">
+        <span class="num">3</span>
+        <p>RTL direction auto-applied for Hebrew layouts</p>
+      </div>
+    </div>
+    <div>
+      <h4>Translation Coverage</h4>
+      <p>All navigation, buttons, form labels, error messages, and status indicators are translated. Product names and descriptions available in both languages.</p>
+      <h4>AI Shopping Assistant</h4>
+      <p>Gemini-powered voice/text shopping with Hebrew and English TTS. Natural language product search and cart operations.</p>
+    </div>
+  </div>
+
+  <div class="img-hero" style="height: 22mm; margin-top: 3mm;">
+    <img src="../public/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_25.jpg" alt="">
+    <div class="overlay">
+      <div class="overlay-text" style="font-size: 10pt;">
+        Serving the Community Since 1969
+        <small>The Village of Peace | Dimona, Israel</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-line"></div>
+    <span style="display:flex;align-items:center;gap:2mm;"><img src="../public/images/logos/kfar_icon_leaf_green_small.png" style="height:10px;opacity:0.5;">KFAR Marketplace | Digital Handover</span>
+    <span>Page 7 of 8</span>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- PAGE 8: DEPLOYMENT & MAINTENANCE -->
+<!-- ================================================================ -->
+<div class="page content-page">
+  <img src="../public/images/logos/kfar_icon_leaf_gold.png" class="corner-leaf top-right" alt="">
+  <div class="page-header">
+    <div class="header-left">
+      <img src="../public/images/logos/kfar_logo_primary_horizontal.png" class="logo-small" alt="KFAR">
+      <div class="header-divider"></div>
+      <span class="section-tag">Deployment &amp; Maintenance</span>
+    </div>
+    <span class="page-num">08 / 08</span>
+  </div>
+
+  <h2>Deployment &amp; Maintenance</h2>
+  <p class="intro-text">Application runs on a Hostinger VPS with PM2 process management and Nginx reverse proxy.</p>
+
+  <h3>Server Architecture</h3>
+  <div class="flow">
+    <div class="flow-step">User Browser<small>kfarapp.com</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Nginx<small>SSL + Cache + Gzip</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">Next.js App<small>Port 3006</small></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-step">PostgreSQL<small>Indexed queries</small></div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Performance:</strong> Nginx gzip (87% size reduction), static asset caching (365 days for JS/CSS, 30 days for images), rate limiting on auth endpoints (5 req/sec), security headers (HSTS, X-Frame-Options, CSP). DB queries indexed on vendor_id and created_at.</p>
+  </div>
+
+  <h3>Common Maintenance Commands</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Task</th>
+        <th>Command (run on VPS via SSH)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>SSH to server</td>
+        <td><span class="mono">ssh root@72.61.201.237</span></td>
+      </tr>
+      <tr>
+        <td>View app status</td>
+        <td><span class="mono">pm2 status</span></td>
+      </tr>
+      <tr>
+        <td>View app logs</td>
+        <td><span class="mono">pm2 logs kfar --lines 50</span></td>
+      </tr>
+      <tr>
+        <td>Restart app</td>
+        <td><span class="mono">pm2 restart kfar</span></td>
+      </tr>
+      <tr>
+        <td>Deploy update</td>
+        <td><span class="mono">cd /opt/kfar && git pull && npm install --legacy-peer-deps && NODE_OPTIONS='--max-old-space-size=2048' node_modules/.bin/next build && pm2 restart kfar</span></td>
+      </tr>
+      <tr>
+        <td>Check Nginx</td>
+        <td><span class="mono">nginx -t && systemctl reload nginx</span></td>
+      </tr>
+      <tr>
+        <td>Access database</td>
+        <td><span class="mono">sudo -u postgres psql kfar_marketplace</span></td>
+      </tr>
+      <tr>
+        <td>Check email logs</td>
+        <td><span class="mono">journalctl -u postfix -n 50</span></td>
+      </tr>
+      <tr>
+        <td>Renew SSL</td>
+        <td><span class="mono">certbot renew</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <p><strong>Build:</strong> Always use <span class="mono">NODE_OPTIONS='--max-old-space-size=2048' node_modules/.bin/next build</span> (not npx). VPS builds take ~8.5 minutes.</p>
+  </div>
+  <div class="callout warning">
+    <p><strong>YPAY:</strong> Currently sandbox mode. Contact YPAY (ypay.co.il) for production credentials. Update YPAY_CLIENT_ID and YPAY_CLIENT_SECRET in PM2 ecosystem config.</p>
+  </div>
+
+  <h3>Database Tables (24 total, indexed)</h3>
+  <div class="two-col" style="font-size: 7.5pt;">
+    <div>
+      <p><span class="mono">users</span> &mdash; Auth accounts<br>
+      <span class="mono">user_sessions</span> &mdash; JWT refresh tokens<br>
+      <span class="mono">customers</span> &mdash; Customer profiles<br>
+      <span class="mono">orders</span> &mdash; Order records<br>
+      <span class="mono">payment_transactions</span> &mdash; Payment log<br>
+      <span class="mono">rewards_points</span> &mdash; Point balances<br>
+      <span class="mono">points_transactions</span> &mdash; Points history<br>
+      <span class="mono">notifications</span> &mdash; In-app alerts<br>
+      <span class="mono">promotions</span> &mdash; Active promos<br>
+      <span class="mono">coupons</span> &mdash; Discount codes<br>
+      <span class="mono">email_templates</span> &mdash; Email templates<br>
+      <span class="mono">email_log</span> &mdash; Sent email tracking</p>
+    </div>
+    <div>
+      <p><span class="mono">crm_activity_log</span> &mdash; CRM activity<br>
+      <span class="mono">customer_segments</span> &mdash; Segments<br>
+      <span class="mono">customer_segment_members</span> &mdash; Membership<br>
+      <span class="mono">store_settings</span> &mdash; Key-value config<br>
+      <span class="mono">products</span> &mdash; Product catalog<br>
+      <span class="mono">vendors</span> &mdash; Vendor profiles<br>
+      <span class="mono">bundles</span> &mdash; Product bundles<br>
+      <span class="mono">flash_deals</span> &mdash; Time-limited deals<br>
+      <span class="mono">product_reviews</span> &mdash; Reviews<br>
+      <span class="mono">invoices</span> &mdash; Invoice records<br>
+      <span class="mono">customer_registrations</span> &mdash; Signups<br>
+      <span class="mono">vendor_registrations</span> &mdash; Applications</p>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-line"></div>
+    <span style="display:flex;align-items:center;gap:2mm;"><img src="../public/images/logos/kfar_icon_leaf_green_small.png" style="height:10px;opacity:0.5;">KFAR Marketplace | Digital Handover</span>
+    <span>Page 8 of 8</span>
+  </div>
+</div>
+
+</body>
+</html>

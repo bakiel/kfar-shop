@@ -1,0 +1,72 @@
+/* Customer Login Page Specific Styles */
+.customer-login-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.customer-login-header {
+  position: relative;
+  z-index: 10;
+}
+
+.customer-login-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-login-content {
+  flex: 1;
+  padding-bottom: 2rem;
+}
+
+.customer-login-footer {
+  margin-top: auto;
+}
+
+/* Ensure no content overlap */
+.login-form-container {
+  position: relative;
+  z-index: 1;
+  background-color: white;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+  .customer-login-content {
+    padding-bottom: 80px; /* Space for mobile bottom nav */
+  }
+  
+  .customer-login-page {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Footer alignment fixes */
+.footer-wrapper {
+  width: 100%;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Prevent form elements from overlapping */
+.form-section {
+  position: relative;
+  background: white;
+  z-index: 5;
+}
+
+/* Hero section proper spacing */
+.hero-section {
+  position: relative;
+  margin-bottom: 0;
+}
+
+/* Benefits section proper spacing */
+.benefits-section {
+  position: relative;
+  background: white;
+  z-index: 1;
+  margin-top: -1px; /* Prevent gap between sections */
+}
