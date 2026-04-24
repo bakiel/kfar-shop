@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, query } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -58,19 +59,24 @@ export async function GET(request: NextRequest) {
 
     const { rows: vendors } = await query(sql, params);
 
-    // Get product counts for each vendor
-    const vendorsWithCounts = await Promise.all(
-      vendors.map(async (vendor: any) => {
-        const { rows: products } = await query(
-          'SELECT COUNT(*) as count FROM products WHERE vendor_id = $1 AND in_stock = true',
-          [vendor.id]
-        );
-        return {
-          ...vendor,
-          productCount: parseInt(products[0]?.count || '0')
-        };
-      })
-    );
+    // Get product counts for all vendors — single aggregation query instead of N per-vendor queries
+    let productCountMap: Map<string, number> = new Map();
+    try {
+      const { rows: countRows } = await query(
+        `SELECT vendor_id, COUNT(*) as count
+         FROM products WHERE in_stock = true GROUP BY vendor_id`
+      );
+      for (const row of countRows) {
+        productCountMap.set(row.vendor_id, parseInt(row.count, 10));
+      }
+    } catch {
+      // If count query fails, all vendors get zero product count
+    }
+
+    const vendorsWithCounts = vendors.map((vendor: any) => ({
+      ...vendor,
+      productCount: productCountMap.get(vendor.id) ?? 0,
+    }));
 
     return NextResponse.json({
       success: true,
@@ -92,9 +98,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Check if user is authenticated as admin
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    // Require a verified admin JWT — header existence alone is not sufficient
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -136,9 +143,10 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { vendorId, updates } = body;
 
-    // Check if user is authenticated as vendor or admin
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    // Require a verified admin JWT — header existence alone is not sufficient
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }

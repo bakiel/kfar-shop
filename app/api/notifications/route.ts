@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import { query } from '@/lib/db/postgres-client';
 import {
   getNotifications,
   createNotification,
@@ -76,32 +77,58 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate first for ALL POST actions
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
 
     // --- Legacy action mode (backward compatibility) ---
     if (body.action) {
-      const { notificationId, action, customerId } = body;
+      const { notificationId, action } = body;
+
+      // Resolve the user/customer ID to scope operations against
+      const actorId = user.customerId || user.id;
 
       let success = false;
 
       switch (action) {
-        case 'markAsRead':
+        case 'markAsRead': {
           if (!notificationId) {
             return NextResponse.json({ error: 'notificationId required' }, { status: 400 });
+          }
+          // Verify the notification belongs to the authenticated user
+          const { rows: readRows } = await query(
+            'SELECT id FROM notifications WHERE id = $1 AND user_id = $2',
+            [notificationId, actorId]
+          );
+          if (readRows.length === 0) {
+            return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
           }
           success = await markAsRead(notificationId);
           break;
-        case 'delete':
+        }
+        case 'delete': {
           if (!notificationId) {
             return NextResponse.json({ error: 'notificationId required' }, { status: 400 });
           }
+          // Verify the notification belongs to the authenticated user
+          const { rows: deleteRows } = await query(
+            'SELECT id FROM notifications WHERE id = $1 AND user_id = $2',
+            [notificationId, actorId]
+          );
+          if (deleteRows.length === 0) {
+            return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
+          }
           success = await deleteNotification(notificationId);
           break;
+        }
         case 'markAllAsRead':
-          if (!customerId) {
-            return NextResponse.json({ error: 'customerId required' }, { status: 400 });
-          }
-          success = await markAllRead(customerId);
+          success = await markAllRead(actorId);
           break;
         default:
           return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -111,13 +138,6 @@ export async function POST(request: NextRequest) {
     }
 
     // --- Create notification mode (requires admin auth) ---
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const user = token ? verifyAccessToken(token) : null;
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     if (user.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }

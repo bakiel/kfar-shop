@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 export async function POST(request: NextRequest) {
   try {
+    // Require a valid customer JWT — prevents anonymous loyalty-point farming
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user || user.role !== 'customer') {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { productId, rating, title, comment, images } = body;
 

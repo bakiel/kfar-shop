@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Onboarding error:', error);
     return NextResponse.json(
-      { error: 'Failed to process onboarding', details: error },
+      { error: 'Failed to process onboarding', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

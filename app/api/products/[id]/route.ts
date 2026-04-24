@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
+import { verifyAccessToken } from '@/lib/services/auth-service'
+import { query } from '@/lib/db/postgres-client'
 
 // Get product by ID
 export async function GET(
@@ -92,14 +93,20 @@ export async function PUT(
         { status: 401 }
       )
     }
-    
-    // Decode token to get user info
-    const decoded = jwt.verify(token.value, process.env.JWT_SECRET || 'your-secret-key') as any
-    const userId = decoded.userId
-    const userRole = decoded.role
-    
+
+    // Verify token using auth-service (no insecure fallback secret)
+    const user = verifyAccessToken(token.value)
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    const userId = user.id
+    const userRole = user.role
+
     // Check permissions
-    const hasPermission = await checkUpdatePermission(userId, userRole, productId)
+    const hasPermission = await checkUpdatePermission(userId, userRole, productId, user.vendorId)
     if (!hasPermission) {
       return NextResponse.json(
         { error: 'Forbidden' },
@@ -183,19 +190,26 @@ async function getExtendedProductData(productId: string) {
   }
 }
 
-async function checkUpdatePermission(userId: string, userRole: string, productId: string): Promise<boolean> {
+async function checkUpdatePermission(
+  userId: string,
+  userRole: string,
+  productId: string,
+  vendorId?: string
+): Promise<boolean> {
   // Super admin can edit anything
-  if (userRole === 'superadmin') {
+  if (userRole === 'admin') {
     return true
   }
-  
-  // Vendor can only edit their own products
-  if (userRole === 'vendor') {
-    // Check if user owns this product's vendor
-    // In production, this would check against database
-    return true // Placeholder
+
+  // Vendor can only edit their own products - verify ownership via DB
+  if (userRole === 'vendor' && vendorId) {
+    const { rows } = await query(
+      'SELECT id FROM products WHERE id = $1 AND vendor_id = $2',
+      [productId, vendorId]
+    )
+    return rows.length > 0
   }
-  
+
   return false
 }
 

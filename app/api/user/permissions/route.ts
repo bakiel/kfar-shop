@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
+import { verifyAccessToken } from '@/lib/services/auth-service'
 
 export async function GET(request: NextRequest) {
   try {
     // Get auth token from cookies
     const cookieStore = cookies()
     const token = cookieStore.get('auth-token')
-    
+
     if (!token) {
       return NextResponse.json({
         isAuthenticated: false,
@@ -16,21 +16,12 @@ export async function GET(request: NextRequest) {
         vendorId: null
       })
     }
-    
-    try {
-      // Decode JWT token
-      const decoded = jwt.verify(token.value, process.env.JWT_SECRET || 'your-secret-key') as any
-      
-      return NextResponse.json({
-        isAuthenticated: true,
-        isSuperAdmin: decoded.role === 'superadmin',
-        isVendor: decoded.role === 'vendor',
-        vendorId: decoded.vendorId || null,
-        userId: decoded.userId,
-        email: decoded.email
-      })
-    } catch (error) {
-      // Invalid token
+
+    // Verify JWT token using auth-service (no insecure fallback secret)
+    const user = verifyAccessToken(token.value)
+
+    if (!user) {
+      // Invalid or expired token
       return NextResponse.json({
         isAuthenticated: false,
         isSuperAdmin: false,
@@ -38,6 +29,15 @@ export async function GET(request: NextRequest) {
         vendorId: null
       })
     }
+
+    return NextResponse.json({
+      isAuthenticated: true,
+      isSuperAdmin: user.role === 'admin',
+      isVendor: user.role === 'vendor',
+      vendorId: user.vendorId || null,
+      userId: user.id,
+      email: user.email
+    })
   } catch (error) {
     console.error('Error checking permissions:', error)
     return NextResponse.json(

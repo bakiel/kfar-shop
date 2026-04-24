@@ -3,12 +3,15 @@ import { Pool, PoolClient } from 'pg';
 // PostgreSQL connection pool for KFAR Marketplace
 // Migrated from Supabase to Hostinger VPS
 
+if (!process.env.POSTGRES_PASSWORD) throw new Error('POSTGRES_PASSWORD env var is required');
+if (!process.env.POSTGRES_HOST) throw new Error('POSTGRES_HOST env var is required');
+
 const pool = new Pool({
-  host: process.env.POSTGRES_HOST || '72.61.201.237',
+  host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT || '5432'),
   database: process.env.POSTGRES_DB || 'kfar_marketplace',
   user: process.env.POSTGRES_USER || 'kfar',
-  password: process.env.POSTGRES_PASSWORD || 'kfar_secure_2025',
+  password: process.env.POSTGRES_PASSWORD,
   max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 3000,
@@ -104,11 +107,6 @@ export async function query<T = any>(
   }
 }
 
-// Get a client for transactions
-export async function getClient(): Promise<PoolClient> {
-  return await pool.connect();
-}
-
 // Transaction helper
 export async function transaction<T>(
   callback: (client: PoolClient) => Promise<T>
@@ -125,6 +123,61 @@ export async function transaction<T>(
   } finally {
     client.release();
   }
+}
+
+// Column allowlists — only these names are permitted in dynamic INSERT/UPDATE
+// column positions. Values are always parameterized; this blocks injection via key names.
+const VENDOR_COLUMNS = new Set([
+  'id', 'name', 'slug', 'email', 'phone', 'password_hash',
+  'logo_url', 'banner_url', 'primary_color', 'secondary_color', 'accent_color',
+  'description', 'short_description', 'established_year', 'location', 'address',
+  'theme', 'layout', 'features', 'payment_methods', 'shipping_methods',
+  'return_policy', 'minimum_order', 'status', 'verified', 'featured',
+  'total_products', 'total_sales', 'total_orders', 'average_rating',
+  'review_count', 'follower_count', 'tags', 'certifications',
+  'created_at', 'updated_at', 'is_active',
+]);
+
+const PRODUCT_COLUMNS = new Set([
+  'id', 'vendor_id', 'sku', 'slug', 'name', 'name_he',
+  'description', 'short_description', 'long_description',
+  'category', 'subcategory', 'tags', 'price', 'original_price', 'cost', 'currency',
+  'in_stock', 'stock_quantity', 'track_inventory', 'low_stock_threshold',
+  'primary_image', 'image_gallery', 'thumbnails', 'video_urls',
+  'weight', 'dimensions', 'specifications', 'nutritional_info',
+  'features', 'benefits', 'ingredients', 'allergens', 'certifications',
+  'meta_title', 'meta_description', 'meta_keywords',
+  'status', 'is_featured', 'is_vegan', 'is_kosher', 'is_organic', 'is_gluten_free',
+  'view_count', 'purchase_count', 'wishlist_count', 'rating', 'review_count',
+  'published_at', 'created_at', 'updated_at',
+]);
+
+const CUSTOMER_COLUMNS = new Set([
+  'id', 'name', 'email', 'phone', 'points', 'loyalty_tier',
+  'language_preference', 'dietary_restrictions', 'location', 'preferences',
+  'lifetime_points', 'tags', 'notes', 'segment', 'addresses',
+  'total_orders', 'total_spent', 'last_order_at', 'avatar_url',
+  'phone_verified', 'email_verified', 'status', 'last_activity',
+  'updated_at', 'created_at',
+]);
+
+/**
+ * Filter an object's keys to only those present in the allowlist.
+ * Throws if no valid keys remain so callers get an early, clear error.
+ */
+function filterColumns(data: Record<string, any>, allowlist: Set<string>, table: string) {
+  const filtered: Record<string, any> = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (allowlist.has(k)) {
+      filtered[k] = v;
+    } else {
+      console.warn(`[db] Rejected unknown column "${k}" for table "${table}"`);
+    }
+  }
+  if (Object.keys(filtered).length === 0) {
+    throw new Error(`No valid columns provided for table "${table}"`);
+  }
+  return filtered;
 }
 
 // Database service object (similar to Supabase API pattern)
@@ -148,8 +201,9 @@ export const db = {
       return rows[0] || null;
     },
     async create(data: any) {
-      const keys = Object.keys(data);
-      const values = Object.values(data);
+      const safe = filterColumns(data, VENDOR_COLUMNS, 'vendors');
+      const keys = Object.keys(safe);
+      const values = Object.values(safe);
       const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
       const { rows } = await query(
         `INSERT INTO vendors (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`,
@@ -158,8 +212,9 @@ export const db = {
       return rows[0];
     },
     async update(id: string, data: any) {
-      const keys = Object.keys(data);
-      const values = Object.values(data);
+      const safe = filterColumns(data, VENDOR_COLUMNS, 'vendors');
+      const keys = Object.keys(safe);
+      const values = Object.values(safe);
       const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(', ');
       const { rows } = await query(
         `UPDATE vendors SET ${sets} WHERE id = $1 RETURNING *`,
@@ -194,8 +249,9 @@ export const db = {
       return rows;
     },
     async create(data: any) {
-      const keys = Object.keys(data);
-      const values = Object.values(data);
+      const safe = filterColumns(data, PRODUCT_COLUMNS, 'products');
+      const keys = Object.keys(safe);
+      const values = Object.values(safe);
       const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
       const { rows } = await query(
         `INSERT INTO products (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`,
@@ -204,8 +260,9 @@ export const db = {
       return rows[0];
     },
     async update(id: string, data: any) {
-      const keys = Object.keys(data);
-      const values = Object.values(data);
+      const safe = filterColumns(data, PRODUCT_COLUMNS, 'products');
+      const keys = Object.keys(safe);
+      const values = Object.values(safe);
       const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(', ');
       const { rows } = await query(
         `UPDATE products SET ${sets} WHERE id = $1 RETURNING *`,
@@ -237,8 +294,9 @@ export const db = {
       return rows[0] || null;
     },
     async create(data: any) {
-      const keys = Object.keys(data);
-      const values = Object.values(data);
+      const safe = filterColumns(data, CUSTOMER_COLUMNS, 'customers');
+      const keys = Object.keys(safe);
+      const values = Object.values(safe);
       const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
       const { rows } = await query(
         `INSERT INTO customers (${keys.join(', ')}) VALUES (${placeholders}) RETURNING *`,
@@ -247,8 +305,9 @@ export const db = {
       return rows[0];
     },
     async update(id: string, data: any) {
-      const keys = Object.keys(data);
-      const values = Object.values(data);
+      const safe = filterColumns(data, CUSTOMER_COLUMNS, 'customers');
+      const keys = Object.keys(safe);
+      const values = Object.values(safe);
       const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(', ');
       const { rows } = await query(
         `UPDATE customers SET ${sets} WHERE id = $1 RETURNING *`,

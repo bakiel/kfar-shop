@@ -61,31 +61,27 @@ export async function GET(request: NextRequest) {
       try {
         let vendors = await db.vendors.findAll();
 
-        // Enrich with order/revenue stats from DB
-        const enrichedVendors = await Promise.all(
-          vendors.map(async (v: any) => {
-            let totalRevenue = 0;
-            let totalOrders = 0;
-            try {
-              const { rows } = await query(
-                `SELECT COUNT(*) as order_count, COALESCE(SUM(total), 0) as revenue
-                 FROM orders WHERE vendor_id = $1`,
-                [v.id]
-              );
-              if (rows[0]) {
-                totalOrders = parseInt(rows[0].order_count, 10);
-                totalRevenue = parseFloat(rows[0].revenue) || 0;
-              }
-            } catch {
-              // If order stats query fails, leave at 0
-            }
-            return {
-              ...v,
-              totalRevenue,
-              totalOrders,
-            };
-          })
-        );
+        // Enrich with order/revenue stats — single aggregation query instead of N per-vendor queries
+        let statsMap: Map<string, { totalOrders: number; totalRevenue: number }> = new Map();
+        try {
+          const { rows: statsRows } = await query(
+            `SELECT vendor_id, COUNT(*) as order_count, COALESCE(SUM(total), 0) as revenue
+             FROM orders GROUP BY vendor_id`
+          );
+          for (const row of statsRows) {
+            statsMap.set(row.vendor_id, {
+              totalOrders: parseInt(row.order_count, 10),
+              totalRevenue: parseFloat(row.revenue) || 0,
+            });
+          }
+        } catch {
+          // If order stats query fails, all vendors get zero stats
+        }
+
+        const enrichedVendors = vendors.map((v: any) => {
+          const stats = statsMap.get(v.id) ?? { totalOrders: 0, totalRevenue: 0 };
+          return { ...v, ...stats };
+        });
 
         let filteredVendors = enrichedVendors;
         if (search) {

@@ -1,26 +1,56 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
-// GET - Retrieve orders (optionally filtered by vendor_id or customer_id)
-export async function GET(request: Request) {
+function getUser(request: NextRequest) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  return token ? verifyAccessToken(token) : null;
+}
+
+// GET - Retrieve orders for the authenticated user
+export async function GET(request: NextRequest) {
   try {
+    const user = getUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
-    const vendorId = searchParams.get('vendor_id');
-    const customerId = searchParams.get('customer_id');
     const orderId = searchParams.get('id');
 
     let sql = 'SELECT * FROM orders';
     const params: any[] = [];
 
     if (orderId) {
-      sql += ' WHERE id = $1';
-      params.push(orderId);
-    } else if (vendorId) {
+      // Any authenticated user can look up a specific order, but we scope
+      // it to their own customer/vendor ID to prevent cross-user access
+      if (user.role === 'vendor' && user.vendorId) {
+        sql += ' WHERE id = $1 AND vendor_id = $2';
+        params.push(orderId, user.vendorId);
+      } else if (user.customerId) {
+        sql += ' WHERE id = $1 AND customer_id = $2';
+        params.push(orderId, user.customerId);
+      } else if (user.role === 'admin') {
+        sql += ' WHERE id = $1';
+        params.push(orderId);
+      } else {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    } else if (user.role === 'vendor' && user.vendorId) {
+      // Vendors see only their own orders
       sql += ' WHERE vendor_id = $1';
-      params.push(vendorId);
-    } else if (customerId) {
+      params.push(user.vendorId);
+    } else if (user.customerId) {
+      // Customers see only their own orders
       sql += ' WHERE customer_id = $1';
-      params.push(customerId);
+      params.push(user.customerId);
+    } else if (user.role === 'admin') {
+      // Admins can see all orders (no filter)
+    } else {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     sql += ' ORDER BY created_at DESC';
@@ -36,15 +66,26 @@ export async function GET(request: Request) {
   }
 }
 
-// POST - Create a new order
-export async function POST(request: Request) {
+// POST - Create a new order (authenticated customers only)
+export async function POST(request: NextRequest) {
   try {
+    const user = getUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const data = await request.json();
 
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
     const seq = Math.floor(Math.random() * 9000) + 1000;
     const orderNumber = data.order_number || `KFAR-${dateStr}-${seq}`;
+
+    // Use the authenticated user's customerId from the JWT - never trust the request body for identity
+    const customerId = user.customerId || null;
 
     const { rows } = await query(
       `INSERT INTO orders (
@@ -57,7 +98,7 @@ export async function POST(request: Request) {
       RETURNING *`,
       [
         orderNumber,
-        data.customer_id || null,
+        customerId,
         data.vendor_id || null,
         JSON.stringify(data.items),
         data.subtotal || data.total,
@@ -87,8 +128,8 @@ export async function POST(request: Request) {
   }
 }
 
-// PATCH - Update an order (typically for status updates)
-export async function PATCH(request: Request) {
+// PATCH - Update an order status (vendor or admin only)
+export async function PATCH(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('id');
