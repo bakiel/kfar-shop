@@ -9,7 +9,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const params = await context.params
+    const params = await context.params;
     const productId = params.id
     console.log(`API: Fetching product with ID: ${productId}`)
     
@@ -77,9 +77,10 @@ export async function GET(
 // Update product
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const productId = params.id
     const updates = await request.json()
     

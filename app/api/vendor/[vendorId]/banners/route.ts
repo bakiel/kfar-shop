@@ -47,9 +47,10 @@ const vendorBanners: Record<string, any[]> = {
 // GET - Fetch all banners for a vendor
 export async function GET(
   request: NextRequest,
-  { params }: { params: { vendorId: string } }
+  context: { params: Promise<{ vendorId: string }> }
 ) {
   try {
+    const params = await context.params;
     const vendorId = params.vendorId;
     const banners = vendorBanners[vendorId] || [];
 
@@ -69,9 +70,10 @@ export async function GET(
 // POST - Create a new banner
 export async function POST(
   request: NextRequest,
-  { params }: { params: { vendorId: string } }
+  context: { params: Promise<{ vendorId: string }> }
 ) {
   try {
+    const params = await context.params;
     const vendorId = params.vendorId;
     const body = await request.json();
 
@@ -112,9 +114,10 @@ export async function POST(
 // PUT - Update an existing banner
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { vendorId: string } }
+  context: { params: Promise<{ vendorId: string }> }
 ) {
   try {
+    const params = await context.params;
     const vendorId = params.vendorId;
     const { bannerId, ...updateData } = await request.json();
 

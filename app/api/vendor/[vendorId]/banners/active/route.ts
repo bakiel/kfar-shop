@@ -3,9 +3,10 @@ import { query, isDbAvailable } from '@/lib/db/postgres-client';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { vendorId: string } }
+  context: { params: Promise<{ vendorId: string }> }
 ) {
   try {
+    const params = await context.params;
     const vendorId = params.vendorId;
 
     // Query DB for active banners

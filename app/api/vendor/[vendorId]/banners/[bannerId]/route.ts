@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 // DELETE - Delete a banner
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { vendorId: string; bannerId: string } }
+  context: { params: Promise<{ vendorId: string; bannerId: string }> }
 ) {
   try {
+    const params = await context.params;
     const { vendorId, bannerId } = params;
     
     // In production, this would delete from the database
