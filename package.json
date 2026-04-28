@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "dev:admin": "next dev -H 127.0.0.1 -p 3000",
-    "build": "next build",
-    "build:standalone": "next build",
+    "build": "next build --no-lint",
+    "build:standalone": "next build --no-lint",
     "start": "next start",
     "deploy:vps:prebuilt": "bash scripts/deploy-prebuilt-vps.sh",
     "lint": "next lint",

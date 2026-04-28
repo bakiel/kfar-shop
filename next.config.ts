@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   turbopack: {},
 
   experimental: {},
+
+  // Fix workspace root detection when multiple lockfiles exist
+  outputFileTracingRoot: '/Users/mac/Downloads/Claude_Tech_Lab/kfar-review',
   
   images: {
     minimumCacheTTL: 2592000, // 30 days - prevents re-optimization
@@ -26,17 +29,12 @@ const nextConfig: NextConfig = {
     ],
   },
   
-  // Disable ALL build-time checks
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
   
   // Skip API route validation
   skipTrailingSlashRedirect: true,
-  skipMiddlewareUrlNormalize: true,
   
   // Handle server-only modules
   webpack: (config, { isServer }) => {

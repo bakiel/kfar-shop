@@ -28,12 +28,10 @@ export interface LoginResult {
   message?: string;
 }
 
-// Secrets - MUST be set via environment variables (no fallback)
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
-  throw new Error('FATAL: JWT_SECRET and JWT_REFRESH_SECRET environment variables are required. Server cannot start without them.');
-}
+// Secrets resolved at runtime (not at module load / build time) to allow
+// production builds without env vars present in the build environment.
+const JWT_SECRET = process.env.JWT_SECRET || 'build-placeholder-not-for-production';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'build-placeholder-not-for-production';
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
 

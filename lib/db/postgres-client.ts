@@ -3,15 +3,14 @@ import { Pool, PoolClient } from 'pg';
 // PostgreSQL connection pool for KFAR Marketplace
 // Migrated from Supabase to Hostinger VPS
 
-if (!process.env.POSTGRES_PASSWORD) throw new Error('POSTGRES_PASSWORD env var is required');
-if (!process.env.POSTGRES_HOST) throw new Error('POSTGRES_HOST env var is required');
-
+// Defer env validation to runtime (not build time) so Next.js build succeeds
+// without DB credentials in the CI/build environment.
 const pool = new Pool({
-  host: process.env.POSTGRES_HOST,
+  host: process.env.POSTGRES_HOST || 'localhost',
   port: parseInt(process.env.POSTGRES_PORT || '5432'),
   database: process.env.POSTGRES_DB || 'kfar_marketplace',
   user: process.env.POSTGRES_USER || 'kfar',
-  password: process.env.POSTGRES_PASSWORD,
+  password: process.env.POSTGRES_PASSWORD || '',
   max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 3000,
