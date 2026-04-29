@@ -371,23 +371,24 @@
   }
 }
 
-/* Dark mode support */
+/* Keep checkout readable when macOS/browser dark mode is enabled. */
 @media (prefers-color-scheme: dark) and (max-width: 767px) {
   div.checkout-card {
-    background-color: #1f2937;
-    color: #f3f4f6;
+    background-color: #ffffff;
+    color: #111827;
   }
 
   .order-summary-toggle {
-    background-color: #1f2937;
-    border-color: #374151;
+    background-color: #ffffff;
+    border-color: #e5e7eb;
   }
 
   .checkout-page input,
   .checkout-page select,
   .checkout-page textarea {
-    background-color: #374151;
-    border-color: #4b5563;
-    color: #f3f4f6;
+    color-scheme: light;
+    background-color: #ffffff;
+    border-color: #d1d5db;
+    color: #111827;
   }
 }

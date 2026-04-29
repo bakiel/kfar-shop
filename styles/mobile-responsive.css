@@ -143,15 +143,15 @@
   }
 }
 
-/* Dark mode support — keep as-is, this is the good part */
+/* Keep the mobile navigation readable when the OS is in dark mode. */
 @media (prefers-color-scheme: dark) {
   .mobile-bottom-nav {
-    background-color: #1f2937;
-    border-top-color: #374151;
+    background-color: #ffffff;
+    border-top-color: #e5e7eb;
   }
 
   .mobile-bottom-nav a {
-    color: #9ca3af;
+    color: #4b5563;
   }
 
   .mobile-bottom-nav a.active {
