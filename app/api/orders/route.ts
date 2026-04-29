@@ -131,6 +131,14 @@ export async function POST(request: NextRequest) {
 // PATCH - Update an order status (vendor or admin only)
 export async function PATCH(request: NextRequest) {
   try {
+    const user = getUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('id');
 
@@ -142,6 +150,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updates = await request.json();
+
+    if (user.role !== 'admin' && user.role !== 'vendor') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    if (user.role === 'vendor' && !user.vendorId) {
+      return NextResponse.json({ error: 'Vendor access required' }, { status: 403 });
+    }
 
     // Build dynamic update query
     const updateFields: string[] = [];
@@ -159,9 +174,14 @@ export async function PATCH(request: NextRequest) {
 
     updateFields.push(`updated_at = NOW()`);
     values.push(orderId);
+    if (user.role === 'vendor') {
+      values.push(user.vendorId);
+    }
 
     const { rows } = await query(
-      `UPDATE orders SET ${updateFields.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+      `UPDATE orders SET ${updateFields.join(', ')}
+       WHERE id = $${paramCount}${user.role === 'vendor' ? ` AND vendor_id = $${paramCount + 1}` : ''}
+       RETURNING *`,
       values
     );
 

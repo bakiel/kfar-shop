@@ -8,7 +8,7 @@ function getUser(request: NextRequest) {
   return token ? verifyAccessToken(token) : null;
 }
 
-const VALID_STATUSES = ['processing', 'ready', 'completed', 'cancelled'] as const;
+const VALID_STATUSES = ['pending', 'accepted', 'preparing', 'processing', 'ready', 'completed', 'cancelled'] as const;
 type OrderStatus = typeof VALID_STATUSES[number];
 
 // PATCH - Update order status
@@ -77,6 +77,8 @@ export async function PATCH(
     // Send order status update email to customer (fire-and-forget)
     if (order.customer_email) {
       const statusLabels: Record<string, string> = {
+        accepted: 'Accepted',
+        preparing: 'Being Prepared',
         processing: 'Being Prepared',
         ready: 'Ready for Pickup',
         completed: 'Completed',

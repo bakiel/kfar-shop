@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 type PromotionType = 'flash_sale' | 'vendor_special' | 'new_arrival' | 'limited_stock' | 'bundle_deal';
 
@@ -25,6 +26,7 @@ interface PromotionFormData {
 }
 
 export default function PromotionSubmissionForm({ vendorId }: { vendorId: string }) {
+  const { accessToken } = useAuth();
   const [formData, setFormData] = useState<PromotionFormData>({
     productId: '',
     productName: '',
@@ -88,17 +90,23 @@ export default function PromotionSubmissionForm({ vendorId }: { vendorId: string
     setIsSubmitting(true);
 
     try {
+      if (!accessToken) {
+        throw new Error('Vendor session expired. Please log in again.');
+      }
+      if (!vendorId) {
+        throw new Error('Vendor profile is still loading. Please try again.');
+      }
       const response = await fetch('/api/vendor/promotions/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          vendorId,
           ...formData,
           status: 'pending_approval'
         })
       });
+      const data = await response.json();
 
-      if (response.ok) {
+      if (response.ok && data.success) {
         toast({
           title: "Promotion submitted!",
           description: "Your promotion is pending admin approval.",
@@ -118,12 +126,12 @@ export default function PromotionSubmissionForm({ vendorId }: { vendorId: string
         });
         setPreviewMode(false);
       } else {
-        throw new Error('Failed to submit promotion');
+        throw new Error(data.error || 'Failed to submit promotion');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to submit promotion. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit promotion. Please try again.",
       });
     } finally {
       setIsSubmitting(false);

@@ -20,7 +20,7 @@ interface Transaction {
 }
 
 export default function VendorScanCustomerPage() {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [stats, setStats] = useState({
     todayScans: 0,
@@ -30,22 +30,12 @@ export default function VendorScanCustomerPage() {
   });
   const { toast } = useToast();
 
-  // Get vendorId from auth context or legacy localStorage
   const [vendorId, setVendorId] = useState('');
 
   useEffect(() => {
-    let id = user?.vendorId || '';
-    if (!id) {
-      try {
-        const authStr = localStorage.getItem('vendorAuth');
-        if (authStr) {
-          const auth = JSON.parse(authStr);
-          id = auth.vendorId || '';
-        }
-      } catch { /* ignore */ }
-    }
-    setVendorId(id);
-  }, [user]);
+    if (authLoading) return;
+    setVendorId(user?.vendorId || '');
+  }, [authLoading, user?.vendorId]);
 
   const handleScanSuccess = (result: any) => {
     // Build transaction from scan result
@@ -78,6 +68,14 @@ export default function VendorScanCustomerPage() {
       description: `${transaction.customerName}'s benefits have been applied to this transaction`,
     });
   };
+
+  if (authLoading || !accessToken || !vendorId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#478c0b] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

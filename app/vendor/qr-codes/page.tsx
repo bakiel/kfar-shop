@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import VendorQRGenerator from '@/components/vendor/VendorQRGenerator';
 import Link from 'next/link';
 import { ArrowLeft, AlertTriangle, QrCode } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface VendorData {
   id: string;
@@ -27,33 +27,28 @@ interface ProductData {
 }
 
 export default function VendorQRCodesPage() {
-  const router = useRouter();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
   const [vendorData, setVendorData] = useState<VendorData | null>(null);
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (authLoading) return;
+
     const loadVendorData = async () => {
       try {
-        // Get vendor auth from localStorage (set by AuthContext on login)
-        const authStr = localStorage.getItem('vendorAuth');
-        if (!authStr) {
+        if (!accessToken || user?.role !== 'vendor' || !user.vendorId) {
           setError('not_authenticated');
           setLoading(false);
           return;
         }
 
-        const auth = JSON.parse(authStr);
-        const vendorId = auth.vendorId || '';
-
-        if (!vendorId) {
-          setError('no_vendor_id');
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch(`/api/vendor/${vendorId}`, { cache: 'no-store' });
+        const vendorId = user.vendorId;
+        const response = await fetch(`/api/vendor/${vendorId}`, {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
         if (!response.ok) throw new Error(`Vendor feed failed: ${response.status}`);
 
         const data = await response.json();
@@ -62,7 +57,7 @@ export default function VendorQRCodesPage() {
 
         setVendorData({
           id: store.id,
-          storeName: store.name || auth.vendorName || auth.name || 'My Store',
+          storeName: store.name || user.displayName || 'My Store',
           storeNameHe: store.nameHe,
           description: store.description,
           descriptionHe: store.descriptionHe,
@@ -90,7 +85,7 @@ export default function VendorQRCodesPage() {
     };
 
     loadVendorData();
-  }, []);
+  }, [accessToken, authLoading, user?.displayName, user?.role, user?.vendorId]);
 
   if (loading) {
     return (

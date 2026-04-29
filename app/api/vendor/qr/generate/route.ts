@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { qrService } from '@/lib/services/qr-service';
 import QRCode from 'qrcode';
+import { verifyAccessToken } from '@/lib/services/auth-service';
+
+function getUser(request: NextRequest) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  return token ? verifyAccessToken(token) : null;
+}
+
+function requireVendorAccess(request: NextRequest, vendorId: string | null) {
+  const user = getUser(request);
+  if (!user) return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+  if (user.role !== 'vendor' || !user.vendorId || user.vendorId !== vendorId) {
+    return NextResponse.json({ success: false, error: 'Vendor access required' }, { status: 403 });
+  }
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +34,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const authError = requireVendorAccess(request, vendorId);
+    if (authError) return authError;
     
     // Generate QR code data
     let qrData: any = { vendorId };
@@ -186,6 +204,9 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const authError = requireVendorAccess(request, vendorId);
+    if (authError) return authError;
     
     // No QR codes stored yet -- return empty array
     return NextResponse.json({

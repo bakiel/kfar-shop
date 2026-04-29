@@ -1,41 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db/postgres-client';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import {
+  createVendorBanner,
+  deleteVendorBanner,
+  listVendorBanners,
+  updateVendorBanner,
+  validateVendorBanner,
+} from '@/lib/services/vendor-banner-service';
+
+function getUser(request: NextRequest) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  return token ? verifyAccessToken(token) : null;
+}
+
+function requireVendor(request: NextRequest, vendorId: string | null) {
+  const user = getUser(request);
+  if (!user) return { user: null, response: NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 }) };
+  if (user.role !== 'vendor' || !user.vendorId || user.vendorId !== vendorId) {
+    return { user, response: NextResponse.json({ success: false, error: 'Vendor access required' }, { status: 403 }) };
+  }
+  return { user, response: null };
+}
+
+function normalizeBody(body: any) {
+  const content = body.content || {};
+  return {
+    template: body.template || 'custom',
+    content: {
+      ...content,
+      title: content.title ?? body.title ?? '',
+      subtitle: content.subtitle ?? body.subtitle ?? '',
+    },
+    isActive: body.isActive ?? body.is_active ?? true,
+    orderPosition: body.orderPosition ?? body.order_position ?? 0,
+    startDate: body.startDate ?? body.start_date ?? content.startDate ?? null,
+    endDate: body.endDate ?? body.end_date ?? content.endDate ?? null,
+  };
+}
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const vendorId = searchParams.get('vendorId');
+    const auth = requireVendor(request, vendorId);
+    if (auth.response) return auth.response;
 
-    if (!vendorId) {
-      return NextResponse.json(
-        { error: 'Vendor ID is required' },
-        { status: 400 }
-      );
-    }
-
-    try {
-      // Get active banners from PostgreSQL database
-      const { rows: banners } = await query(
-        `SELECT * FROM vendor_banners
-         WHERE vendor_id = $1 AND is_active = true
-         ORDER BY order_position ASC`,
-        [vendorId]
-      );
-
-      if (banners.length > 0) {
-        return NextResponse.json({ banners });
-      }
-    } catch (dbError) {
-      console.log('Database operation failed, returning empty banners');
-    }
-
-    // DB unavailable -- return empty array
-    return NextResponse.json({ banners: [] });
+    const banners = await listVendorBanners(vendorId!);
+    return NextResponse.json({ success: true, banners, total: banners.length });
   } catch (error) {
     console.error('Error fetching vendor banners:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { success: false, banners: [], total: 0, error: 'Failed to fetch banners' },
       { status: 500 }
     );
   }
@@ -43,73 +58,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const user = token ? verifyAccessToken(token) : null;
-    if (!user || user.role !== 'vendor') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
-    const { vendor_id, title, subtitle, template, content, start_date, end_date, order_position } = body;
+    const vendorId = body.vendor_id || body.vendorId || null;
+    const auth = requireVendor(request, vendorId);
+    if (auth.response) return auth.response;
 
-    // Prevent cross-vendor banner creation
-    if (vendor_id !== user.vendorId) {
-      return NextResponse.json({ error: 'Forbidden: cannot create banners for another vendor' }, { status: 403 });
+    const input = normalizeBody(body);
+    const validation = validateVendorBanner(input);
+    if (!validation.valid) {
+      return NextResponse.json({ success: false, error: validation.error }, { status: 400 });
     }
 
-    // Validate required fields
-    if (!vendor_id || !title || !template) {
-      return NextResponse.json(
-        { error: 'Vendor ID, title, and template are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate template
-    const validTemplates = ['sale', 'announcement', 'product', 'event', 'seasonal', 'custom'];
-    if (!validTemplates.includes(template)) {
-      return NextResponse.json(
-        { error: 'Invalid template type' },
-        { status: 400 }
-      );
-    }
-
-    try {
-      // Create banner in PostgreSQL
-      const { rows } = await query(
-        `INSERT INTO vendor_banners (
-          vendor_id, title, subtitle, template, content,
-          start_date, end_date, order_position, is_active,
-          created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW(), NOW())
-        RETURNING *`,
-        [
-          vendor_id,
-          title,
-          subtitle || null,
-          template,
-          JSON.stringify(content || {}),
-          start_date || null,
-          end_date || null,
-          order_position || 0
-        ]
-      );
-
-      return NextResponse.json({
-        success: true,
-        banner: rows[0]
-      });
-    } catch (dbError) {
-      console.error('Database operation failed:', dbError);
-      return NextResponse.json(
-        { error: 'Database unavailable, cannot create banner' },
-        { status: 503 }
-      );
-    }
+    const banner = await createVendorBanner(vendorId, input);
+    return NextResponse.json({ success: true, banner }, { status: 201 });
   } catch (error) {
     console.error('Error creating vendor banner:', error);
     return NextResponse.json(
-      { error: 'Failed to create banner' },
+      { success: false, error: 'Failed to create banner' },
       { status: 500 }
     );
   }
@@ -117,68 +82,27 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const user = token ? verifyAccessToken(token) : null;
-    if (!user || user.role !== 'vendor') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const bannerId = searchParams.get('id');
+    const body = await request.json();
+    const vendorId = body.vendor_id || body.vendorId || null;
+    const auth = requireVendor(request, vendorId);
+    if (auth.response) return auth.response;
 
     if (!bannerId) {
-      return NextResponse.json(
-        { error: 'Banner ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Banner ID is required' }, { status: 400 });
     }
 
-    const body = await request.json();
-
-    try {
-      // Verify the banner belongs to the authenticated vendor (prevent cross-vendor modification)
-      const { rows: existing } = await query(
-        'SELECT vendor_id FROM vendor_banners WHERE id = $1',
-        [bannerId]
-      );
-      if (!existing.length || existing[0].vendor_id !== user.vendorId) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-      }
-
-      // Whitelist allowed columns to prevent SQL injection via column name injection
-      const ALLOWED_COLUMNS = new Set([
-        'title', 'subtitle', 'template', 'content',
-        'start_date', 'end_date', 'order_position', 'is_active'
-      ]);
-      const safeUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
-      for (const [k, v] of Object.entries(body)) {
-        if (ALLOWED_COLUMNS.has(k)) safeUpdates[k] = v;
-      }
-
-      const keys = Object.keys(safeUpdates);
-      const values = Object.values(safeUpdates);
-      const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(', ');
-
-      const { rows } = await query(
-        `UPDATE vendor_banners SET ${sets} WHERE id = $1 RETURNING *`,
-        [bannerId, ...values]
-      );
-
-      return NextResponse.json({
-        success: true,
-        banner: rows[0]
-      });
-    } catch (dbError) {
-      console.error('Database operation failed:', dbError);
-      return NextResponse.json(
-        { error: 'Database unavailable, cannot update banner' },
-        { status: 503 }
-      );
+    const banner = await updateVendorBanner(vendorId, bannerId, normalizeBody(body));
+    if (!banner) {
+      return NextResponse.json({ success: false, error: 'Banner not found' }, { status: 404 });
     }
+
+    return NextResponse.json({ success: true, banner });
   } catch (error) {
     console.error('Error updating vendor banner:', error);
     return NextResponse.json(
-      { error: 'Failed to update banner' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to update banner' },
       { status: 500 }
     );
   }
@@ -186,50 +110,26 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    const user = token ? verifyAccessToken(token) : null;
-    if (!user || user.role !== 'vendor') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const bannerId = searchParams.get('id');
+    const vendorId = searchParams.get('vendorId');
+    const auth = requireVendor(request, vendorId);
+    if (auth.response) return auth.response;
 
     if (!bannerId) {
-      return NextResponse.json(
-        { error: 'Banner ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Banner ID is required' }, { status: 400 });
     }
 
-    try {
-      // Verify the banner belongs to the authenticated vendor (prevent cross-vendor deletion)
-      const { rows: existing } = await query(
-        'SELECT vendor_id FROM vendor_banners WHERE id = $1',
-        [bannerId]
-      );
-      if (!existing.length || existing[0].vendor_id !== user.vendorId) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-      }
-
-      // Delete banner from PostgreSQL
-      await query('DELETE FROM vendor_banners WHERE id = $1 AND vendor_id = $2', [bannerId, user.vendorId]);
-
-      return NextResponse.json({
-        success: true,
-        message: 'Banner deleted successfully'
-      });
-    } catch (dbError) {
-      console.error('Database operation failed:', dbError);
-      return NextResponse.json(
-        { error: 'Database unavailable, cannot delete banner' },
-        { status: 503 }
-      );
+    const deleted = await deleteVendorBanner(vendorId!, bannerId);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: 'Banner not found' }, { status: 404 });
     }
+
+    return NextResponse.json({ success: true, message: 'Banner deleted successfully' });
   } catch (error) {
     console.error('Error deleting vendor banner:', error);
     return NextResponse.json(
-      { error: 'Failed to delete banner' },
+      { success: false, error: 'Failed to delete banner' },
       { status: 500 }
     );
   }

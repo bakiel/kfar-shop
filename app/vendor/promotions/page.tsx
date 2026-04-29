@@ -1,15 +1,68 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import PromotionSubmissionForm from '@/components/vendor/PromotionSubmissionForm';
 import Link from 'next/link';
 import { ArrowLeft, Megaphone, Clock, Eye, TrendingUp, Flag, ArrowRight, Lightbulb, CheckCircle, BarChart3, Info } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 
+interface VendorPromotion {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  isActive: boolean;
+  endDate?: string;
+}
+
 export default function VendorPromotionsPage() {
-  const { user } = useAuth();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
   const vendorId = user?.vendorId || '';
+  const [promotions, setPromotions] = useState<VendorPromotion[]>([]);
+  const [stats, setStats] = useState({ total: 0, active: 0, pending: 0, rejected: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+
+    const loadPromotions = async () => {
+      try {
+        const response = await fetch('/api/vendor/promotions', {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to load promotions');
+        }
+        setPromotions(data.promotions || []);
+        setStats(data.stats || { total: 0, active: 0, pending: 0, rejected: 0 });
+      } catch (err) {
+        console.error('Error loading vendor promotions:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load promotions');
+        setPromotions([]);
+        setStats({ total: 0, active: 0, pending: 0, rejected: 0 });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPromotions();
+  }, [accessToken, authLoading]);
+
+  if (authLoading || !vendorId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#478c0b] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -47,7 +100,7 @@ export default function VendorPromotionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Active Promotions</p>
-                <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>3</p>
+                <p className="text-2xl font-bold" style={{ color: '#478c0b' }}>{stats.active}</p>
               </div>
               <Megaphone className="w-8 h-8 stroke-[1.5]" style={{ color: '#478c0b' }} />
             </div>
@@ -62,7 +115,7 @@ export default function VendorPromotionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Pending Approval</p>
-                <p className="text-2xl font-bold" style={{ color: '#f6af0d' }}>1</p>
+                <p className="text-2xl font-bold" style={{ color: '#f6af0d' }}>{stats.pending}</p>
               </div>
               <Clock className="w-8 h-8 stroke-[1.5]" style={{ color: '#f6af0d' }} />
             </div>
@@ -77,7 +130,7 @@ export default function VendorPromotionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Views</p>
-                <p className="text-2xl font-bold" style={{ color: '#c23c09' }}>1,247</p>
+                <p className="text-2xl font-bold" style={{ color: '#c23c09' }}>0</p>
               </div>
               <Eye className="w-8 h-8 stroke-[1.5]" style={{ color: '#c23c09' }} />
             </div>
@@ -92,7 +145,7 @@ export default function VendorPromotionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Conversion Rate</p>
-                <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>18%</p>
+                <p className="text-2xl font-bold" style={{ color: '#3a3a1d' }}>0%</p>
               </div>
               <TrendingUp className="w-8 h-8 stroke-[1.5]" style={{ color: '#3a3a1d' }} />
             </div>
@@ -229,9 +282,40 @@ export default function VendorPromotionsPage() {
             Your Active Promotions
           </h2>
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <p className="text-gray-500 text-center">
-              No active promotions yet. Create your first promotion above!
-            </p>
+            {loading ? (
+              <p className="text-gray-500 text-center">Loading promotions...</p>
+            ) : error ? (
+              <p className="text-red-600 text-center">{error}</p>
+            ) : promotions.length === 0 ? (
+              <p className="text-gray-500 text-center">
+                No promotions yet. Create your first promotion above.
+              </p>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {promotions.map((promotion) => (
+                  <div key={promotion.id} className="py-4 flex items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold" style={{ color: '#3a3a1d' }}>{promotion.title}</h3>
+                      <p className="text-sm text-gray-600 line-clamp-1">{promotion.description}</p>
+                      {promotion.endDate && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Ends {new Date(promotion.endDate).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      promotion.isActive || promotion.status === 'approved'
+                        ? 'bg-green-100 text-green-700'
+                        : promotion.status === 'rejected'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {promotion.status === 'pending_approval' ? 'Pending' : promotion.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

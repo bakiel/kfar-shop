@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, isDbAvailable } from '@/lib/db/postgres-client';
+import { listVendorBanners } from '@/lib/services/vendor-banner-service';
 
 export async function GET(
   request: NextRequest,
@@ -9,30 +9,10 @@ export async function GET(
     const params = await context.params;
     const vendorId = params.vendorId;
 
-    // Query DB for active banners
-    const dbUp = await isDbAvailable();
-    if (dbUp) {
-      try {
-        const { rows: banners } = await query(
-          `SELECT * FROM vendor_banners
-           WHERE vendor_id = $1 AND is_active = true
-           ORDER BY order_position ASC`,
-          [vendorId]
-        );
-
-        return NextResponse.json({
-          banners,
-          total: banners.length
-        });
-      } catch {
-        // Table may not exist -- fall through
-      }
-    }
-
-    // DB unavailable -- return empty array
+    const banners = await listVendorBanners(vendorId, true);
     return NextResponse.json({
-      banners: [],
-      total: 0
+      banners,
+      total: banners.length,
     });
   } catch (error) {
     console.error('Error fetching active banners:', error);

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from '@/components/ui/use-toast';
 import { Calendar, MapPin, Clock, Flag, Plus, Eye, MousePointer, ShoppingCart, Pencil, Trash2, Lightbulb } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 // Banner templates
 const bannerTemplates = {
@@ -85,6 +86,7 @@ interface BannerData {
 }
 
 export default function VendorBannerManager({ vendorId }: { vendorId: string }) {
+  const { accessToken } = useAuth();
   const [banners, setBanners] = useState<BannerData[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('sale');
   const [isCreating, setIsCreating] = useState(false);
@@ -109,23 +111,32 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
   });
 
   useEffect(() => {
+    if (!vendorId || !accessToken) return;
     fetchBanners();
-  }, [vendorId]);
+  }, [vendorId, accessToken]);
 
   const fetchBanners = async () => {
     try {
-      const response = await fetch(`/api/vendor/${vendorId}/banners`);
+      if (!accessToken) return;
+      const response = await fetch(`/api/vendor/${vendorId}/banners`, {
+        cache: 'no-store',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to fetch banners');
+      }
       setBanners(data.banners || []);
     } catch (error) {
       console.error('Error fetching banners:', error);
+      setBanners([]);
     }
   };
 
   const handleSubmit = async () => {
     try {
+      if (!accessToken) throw new Error('Vendor session expired. Please log in again.');
       const bannerData = {
-        vendorId,
         template: selectedTemplate,
         content: formData,
         isActive: true
@@ -133,14 +144,15 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
 
       const response = await fetch(`/api/vendor/${vendorId}/banners`, {
         method: editingBanner ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           ...bannerData,
           bannerId: editingBanner?.id
         })
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (response.ok && data.success) {
         toast({
           title: editingBanner ? "Banner updated!" : "Banner created!",
           description: "Your banner is now live on your store page.",
@@ -165,34 +177,40 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
         setIsCreating(false);
         setEditingBanner(null);
         fetchBanners();
+      } else {
+        throw new Error(data.error || 'Failed to save banner');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save banner. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save banner. Please try again.",
       });
     }
   };
 
   const toggleBannerStatus = async (bannerId: string, isActive: boolean) => {
     try {
+      if (!accessToken) throw new Error('Vendor session expired. Please log in again.');
       const response = await fetch(`/api/vendor/${vendorId}/banners/${bannerId}/toggle`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ isActive })
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (response.ok && data.success) {
         toast({
           title: isActive ? "Banner activated" : "Banner deactivated",
           description: isActive ? "Your banner is now visible to customers" : "Banner hidden from customers",
         });
         fetchBanners();
+      } else {
+        throw new Error(data.error || 'Failed to update banner status');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update banner status",
+        description: error instanceof Error ? error.message : "Failed to update banner status",
       });
     }
   };
@@ -201,21 +219,26 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
     if (!confirm('Are you sure you want to delete this banner?')) return;
 
     try {
+      if (!accessToken) throw new Error('Vendor session expired. Please log in again.');
       const response = await fetch(`/api/vendor/${vendorId}/banners/${bannerId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      if (response.ok && data.success) {
         toast({
           title: "Banner deleted",
           description: "The banner has been removed from your store",
         });
         fetchBanners();
+      } else {
+        throw new Error(data.error || 'Failed to delete banner');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete banner",
+        description: error instanceof Error ? error.message : "Failed to delete banner",
       });
     }
   };

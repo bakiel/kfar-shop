@@ -58,7 +58,7 @@ const item = {
 export default function VendorDashboard() {
   const router = useRouter();
   const { language, t, isRTL } = useLanguage();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
 
   const [vendorId, setVendorId] = useState('');
   const [vendorName, setVendorName] = useState('');
@@ -165,20 +165,10 @@ export default function VendorDashboard() {
   }, [isRTL]);
 
   useEffect(() => {
-    // Get vendor info from auth context or legacy localStorage
-    let id = user?.vendorId || '';
-    let name = user?.displayName || '';
+    if (authLoading) return;
 
-    if (!id) {
-      try {
-        const authStr = localStorage.getItem('vendorAuth');
-        if (authStr) {
-          const auth = JSON.parse(authStr);
-          id = auth.vendorId || '';
-          name = auth.vendorName || auth.name || '';
-        }
-      } catch { /* ignore */ }
-    }
+    const id = user?.vendorId || '';
+    const name = user?.displayName || '';
 
     setVendorId(id);
     setVendorName(name);
@@ -199,7 +189,7 @@ export default function VendorDashboard() {
         setLoadingAnalytics(false);
       }
     }
-  }, [user, accessToken, isRTL, fetchAnalytics, fetchRecentOrders, fetchPublicVendorSnapshot]);
+  }, [accessToken, authLoading, fetchAnalytics, fetchPublicVendorSnapshot, fetchRecentOrders, isRTL, user?.displayName, user?.vendorId]);
 
   // --- Order table columns ---
   const orderColumns: Column<RecentOrder>[] = [

@@ -64,7 +64,7 @@ const item = {
 export default function VendorOrders() {
   const router = useRouter();
   const { language, t, isRTL } = useLanguage();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
 
   const [vendorId, setVendorId] = useState('');
   const [vendorName, setVendorName] = useState('');
@@ -122,20 +122,10 @@ export default function VendorOrders() {
   }, []);
 
   useEffect(() => {
-    // Get vendor info from auth context or legacy localStorage
-    let id = user?.vendorId || '';
-    let name = user?.displayName || '';
+    if (authLoading) return;
 
-    if (!id) {
-      try {
-        const authStr = localStorage.getItem('vendorAuth');
-        if (authStr) {
-          const auth = JSON.parse(authStr);
-          id = auth.vendorId || '';
-          name = auth.vendorName || auth.name || '';
-        }
-      } catch { /* ignore */ }
-    }
+    const id = user?.vendorId || '';
+    const name = user?.displayName || '';
 
     setVendorId(id);
     setVendorName(name);
@@ -147,7 +137,7 @@ export default function VendorOrders() {
       setOrders([]);
       setLoading(false);
     }
-  }, [user, accessToken, fetchOrders]);
+  }, [accessToken, authLoading, fetchOrders, user?.displayName, user?.vendorId]);
 
   // --- Update order status (DB update + WhatsApp notification) ---
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
@@ -160,21 +150,24 @@ export default function VendorOrders() {
     );
 
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
+      if (!accessToken) {
+        throw new Error('Vendor session expired. Please log in again.');
       }
 
-      const response = await fetch(`/api/orders?id=${orderId}`, {
+      const response = await fetch(`/api/vendor/orders/${orderId}/status`, {
         method: 'PATCH',
-        headers,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (!response.ok) {
-        console.error('Failed to update order status in DB');
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update order status');
       }
     } catch (error) {
       console.error('Error updating order status:', error);
+      setOrders(prev =>
+        prev.map(o => (o.id === orderId ? { ...o, status: order.status } : o))
+      );
     }
 
     // WhatsApp notification

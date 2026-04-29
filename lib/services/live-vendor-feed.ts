@@ -163,6 +163,8 @@ function normalizeVendor(row: any, products: ProductFeedProduct[] = [], source: 
     products,
     metadata: {
       ...metadata,
+      phone: row.phone || metadata.phone,
+      whatsapp: row.whatsapp || metadata.whatsapp,
       location: row.address || metadata.location || 'Dimona, Israel',
       businessHours: row.business_hours || metadata.businessHours,
       deliveryOptions: row.delivery_options || metadata.deliveryOptions,
@@ -211,6 +213,8 @@ async function loadVendorFeed(options: {
          v.slug,
          v.description,
          v.description_he,
+         v.phone,
+         v.whatsapp,
          v.logo_url,
          v.banner_url,
          v.category,

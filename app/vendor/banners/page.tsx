@@ -8,8 +8,16 @@ import { ArrowLeft, HelpCircle, Info } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 
 export default function VendorBannersPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const vendorId = user?.vendorId || '';
+
+  if (authLoading || !vendorId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#478c0b] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-gray-50 py-12">

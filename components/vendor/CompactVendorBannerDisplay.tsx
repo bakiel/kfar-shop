@@ -75,21 +75,8 @@ export default function CompactVendorBannerDisplay({ vendorId }: { vendorId: str
       const data = await response.json();
       setBanners(data.banners || []);
     } catch (error) {
-      // Fallback to mock data for demonstration
-      setBanners([
-        {
-          id: '1',
-          template: 'sale',
-          content: {
-            title: 'Weekend Special',
-            description: 'Save on select items',
-            discount: 20,
-            ctaText: 'Shop Now',
-            endDate: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-          },
-          isActive: true
-        }
-      ]);
+      console.error('Error fetching active vendor banners:', error);
+      setBanners([]);
     }
   };
 
