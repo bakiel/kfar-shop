@@ -39,7 +39,7 @@ export default function MarketplaceStoresPage() {
   const categories = useMemo(() => {
     const allCategories = new Set<string>();
     vendors.forEach(vendor => {
-      vendor.categories?.forEach(cat => allCategories.add(cat));
+      vendor.categories?.forEach((cat: string) => allCategories.add(cat));
     });
     return ['all', ...Array.from(allCategories)];
   }, [vendors]);

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import VendorStorePage from '@/components/vendor/VendorStorePage';
 import Layout from '@/components/layout/Layout';
-import type { Product } from '@/lib/data/products';
+import type { Product } from '@/lib/types/products';
 import { getVendorById } from '@/lib/services/live-vendor-feed';
 
 interface PageProps {

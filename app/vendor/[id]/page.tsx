@@ -307,7 +307,7 @@ export default function VendorStorePage() {
                         className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-5 py-3 rounded-full border border-white/20"
                       >
                         <Star className="w-5 h-5 stroke-[1.5]" fill="#f6af0d" stroke="#f6af0d" />
-                        <span className="font-bold text-lg">{vendor.rating.toFixed(1)}</span>
+                        <span className="font-bold text-lg">{(vendor.rating ?? 0).toFixed(1)}</span>
                         <span className="opacity-90">({vendor.reviewCount} reviews)</span>
                       </motion.div>
                       <motion.div
@@ -457,8 +457,14 @@ export default function VendorStorePage() {
               <div className="absolute inset-0 opacity-10 cultural-pattern"></div>
               <div className="relative flex items-center justify-between">
                 <div>
-                  <h3 className="text-h2 mb-2">🎉 {vendor.promotions[0].title}</h3>
-                  <p className="text-body-lg opacity-90">{vendor.promotions[0].description}</p>
+                  <h3 className="text-h2 mb-2">
+                    🎉 {typeof vendor.promotions[0] === 'string'
+                      ? vendor.promotions[0]
+                      : vendor.promotions[0].title}
+                  </h3>
+                  {typeof vendor.promotions[0] !== 'string' && vendor.promotions[0].description && (
+                    <p className="text-body-lg opacity-90">{vendor.promotions[0].description}</p>
+                  )}
                 </div>
                 <Gift className="w-10 h-10 opacity-50 stroke-[1.5]" />
               </div>
@@ -781,7 +787,9 @@ export default function VendorStorePage() {
                   <div className="p-4 rounded-lg border-l-4 kfar-bg-cream kfar-border-earth-flame">
                     <h4 className="text-h6 mb-2">Business Hours</h4>
                     <p className="text-body-sm kfar-text-gray-600">
-                      {vendor.businessHours || 'Sunday-Thursday: 9:00 AM - 6:00 PM\nFriday: 9:00 AM - 2:00 PM'}
+                      {typeof vendor.businessHours === 'string'
+                        ? vendor.businessHours
+                        : 'Sunday-Thursday: 9:00 AM - 6:00 PM\nFriday: 9:00 AM - 2:00 PM'}
                     </p>
                   </div>
                 </div>

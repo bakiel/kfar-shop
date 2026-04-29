@@ -525,7 +525,7 @@ function resolveBundleProduct(productId: string): BundleProduct {
 }
 
 function mapDatabaseBundle(row: any): Bundle {
-  const normalized = normalizeBundleRecord(row);
+  const normalized = normalizeBundleRecord(row) as any;
   const products = normalized.products.map(resolveBundleProduct);
   const bundlePrice = normalized.price;
   const originalPrice = normalized.originalPrice;
@@ -601,10 +601,10 @@ export async function getEnrichedBundle(id: string): Promise<EnrichedBundle | nu
       ...bp,
       nameHe: fullProduct?.nameHe || undefined,
       description: fullProduct?.description,
-      descriptionHe: fullProduct?.descriptionHe,
+      descriptionHe: fullProduct?.descriptionHe || undefined,
       vendorId: fullProduct?.vendorId || '',
       vendorName: fullProduct?.vendorName || '',
-      vendorLogo: fullProduct?.vendorLogo,
+      vendorLogo: fullProduct?.vendorLogo || undefined,
       category: fullProduct?.category || '',
       tags: fullProduct?.tags || [],
     };

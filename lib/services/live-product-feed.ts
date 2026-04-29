@@ -20,6 +20,7 @@ export interface ProductFeedProduct {
   vegan: boolean;
   organic: boolean;
   glutenFree: boolean;
+  sugarFree?: boolean;
   unit: string;
   minimumOrder: number;
   inStock: boolean;

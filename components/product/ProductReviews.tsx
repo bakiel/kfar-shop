@@ -8,6 +8,9 @@ import { Star, CheckCircle, Store, ThumbsUp, Flag, PenLine } from 'lucide-react'
 
 interface ProductReviewsProps {
   productId: string;
+  productName?: string;
+  averageRating?: number;
+  totalReviews?: number;
 }
 
 export default function ProductReviews({ productId }: ProductReviewsProps) {
@@ -121,8 +124,7 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as any)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
-          style={{ focusRingColor: '#478c0b' }}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#478c0b]/30"
         >
           <option value="recent">Most Recent</option>
           <option value="helpful">Most Helpful</option>
@@ -157,11 +159,12 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
                     <h4 className="font-semibold" style={{ color: '#3a3a1d' }}>
                       {review.author.name}
                       {review.author.verified && (
-                        <CheckCircle
-                          className="w-4 h-4 stroke-[1.5] ml-2"
-                          style={{ color: '#478c0b' }}
-                          title="Verified Purchaser"
-                        />
+                        <span title="Verified Purchaser">
+                          <CheckCircle
+                            className="w-4 h-4 stroke-[1.5] ml-2"
+                            style={{ color: '#478c0b' }}
+                          />
+                        </span>
                       )}
                     </h4>
                     <p className="text-sm text-gray-600">

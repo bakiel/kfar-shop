@@ -2369,20 +2369,18 @@ export default function ProductDetailPage() {
           <MobileFilterSheet 
             isOpen={showMobileFilters}
             onClose={() => setShowMobileFilters(false)}
-            selectedCategories={[]}
-            setSelectedCategories={() => {}}
-            selectedVendors={[]}
-            setSelectedVendors={() => {}}
-            priceRange={[0, 100]}
-            setPriceRange={() => {}}
-            selectedSpecialFilters={[]}
-            setSelectedSpecialFilters={() => {}}
-            selectedCertifications={[]}
-            setSelectedCertifications={() => {}}
-            selectedOrigins={[]}
-            setSelectedOrigins={() => {}}
-            onApply={() => setShowMobileFilters(false)}
-            onReset={() => {}}
+            filters={{
+              priceRange: [0, 100],
+              vendors: [],
+              categories: [],
+              dietary: [],
+              ratings: null,
+              sort: 'trending',
+            }}
+            onApplyFilters={() => setShowMobileFilters(false)}
+            vendors={[]}
+            categories={[]}
+            maxPrice={100}
           />
         )}
 

@@ -1,7 +1,7 @@
 // Product service using backend API
 import { productsApi } from '@/lib/api/products';
 import { vendorsApi } from '@/lib/api/vendors';
-import type { Product as ApiProduct } from '@/lib/data/products';
+import type { Product as ApiProduct } from '@/lib/api/products';
 
 export type Vendor = {
   id: string;

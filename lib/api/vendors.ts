@@ -1,7 +1,35 @@
 // Vendors API
 
 import { api } from './client';
-import type { Vendor } from '@/lib/data/products';
+
+export interface Vendor {
+  id: string;
+  businessName: string;
+  businessNameHe: string;
+  description: string;
+  descriptionHe: string;
+  logo: string;
+  bannerImage: string;
+  category: string;
+  rating: number;
+  reviewCount: number;
+  productCount: number;
+  deliveryOptions: string[];
+  paymentMethods: string[];
+  minimumOrder: number;
+  operatingHours: any;
+  contactInfo: {
+    phone: string;
+    email: string;
+    address: string;
+    city: string;
+  };
+  socialMedia: Record<string, string>;
+  certifications: string[];
+  specialties: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface VendorsQuery {
   category?: string;

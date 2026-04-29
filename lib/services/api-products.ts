@@ -269,10 +269,10 @@ function transformApiProductToProduct(apiProduct: any): Product {
   return {
     id: apiProduct.id.toString(),
     vendorId: vendorIdString,
+    vendor: apiProduct.vendor || apiProduct.vendorName || apiProduct.vendor_name || vendorIdString,
     name: apiProduct.name,
-    nameHebrew: apiProduct.nameHebrew || '',
+    nameHe: apiProduct.nameHebrew || apiProduct.nameHe || '',
     description: apiProduct.description,
-    descriptionHebrew: apiProduct.descriptionHebrew || '',
     price: apiProduct.price,
     originalPrice: apiProduct.originalPrice,
     image: apiProduct.image || apiProduct.images?.[0] || '',
@@ -303,9 +303,7 @@ function transformApiVendorToVendor(apiVendor: any): Vendor {
   return {
     id: vendorIdString,
     name: apiVendor.name,
-    nameHebrew: apiVendor.nameHebrew || '',
     description: apiVendor.description,
-    descriptionHebrew: apiVendor.descriptionHebrew || '',
     logo: apiVendor.logo || '',
     banner: apiVendor.banner || '',
     rating: apiVendor.rating || 0,
