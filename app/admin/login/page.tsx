@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 
 export default function AdminLoginPage() {
   const { language, toggleLanguage, t, isRTL } = useLanguage();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,6 +25,13 @@ export default function AdminLoginPage() {
 
       if (!result.success) {
         setError(result.error || (isRTL ? 'פרטי התחברות שגויים' : 'Invalid credentials'));
+        setLoading(false);
+        return;
+      }
+
+      if (result.user?.role !== 'admin') {
+        await logout();
+        setError(isRTL ? 'חשבון זה אינו חשבון מנהל' : 'This account is not an admin account');
         setLoading(false);
         return;
       }

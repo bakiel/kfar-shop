@@ -121,7 +121,7 @@ export default function LoginPortal() {
               <div className="space-y-6">
                 <div className="text-center">
                   <Link 
-                    href="/customer/login?role=vendor"
+                    href="/vendor/login"
                     className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                     style={{ backgroundColor: '#f6af0d' }}
                   >
@@ -165,7 +165,7 @@ export default function LoginPortal() {
               <div className="space-y-6">
                 <div className="text-center">
                   <Link 
-                    href="/customer/login?role=admin"
+                    href="/admin/login"
                     className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                     style={{ backgroundColor: '#c23c09' }}
                   >

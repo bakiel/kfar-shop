@@ -166,7 +166,7 @@ export default function UserAccountDropdown() {
                   </Link>
 
                   <Link
-                    href="/customer/login?role=vendor"
+                    href="/vendor/login"
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-50 transition-all group"
                     onClick={() => setIsOpen(false)}
                   >
@@ -179,7 +179,7 @@ export default function UserAccountDropdown() {
                   </Link>
 
                   <Link
-                    href="/customer/login?role=admin"
+                    href="/admin/login"
                     className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-green-50 transition-all group"
                     onClick={() => setIsOpen(false)}
                   >

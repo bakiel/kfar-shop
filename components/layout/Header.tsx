@@ -729,7 +729,7 @@ const Header = () => {
                   <span className="text-base text-purple-600">Customer Login</span>
                 </Link>
                 <Link
-                  href="/customer/login?role=vendor"
+                  href="/vendor/login"
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-50 transition-all"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -737,7 +737,7 @@ const Header = () => {
                   <span className="text-base text-blue-600">Vendor Portal</span>
                 </Link>
                 <Link
-                  href="/customer/login?role=admin"
+                  href="/admin/login"
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-green-50 transition-all"
                   onClick={() => setMobileMenuOpen(false)}
                 >

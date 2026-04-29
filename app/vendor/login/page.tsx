@@ -27,7 +27,7 @@ const item = {
 
 export default function VendorLoginPage() {
   const { language, toggleLanguage, t, isRTL } = useLanguage();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
 
   const [vendorId, setVendorId] = useState('');
   const [password, setPassword] = useState('');
@@ -66,6 +66,13 @@ export default function VendorLoginPage() {
 
       if (!result.success) {
         setError(result.error || (isRTL ? 'פרטים שגויים' : 'Invalid credentials'));
+        setLoading(false);
+        return;
+      }
+
+      if (result.user?.role !== 'vendor' || result.user.vendorId !== vendor.id) {
+        await logout();
+        setError(isRTL ? 'חשבון זה אינו מחובר לחנות שנבחרה' : 'This account is not connected to the selected store');
         setLoading(false);
         return;
       }

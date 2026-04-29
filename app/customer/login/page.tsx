@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import {
@@ -63,7 +63,9 @@ export default function CustomerLogin() {
   const { t, language, isRTL } = useLanguage();
   const { login, register } = useAuth();
   const shouldReduceMotion = useReducedMotion();
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const requestedRole = searchParams.get('role');
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [loading, setLoading] = useState(false);
@@ -81,6 +83,14 @@ export default function CustomerLogin() {
   useEffect(() => {
     emailRef.current?.focus();
   }, [mode]);
+
+  useEffect(() => {
+    if (requestedRole === 'admin') {
+      router.replace('/admin/login');
+    } else if (requestedRole === 'vendor') {
+      router.replace('/vendor/login');
+    }
+  }, [requestedRole, router]);
 
   // Clear error/success on mode switch
   useEffect(() => {
@@ -103,7 +113,13 @@ export default function CustomerLogin() {
           return;
         }
 
-        window.location.href = '/customer/dashboard';
+        if (result.user?.role === 'admin') {
+          window.location.href = '/admin/dashboard';
+        } else if (result.user?.role === 'vendor') {
+          window.location.href = '/vendor/dashboard';
+        } else {
+          window.location.href = '/customer/dashboard';
+        }
       } else {
         // Registration
         if (formData.password.length < 8) {
