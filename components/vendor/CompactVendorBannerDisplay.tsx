@@ -170,7 +170,7 @@ export default function CompactVendorBannerDisplay({ vendorId }: { vendorId: str
                 {banners.length > 1 && (
                   <div className="flex items-center gap-2 ml-4">
                     <button
-                      onClick={() => setCurrentBannerIndex((prev - 1 + banners.length) % banners.length)}
+                      onClick={() => setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length)}
                       className="p-1 hover:bg-white/20 rounded transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -179,7 +179,7 @@ export default function CompactVendorBannerDisplay({ vendorId }: { vendorId: str
                       {currentBannerIndex + 1}/{banners.length}
                     </span>
                     <button
-                      onClick={() => setCurrentBannerIndex((prev + 1) % banners.length)}
+                      onClick={() => setCurrentBannerIndex((prev) => (prev + 1) % banners.length)}
                       className="p-1 hover:bg-white/20 rounded transition-colors"
                     >
                       <ChevronRight className="w-4 h-4" />

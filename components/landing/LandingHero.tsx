@@ -163,7 +163,7 @@ function RotatingHeroImage({ shouldReduceMotion }: { shouldReduceMotion: boolean
           initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, scale: 1.05 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.8, ease: 'easeOut' as const }}
           className="absolute inset-0"
         >
           <Image
@@ -436,7 +436,7 @@ export default function LandingHero({
             className="order-2 lg:order-2 min-w-0"
             initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ delay: 0.4, duration: 0.7, ease: 'easeOut' as const }}
           >
             <div className="relative h-[280px] sm:h-[360px] lg:h-[420px]">
               <RotatingHeroImage shouldReduceMotion={shouldReduceMotion} />

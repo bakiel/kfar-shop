@@ -62,7 +62,7 @@ export default function PromotedBundleCard({ isRTL = false }: { isRTL?: boolean 
     <motion.section
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: 'easeOut' as const }}
       className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2D5A27] to-[#1E3D1A] shadow-lg my-6"
       dir={isRTL ? 'rtl' : 'ltr'}
     >

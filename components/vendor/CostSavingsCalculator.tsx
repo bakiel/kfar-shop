@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calculator, Clock, DollarSign, TrendingUp, Users, Package, Zap, BarChart } from 'lucide-react';
+import { Calculator, Clock, DollarSign, TrendingUp, Users, Package, Zap, BarChart, Languages } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface SavingsInputs {

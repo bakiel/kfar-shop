@@ -85,7 +85,7 @@ function StockBar({
           }`}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          transition={{ duration: 0.8, ease: 'easeOut' as const }}
         />
       </div>
       <p
@@ -137,8 +137,7 @@ function DealCard({
       viewport={{ once: true, margin: '-40px' }}
       transition={{
         duration: shouldReduceMotion ? 0 : 0.45,
-        delay: shouldReduceMotion ? 0 : index * 0.08,
-        ease: 'easeOut',
+        delay: shouldReduceMotion ? 0 : index * 0.08, ease: 'easeOut' as const,
       }}
       whileHover={
         shouldReduceMotion
@@ -270,7 +269,7 @@ export default function FlashDeals({ deals }: { deals: FlashDeal[] }) {
           initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: 'easeOut' }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: 'easeOut' as const }}
         >
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-kfar-gold/15">

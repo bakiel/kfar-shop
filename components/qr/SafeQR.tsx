@@ -19,31 +19,34 @@ const SimpleQR = dynamic(() => import('./SimpleQR'), {
 });
 
 interface SafeQRProps {
-  type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
-  data: any;
+  type?: 'product' | 'vendor' | 'order' | 'collection' | 'p2p' | 'customer';
+  data?: any;
+  value?: string;
   size?: number;
   compact?: boolean;
   onGenerated?: (qrContent: any) => void;
 }
 
-export default function SafeQR({ type, data, size = 250, compact = true, onGenerated }: SafeQRProps) {
+export default function SafeQR({ type = 'product', data, value, size = 250, compact = true, onGenerated }: SafeQRProps) {
   // Convert data to a simple string for QR code
   const qrData = useMemo(() => {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kfar.market';
-    const id = data.id || `${type}-${Date.now()}`;
+    if (value) return value;
+
+    const id = data?.id || `${type}-${Date.now()}`;
     
     // Create a simple URL that contains the essential data
     const qrObject = {
       type,
       id,
-      amount: data.amount || data.total,
-      timestamp: data.timestamp || Date.now()
+      amount: data?.amount || data?.total,
+      timestamp: data?.timestamp || Date.now()
     };
     
     // Encode data as base64 to avoid URL encoding issues
     const encoded = btoa(JSON.stringify(qrObject));
     return `${baseUrl}/qr/${type}/${id}?data=${encoded}`;
-  }, [type, data]);
+  }, [type, data, value]);
 
   const displaySize = compact ? size * 0.8 : size;
 

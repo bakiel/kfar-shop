@@ -135,7 +135,7 @@ export class DeepSeekService {
    */
   async translate(text: string, targetLanguage: string): Promise<AITranslation> {
     try {
-      const languages = {
+      const languages: Record<string, string> = {
         he: 'Hebrew',
         ar: 'Arabic',
         en: 'English'

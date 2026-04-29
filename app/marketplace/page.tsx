@@ -898,7 +898,7 @@ export default function MarketplacePage() {
                   key={product.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease: [0.25, 0.46, 0.45, 0.94] }}
+                  transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease: 'easeOut' as const }}
                   whileHover={{ y: -6, boxShadow: '0 20px 40px -8px rgba(0,0,0,0.12)' }}
                   className="bg-white rounded-2xl overflow-hidden group cursor-pointer border border-gray-100/80"
                   style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}

@@ -272,7 +272,7 @@ export default function RevenueFeedPage() {
             <motion.div
               key={store.id}
               whileHover={{ y: -4, boxShadow: '0 12px 24px -6px rgba(0,0,0,0.1)' }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              transition={{ duration: 0.2, ease: 'easeOut' as const }}
               className={`bg-white rounded-xl border p-4 cursor-pointer transition-all ${
                 filter === store.id
                   ? 'ring-2 ring-offset-2 border-transparent'

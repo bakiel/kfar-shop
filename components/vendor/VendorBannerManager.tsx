@@ -650,7 +650,7 @@ export default function VendorBannerManager({ vendorId }: { vendorId: string }) 
                       <button
                         onClick={() => {
                           setEditingBanner(banner);
-                          setFormData(banner.content);
+                          setFormData((prev) => ({ ...prev, ...banner.content }));
                           setSelectedTemplate(banner.template);
                         }}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

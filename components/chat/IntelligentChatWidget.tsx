@@ -230,7 +230,7 @@ export default function IntelligentChatWidget() {
                 </div>
               ) : (
                 <>
-                  {messages.map((message, idx) => (
+                  {messages.map((message: any, idx: number) => (
                     <motion.div
                       key={idx}
                       initial={{ opacity: 0, y: 10 }}

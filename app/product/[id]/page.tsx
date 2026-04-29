@@ -1920,7 +1920,7 @@ export default function ProductDetailPage() {
             ref={relatedRef}
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 50 }}
             animate={isRelatedInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            transition={{ duration: 0.6, ease: 'easeOut' as const }}
             className={`${isMobile ? 'bg-gray-50' : 'bg-white'} ${isMobile ? 'py-6' : 'py-12'}`}
           >
             <div className={`${isMobile ? '' : 'container mx-auto'} px-4`}>

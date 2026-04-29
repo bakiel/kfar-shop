@@ -87,8 +87,7 @@ function ValueCard({
       viewport={{ once: true, margin: '-40px' }}
       transition={{
         duration: shouldReduceMotion ? 0 : 0.5,
-        delay: shouldReduceMotion ? 0 : index * 0.12,
-        ease: 'easeOut',
+        delay: shouldReduceMotion ? 0 : index * 0.12, ease: 'easeOut' as const,
       }}
       whileHover={
         shouldReduceMotion
@@ -141,8 +140,7 @@ function VendorCard({
       viewport={{ once: true, margin: '-40px' }}
       transition={{
         duration: shouldReduceMotion ? 0 : 0.5,
-        delay: shouldReduceMotion ? 0 : 0.15 + index * 0.1,
-        ease: 'easeOut',
+        delay: shouldReduceMotion ? 0 : 0.15 + index * 0.1, ease: 'easeOut' as const,
       }}
       whileHover={
         shouldReduceMotion
@@ -269,7 +267,7 @@ export default function VendorShowcaseV2({
           className="text-center mb-10 md:mb-14"
           initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.5, ease: 'easeOut' }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.5, ease: 'easeOut' as const }}
         >
           <span className="inline-block text-leaf-green text-sm font-semibold uppercase tracking-wider mb-2">
             {language === 'he' ? 'הקהילה שלנו' : 'Our Community'}
@@ -319,8 +317,7 @@ export default function VendorShowcaseV2({
           viewport={{ once: true }}
           transition={{
             delay: shouldReduceMotion ? 0 : 0.3,
-            duration: shouldReduceMotion ? 0 : 0.5,
-            ease: 'easeOut',
+            duration: shouldReduceMotion ? 0 : 0.5, ease: 'easeOut' as const,
           }}
         >
           <Link href="/vendors">

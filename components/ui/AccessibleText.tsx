@@ -3,7 +3,7 @@
 import React from 'react';
 import { KFAR_COLORS, getAccessibleTextStyle } from '@/lib/utils/wcag-contrast';
 
-interface AccessibleTextProps {
+interface AccessibleTextProps extends React.HTMLAttributes<HTMLElement> {
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
   variant?: 'heading1' | 'heading2' | 'heading3' | 'heading4' | 'body' | 'bodyLarge' | 'caption' | 'label';
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'muted';
@@ -39,7 +39,7 @@ export default function AccessibleText({
     label: 'span'
   };
 
-  const Element = as || variantElements[variant] || 'div';
+  const Element = (as || variantElements[variant] || 'div') as React.ElementType;
 
   // Typography classes based on variant
   const variantClasses = {

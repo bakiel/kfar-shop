@@ -9,7 +9,7 @@ import { QrCode, Download, Copy, Share2, Maximize, Minimize, Package, Store, Sho
 import QRTrackingService from '@/lib/services/qr-tracking-mock';
 
 interface SmartQRGeneratorCompactProps {
-  type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
+  type: SmartQRContent['type'];
   data: any;
   size?: number;
   logo?: string;
@@ -126,7 +126,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kfar.market';
       const qrUrl = `${baseUrl}/qr/${type}/${smartContent.metadata.security.signature.substring(0, 16)}`;
 
-      const dataUrl = await QRCode.toDataURL(qrUrl, qrOptions);
+      const dataUrl = await QRCode.toDataURL(qrUrl, qrOptions) as unknown as string;
       
       if (!mountedRef.current) return;
       
@@ -374,7 +374,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
                 )}
               </button>
               
-              {typeof window !== 'undefined' && navigator.share && (
+              {typeof window !== 'undefined' && typeof navigator.share === 'function' && (
                 <button
                   onClick={shareQR}
                   disabled={loading || !!error}
@@ -523,7 +523,7 @@ export const SmartQRGeneratorCompact: React.FC<SmartQRGeneratorCompactProps> = (
           )}
         </button>
         
-        {typeof window !== 'undefined' && navigator.share ? (
+        {typeof window !== 'undefined' && typeof navigator.share === 'function' ? (
           <button
             onClick={shareQR}
             disabled={loading || !!error}

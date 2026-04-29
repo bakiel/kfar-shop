@@ -17,7 +17,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } }
 };
 
 const policies = [
@@ -127,7 +127,7 @@ export default function ReturnsPage() {
                     variants={item}
                     className="bg-white rounded-2xl p-8 shadow-sm border border-[#478c0b]/10"
                     whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(71,140,11,0.15)' }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    transition={{ duration: 0.2, ease: 'easeOut' as const }}
                   >
                     <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ background: '#478c0b15' }}>
                       <Icon className="w-7 h-7 stroke-[1.5] text-[#478c0b]" />

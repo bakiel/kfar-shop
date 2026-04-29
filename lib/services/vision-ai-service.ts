@@ -12,6 +12,7 @@ export interface VisionAnalysis {
   features: string[];
   tags: string[];
   confidence: number;
+  ingredients?: string[];
   allergens?: string[];
   certifications?: string[];
 }

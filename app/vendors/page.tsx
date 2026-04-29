@@ -287,7 +287,7 @@ export default function VendorsPage() {
                 key={vendor.id}
                 variants={listItem}
                 whileHover={{ y: -6, boxShadow: '0 20px 40px -8px rgba(0,0,0,0.12)' }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
+                transition={{ duration: 0.25, ease: 'easeOut' as const }}
               >
                 <Link href={`/store/${vendor.id}`}>
                   <div className="bg-white rounded-2xl overflow-hidden cursor-pointer group h-full border border-gray-100/80" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>

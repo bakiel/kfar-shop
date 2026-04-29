@@ -5,11 +5,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 export interface CartItem {
   id: string;
   name: string;
-  vendorId: string;
-  vendorName: string;
+  vendorId?: string;
+  vendorName?: string;
+  vendor?: string;
   price: number;
   quantity: number;
-  image: string;
+  image?: string;
   maxQuantity?: number;
   bulkPricing?: Array<{ quantity: number; price: number }>;
   originalPrice?: number;
@@ -17,6 +18,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
+  cart: CartItem[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -118,10 +120,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getItemsByVendor = () => {
     return items.reduce((acc, item) => {
-      if (!acc[item.vendorId]) {
-        acc[item.vendorId] = [];
+      const vendorKey = item.vendorId || item.vendor || item.vendorName || 'unknown';
+      if (!acc[vendorKey]) {
+        acc[vendorKey] = [];
       }
-      acc[item.vendorId].push(item);
+      acc[vendorKey].push(item);
       return acc;
     }, {} as Record<string, CartItem[]>);
   };
@@ -209,6 +212,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <CartContext.Provider value={{
       items,
+      cart: items,
       addToCart,
       removeFromCart,
       updateQuantity,
@@ -237,6 +241,7 @@ export const useCart = () => {
 
 const defaultCartContext: CartContextType = {
   items: [],
+  cart: [],
   addToCart: () => {},
   removeFromCart: () => {},
   updateQuantity: () => {},

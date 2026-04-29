@@ -252,7 +252,7 @@ export function parseVoiceCommand(text: string, language: 'en' | 'he' | 'ar' = '
   });
   
   // Check help patterns
-  patterns.help?.forEach(pattern => {
+  (patterns as any).help?.forEach((pattern: RegExp) => {
     if (text.match(pattern)) {
       detectedIntent = CommandIntent.HELP;
       highestConfidence = Math.max(highestConfidence, 0.95);

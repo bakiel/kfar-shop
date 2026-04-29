@@ -27,6 +27,7 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const readerRef = useRef<BrowserQRCodeReader | null>(null);
+  const controlsRef = useRef<{ stop: () => void } | null>(null);
 
   useEffect(() => {
     checkCameraPermission();
@@ -57,7 +58,7 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
       if (!videoRef.current) return;
       
       readerRef.current = new BrowserQRCodeReader();
-      const devices = await readerRef.current.listVideoInputDevices();
+      const devices = await BrowserQRCodeReader.listVideoInputDevices();
       
       if (devices.length === 0) {
         setError('No camera found');
@@ -65,12 +66,12 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
       }
 
       // Prefer back camera on mobile
-      const selectedDevice = devices.find(device => 
+      const selectedDevice = devices.find((device: MediaDeviceInfo) =>
         device.label.toLowerCase().includes('back') || 
         device.label.toLowerCase().includes('rear')
       ) || devices[0];
 
-      await readerRef.current.decodeFromVideoDevice(
+      controlsRef.current = await readerRef.current.decodeFromVideoDevice(
         selectedDevice.deviceId,
         videoRef.current,
         async (result, error) => {
@@ -90,10 +91,9 @@ export const SmartQRScanner: React.FC<SmartQRScannerProps> = ({
   };
 
   const stopScanning = () => {
-    if (readerRef.current) {
-      readerRef.current.reset();
-      readerRef.current = null;
-    }
+    controlsRef.current?.stop();
+    controlsRef.current = null;
+    readerRef.current = null;
   };
 
   const handleQRCode = async (qrData: string) => {

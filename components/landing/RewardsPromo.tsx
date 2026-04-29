@@ -31,7 +31,7 @@ export default function RewardsPromo({ promotions }: RewardsPromoProps) {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+      transition: { duration: 0.5, ease: 'easeOut' as const },
     },
   };
 
@@ -129,7 +129,7 @@ export default function RewardsPromo({ promotions }: RewardsPromoProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.5, ease: 'easeOut' as const }}
           className="text-center mb-10"
         >
           <h2 className="text-2xl sm:text-3xl font-bold text-soil-brown font-display">
@@ -159,7 +159,7 @@ export default function RewardsPromo({ promotions }: RewardsPromoProps) {
                   y: -6,
                   boxShadow: '0 20px 40px -12px rgba(0,0,0,0.1)',
                 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ duration: 0.2, ease: 'easeOut' as const }}
                 className={`bg-white rounded-xl p-6 border border-gray-100 ${card.borderHover} transition-colors cursor-pointer`}
               >
                 {/* Badge */}
@@ -192,7 +192,7 @@ export default function RewardsPromo({ promotions }: RewardsPromoProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.5, delay: 0.5, ease: 'easeOut' as const }}
           className="mt-10 text-center"
         >
           <Link href="/customer/login">

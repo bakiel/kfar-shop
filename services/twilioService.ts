@@ -4,7 +4,7 @@ import twilio from 'twilio';
 // Initialize Twilio client
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+const twilioPhone = process.env.TWILIO_PHONE_NUMBER || '';
 
 const client = twilio(accountSid, authToken);
 
@@ -79,7 +79,7 @@ export class TwilioService {
         
         results.push({ phone, status: 'sent', sid: message.sid });
       } catch (error) {
-        results.push({ phone, status: 'failed', error: error.message });
+        results.push({ phone, status: 'failed', error: error instanceof Error ? error.message : String(error) });
       }
     }
     

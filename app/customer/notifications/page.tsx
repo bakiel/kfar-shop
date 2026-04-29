@@ -121,9 +121,11 @@ export default function NotificationsPage() {
       product: 'text-blue-600 bg-blue-50',
       vendor: 'text-purple-600 bg-purple-50',
       system: 'text-gray-600 bg-gray-50',
-      promotion: 'text-red-600 bg-red-50'
+      promotion: 'text-red-600 bg-red-50',
+      order_update: 'text-green-600 bg-green-50',
+      points: 'text-yellow-600 bg-yellow-50',
     };
-    return colors[type];
+    return colors[type] || colors.system;
   };
 
   const formatDate = (date: Date) => {

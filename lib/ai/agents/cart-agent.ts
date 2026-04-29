@@ -10,11 +10,11 @@ import type { CartSummary, CartItemSummary } from '../events/shopping-events';
 export interface CartItem {
   id: string;
   name: string;
-  vendorId: string;
-  vendorName: string;
+  vendorId?: string;
+  vendorName?: string;
   price: number;
   quantity: number;
-  image: string;
+  image?: string;
   maxQuantity?: number;
   bulkPricing?: Array<{ quantity: number; price: number }>;
   originalPrice?: number;
@@ -232,11 +232,12 @@ export class CartAgent {
    */
   getVendorBreakdown(cart: CartItem[]): Record<string, { items: CartItem[]; subtotal: number }> {
     return cart.reduce((acc, item) => {
-      if (!acc[item.vendorId]) {
-        acc[item.vendorId] = { items: [], subtotal: 0 };
+      const vendorKey = item.vendorId || item.vendorName || 'unknown';
+      if (!acc[vendorKey]) {
+        acc[vendorKey] = { items: [], subtotal: 0 };
       }
-      acc[item.vendorId].items.push(item);
-      acc[item.vendorId].subtotal += item.price * item.quantity;
+      acc[vendorKey].items.push(item);
+      acc[vendorKey].subtotal += item.price * item.quantity;
       return acc;
     }, {} as Record<string, { items: CartItem[]; subtotal: number }>);
   }

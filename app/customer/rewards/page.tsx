@@ -19,7 +19,7 @@ const containerVariants = {
 
 const itemVariant = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 interface PointTransaction {
@@ -114,8 +114,7 @@ export default function CustomerRewards() {
       return;
     }
     const controls = animate(0, currentPoints, {
-      duration: 1.5,
-      ease: 'easeOut',
+      duration: 1.5, ease: 'easeOut' as const,
       onUpdate: (v) => setDisplayPoints(Math.round(v)),
     });
     return () => controls.stop();
@@ -282,7 +281,7 @@ export default function CustomerRewards() {
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(progressPercent, 100)}%` }}
-              transition={{ duration: 1.2, delay: 0.5, ease: 'easeOut' }}
+              transition={{ duration: 1.2, delay: 0.5, ease: 'easeOut' as const }}
               className="h-full rounded-full"
               style={{ backgroundColor: currentTier.color }}
             />

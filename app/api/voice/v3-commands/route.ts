@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseVoiceCommand, CommandIntent } from '@/lib/voice/voiceCommandParser';
-import { AGENT_INTRO } from '@/config/voice';
+import { AGENT_INTRO, type Language, type VoiceAssistant } from '@/config/voice';
 import { getProductFeed } from '@/lib/services/live-product-feed';
 
 async function searchProducts(query: string, filters?: any) {
@@ -129,8 +129,10 @@ export async function POST(request: NextRequest) {
       }
 
       case CommandIntent.HELP: {
-        const voice = context?.voice || 'daniella';
-        const lang = language || 'en';
+        const voice = ((context?.voice || 'daniella') in AGENT_INTRO.en
+          ? context?.voice || 'daniella'
+          : 'daniella') as VoiceAssistant;
+        const lang = ((language || 'en') in AGENT_INTRO ? language || 'en' : 'en') as Language;
         response.voiceResponse = AGENT_INTRO[lang][voice] || AGENT_INTRO.en.daniella;
         response.action = 'show_help';
         break;

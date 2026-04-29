@@ -299,7 +299,7 @@ export default function AdminDashboard() {
               <motion.div
                 whileHover={{ y: -4, boxShadow: '0 20px 40px -12px rgba(0,0,0,0.08)' }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ duration: 0.2, ease: 'easeOut' as const }}
                 className="bg-white rounded-xl border border-gray-100 p-5 cursor-pointer group"
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${action.color} transition-transform group-hover:scale-110`}>

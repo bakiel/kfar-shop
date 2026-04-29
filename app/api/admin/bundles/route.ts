@@ -241,8 +241,10 @@ export async function POST(request: NextRequest) {
           values
         );
         if (result.rows[0]) {
+          const productFeed = await getProductFeed();
+          const productMap = new Map(productFeed.products.map((product) => [product.id, product]));
           return NextResponse.json(
-            { success: true, bundle: enrichBundle(result.rows[0]) },
+            { success: true, bundle: enrichBundle(result.rows[0], productMap) },
             { status: 201 }
           );
         }
@@ -375,9 +377,11 @@ export async function PATCH(request: NextRequest) {
             values
           );
           if (result.rows[0]) {
+            const productFeed = await getProductFeed();
+            const productMap = new Map(productFeed.products.map((product) => [product.id, product]));
             return NextResponse.json({
               success: true,
-              bundle: enrichBundle(result.rows[0]),
+              bundle: enrichBundle(result.rows[0], productMap),
             });
           }
         }

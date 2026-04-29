@@ -452,7 +452,7 @@ export default function DriverApplicationForm() {
         >
           {submitting ? (
             <>
-              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'easeOut' as const }}>
                 <Loader className="w-5 h-5 stroke-[1.5]" />
               </motion.div>
               {isHe ? 'שולח...' : 'Submitting...'}

@@ -15,7 +15,7 @@ export default function QRCodePayment({ amount, currency, onComplete }: QRCodePa
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
 
-  const currencySymbols = {
+  const currencySymbols: Record<string, string> = {
     ILS: '₪',
     USD: '$',
     EUR: '€',

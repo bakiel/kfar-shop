@@ -301,7 +301,7 @@ function transformDbVendorToStore(dbVendor: any, products: any[]): VendorStore {
     },
     tags: dbVendor.tags || [],
     categories: []
-  };
+  } as unknown as VendorStore;
 }
 
 function transformDbProductToEnhanced(dbProduct: any): EnhancedProduct {
@@ -356,7 +356,7 @@ function transformDbProductToEnhanced(dbProduct: any): EnhancedProduct {
 
     publishedAt: dbProduct.published_at,
     updatedAt: dbProduct.updated_at
-  };
+  } as unknown as EnhancedProduct;
 }
 
 // Export the appropriate adapter based on configuration

@@ -63,6 +63,7 @@ export default function EnhancedCartPage() {
   // Group items by vendor
   useEffect(() => {
     const groups = items.reduce((acc: VendorGroup[], item) => {
+      const vendorName = item.vendorName || item.vendor || item.vendorId || 'Marketplace Vendor';
       // Calculate item price with bulk pricing
       let itemPrice = item.price;
       if (item.bulkPricing && item.bulkPricing.length > 0) {
@@ -75,17 +76,17 @@ export default function EnhancedCartPage() {
         }
       }
 
-      const existingGroup = acc.find(g => g.vendor === item.vendorName);
+      const existingGroup = acc.find(g => g.vendor === vendorName);
       if (existingGroup) {
         existingGroup.items.push(item);
         existingGroup.subtotal += itemPrice * item.quantity;
       } else {
         acc.push({
-          vendor: item.vendorName,
-          vendorLogo: getVendorLogo(item.vendorName),
+          vendor: vendorName,
+          vendorLogo: getVendorLogo(vendorName),
           items: [item],
           subtotal: itemPrice * item.quantity,
-          estimatedDelivery: getEstimatedDelivery(item.vendorName)
+          estimatedDelivery: getEstimatedDelivery(vendorName)
         });
       }
       return acc;
@@ -457,7 +458,7 @@ export default function EnhancedCartPage() {
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${Math.min((group.subtotal / 150) * 100, 100)}%` }}
-                              transition={{ duration: 0.8, ease: 'easeOut' }}
+                              transition={{ duration: 0.8, ease: 'easeOut' as const }}
                               className="h-2 rounded-full bg-gradient-to-r from-[#478c0b] to-[#2D5A27]"
                             />
                           </div>
@@ -633,7 +634,7 @@ export default function EnhancedCartPage() {
                 >
                   <motion.div
                     animate={shouldReduceMotion ? {} : { scale: [1, 1.1, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' as const }}
                   >
                     <Heart className="w-5 h-5 mx-auto mb-2 stroke-[1.5]" />
                   </motion.div>

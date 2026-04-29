@@ -77,7 +77,7 @@ export class NFCService {
       this.isReading = true;
 
       return new Promise((resolve) => {
-        ndef.addEventListener('reading', async ({ message, serialNumber }) => {
+        ndef.addEventListener('reading', async ({ message, serialNumber }: any) => {
           clearTimeout(timeoutId);
           this.stopReading();
 

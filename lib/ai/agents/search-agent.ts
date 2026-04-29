@@ -294,17 +294,17 @@ export class SearchAgent {
     return {
       id: product.id,
       name: product.name,
-      nameHe: product.nameHe,
-      description: product.description,
+      nameHe: product.nameHe ?? undefined,
+      description: product.description ?? undefined,
       price: product.price,
       originalPrice: product.originalPrice,
       image: product.image || '/images/placeholder-product.jpg',
       vendorId: product.vendorId || '',
       vendorName: product.vendorName || '',
-      category: product.category,
+      category: product.category ?? undefined,
       inStock: product.inStock !== false,
       tags: product.tags,
-      badge: product.badge,
+      badge: product.badge ?? undefined,
     };
   }
 }

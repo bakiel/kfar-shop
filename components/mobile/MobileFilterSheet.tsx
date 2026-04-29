@@ -39,6 +39,7 @@ interface MobileFilterSheetProps {
     ratings: number | null;
     sort: string;
     selectedTags?: string[];
+    activeOnly?: boolean;
   };
   onApplyFilters: (filters: any) => void;
   vendors: Array<{ id: string; name: string; productCount: number }>;

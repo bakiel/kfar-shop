@@ -383,7 +383,7 @@ export default function AIPersonalizationDemo() {
                     <div>
                       <span className="text-sm text-gray-600">Dietary Preferences</span>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {demoCustomer.preferences.dietaryRestrictions.map((diet) => (
+                        {demoCustomer.preferences.dietaryRestrictions.map((diet: string) => (
                           <span key={diet} className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
                             {diet}
                           </span>
@@ -399,7 +399,7 @@ export default function AIPersonalizationDemo() {
                     <div>
                       <span className="text-sm text-gray-600">Favorite Categories</span>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {demoCustomer.preferences.favoriteCategories.map((cat) => (
+                        {demoCustomer.preferences.favoriteCategories.map((cat: string) => (
                           <span key={cat} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                             {cat.replace('-', ' ')}
                           </span>

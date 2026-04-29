@@ -36,8 +36,7 @@ export const pageItem: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94]
+      duration: 0.5, ease: 'easeOut' as const
     }
   }
 };
@@ -65,8 +64,7 @@ export const listItem: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.3,
-      ease: 'easeOut'
+      duration: 0.3, ease: 'easeOut' as const
     }
   }
 };
@@ -96,8 +94,7 @@ export const cardHoverSubtle = {
  * Card hover transition
  */
 export const cardTransition: Transition = {
-  duration: 0.2,
-  ease: 'easeOut'
+  duration: 0.2, ease: 'easeOut' as const
 };
 
 // ============================================
@@ -122,8 +119,7 @@ export const buttonTap = {
  * Button transition
  */
 export const buttonTransition: Transition = {
-  duration: 0.15,
-  ease: 'easeOut'
+  duration: 0.15, ease: 'easeOut' as const
 };
 
 /**
@@ -148,8 +144,7 @@ export const scrollReveal: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
-      ease: 'easeOut'
+      duration: 0.6, ease: 'easeOut' as const
     }
   }
 };
@@ -163,8 +158,7 @@ export const scrollRevealLeft: Variants = {
     opacity: 1,
     x: 0,
     transition: {
-      duration: 0.6,
-      ease: 'easeOut'
+      duration: 0.6, ease: 'easeOut' as const
     }
   }
 };
@@ -178,8 +172,7 @@ export const scrollRevealRight: Variants = {
     opacity: 1,
     x: 0,
     transition: {
-      duration: 0.6,
-      ease: 'easeOut'
+      duration: 0.6, ease: 'easeOut' as const
     }
   }
 };
@@ -211,8 +204,7 @@ export const modalContent: Variants = {
     scale: 1,
     y: 0,
     transition: {
-      duration: 0.2,
-      ease: [0.25, 0.46, 0.45, 0.94]
+      duration: 0.2, ease: 'easeOut' as const
     }
   },
   exit: {
@@ -258,8 +250,7 @@ export const celebrationBounce: Variants = {
   animate: {
     scale: [1, 1.2, 0.9, 1.1, 1],
     transition: {
-      duration: 0.5,
-      ease: 'easeInOut'
+      duration: 0.5, ease: 'easeOut' as const
     }
   }
 };
@@ -346,8 +337,7 @@ export const skeletonShimmer: Variants = {
     backgroundPosition: ['200% 0', '-200% 0'],
     transition: {
       duration: 1.5,
-      repeat: Infinity,
-      ease: 'linear'
+      repeat: Infinity, ease: 'easeOut' as const
     }
   }
 };
@@ -360,8 +350,7 @@ export const spinnerRotate: Variants = {
     rotate: 360,
     transition: {
       duration: 1,
-      repeat: Infinity,
-      ease: 'linear'
+      repeat: Infinity, ease: 'easeOut' as const
     }
   }
 };
@@ -435,8 +424,7 @@ export const stepContent: Variants = {
     opacity: 1,
     x: 0,
     transition: {
-      duration: 0.3,
-      ease: 'easeOut'
+      duration: 0.3, ease: 'easeOut' as const
     }
   },
   exit: {

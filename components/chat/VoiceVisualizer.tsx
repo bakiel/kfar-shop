@@ -6,7 +6,7 @@ interface VoiceVisualizerProps {
 
 export default function VoiceVisualizer({ isActive }: VoiceVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | null>(null);
   const barsRef = useRef<number[]>(new Array(20).fill(0));
 
   useEffect(() => {

@@ -21,7 +21,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } }
 };
 
 interface ContactCard {
@@ -203,7 +203,7 @@ export default function ContactPage() {
                     key={i}
                     variants={item}
                     whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.12)' }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    transition={{ duration: 0.2, ease: 'easeOut' as const }}
                     className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 cursor-pointer group"
                   >
                     <div
@@ -239,7 +239,7 @@ export default function ContactPage() {
                 className="lg:col-span-3"
                 initial={{ opacity: 0, y: 40 }}
                 animate={isFormInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+                transition={{ duration: 0.6, ease: 'easeOut' as const }}
               >
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-10">
                   <h2 className="text-2xl md:text-3xl font-bold text-[#3a3a1d] mb-2">
@@ -434,7 +434,7 @@ export default function ContactPage() {
                         <>
                           <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                            transition={{ duration: 1, repeat: Infinity, ease: 'easeOut' as const }}
                           >
                             <Send className="w-5 h-5 stroke-[1.5]" />
                           </motion.div>
@@ -462,7 +462,7 @@ export default function ContactPage() {
                 className="lg:col-span-2 space-y-6"
                 initial={{ opacity: 0, x: 30 }}
                 animate={isInfoInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+                transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' as const }}
               >
                 {/* WhatsApp CTA */}
                 <motion.a

@@ -7,9 +7,9 @@ export interface EnhancedProduct {
   nameHe?: string;
   description?: string;
   price: number;
-  image?: string;
+  image: string;
   category?: string;
-  vendorId?: string;
+  vendorId: string;
   vendorName?: string;
   tags?: string[];
   [key: string]: any;
@@ -19,8 +19,8 @@ export interface VendorStore {
   id: string;
   name: string;
   description?: string;
-  logo?: string;
-  products?: EnhancedProduct[];
+  logo: string;
+  products: EnhancedProduct[];
   categories?: string[];
   [key: string]: any;
 }
@@ -28,7 +28,7 @@ export interface VendorStore {
 export const TOTAL_PRODUCTS = 0;
 export const VENDOR_COUNT = 0;
 
-export function getFeaturedProducts(): EnhancedProduct[] {
+export function getFeaturedProducts(_limit?: number): EnhancedProduct[] {
   return [];
 }
 
@@ -36,18 +36,18 @@ export function getVendors(): VendorStore[] {
   return [];
 }
 
-export function getProductsByVendor(): EnhancedProduct[] {
+export function getProductsByVendor(_vendorId?: string): EnhancedProduct[] {
   return [];
 }
 
-export function getProductsByCategory(): EnhancedProduct[] {
+export function getProductsByCategory(_categoryId?: string): EnhancedProduct[] {
   return [];
 }
 
-export function getTopCategories(): Array<{ id: string; name: string; count: number }> {
+export function getTopCategories(_limit?: number): Array<{ id: string; name: string; count: number }> {
   return [];
 }
 
-export function getVendorStore(): VendorStore | undefined {
+export function getVendorStore(_vendorId?: string): VendorStore | undefined {
   return undefined;
 }

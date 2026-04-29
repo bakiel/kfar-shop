@@ -245,7 +245,7 @@ export async function addTag(
   );
 
   if (rows.length > 0) {
-    await logActivity(customerId, 'tag_added', `Tag added: ${tag}`, null, performedBy);
+    await logActivity(customerId, 'tag_added', `Tag added: ${tag}`, undefined, performedBy);
   }
 
   // Return current tags even if no update happened (tag already existed)

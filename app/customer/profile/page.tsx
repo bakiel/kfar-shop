@@ -18,7 +18,7 @@ const containerVariants = {
 
 const itemVariant = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 const TIER_COLORS: Record<string, string> = {
@@ -276,7 +276,7 @@ export default function CustomerProfile() {
             {saving ? (
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                transition={{ repeat: Infinity, duration: 1, ease: 'easeOut' as const }}
               >
                 <Save className="w-4 h-4 stroke-[1.5]" />
               </motion.div>

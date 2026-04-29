@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeOut' as const }}
         className="w-full max-w-md mx-4"
         dir={isRTL ? 'rtl' : 'ltr'}
       >

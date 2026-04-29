@@ -349,7 +349,7 @@ const SimplifiedHeader = () => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ duration: 0.2, ease: 'easeOut' as const }}
                 className="overflow-hidden"
               >
                 <form onSubmit={handleSearchSubmit} className="pb-3">

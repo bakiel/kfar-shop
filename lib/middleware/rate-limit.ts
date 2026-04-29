@@ -10,7 +10,9 @@ interface RateLimitConfig {
 
 export function rateLimit(config: RateLimitConfig = { windowMs: 60000, max: 100 }) {
   return async (request: NextRequest) => {
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
     const now = Date.now();
     
     const userLimit = rateLimitMap.get(ip);

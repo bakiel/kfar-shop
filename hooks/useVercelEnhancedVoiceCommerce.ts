@@ -59,7 +59,7 @@ export function useVercelEnhancedVoiceCommerce() {
     try {
       const result = await processCommand(transcript, {
         streaming: true,
-        onPartialResponse: (text) => {
+        onPartialResponse: (text: string) => {
           // Update UI with streaming response
           setStreamingText(text);
         },
@@ -130,7 +130,7 @@ export function useVercelEnhancedVoiceCommerce() {
       
     } catch (error) {
       console.error('Voice command processing error:', error);
-      performanceTracker.trackError('system', error.message, { transcript });
+      performanceTracker.trackError('system', error instanceof Error ? error.message : String(error), { transcript });
       setStreamingText("I'm having trouble understanding. Could you try again?");
     } finally {
       performanceTracker.endTimer('total');

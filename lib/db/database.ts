@@ -5,6 +5,8 @@
 
 import { Pool } from 'pg';
 import { Vendor, Product } from './schema';
+export type { Vendor, Product } from './schema';
+export type Category = Record<string, any>;
 
 // Database configuration
 const dbConfig = {
@@ -31,7 +33,7 @@ export async function query<T = any>(
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
     console.log('Executed query', { text, duration, rows: res.rowCount });
-    return res;
+    return { rows: res.rows as T[], rowCount: res.rowCount ?? 0 };
   } catch (error) {
     console.error('Database query error:', error);
     throw error;
@@ -239,7 +241,7 @@ export const productDb = {
       [
         id, vendorId, name, nameHe, description, category, subcategory,
         price, originalPrice, inStock, status, primaryImage, tags,
-        isVegan, isKosher, name.toLowerCase().replace(/\s+/g, '-')
+        isVegan, isKosher, (name || id || 'product').toLowerCase().replace(/\s+/g, '-')
       ]
     );
     return rows[0];

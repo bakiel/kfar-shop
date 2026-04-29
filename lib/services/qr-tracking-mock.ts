@@ -2,7 +2,7 @@
 
 export interface QRScan {
   id: string;
-  qrType: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
+  qrType: 'product' | 'vendor' | 'order' | 'collection' | 'p2p' | 'customer';
   qrCode: string;
   scannedAt: Date;
   userId?: string;
@@ -20,12 +20,12 @@ export interface QRScan {
 class MockQRTrackingService {
   private scans: QRScan[] = [];
 
-  async trackScan(scan: Partial<QRScan>): Promise<void> {
+  async trackScan(scan: Partial<QRScan> & { type?: QRScan['qrType']; code?: string }): Promise<void> {
     // Simply log the scan in memory - no external calls
     const newScan: QRScan = {
       id: `scan-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      qrType: scan.qrType || 'product',
-      qrCode: scan.qrCode || '',
+      qrType: scan.qrType || scan.type || 'product',
+      qrCode: scan.qrCode || scan.code || '',
       scannedAt: new Date(),
       metadata: scan.metadata || {},
       ...scan

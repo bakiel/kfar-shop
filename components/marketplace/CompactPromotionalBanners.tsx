@@ -214,7 +214,7 @@ export default function CompactPromotionalBanners() {
                             : 'text-white/70 hover:text-white'
                         }`}
                       >
-                        {React.cloneElement(b.icon as React.ReactElement, { className: 'h-3 w-3' })}
+                        {React.cloneElement(b.icon as React.ReactElement<{ className?: string }>, { className: 'h-3 w-3' })}
                       </button>
                     ))}
                   </div>

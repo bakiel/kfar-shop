@@ -11,7 +11,7 @@ interface NotificationCenterProps {
   customerId: string;
   isOpen: boolean;
   onClose: () => void;
-  anchorRef?: React.RefObject<HTMLElement>;
+  anchorRef?: React.RefObject<HTMLElement | null>;
 }
 
 export default function NotificationCenter({ 

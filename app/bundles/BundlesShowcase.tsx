@@ -91,7 +91,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.6, ease: 'easeOut' as const },
   },
 };
 
@@ -146,7 +146,7 @@ export default function BundlesShowcase({ bundles }: BundlesShowcaseProps) {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={heroInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.6, ease: 'easeOut' as const }}
               className="max-w-xl"
             >
               <div
@@ -319,7 +319,7 @@ function BundleDetailCard({ bundle, theme, language, isRTL, t }: BundleDetailCar
       ref={cardRef}
       variants={itemVariants}
       whileHover={{ y: -6, boxShadow: '0 30px 60px -15px rgba(0,0,0,0.12)' }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
+      transition={{ duration: 0.25, ease: 'easeOut' as const }}
       className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100/80 group flex flex-col"
     >
       {/* Header: gradient + hero image — links to detail page */}

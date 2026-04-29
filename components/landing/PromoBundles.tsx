@@ -51,7 +51,7 @@ export default function PromoBundles({ bundles, featuredProducts }: PromoBundles
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+      transition: { duration: 0.5, ease: 'easeOut' as const },
     },
   };
 
@@ -237,7 +237,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+      transition: { duration: 0.5, ease: 'easeOut' as const },
     },
   };
 
@@ -245,7 +245,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -6, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)' }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.2, ease: 'easeOut' as const }}
       className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 group flex flex-col"
     >
       {/* Header with gradient + overlaid product thumbnails — links to detail page */}
@@ -422,7 +422,7 @@ function FeaturedProductCard({ product, language, isRTL, t }: FeaturedProductCar
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+      transition: { duration: 0.5, ease: 'easeOut' as const },
     },
   };
 
@@ -434,7 +434,7 @@ function FeaturedProductCard({ product, language, isRTL, t }: FeaturedProductCar
       >
         <motion.div
           whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)' }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          transition={{ duration: 0.2, ease: 'easeOut' as const }}
           className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100"
         >
           {/* Product Image */}

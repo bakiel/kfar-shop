@@ -291,7 +291,7 @@ export class UnifiedAIService {
         }
       };
 
-      const insights = await this.deepseek.searchProducts(prompt);
+      const insights = await this.deepseek.searchProducts(prompt as AISearchQuery);
       
       return {
         success: true,
@@ -373,9 +373,9 @@ export class UnifiedAIService {
         return Array.from(array)
           .map(b => b.toString(16).padStart(2, '0'))
           .join('');
-      } else if (typeof global !== 'undefined' && global.crypto && global.crypto.randomBytes) {
+      } else if (typeof global !== 'undefined' && (global as any).crypto?.randomBytes) {
         // Node.js environment
-        return global.crypto.randomBytes(32).toString('hex');
+        return (global as any).crypto.randomBytes(32).toString('hex');
       } else {
         // Try require crypto for Node.js
         const crypto = require('crypto');
@@ -516,7 +516,7 @@ export class UnifiedAIService {
     // Cleanup old entries
     if (this.cache.size > 100) {
       const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      if (oldestKey) this.cache.delete(oldestKey);
     }
   }
 }

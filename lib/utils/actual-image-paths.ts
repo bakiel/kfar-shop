@@ -6,8 +6,8 @@
  */
 
 export const ACTUAL_IMAGE_PATHS: Record<string, {
-  logo: string;
-  banner?: string;
+  logo: string | null;
+  banner?: string | null;
   products: Record<string, string>;
 }> = {
   "atur-avior": {

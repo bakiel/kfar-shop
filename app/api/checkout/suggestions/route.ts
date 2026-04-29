@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
         name: product.name,
         nameHe: product.nameHe || undefined,
         price: product.price,
-        originalPrice: product.originalPrice,
+        originalPrice: product.originalPrice ?? undefined,
         image: product.image,
         vendorId: product.vendorId,
         vendorName: product.vendorName,

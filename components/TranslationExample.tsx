@@ -18,9 +18,9 @@ export function TranslationExample() {
   });
 
   const [productExamples] = useState([
-    { text: 'Vegan Schnitzel', context: 'product_name' as const },
-    { text: 'Plant-Based Shawarma', context: 'product_name' as const },
-    { text: 'Organic Hummus Spread', context: 'product_name' as const }
+    { id: 'vegan-schnitzel', text: 'Vegan Schnitzel', context: 'product_name' as const },
+    { id: 'plant-based-shawarma', text: 'Plant-Based Shawarma', context: 'product_name' as const },
+    { id: 'organic-hummus-spread', text: 'Organic Hummus Spread', context: 'product_name' as const }
   ]);
 
   const handleTranslate = async () => {
@@ -29,18 +29,18 @@ export function TranslationExample() {
   };
 
   const handleTranslateStore = async () => {
-    const [name, description] = await translateBatch([
-      { text: storeExample.name, context: 'store_name' },
-      { text: storeExample.description, context: 'description' }
+    const translations = await translateBatch([
+      { id: 'store-name', text: storeExample.name, context: 'store_name' },
+      { id: 'store-description', text: storeExample.description, context: 'description' }
     ], targetLang);
 
-    alert(`Store Name: ${name}\nDescription: ${description}`);
+    alert(`Store Name: ${translations['store-name']}\nDescription: ${translations['store-description']}`);
   };
 
   const handleTranslateProducts = async () => {
     const translations = await translateBatch(productExamples, targetLang);
     const message = productExamples.map((product, index) => 
-      `${product.text} → ${translations[index]}`
+      `${product.text} → ${translations[product.id]}`
     ).join('\n');
     alert(message);
   };

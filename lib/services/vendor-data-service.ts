@@ -27,12 +27,13 @@ export type EnhancedProduct = ProductFeedProduct & {
   viewCount?: number;
   purchaseCount?: number;
   popularityScore?: number;
+  [key: string]: any;
 };
 
 export type VendorStore = LiveVendor & {
   products: EnhancedProduct[];
-  branding?: { logo?: string; banner?: string };
-  info?: { description?: string; location?: string };
+  branding?: { logo?: string; banner?: string; [key: string]: any };
+  info?: { description?: string; location?: string; [key: string]: any };
   analytics?: {
     totalProducts?: number;
     activeProducts?: number;
@@ -40,7 +41,9 @@ export type VendorStore = LiveVendor & {
     totalSales?: number;
     averageRating?: number;
     reviewCount?: number;
+    followerCount?: number;
   };
+  [key: string]: any;
 };
 
 export interface VendorDataUpdate {
