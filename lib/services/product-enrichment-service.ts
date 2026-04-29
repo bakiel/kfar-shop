@@ -5,7 +5,7 @@
  * Similar to WordPress's automatic metadata extraction
  */
 
-import { EnhancedProduct } from '@/lib/data/wordpress-style-data-layer';
+import type { EnhancedProduct } from '@/lib/services/vendor-data-service';
 
 export interface VisionAnalysisResult {
   productId: string;

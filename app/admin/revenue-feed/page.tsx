@@ -45,7 +45,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
 // --- Helpers ---
@@ -125,8 +125,8 @@ export default function RevenueFeedPage() {
       if (vendorsRes.ok) {
         const vendorsJson = await vendorsRes.json();
         const vendorList: VendorInfo[] = (vendorsJson.vendors || []).map((v: any, i: number) => ({
-          id: v.id,
-          name: v.name || v.store_name || '',
+          id: v.vendorId || v.vendor_id || v.id,
+          name: v.name || v.storeName || v.store_name || '',
           logo: v.logo_url || v.logo || `/images/vendors/default-vendor.png`,
           color: v.primary_color || defaultColors[i % defaultColors.length],
           totalRevenue: v.totalRevenue || 0,

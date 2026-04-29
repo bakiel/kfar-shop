@@ -3,7 +3,7 @@
  * Handles cart operations with context integration
  */
 
-import { getProductById } from '@/lib/data/wordpress-style-data-layer';
+import { getProductById } from '@/lib/services/live-product-feed';
 import type { CartSummary, CartItemSummary } from '../events/shopping-events';
 
 // Cart item interface (matches CartContext)
@@ -36,8 +36,7 @@ export class CartAgent {
    * Returns the item to add (client-side will update context)
    */
   async addToCart(productId: string, quantity: number = 1, currentCart: CartItem[] = []): Promise<CartResult> {
-    // Get product details from data layer
-    const product = getProductById(productId);
+    const product = await getProductById(productId);
 
     if (!product) {
       return {
@@ -64,7 +63,7 @@ export class CartAgent {
       price: product.price,
       quantity,
       image: product.image || '/images/placeholder-product.jpg',
-      originalPrice: product.originalPrice,
+      originalPrice: product.originalPrice ?? undefined,
     };
 
     // Check if already in cart

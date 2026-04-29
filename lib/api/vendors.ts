@@ -1,7 +1,7 @@
 // Vendors API
 
 import { api } from './client';
-import { Vendor } from '@/lib/data/products';
+import type { Vendor } from '@/lib/data/products';
 
 export interface VendorsQuery {
   category?: string;

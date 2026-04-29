@@ -25,13 +25,32 @@ NODE
   )"
 fi
 
-if [[ ! -d node_modules ]]; then
-  echo "[build-release] Installing dependencies with npm ci..."
-  npm ci --no-audit --no-fund
+NODE_BIN="${NODE_BIN:-$(command -v node || true)}"
+NPM_BIN="${NPM_BIN:-$(command -v npm || true)}"
+
+if [[ -z "$NODE_BIN" ]]; then
+  echo "[build-release] ERROR: node is required but was not found on PATH"
+  exit 1
 fi
 
+if [[ ! -d node_modules ]]; then
+  if [[ -z "$NPM_BIN" ]]; then
+    echo "[build-release] ERROR: node_modules is missing and npm was not found on PATH"
+    exit 1
+  fi
+  echo "[build-release] Installing dependencies with npm ci..."
+  "$NPM_BIN" ci --no-audit --no-fund
+fi
+
+echo "[build-release] Verifying live data source guard..."
+"$NODE_BIN" scripts/guard-live-data-source.mjs
+
 echo "[build-release] Building standalone Next.js output..."
-NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}" npm run build:standalone
+if [[ -n "$NPM_BIN" ]]; then
+  NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}" "$NPM_BIN" run build:standalone
+else
+  NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}" "$NODE_BIN" node_modules/next/dist/bin/next build --no-lint
+fi
 
 if [[ ! -f .next/standalone/server.js ]]; then
   echo "[build-release] ERROR: .next/standalone/server.js was not produced"
@@ -43,8 +62,10 @@ mkdir -p "$RELEASE_ROOT/.next"
 
 echo "[build-release] Staging release files..."
 cp -R .next/standalone/. "$RELEASE_ROOT/"
+rm -rf "$RELEASE_ROOT/.next/static" "$RELEASE_ROOT/public"
 cp -R .next/static "$RELEASE_ROOT/.next/static"
-cp -R public "$RELEASE_ROOT/public"
+mkdir -p "$RELEASE_ROOT/public"
+cp -R public/. "$RELEASE_ROOT/public/"
 git rev-parse HEAD > "$RELEASE_ROOT/REVISION"
 
 ARTIFACT_SHA="$(git rev-parse --short HEAD)"

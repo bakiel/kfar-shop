@@ -1,11 +1,10 @@
 /**
  * Data Adapter Service
- * Provides abstraction layer to switch between JSON files and database
- * Ensures backward compatibility while enabling gradual migration
- * Now uses PostgreSQL instead of Supabase
+ * Compatibility adapter for older modules.
+ * Both adapter branches now resolve against PostgreSQL-backed services.
  */
 
-import { VendorStore, EnhancedProduct } from '@/lib/data/wordpress-style-data-layer';
+import type { VendorStore, EnhancedProduct } from '@/lib/services/vendor-data-service';
 import vendorDataService from '@/lib/services/vendor-data-service';
 import { db, query } from '@/lib/db/postgres-client';
 

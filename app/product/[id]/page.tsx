@@ -16,8 +16,6 @@ import {
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/lib/context/CartContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { completeProductCatalog } from '@/lib/data/complete-catalog';
-import { getProductImage, getProductImages, getVendorLogo } from '@/lib/utils/image-manager';
 import { SmartQRCompactFixed } from '@/components/qr/SmartQRCompactFixed';
 import ProductReviews from '@/components/product/ProductReviews';
 import MobileFilterSheet from '@/components/mobile/MobileFilterSheet';
@@ -41,12 +39,6 @@ import {
   imageFade
 } from '@/lib/animations/motion-variants';
 
-// Helper function to get products by vendor
-function getProductsByVendor(vendorId: string) {
-  const vendorData = completeProductCatalog[vendorId];
-  return vendorData ? vendorData.products : [];
-}
-
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -63,6 +55,8 @@ export default function ProductDetailPage() {
 
   // State
   const [product, setProduct] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileCart, setShowMobileCart] = useState(false);
@@ -120,109 +114,83 @@ export default function ProductDetailPage() {
   const fetchProduct = async () => {
     setLoading(true);
       
-      // First, try to fetch from our API
       try {
         const response = await fetch(`/api/products/${productId}`);
         if (response.ok) {
           const data = await response.json();
-            
-            // Find vendor info from catalog if needed
-            let vendorInfo = null;
-            for (const [vendorId, vendorData] of Object.entries(completeProductCatalog)) {
-              if (vendorData.vendorName === data.vendor_name) {
-                vendorInfo = vendorData;
-                break;
-              }
-            }
-            
-            // Transform API data to match our product structure
-            const transformedProduct = {
-              ...data,
-              id: data.id,
-              image: data.image || data.primary_image || '/images/placeholder.jpg',
-              images: data.images || [data.image || '/images/placeholder.jpg'],
-              name: data.name,
-              description: data.description,
-              rating: data.rating || 4.5,
-              reviewCount: data.reviewCount || 0,
-              vendor: data.vendorName || data.vendor_name,
-              vendorId: data.vendorId || data.vendor_id,
-              vendorLogo: vendorInfo?.logo || '/images/placeholder.jpg',
-              longDescription: data.longDescription || data.description,
-              specifications: data.extendedData?.specifications ? [
-                { label: 'Weight', value: data.extendedData.specifications.weight },
-                { label: 'Servings', value: data.extendedData.specifications.servings },
-                { label: 'Shelf Life', value: data.extendedData.specifications.shelf_life },
-                { label: 'Ingredients', value: data.extendedData.specifications.ingredients?.join(', ') }
-              ].filter(spec => spec.value) : [],
-              culturalSignificance: data.culturalSignificance || null,
-              shippingInfo: data.extendedData?.shipping_info || {
-                localPickup: true,
-                delivery: true,
-                international: false
-              },
-              inStock: data.inStock !== false,
-              vegan: data.isVegan || data.vegan,
-              kosher: data.isKosher || data.kosher,
-              organic: data.organic || false,
-              kashrut: (data.isKosher || data.kosher) ? 'Kosher Certified' : null,
-              glutenFree: data.glutenFree || false,
-              price: data.price,
-              originalPrice: data.originalPrice,
-              category: data.category,
-              unit: data.unit || 'piece',
-              minimumOrder: data.minimumOrder || 1
-            };
-            
-            setProduct(transformedProduct);
-            setLoading(false);
-            setTimeout(() => setPageLoaded(true), 100);
-            return;
-          }
-      } catch (error) {
-        console.error('Error fetching from API:', error);
-      }
-      
-      // If not found in API or not numeric, check the catalog
-      let foundProduct = null;
-      let foundVendorInfo = null;
-      
-      for (const [vendorId, vendorData] of Object.entries(completeProductCatalog)) {
-        const found = vendorData.products.find(p => p.id === productId);
-        if (found) {
-          foundVendorInfo = vendorData;
-          const productImage = getProductImage(vendorId, productId);
-          const productImages = getProductImages(vendorId, productId);
-          
-          foundProduct = {
-            ...found,
-            image: productImage,
-            images: productImages,
-            rating: found.rating || 4.5,
-            reviewCount: found.reviewCount || 127,
-            vendor: vendorData.vendorName,
-            vendorId: vendorId,
-            vendorLogo: getVendorLogo(vendorId),
-            longDescription: found.longDescription || found.description,
-            specifications: found.specifications || [],
-            culturalSignificance: found.culturalSignificance || null,
-            shippingInfo: found.shippingInfo || {
+          const transformedProduct = {
+            ...data,
+            id: data.id,
+            image: data.image || '/images/placeholder.jpg',
+            images: data.images?.length ? data.images : [data.image || '/images/placeholder.jpg'],
+            name: data.name,
+            description: data.description,
+            rating: data.rating || 4.5,
+            reviewCount: data.reviewCount || 0,
+            vendor: data.vendorName || data.vendor_name,
+            vendorId: data.vendorId || data.vendor_id,
+            vendorLogo: data.vendorLogo || '/images/placeholder.jpg',
+            longDescription: data.longDescription || data.description,
+            specifications: data.specifications || [],
+            culturalSignificance: data.culturalSignificance || null,
+            shippingInfo: data.extendedData?.shipping_info || {
               localPickup: true,
               delivery: true,
               international: false
-            }
+            },
+            inStock: data.inStock !== false,
+            vegan: data.isVegan || data.vegan,
+            kosher: data.isKosher || data.kosher || Boolean(data.kashrut),
+            organic: data.organic || false,
+            kashrut: data.kashrut || ((data.isKosher || data.kosher) ? 'Kosher Certified' : null),
+            glutenFree: data.glutenFree || false,
+            price: data.price,
+            originalPrice: data.originalPrice,
+            category: data.category,
+            unit: data.unit || 'piece',
+            minimumOrder: data.minimumOrder || 1
           };
-          break;
+
+          setProduct(transformedProduct);
+
+          const [vendorProductsResponse, recentProductsResponse] = await Promise.all([
+            transformedProduct.vendorId
+              ? fetch(`/api/products-db?vendor=${encodeURIComponent(transformedProduct.vendorId)}&limit=8`, { cache: 'no-store' })
+              : Promise.resolve(null),
+            fetch('/api/products-db?limit=8', { cache: 'no-store' }),
+          ]);
+
+          if (vendorProductsResponse?.ok) {
+            const vendorProductsData = await vendorProductsResponse.json();
+            setRelatedProducts((vendorProductsData.products || [])
+              .filter((p: any) => p.id !== transformedProduct.id)
+              .slice(0, 4)
+              .map((p: any) => ({
+                ...p,
+                vendorName: transformedProduct.vendor
+              })));
+          }
+
+          if (recentProductsResponse.ok) {
+            const recentProductsData = await recentProductsResponse.json();
+            setRecentlyViewed((recentProductsData.products || [])
+              .filter((p: any) => p.id !== transformedProduct.id)
+              .slice(0, 6));
+          }
+
+          setLoading(false);
+          setTimeout(() => setPageLoaded(true), 100);
+          return;
         }
+      } catch (error) {
+        console.error('Error fetching from API:', error);
       }
-      
-      setProduct(foundProduct);
+
+      setProduct(null);
       setLoading(false);
       setTimeout(() => setPageLoaded(true), 100);
 
-      if (!foundProduct) {
-        router.push('/marketplace');
-      }
+      router.push('/marketplace');
     };
 
     useEffect(() => {
@@ -256,39 +224,6 @@ export default function ProductDetailPage() {
     EUR: '€',
     GBP: '£'
   };
-
-  // Get related products
-  const relatedProducts = product ? (
-    product.vendorId && typeof product.vendorId === 'string' 
-      ? getProductsByVendor(product.vendorId)
-          .filter(p => p.id !== product.id)
-          .map(p => {
-            const productImage = getProductImage(product.vendorId, p.id);
-            return {
-              ...p,
-              image: productImage,
-              rating: p.rating || 4.5,
-              reviewCount: p.reviewCount || Math.floor(Math.random() * 200) + 50,
-              vendorName: product.vendor
-            };
-          })
-          .slice(0, 3)
-      : []
-  ) : [];
-
-  // Recently viewed products (mock data)
-  const allProducts: any[] = [];
-  Object.entries(completeProductCatalog).forEach(([vendorId, vendor]) => {
-    vendor.products.forEach(p => {
-      const productImage = getProductImage(vendorId, p.id);
-      allProducts.push({
-        ...p,
-        image: productImage,
-        vendorId: vendorId
-      });
-    });
-  });
-  const recentlyViewed = allProducts.slice(0, 6);
 
   if (loading) {
     return (

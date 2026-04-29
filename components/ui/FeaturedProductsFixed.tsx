@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getFeaturedProducts } from '@/lib/data/wordpress-style-data-layer';
 import { Product } from '@/lib/types/product';
 import { ShoppingBag, Search, ShoppingCart, Star, Heart, Store, ArrowRight, LayoutGrid, Drumstick, IceCreamCone, CookingPot, type LucideIcon } from 'lucide-react';
 
@@ -19,19 +18,64 @@ const FeaturedProductsFixed = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [vendorCount, setVendorCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsVisible(true);
-    // Load featured products from the data layer
-    try {
-      const featuredProducts = getFeaturedProducts(12);
-      setProducts(featuredProducts);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading products:', error);
-      setLoading(false);
-    }
+
+    const loadFeaturedProducts = async () => {
+      try {
+        const [productsResponse, vendorsResponse] = await Promise.all([
+          fetch('/api/products-db?limit=24', { cache: 'no-store' }),
+          fetch('/api/vendors', { cache: 'no-store' }),
+        ]);
+
+        if (!productsResponse.ok) throw new Error(`Product feed failed: ${productsResponse.status}`);
+        const productData = await productsResponse.json();
+        const liveProducts: Product[] = (productData.products || []).map((product: any) => ({
+          id: product.id,
+          name: product.name,
+          nameHe: product.nameHe,
+          description: product.description || '',
+          price: Number(product.price) || 0,
+          originalPrice: product.originalPrice,
+          category: product.category || 'general',
+          image: product.image || product.images?.[0] || '/images/placeholder-product.jpg',
+          images: product.images || [],
+          kashrut: product.kashrut,
+          vegan: product.vegan !== false,
+          organic: product.organic === true,
+          glutenFree: product.glutenFree === true,
+          unit: product.unit || 'unit',
+          minimumOrder: product.minimumOrder || 1,
+          inStock: product.inStock !== false,
+          rating: product.rating || 4.5,
+          reviewCount: product.reviewCount || 0,
+          isFeatured: product.isFeatured,
+          badge: product.badge,
+          vendorId: product.vendorId,
+          vendorName: product.vendorName,
+          vendorLogo: product.vendorLogo || undefined,
+          tags: product.tags || [],
+        }));
+
+        const featuredProducts = liveProducts.filter(product => product.isFeatured).slice(0, 12);
+        setProducts(featuredProducts.length > 0 ? featuredProducts : liveProducts.slice(0, 12));
+
+        if (vendorsResponse.ok) {
+          const vendorData = await vendorsResponse.json();
+          setVendorCount(vendorData.total || vendorData.vendors?.length || 0);
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFeaturedProducts();
   }, []);
 
   const categories = [
@@ -287,7 +331,7 @@ const FeaturedProductsFixed = () => {
             </div>
             <div className="w-px h-12" style={{ backgroundColor: '#e5e7eb' }}></div>
             <div className="text-center">
-              <div className="text-3xl font-bold mb-1" style={{ color: '#f6af0d' }}>6</div>
+              <div className="text-3xl font-bold mb-1" style={{ color: '#f6af0d' }}>{vendorCount}</div>
               <div className="text-sm" style={{ color: '#6b7280' }}>Trusted Vendors</div>
             </div>
             <div className="w-px h-12" style={{ backgroundColor: '#e5e7eb' }}></div>

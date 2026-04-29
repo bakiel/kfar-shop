@@ -9,7 +9,6 @@ import {
   MapPin, User, Home, Store, Filter, Globe, Heart
 } from 'lucide-react';
 import { useCart } from '@/lib/context/CartContext';
-import { completeProductCatalog } from '@/lib/data/complete-catalog';
 
 interface HeaderConfig {
   variant: 'default' | 'vendor' | 'checkout' | 'minimal' | 'product';
@@ -100,43 +99,12 @@ export default function HeaderSystem({ config }: { config?: HeaderConfig } = {})
   // Handle search suggestions
   useEffect(() => {
     if (searchQuery.length > 1) {
-      // Search products
-      const productSuggestions = completeProductCatalog.flatMap(vendor => 
-        vendor.products
-          .filter(product => 
-            product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.description.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-          .map(product => ({
-            type: 'product',
-            id: product.id,
-            name: product.name,
-            vendor: vendor.name,
-            price: product.price,
-            image: product.image
-          }))
-      ).slice(0, 5);
-
-      // Search vendors
-      const vendorSuggestions = completeProductCatalog
-        .filter(vendor => 
-          vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          vendor.description.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .map(vendor => ({
-          type: 'vendor',
-          id: vendor.id,
-          name: vendor.name,
-          description: vendor.description,
-          productCount: vendor.products.length,
-          logo: vendor.logo
-        }))
-        .slice(0, 3);
-
+      const controller = new AbortController();
+      const query = searchQuery.toLowerCase();
       // Search categories
       const categories = ['Vegan Deli', 'Ice Cream', 'Organic', 'Bulk Foods', 'Heritage'];
       const categorySuggestions = categories
-        .filter(cat => cat.toLowerCase().includes(searchQuery.toLowerCase()))
+        .filter(cat => cat.toLowerCase().includes(query))
         .map(cat => ({
           type: 'category',
           name: cat,
@@ -144,7 +112,48 @@ export default function HeaderSystem({ config }: { config?: HeaderConfig } = {})
         }))
         .slice(0, 2);
 
-      setSearchSuggestions([...productSuggestions, ...vendorSuggestions, ...categorySuggestions]);
+      Promise.all([
+        fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&limit=5`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        }).then(res => res.ok ? res.json() : { results: [] }),
+        fetch('/api/vendors', {
+          cache: 'no-store',
+          signal: controller.signal,
+        }).then(res => res.ok ? res.json() : { vendors: [] }),
+      ]).then(([productData, vendorData]) => {
+        const productSuggestions = (productData.results || []).map((product: any) => ({
+          type: 'product',
+          id: product.id,
+          name: product.name,
+          vendor: product.vendorName,
+          price: product.price,
+          image: product.image
+        }));
+
+        const vendorSuggestions = (vendorData.vendors || [])
+          .filter((vendor: any) =>
+            vendor.name?.toLowerCase().includes(query) ||
+            vendor.description?.toLowerCase().includes(query)
+          )
+          .slice(0, 3)
+          .map((vendor: any) => ({
+            type: 'vendor',
+            id: vendor.id,
+            name: vendor.name,
+            description: vendor.description,
+            productCount: vendor.productCount,
+            logo: vendor.logo
+          }));
+
+        setSearchSuggestions([...productSuggestions, ...vendorSuggestions, ...categorySuggestions]);
+      }).catch((error) => {
+        if ((error as any)?.name !== 'AbortError') {
+          setSearchSuggestions(categorySuggestions);
+        }
+      });
+
+      return () => controller.abort();
     } else {
       setSearchSuggestions([]);
     }

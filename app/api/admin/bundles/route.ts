@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProductById } from '@/lib/data/wordpress-style-data-layer';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
 import {
   getBundleRecordOriginalPrice,
@@ -11,12 +10,13 @@ import {
   sortBundleRecords,
 } from '@/lib/db/bundles';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import { getProductFeed, ProductFeedProduct } from '@/lib/services/live-product-feed';
 
 // Enrich bundle with resolved product details
-function enrichBundle(bundle: any) {
+function enrichBundle(bundle: any, productMap: Map<string, ProductFeedProduct>) {
   const normalized = normalizeBundleRecord(bundle);
   const resolvedProducts = normalized.products.map((pid: string) => {
-    const product = getProductById(pid);
+    const product = productMap.get(pid);
     if (product) {
       return {
         id: product.id,
@@ -83,7 +83,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const enriched = bundles.map(enrichBundle);
+    const productFeed = await getProductFeed();
+    const productMap = new Map(productFeed.products.map((product) => [product.id, product]));
+    const enriched = bundles.map((bundle) => enrichBundle(bundle, productMap));
 
     // Single bundle lookup
     if (bundleId) {

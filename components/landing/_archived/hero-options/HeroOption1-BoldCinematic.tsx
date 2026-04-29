@@ -22,7 +22,7 @@ import {
   Leaf, Shield, Truck, Clock
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getFeaturedProducts, TOTAL_PRODUCTS, VENDOR_COUNT } from '@/lib/data/wordpress-style-data-layer';
+import { getFeaturedProducts, TOTAL_PRODUCTS, VENDOR_COUNT } from '../archived-data';
 
 const heroImages = [
   '/images/hero/13.jpg',

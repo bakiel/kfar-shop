@@ -1,10 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/services/auth-service';
 import { query } from '@/lib/db/postgres-client';
+import { invalidateProductFeedCache } from '@/lib/services/live-product-feed';
+import { invalidateVendorFeedCache } from '@/lib/services/live-vendor-feed';
 
 function getUser(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
   return token ? verifyAccessToken(token) : null;
+}
+
+function asArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (typeof value === 'string' && value) return [value];
+  return [];
+}
+
+function normalizeVendorProduct(row: any) {
+  const images = asArray(row.image_gallery || row.images);
+  const image = row.image_url || row.primary_image || row.image_path || row.image || images[0] || '/images/placeholder-product.jpg';
+  return {
+    ...row,
+    image,
+    images: images.length > 0 ? images : (image ? [image] : []),
+  };
+}
+
+function invalidateLiveFeedCaches() {
+  invalidateProductFeedCache();
+  invalidateVendorFeedCache();
 }
 
 // Helper to verify product ownership
@@ -26,13 +49,13 @@ export async function GET(
     const user = getUser(request);
     if (!user) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { success: false, error: 'Authentication required' },
         { status: 401 }
       );
     }
     if (user.role !== 'vendor' || !user.vendorId) {
       return NextResponse.json(
-        { error: 'Vendor access required' },
+        { success: false, error: 'Vendor access required' },
         { status: 403 }
       );
     }
@@ -46,19 +69,19 @@ export async function GET(
 
     if (rows.length === 0) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { success: false, error: 'Product not found' },
         { status: 404 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      product: rows[0],
+      product: normalizeVendorProduct(rows[0]),
     });
   } catch (error) {
     console.error('Error fetching product:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch product', details: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: 'Failed to fetch product', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -73,13 +96,13 @@ export async function PUT(
     const user = getUser(request);
     if (!user) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { success: false, error: 'Authentication required' },
         { status: 401 }
       );
     }
     if (user.role !== 'vendor' || !user.vendorId) {
       return NextResponse.json(
-        { error: 'Vendor access required' },
+        { success: false, error: 'Vendor access required' },
         { status: 403 }
       );
     }
@@ -90,46 +113,68 @@ export async function PUT(
     const ownership = await verifyProductOwnership(productId, user.vendorId);
     if (!ownership.exists) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { success: false, error: 'Product not found' },
         { status: 404 }
       );
     }
     if (!ownership.owned) {
       return NextResponse.json(
-        { error: 'Product does not belong to this vendor' },
+        { success: false, error: 'Product does not belong to this vendor' },
         { status: 403 }
       );
     }
 
     const body = await request.json();
 
-    // Build dynamic update - only update fields that are provided
-    const allowedFields = [
-      'name', 'name_he', 'description', 'description_he',
-      'price', 'category', 'image', 'images', 'tags',
-      'status', 'stock_quantity', 'unit',
-    ];
+    // Build dynamic update against the live DB schema. UI aliases map here.
+    const fieldMap: Record<string, string> = {
+      name: 'name',
+      name_he: 'name_he',
+      description: 'description',
+      description_he: 'description_he',
+      price: 'price',
+      original_price: 'original_price',
+      category: 'category',
+      image: 'image_url',
+      image_url: 'image_url',
+      images: 'image_gallery',
+      image_gallery: 'image_gallery',
+      tags: 'tags',
+      status: 'status',
+      stock_quantity: 'stock_quantity',
+      unit: 'unit',
+      is_vegan: 'is_vegan',
+      is_kosher: 'is_kosher',
+      is_organic: 'is_organic',
+      is_gluten_free: 'is_gluten_free',
+      nutritional_info: 'nutritional_info',
+      ingredients: 'ingredients',
+      allergens: 'allergens',
+    };
 
     const updateFields: string[] = [];
     const values: any[] = [productId]; // $1 is always the product ID
+    const seenColumns = new Set<string>();
     let paramIndex = 2;
 
-    for (const field of allowedFields) {
+    for (const field of Object.keys(fieldMap)) {
       if (body[field] !== undefined) {
+        const column = fieldMap[field];
+        if (seenColumns.has(column)) continue;
         let value = body[field];
-        // Serialize arrays/objects to JSON
-        if (field === 'images' || field === 'tags') {
-          value = JSON.stringify(value);
+        if (column === 'image_gallery' || column === 'tags' || column === 'ingredients' || column === 'allergens') {
+          value = asArray(value);
         }
-        updateFields.push(`${field} = $${paramIndex}`);
+        updateFields.push(`${column} = $${paramIndex}`);
         values.push(value);
+        seenColumns.add(column);
         paramIndex++;
       }
     }
 
     if (updateFields.length === 0) {
       return NextResponse.json(
-        { error: 'No valid fields to update' },
+        { success: false, error: 'No valid fields to update' },
         { status: 400 }
       );
     }
@@ -141,14 +186,16 @@ export async function PUT(
       values
     );
 
+    invalidateLiveFeedCaches();
+
     return NextResponse.json({
       success: true,
-      product: rows[0],
+      product: normalizeVendorProduct(rows[0]),
     });
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json(
-      { error: 'Failed to update product', details: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: 'Failed to update product', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -163,13 +210,13 @@ export async function DELETE(
     const user = getUser(request);
     if (!user) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { success: false, error: 'Authentication required' },
         { status: 401 }
       );
     }
     if (user.role !== 'vendor' || !user.vendorId) {
       return NextResponse.json(
-        { error: 'Vendor access required' },
+        { success: false, error: 'Vendor access required' },
         { status: 403 }
       );
     }
@@ -180,13 +227,13 @@ export async function DELETE(
     const ownership = await verifyProductOwnership(productId, user.vendorId);
     if (!ownership.exists) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { success: false, error: 'Product not found' },
         { status: 404 }
       );
     }
     if (!ownership.owned) {
       return NextResponse.json(
-        { error: 'Product does not belong to this vendor' },
+        { success: false, error: 'Product does not belong to this vendor' },
         { status: 403 }
       );
     }
@@ -197,6 +244,8 @@ export async function DELETE(
       [productId]
     );
 
+    invalidateLiveFeedCaches();
+
     return NextResponse.json({
       success: true,
       message: 'Product archived successfully',
@@ -205,7 +254,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error deleting product:', error);
     return NextResponse.json(
-      { error: 'Failed to delete product', details: error instanceof Error ? error.message : 'Unknown error' },
+      { success: false, error: 'Failed to delete product', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

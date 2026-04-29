@@ -1,7 +1,7 @@
 // Product service using backend API
 import { productsApi } from '@/lib/api/products';
 import { vendorsApi } from '@/lib/api/vendors';
-import { Product as ApiProduct } from '@/lib/data/products';
+import type { Product as ApiProduct } from '@/lib/data/products';
 
 export type Vendor = {
   id: string;
@@ -56,9 +56,7 @@ export async function getProducts(): Promise<Product[]> {
     return apiProducts.map(convertToServiceProduct);
   } catch (error) {
     console.error('Error fetching products:', error);
-    // Fallback to mock data if API fails
-    const { products: localProducts } = await import('@/lib/data/products');
-    return localProducts.filter(p => p.is_active !== false);
+    return [];
   }
 }
 

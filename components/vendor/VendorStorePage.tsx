@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Filter, Star, Clock, MapPin, Phone, Mail, Facebook, Instagram, ShoppingCart, Info, Truck, CreditCard, Award } from 'lucide-react';
-import { Product } from '@/lib/data/products';
+import type { Product } from '@/lib/data/products';
 import { useCart } from '@/lib/context/CartContext';
 import ProductImage from '@/components/ui/ProductImage';
 import { SmartQRCompactFixed } from '@/components/qr/SmartQRCompactFixed';

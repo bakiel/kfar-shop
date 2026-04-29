@@ -13,7 +13,6 @@ import { PageHeader, StatCard, DataTable } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
-import { vendorStores, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
 import SalesLeaderboards from '@/components/vendor/SalesLeaderboards';
 
 // --- Types ---
@@ -63,6 +62,7 @@ export default function VendorDashboard() {
 
   const [vendorId, setVendorId] = useState('');
   const [vendorName, setVendorName] = useState('');
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [productCount, setProductCount] = useState(0);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
@@ -130,6 +130,40 @@ export default function VendorDashboard() {
     }
   }, [isRTL]);
 
+  const fetchPublicVendorSnapshot = useCallback(async (id: string, shouldPopulateProducts: boolean) => {
+    try {
+      const response = await fetch(`/api/vendors/${id}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Vendor feed failed: ${response.status}`);
+      const vendor = await response.json();
+      const products = Array.isArray(vendor?.products) ? vendor.products : [];
+
+      if (vendor?.logo) setStoreLogo(vendor.logo);
+      if (vendor?.name) setVendorName(current => current || vendor.name);
+      if (shouldPopulateProducts) {
+        setProductCount(products.length);
+        const tops: TopProduct[] = products.slice(0, 5).map((product: any) => ({
+          id: product.id,
+          name: isRTL && product.nameHe ? product.nameHe : product.name,
+          image: product.image || product.images?.[0] || '/images/placeholder.jpg',
+          price: Number(product.price) || 0,
+          sold: 0,
+        }));
+        setTopProducts(tops);
+      }
+    } catch (error) {
+      console.error('Error fetching public vendor snapshot:', error);
+      if (shouldPopulateProducts) {
+        setProductCount(0);
+        setTopProducts([]);
+      }
+    } finally {
+      if (shouldPopulateProducts) {
+        setLoadingOrders(false);
+        setLoadingAnalytics(false);
+      }
+    }
+  }, [isRTL]);
+
   useEffect(() => {
     // Get vendor info from auth context or legacy localStorage
     let id = user?.vendorId || '';
@@ -149,28 +183,23 @@ export default function VendorDashboard() {
     setVendorId(id);
     setVendorName(name);
 
+    if (id) {
+      fetchPublicVendorSnapshot(id, !accessToken);
+    }
+
     // Fetch from real APIs if we have an access token
     if (accessToken) {
       fetchAnalytics(accessToken);
       fetchRecentOrders(accessToken);
     } else {
-      // No token -- use static data fallback for product count and top products
-      if (id) {
-        const products = getProductsByVendor(id);
-        setProductCount(products.length);
-        const tops: TopProduct[] = products.slice(0, 5).map((p) => ({
-          id: p.id,
-          name: (isRTL && (p as Record<string, unknown>).nameHe) ? String((p as Record<string, unknown>).nameHe) : p.name,
-          image: p.image || '/images/placeholder.jpg',
-          price: p.price,
-          sold: 0,
-        }));
-        setTopProducts(tops);
+      if (!id) {
+        setProductCount(0);
+        setTopProducts([]);
+        setLoadingOrders(false);
+        setLoadingAnalytics(false);
       }
-      setLoadingOrders(false);
-      setLoadingAnalytics(false);
     }
-  }, [user, accessToken, isRTL, fetchAnalytics, fetchRecentOrders]);
+  }, [user, accessToken, isRTL, fetchAnalytics, fetchRecentOrders, fetchPublicVendorSnapshot]);
 
   // --- Order table columns ---
   const orderColumns: Column<RecentOrder>[] = [
@@ -261,10 +290,6 @@ export default function VendorDashboard() {
       color: '#3a3a1d',
     },
   ];
-
-  // --- Vendor store info ---
-  const vendorStore = vendorStores[vendorId];
-  const storeLogo = vendorStore?.logo;
 
   // Derived stats
   const totalRevenue = analytics?.totalRevenue ?? 0;

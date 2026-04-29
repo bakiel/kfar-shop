@@ -11,5 +11,9 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     db: dbOk,
+  }, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
+    },
   });
 }

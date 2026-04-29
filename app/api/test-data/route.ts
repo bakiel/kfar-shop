@@ -1,17 +1,23 @@
 import { NextResponse } from 'next/server';
+import { getProductFeed } from '@/lib/services/live-product-feed';
+import { getVendorFeed } from '@/lib/services/live-vendor-feed';
 
 export async function GET() {
   try {
-    // Try to import the data layer
-    const dataLayer = await import('@/lib/data/wordpress-style-data-layer');
-    
+    const [vendorFeed, productFeed] = await Promise.all([
+      getVendorFeed(),
+      getProductFeed(),
+    ]);
+
     return NextResponse.json({
-      success: true,
-      vendorCount: dataLayer.VENDOR_COUNT,
-      totalProducts: dataLayer.TOTAL_PRODUCTS,
-      vendors: Object.keys(dataLayer.vendorStores),
-      sampleProduct: dataLayer.getAllProducts()[0] || null
-    });
+      success: productFeed.success && vendorFeed.success,
+      source: productFeed.source,
+      stale: productFeed.stale || vendorFeed.stale,
+      vendorCount: vendorFeed.count,
+      totalProducts: productFeed.count,
+      vendors: vendorFeed.vendors.map(vendor => vendor.id),
+      sampleProduct: productFeed.products[0] || null
+    }, { status: productFeed.success && vendorFeed.success ? 200 : 503 });
   } catch (error) {
     return NextResponse.json({
       success: false,

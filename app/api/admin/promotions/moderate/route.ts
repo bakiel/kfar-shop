@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import { query } from '@/lib/db/postgres-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { promotionId, action, priority } = await request.json();
+    const { promotionId, action } = await request.json();
 
     // Validate input
     if (!promotionId || !action) {
@@ -27,28 +28,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // In production, this would update the database
-    console.log(`Promotion ${promotionId} ${action}d with priority ${priority}`);
+    const { rows: columnRows } = await query<{ column_name: string }>(
+      `SELECT column_name
+       FROM information_schema.columns
+       WHERE table_schema = 'public'
+         AND table_name = 'promotions'`,
+      []
+    );
+    const columns = new Set(columnRows.map(row => row.column_name));
+    if (!columns.has('status')) {
+      return NextResponse.json({ error: 'Promotions status column unavailable' }, { status: 503 });
+    }
 
-    // Simulate database update
-    const updatedPromotion = {
-      id: promotionId,
-      status: action === 'approve' ? 'approved' : 'rejected',
-      priority: priority || 5,
-      moderated_at: new Date().toISOString(),
-      moderated_by: 'admin' // In production, get from auth
-    };
+    const nextStatus = action === 'approve' ? 'approved' : 'rejected';
+    const updates = ['status = $2'];
+    const values: any[] = [promotionId, nextStatus];
 
-    // If approved, schedule it to go active
-    if (action === 'approve') {
-      // In production, you might want to check start_date
-      // and set up a cron job or trigger to activate it
-      console.log('Scheduling promotion to go active...');
+    if (columns.has('is_active')) {
+      values.push(action === 'approve');
+      updates.push(`is_active = $${values.length}`);
+    }
+    if (columns.has('updated_at')) {
+      updates.push('updated_at = NOW()');
+    }
+
+    const { rows } = await query(
+      `UPDATE promotions
+       SET ${updates.join(', ')}
+       WHERE id::text = $1::text
+       RETURNING *`,
+      values
+    );
+
+    if (!rows[0]) {
+      return NextResponse.json({ error: 'Promotion not found' }, { status: 404 });
     }
 
     return NextResponse.json({
       success: true,
-      promotion: updatedPromotion,
+      promotion: rows[0],
       message: `Promotion ${action}d successfully`
     });
   } catch (error) {

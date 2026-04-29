@@ -2,37 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const adminAuth = localStorage.getItem('adminAuth');
-      
-      if (!adminAuth) {
-        router.push('/admin/login');
-        return;
-      }
-      
-      try {
-        const auth = JSON.parse(adminAuth);
-        if (auth.role !== 'admin') {
-          router.push('/admin/login');
-          return;
-        }
-        setIsAuthenticated(true);
-      } catch {
-        router.push('/admin/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    if (isLoading) return;
+    const hasAdminAccess = isAuthenticated && user?.role === 'admin';
+    setAllowed(hasAdminAccess);
+    if (!hasAdminAccess) {
+      router.replace('/admin/login?expired=1');
+    }
+  }, [isAuthenticated, isLoading, router, user?.role]);
 
   if (isLoading) {
     return (
@@ -47,7 +31,7 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!allowed) {
     return null;
   }
 

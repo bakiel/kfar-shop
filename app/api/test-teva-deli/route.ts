@@ -1,22 +1,29 @@
 import { NextResponse } from 'next/server';
-import { completeProductCatalog } from '@/lib/data/complete-catalog';
+import { getProductFeed } from '@/lib/services/live-product-feed';
+import { getVendorById } from '@/lib/services/live-vendor-feed';
 
 export async function GET() {
-  const tevaDeli = completeProductCatalog['teva-deli'];
-  
-  if (!tevaDeli) {
-    return NextResponse.json({ 
+  const [vendor, feed] = await Promise.all([
+    getVendorById('teva-deli', false),
+    getProductFeed({ vendorId: 'teva-deli' }),
+  ]);
+
+  if (!vendor) {
+    return NextResponse.json({
       error: 'Teva Deli not found',
-      availableVendors: Object.keys(completeProductCatalog)
+      source: feed.source,
+      stale: feed.stale,
     }, { status: 404 });
   }
-  
+
   return NextResponse.json({
-    vendor: tevaDeli.vendorName,
-    vendorId: tevaDeli.vendorId,
-    totalProducts: tevaDeli.products.length,
-    categories: [...new Set(tevaDeli.products.map(p => p.category))],
-    products: tevaDeli.products.slice(0, 5).map(p => ({
+    vendor: vendor.name,
+    vendorId: vendor.id,
+    source: feed.source,
+    stale: feed.stale,
+    totalProducts: feed.count,
+    categories: [...new Set(feed.products.map(p => p.category))],
+    products: feed.products.slice(0, 5).map(p => ({
       id: p.id,
       name: p.name,
       nameHe: p.nameHe,
@@ -24,5 +31,5 @@ export async function GET() {
       category: p.category,
       hasImage: !!p.image
     }))
-  });
+  }, { status: feed.success ? 200 : 503 });
 }

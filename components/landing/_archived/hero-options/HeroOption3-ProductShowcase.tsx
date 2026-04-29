@@ -22,7 +22,7 @@ import {
   Sparkles, TrendingUp, Clock, Leaf
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getFeaturedProducts, getVendors, TOTAL_PRODUCTS, VENDOR_COUNT } from '@/lib/data/wordpress-style-data-layer';
+import { getFeaturedProducts, getVendors, TOTAL_PRODUCTS, VENDOR_COUNT } from '../archived-data';
 
 const HeroOption3ProductShowcase = () => {
   const { language, isRTL } = useLanguage();

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { vendorStores, getAllProducts } from '@/lib/data/wordpress-style-data-layer';
 import { db, isDbAvailable, query } from '@/lib/db/postgres-client';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import { getProductFeed } from '@/lib/services/live-product-feed';
+import { getVendorFeed } from '@/lib/services/live-vendor-feed';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,12 +12,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Static product/vendor counts from the data layer (these are real)
-    const products = getAllProducts();
-    const vendors = Object.values(vendorStores);
-
     const dbUp = await isDbAvailable();
     if (!dbUp) {
+      return NextResponse.json(
+        { error: 'Database unavailable' },
+        { status: 503 }
+      );
+    }
+
+    const [productFeed, vendorFeed] = await Promise.all([
+      getProductFeed(),
+      getVendorFeed(),
+    ]);
+
+    if (!productFeed.success || !vendorFeed.success) {
       return NextResponse.json(
         { error: 'Database unavailable' },
         { status: 503 }
@@ -82,7 +91,7 @@ export async function GET(request: NextRequest) {
       vendorStats = vRows.map((v: any) => ({
         id: v.id,
         name: v.name,
-        products: vendors.find((s) => s.id === v.id)?.products?.length || 0,
+        products: vendorFeed.vendors.find((vendor) => vendor.id === v.id)?.productCount || 0,
         revenue: parseFloat(v.revenue) || 0,
         orders: parseInt(v.order_count, 10) || 0,
       }));
@@ -97,8 +106,8 @@ export async function GET(request: NextRequest) {
     const stats = {
       totalRevenue,
       activeOrders,
-      activeVendors: vendors.length,
-      totalProducts: products.length,
+      activeVendors: vendorFeed.count,
+      totalProducts: productFeed.count,
       totalCustomers,
       pendingOrders,
       recentOrders,

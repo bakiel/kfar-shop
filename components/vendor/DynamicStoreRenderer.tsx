@@ -4,7 +4,7 @@ import React from 'react';
 import { StoreTemplate, StoreSection } from '@/lib/data/store-templates';
 import Image from 'next/image';
 import { Star, Clock, MapPin, Phone, Mail, ShoppingCart, Truck, CreditCard, Award } from 'lucide-react';
-import { Product } from '@/lib/data/products';
+import type { Product } from '@/lib/data/products';
 import { useCart } from '@/lib/context/CartContext';
 import ProductImage from '@/components/ui/ProductImage';
 

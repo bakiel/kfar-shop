@@ -1,9 +1,10 @@
 /**
  * OpenRouter Client for KFAR Marketplace
- * Integrates with existing data system
+ * Integrates with the live marketplace feed
  */
 
-import { vendorStores, getAllProducts, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
+import { getProductFeed } from '@/lib/services/live-product-feed';
+import { getVendorFeed } from '@/lib/services/live-vendor-feed';
 import { marketplaceDB } from './marketplace-database';
 import { AI_PROVIDERS } from '@/lib/config/ai-providers';
 
@@ -97,19 +98,21 @@ export class OpenRouterClient {
         source: 'database'
       };
     } catch (error) {
-      // Fallback to static data
-      console.log('Using static data fallback');
-      const products = getAllProducts();
+      const [productFeed, vendorFeed] = await Promise.all([
+        getProductFeed(),
+        getVendorFeed(),
+      ]);
+      const products = productFeed.products;
       
       return {
-        vendors: Object.values(vendorStores),
+        vendors: vendorFeed.vendors,
         stats: {
-          vendor_count: Object.keys(vendorStores).length,
+          vendor_count: vendorFeed.count,
           product_count: products.length,
           category_count: new Set(products.map(p => p.category)).size
         },
         totalProducts: products.length,
-        source: 'static'
+        source: productFeed.source
       };
     }
   }
@@ -125,11 +128,11 @@ export class OpenRouterClient {
         return dbProducts;
       }
     } catch (error) {
-      console.log('Database search failed, using static search');
+      console.log('Database search failed, using live product feed search');
     }
 
-    // Fallback to static data search
-    const allProducts = getAllProducts();
+    const productFeed = await getProductFeed({ search: query });
+    const allProducts = productFeed.products;
     const queryLower = query.toLowerCase();
     
     return allProducts.filter(product => 

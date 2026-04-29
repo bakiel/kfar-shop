@@ -9,7 +9,7 @@ import {
   CheckCircle, Clock, Sparkles, ChevronRight, Heart
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getFeaturedProducts, getVendors, TOTAL_PRODUCTS } from '@/lib/data/wordpress-style-data-layer';
+import { getFeaturedProducts, getVendors, TOTAL_PRODUCTS } from './archived-data';
 
 // Hero background images for slideshow
 const heroImages = [

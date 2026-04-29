@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 import { ArrowLeft, Wand2, Bot, Plus, X, CloudUpload, Loader2 } from 'lucide-react';
 
 export default function AddProductPage() {
   const router = useRouter();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [product, setProduct] = useState({
@@ -53,6 +55,13 @@ export default function AddProductPage() {
   const [currentTag, setCurrentTag] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!accessToken || user?.role !== 'vendor' || !user.vendorId) {
+      router.replace('/vendor/login?expired=1');
+    }
+  }, [accessToken, authLoading, router, user?.role, user?.vendorId]);
 
   const categories = [
     'Prepared Foods',
@@ -148,16 +157,19 @@ export default function AddProductPage() {
     setSubmitting(true);
     setSubmitError(null);
 
-    const token = typeof window !== 'undefined'
-      ? sessionStorage.getItem('kfar_access_token') || localStorage.getItem('kfar_access_token') || ''
-      : '';
+    if (!accessToken || user?.role !== 'vendor' || !user.vendorId) {
+      setSubmitError('Vendor session expired. Please log in again.');
+      setSubmitting(false);
+      return;
+    }
 
     try {
+      const persistentImages = product.images.filter(src => !src.startsWith('blob:'));
       const res = await fetch('/api/vendor/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           name: product.name.trim(),
@@ -170,8 +182,8 @@ export default function AddProductPage() {
           stock_quantity: product.stock ? parseInt(product.stock) : 0,
           unit: product.unit,
           tags: product.tags,
-          image_url: product.images[0] || null,
-          image_gallery: product.images,
+          image_url: persistentImages[0] || null,
+          image_gallery: persistentImages,
           is_vegan: product.dietaryInfo.vegan,
           is_gluten_free: product.dietaryInfo.glutenFree,
           is_organic: product.dietaryInfo.organic,
@@ -200,6 +212,14 @@ export default function AddProductPage() {
       setSubmitting(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-cream-base flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin stroke-[1.5]" style={{ color: '#478c0b' }} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream-base">

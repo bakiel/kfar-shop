@@ -20,7 +20,6 @@ import MobileProductCard from '@/components/mobile/MobileProductCard';
 import MobileCartDrawer from '@/components/mobile/MobileCartDrawer';
 import { useMobileDetect } from '@/hooks/useMobileDetect';
 import MobileFilterSheet from '@/components/mobile/MobileFilterSheet';
-import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import TrafficLightMenu from '@/components/mobile/TrafficLightMenu';
 import { voiceChatManager } from '@/lib/voice/voiceChatManager';
 
@@ -65,6 +64,53 @@ const getVendorDisplayName = (vendorId: string): string => {
   return vendorMap[vendorId] || vendorId;
 };
 
+const parsePrice = (value: unknown): number => {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+};
+
+const normalizeProduct = (product: any): Product => {
+  const vendorId = product.vendorId || product.vendor_id || '';
+  const vendorName = product.vendorName || product.vendor_name || product.vendor?.name || getVendorDisplayName(vendorId);
+  const image = product.image || product.primary_image || product.image_url || product.images?.[0] || '/images/placeholder-product.jpg';
+  const isKosher = product.kashrut || product.isKosher || product.is_kosher;
+
+  return {
+    id: String(product.id),
+    name: product.name || product.nameEn || '',
+    nameHe: product.nameHe || product.name_he || product.nameHebrew,
+    description: product.description || product.descriptionEn || '',
+    price: parsePrice(product.price),
+    originalPrice: product.originalPrice ?? (product.original_price ? parsePrice(product.original_price) : undefined),
+    category: product.category || 'other',
+    image,
+    images: product.images || product.image_gallery || [],
+    kashrut: isKosher ? (typeof isKosher === 'string' ? isKosher : 'Kosher') : undefined,
+    vegan: product.vegan ?? product.isVegan ?? product.is_vegan ?? true,
+    organic: product.organic ?? product.isOrganic ?? product.is_organic ?? false,
+    glutenFree: product.glutenFree ?? product.isGlutenFree ?? product.is_gluten_free ?? false,
+    unit: product.unit || 'unit',
+    minimumOrder: product.minimumOrder || product.minimum_order || 1,
+    inStock: product.inStock ?? product.in_stock ?? true,
+    rating: product.rating,
+    reviewCount: product.reviewCount || product.review_count || product.reviews,
+    specifications: product.specifications || [],
+    culturalSignificance: product.culturalSignificance || product.cultural_significance,
+    isFeatured: product.isFeatured ?? product.featured ?? product.is_featured ?? false,
+    badge: product.badge,
+    vendorId,
+    vendorName,
+    vendorLogo: product.vendorLogo || product.vendor_logo || product.vendor?.logo_url
+  };
+};
+
+const PRODUCT_FETCH_TIMEOUT_MS = 4_000;
+const SEARCH_FETCH_TIMEOUT_MS = 2_500;
+
 export default function MarketplacePage() {
   const { addToCart } = useCart();
   const router = useRouter();
@@ -76,6 +122,8 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [feedError, setFeedError] = useState<string | null>(null);
+  const [feedStale, setFeedStale] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -106,10 +154,6 @@ export default function MarketplacePage() {
     { slug: 'new', name: language === 'he' ? 'חדש' : 'New', icon: Sparkles, color: '#9f7aea' }
   ];
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   // Read category from URL and apply to filters
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category');
@@ -121,81 +165,43 @@ export default function MarketplacePage() {
     }
   }, [searchParams]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), PRODUCT_FETCH_TIMEOUT_MS);
+    setLoading(true);
+
     try {
-      setLoading(true);
-      console.log('Fetching products from database...');
+      const response = await fetch('/api/products-db', {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
 
-      // Try database API first
-      const response = await fetch('/api/products-db');
-      console.log('Database API response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`Products API error: ${response.status}`);
+      }
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Database API response:', data);
+      const data = await response.json();
+      const apiProducts = Array.isArray(data.products)
+        ? data.products.map(normalizeProduct).filter((product: Product) => product.id && product.name)
+        : [];
 
-        if (data.success && data.products) {
-          // Convert database products to marketplace format
-          const formattedProducts = data.products.map((product: any) => ({
-            id: product.id,
-            name: product.name,
-            nameHe: product.name_he,
-            description: product.description || '',
-            price: parseFloat(product.price),
-            originalPrice: product.original_price ? parseFloat(product.original_price) : undefined,
-            category: product.category || 'other',
-            image: product.primary_image || product.image || '/images/placeholder-product.jpg',
-            images: product.image_gallery || [],
-            kashrut: product.is_kosher ? 'כשר' : undefined,
-            vegan: product.is_vegan || false,
-            organic: product.is_organic || false,
-            glutenFree: product.is_gluten_free || false,
-            unit: product.unit || 'unit',
-            minimumOrder: 1,
-            inStock: product.in_stock !== false,
-            rating: product.rating,
-            reviewCount: product.review_count,
-            isFeatured: product.is_featured || false,
-            badge: product.badge,
-            vendorId: product.vendor_id,
-            vendorName: product.vendor?.name || getVendorDisplayName(product.vendor_id),
-            vendorLogo: product.vendor?.logo_url
-          }));
-          
-          setProducts(formattedProducts);
-          return;
-        }
-      }
-      
-      // Fallback to enhanced products API (uses JSON files)
-      console.log('Falling back to JSON-based API...');
-      const fallbackResponse = await fetch('/api/products-enhanced');
-      
-      if (!fallbackResponse.ok) {
-        throw new Error(`Fallback API error: ${fallbackResponse.status}`);
-      }
-      
-      const fallbackData = await fallbackResponse.json();
-      
-      if (fallbackData.products) {
-        const productsWithVendorNames = fallbackData.products.map((product: Product) => ({
-          ...product,
-          vendorName: product.vendorName || getVendorDisplayName(product.vendorId)
-        }));
-        
-        setProducts(productsWithVendorNames);
-        console.log(`⚠️ Using fallback: Loaded ${productsWithVendorNames.length} products from JSON files`);
-      } else {
-        console.error('No products in fallback response');
-        setProducts([]);
-      }
+      setProducts(apiProducts);
+      setFeedStale(Boolean(data.stale));
+      setFeedError(data.success ? null : data.error || 'Product feed unavailable');
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setProducts([]);
+      if ((error as any)?.name !== 'AbortError') {
+        console.warn('Product feed unavailable:', error);
+      }
+      setFeedError('Product feed is temporarily unavailable');
     } finally {
+      window.clearTimeout(timeout);
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Debounced search API call
   useEffect(() => {
@@ -203,9 +209,15 @@ export default function MarketplacePage() {
       setSearchResults(null);
       return;
     }
+    const controller = new AbortController();
+    let timeout: number | null = null;
     const timer = setTimeout(async () => {
+      timeout = window.setTimeout(() => controller.abort(), SEARCH_FETCH_TIMEOUT_MS);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&limit=50`);
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&limit=50`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (data.results && data.results.length > 0) {
           setSearchResults(data.results.map((r: any) => r.id));
@@ -214,9 +226,19 @@ export default function MarketplacePage() {
         }
       } catch {
         setSearchResults(null);
+      } finally {
+        if (timeout !== null) {
+          window.clearTimeout(timeout);
+        }
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (timeout !== null) {
+        window.clearTimeout(timeout);
+      }
+      controller.abort();
+    };
   }, [searchQuery]);
 
   // Calculate max price from products
@@ -371,15 +393,13 @@ export default function MarketplacePage() {
     return sortedProducts.reduce((acc, product) => {
       const vendorId = product.vendorId;
       if (!acc[vendorId]) {
-        const vendorStore = vendorStores[vendorId];
-        
         acc[vendorId] = {
           vendorInfo: {
             id: vendorId,
-            name: product.vendorName || vendorStore?.name,
-            logo: vendorStore?.logo || product.vendorLogo,
-            description: vendorStore?.description,
-            tags: vendorStore?.metadata?.certifications
+            name: product.vendorName || getVendorDisplayName(vendorId),
+            logo: product.vendorLogo || '',
+            description: '',
+            tags: []
           },
           products: []
         };
@@ -690,6 +710,11 @@ export default function MarketplacePage() {
               <span className={`text-gray-600 ${isMobile ? 'text-sm' : ''}`}>
                 Showing {filteredProducts.length} of {products.length} products
               </span>
+              {feedStale && (
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  Live feed reconnecting
+                </span>
+              )}
             </div>
             
             <div className="flex items-center gap-4">
@@ -857,7 +882,7 @@ export default function MarketplacePage() {
                       name: product.name,
                       vendorId: product.vendorId,
                       vendor: product.vendorName || getVendorDisplayName(product.vendorId),
-                      vendorLogo: vendorStores[product.vendorId]?.logo || '',
+                      vendorLogo: product.vendorLogo || '',
                       price: `₪${product.price}`,
                       originalPrice: product.originalPrice ? `₪${product.originalPrice}` : undefined,
                       image: product.image,
@@ -1049,10 +1074,14 @@ export default function MarketplacePage() {
             <div className="text-center py-12">
               <Tags className="w-16 h-16 mx-auto mb-4 text-gray-300 stroke-[1.5]" />
               <h3 className="text-xl font-semibold mb-2" style={{ color: '#3a3a1d' }}>
-                {language === 'he' ? 'לא נמצאו מוצרים' : 'No products found'}
+                {feedError
+                  ? (language === 'he' ? 'הזנת המוצרים אינה זמינה כרגע' : 'Product feed temporarily unavailable')
+                  : (language === 'he' ? 'לא נמצאו מוצרים' : 'No products found')}
               </h3>
               <p className="text-gray-600 mb-6">
-                {language === 'he' ? 'נסה לשנות את הסינון או החיפוש' : 'Try adjusting your filters or search query'}
+                {feedError
+                  ? (language === 'he' ? 'נסה שוב בעוד רגע' : 'Please try again in a moment')
+                  : (language === 'he' ? 'נסה לשנות את הסינון או החיפוש' : 'Try adjusting your filters or search query')}
               </p>
               <button
                 onClick={() => {

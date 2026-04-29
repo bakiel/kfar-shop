@@ -4,7 +4,8 @@
  */
 
 import { openRouterClient, OpenRouterMessage, OpenRouterConfig } from '@/lib/adk/openrouter-client';
-import { getAllProducts, vendorStores } from '@/lib/data/wordpress-style-data-layer';
+import { getProductFeed } from '@/lib/services/live-product-feed';
+import { getVendorById, getVendorFeed } from '@/lib/services/live-vendor-feed';
 import { marketplaceDB } from '@/lib/adk/marketplace-database';
 
 export class MiniMaxReasoningService {
@@ -14,8 +15,12 @@ export class MiniMaxReasoningService {
    */
   async analyzeMarketplaceTrends(timeRange: 'monthly' | 'quarterly' | 'yearly') {
     // Gather extensive data
-    const products = getAllProducts();
-    const vendors = Object.values(vendorStores);
+    const [productFeed, vendorFeed] = await Promise.all([
+      getProductFeed(),
+      getVendorFeed(),
+    ]);
+    const products = productFeed.products;
+    const vendors = vendorFeed.vendors;
     
     // Build comprehensive context
     const systemPrompt = `You are analyzing the KFAR Marketplace with MiniMax M1's advanced reasoning capabilities.
@@ -26,10 +31,10 @@ MARKETPLACE DATA:
 - Categories: ${new Set(products.map(p => p.category)).size}
 
 FULL PRODUCT CATALOG:
-${products.map(p => `- ${p.name} (${p.vendor}, ₪${p.price}, ${p.category})`).join('\n')}
+${products.map(p => `- ${p.name} (${p.vendorName}, ₪${p.price}, ${p.category})`).join('\n')}
 
 VENDOR PROFILES:
-${vendors.map(v => `- ${v.name}: ${v.description} (${v.products} products)`).join('\n')}
+${vendors.map(v => `- ${v.name}: ${v.description} (${v.productCount} products)`).join('\n')}
 
 Provide deep insights on:
 1. Pricing trends and patterns
@@ -65,12 +70,13 @@ Provide deep insights on:
    * Analyzes entire marketplace to provide competitive insights
    */
   async generateVendorStrategy(vendorId: string) {
-    const vendor = vendorStores[vendorId];
+    const vendor = await getVendorById(vendorId, true);
     if (!vendor) throw new Error('Vendor not found');
 
-    const allProducts = getAllProducts();
-    const vendorProducts = allProducts.filter(p => p.vendor === vendor.name);
-    const competitorProducts = allProducts.filter(p => p.vendor !== vendor.name);
+    const productFeed = await getProductFeed();
+    const vendorFeed = await getVendorFeed();
+    const allProducts = productFeed.products;
+    const vendorProducts = allProducts.filter(p => p.vendorId === vendor.id);
 
     // Build extensive competitive analysis context
     const systemPrompt = `You are a strategic advisor using MiniMax M1 to analyze competitive positioning.
@@ -78,15 +84,15 @@ Provide deep insights on:
 TARGET VENDOR: ${vendor.name}
 - Description: ${vendor.description}
 - Products: ${vendorProducts.length}
-- Specialties: ${vendor.specialties.join(', ')}
+- Specialties: ${vendor.categories.join(', ')}
 
 VENDOR'S PRODUCT LINE:
 ${vendorProducts.map(p => `- ${p.name}: ₪${p.price} (${p.category})`).join('\n')}
 
 COMPETITOR LANDSCAPE:
-${Object.values(vendorStores)
+${vendorFeed.vendors
   .filter(v => v.id !== vendorId)
-  .map(v => `${v.name}: ${v.products} products, specializing in ${v.specialties.join(', ')}`)
+  .map(v => `${v.name}: ${v.productCount} products, specializing in ${v.categories.join(', ')}`)
   .join('\n')}
 
 MARKET ANALYSIS:
@@ -180,21 +186,27 @@ Analyze these patterns to identify:
     includePredictions?: boolean;
   }) {
     // Gather ALL marketplace data
-    const allProducts = getAllProducts();
-    const allVendors = Object.values(vendorStores);
+    const [productFeed, vendorFeed] = await Promise.all([
+      getProductFeed(),
+      getVendorFeed(),
+    ]);
+    const allProducts = productFeed.products;
+    const allVendors = vendorFeed.vendors;
     
     // Calculate comprehensive metrics
     const metrics = {
-      totalRevenue: allProducts.reduce((sum, p) => sum + (p.price * (p.stock || 50)), 0),
-      averageProductPrice: allProducts.reduce((sum, p) => sum + p.price, 0) / allProducts.length,
+      totalRevenue: allProducts.reduce((sum, p) => sum + (p.price * (p.stockQuantity || 50)), 0),
+      averageProductPrice: allProducts.length
+        ? allProducts.reduce((sum, p) => sum + p.price, 0) / allProducts.length
+        : 0,
       categoryDistribution: allProducts.reduce((acc, p) => {
         acc[p.category] = (acc[p.category] || 0) + 1;
         return acc;
       }, {} as Record<string, number>),
       vendorMetrics: allVendors.map(v => ({
         name: v.name,
-        products: allProducts.filter(p => p.vendor === v.name).length,
-        revenue: allProducts.filter(p => p.vendor === v.name).reduce((sum, p) => sum + (p.price * (p.stock || 50)), 0)
+        products: allProducts.filter(p => p.vendorId === v.id).length,
+        revenue: allProducts.filter(p => p.vendorId === v.id).reduce((sum, p) => sum + (p.price * (p.stockQuantity || 50)), 0)
       }))
     };
 

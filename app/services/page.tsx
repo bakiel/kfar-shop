@@ -333,7 +333,7 @@ const ServicesPage = () => {
     filteredServices = [...eventServices, ...filteredServices];
   }
 
-  // Use live events if available, fallback to static data
+  // Use live events when available; otherwise show the curated service schedule.
   const upcomingEvents = liveEvents.length > 0 ? liveEvents : getUpcomingEvents().slice(0, 3);
 
   return (

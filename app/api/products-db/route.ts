@@ -1,99 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, query } from '@/lib/db/postgres-client';
+import { query } from '@/lib/db/postgres-client';
+import { getProductFeed, invalidateProductFeedCache } from '@/lib/services/live-product-feed';
+import { invalidateVendorFeedCache } from '@/lib/services/live-vendor-feed';
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
+};
+
+function invalidateLiveFeedCaches() {
+  invalidateProductFeedCache();
+  invalidateVendorFeedCache();
+}
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const vendorId = searchParams.get('vendor');
-    const search = searchParams.get('search');
-    const category = searchParams.get('category');
-    const limit = searchParams.get('limit');
+  const { searchParams } = new URL(request.url);
+  const feed = await getProductFeed({
+    vendorId: searchParams.get('vendor'),
+    search: searchParams.get('search'),
+    category: searchParams.get('category'),
+    limit: searchParams.get('limit'),
+  });
 
-    // Build query dynamically
-    let sqlQuery = `
-      SELECT p.*, v.name as vendor_name, v.slug as vendor_slug, v.logo_url as vendor_logo
-      FROM products p
-      LEFT JOIN vendors v ON p.vendor_id = v.id
-      WHERE p.in_stock = true
-    `;
-    const params: any[] = [];
-    let paramCount = 0;
-
-    // Filter by vendor
-    if (vendorId) {
-      paramCount++;
-      sqlQuery += ` AND p.vendor_id = $${paramCount}`;
-      params.push(vendorId);
-    }
-
-    // Search in name and description
-    if (search) {
-      paramCount++;
-      sqlQuery += ` AND (p.name ILIKE $${paramCount} OR p.description ILIKE $${paramCount})`;
-      params.push(`%${search}%`);
-    }
-
-    // Filter by category
-    if (category) {
-      paramCount++;
-      sqlQuery += ` AND p.category = $${paramCount}`;
-      params.push(category);
-    }
-
-    // Order by created_at
-    sqlQuery += ` ORDER BY p.created_at DESC`;
-
-    // Apply limit
-    if (limit) {
-      paramCount++;
-      sqlQuery += ` LIMIT $${paramCount}`;
-      params.push(parseInt(limit));
-    }
-
-    const { rows: products } = await query(sqlQuery, params);
-
-    // Transform data to match frontend expectations
-    const transformedProducts = products?.map((product: any) => ({
-      id: product.id,
-      name: product.name,
-      nameHe: product.name_he,
-      description: product.description,
-      price: parseFloat(product.price),
-      originalPrice: product.original_price ? parseFloat(product.original_price) : null,
-      category: product.category,
-      image: product.image_url || product.image || '/images/placeholder-product.jpg',
-      images: product.image_gallery || [],
-      kashrut: product.is_kosher ? 'Kosher' : null,
-      vegan: product.is_vegan,
-      organic: product.is_organic,
-      glutenFree: product.is_gluten_free,
-      unit: product.unit || 'unit',
-      minimumOrder: product.minimum_order || 1,
-      inStock: product.in_stock,
-      rating: product.rating || 4.5,
-      reviewCount: product.review_count || 0,
-      specifications: product.specifications || [],
-      culturalSignificance: product.cultural_significance,
-      isFeatured: product.is_featured,
-      badge: product.badge,
-      vendorId: product.vendor_id,
-      vendorName: product.vendor_name || 'Unknown Vendor',
-      vendorLogo: product.vendor_logo
-    })) || [];
-
-    return NextResponse.json({
-      success: true,
-      count: transformedProducts.length,
-      products: transformedProducts
-    });
-
-  } catch (error) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { success: false, error: (error as Error).message },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(feed, {
+    status: feed.success ? 200 : 503,
+    headers: NO_STORE_HEADERS,
+  });
 }
 
 // Create new product
@@ -116,7 +47,7 @@ export async function POST(request: NextRequest) {
     const { rows } = await query(
       `INSERT INTO products (
         id, vendor_id, name, slug, description, category, price,
-        image, in_stock, is_vegan, is_kosher, is_organic, is_gluten_free, tags,
+        image_url, in_stock, is_vegan, is_kosher, is_organic, is_gluten_free, tags,
         created_at, updated_at
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
       RETURNING *`,
@@ -128,15 +59,17 @@ export async function POST(request: NextRequest) {
         body.description,
         body.category,
         body.price,
-        body.image,
+        body.image || body.image_url,
         body.inStock !== false,
         body.vegan !== false,
         body.kosher || false,
         body.organic || false,
         body.glutenFree || false,
-        JSON.stringify(body.tags || [])
+        body.tags || []
       ]
     );
+
+    invalidateLiveFeedCaches();
 
     return NextResponse.json({
       success: true,
@@ -195,6 +128,8 @@ export async function PUT(request: NextRequest) {
       ]
     );
 
+    invalidateLiveFeedCaches();
+
     return NextResponse.json({
       success: true,
       message: 'Product updated successfully',
@@ -233,6 +168,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await query('DELETE FROM products WHERE id = $1', [productId]);
+    invalidateLiveFeedCaches();
 
     return NextResponse.json({
       success: true,

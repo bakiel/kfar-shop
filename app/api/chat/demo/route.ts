@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllProducts } from '@/lib/data/wordpress-style-data-layer';
+import { getProductFeed } from '@/lib/services/live-product-feed';
 
-// Load real products from the static data layer
-function getRealProducts() {
-  const all = getAllProducts();
-  return all.map(p => ({
+type DemoProduct = Awaited<ReturnType<typeof getRealProducts>>[number];
+
+async function getRealProducts() {
+  const feed = await getProductFeed();
+  return feed.products.map(p => ({
     id: p.id,
     name: p.name,
     vendorId: p.vendorId,
@@ -14,7 +15,7 @@ function getRealProducts() {
     description: p.description,
     category: p.category,
     tags: p.tags || [],
-    vegan: p.vegan ?? p.isVegan ?? true
+    vegan: p.vegan
   }));
 }
 
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     console.log('🤖 Processing message:', message);
 
     // Load real products and process message
-    const products = getRealProducts();
+    const products = await getRealProducts();
     const response = processMessage(message, products);
     
     // Return response without audio for now (to avoid loading errors)
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ Demo Chat API Error:', error);
 
-    const fallbackProducts = getRealProducts();
+    const fallbackProducts = await getRealProducts();
     // Return helpful fallback response
     return NextResponse.json({
       success: true,
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function processMessage(message: string, products: ReturnType<typeof getRealProducts>) {
+function processMessage(message: string, products: DemoProduct[]) {
   const lowercaseMessage = message.toLowerCase();
 
   // Helper: find products by vendor
@@ -135,7 +136,7 @@ function processMessage(message: string, products: ReturnType<typeof getRealProd
 
 // Simple GET endpoint for testing
 export async function GET() {
-  const products = getRealProducts();
+  const products = await getRealProducts();
   return NextResponse.json({
     status: 'KFAR Demo Chat API is working!',
     timestamp: new Date().toISOString(),

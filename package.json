@@ -9,6 +9,8 @@
     "build:standalone": "next build --no-lint",
     "start": "next start",
     "deploy:vps:prebuilt": "bash scripts/deploy-prebuilt-vps.sh",
+    "smoke:vps": "node scripts/smoke-vps.mjs",
+    "guard:data-source": "node scripts/guard-live-data-source.mjs",
     "lint": "next lint",
     "check:alt": "node scripts/check-image-alts.js",
     "fix:alt": "node scripts/fix-undefined-alts.js",

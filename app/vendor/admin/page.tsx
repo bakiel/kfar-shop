@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/context/AuthContext';
 import { Package, Store, TrendingUp, DollarSign, LogOut, Plus, Edit } from 'lucide-react';
-import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 
 export default function VendorAdminDashboard() {
   const router = useRouter();
+  const { user, accessToken, isLoading: authLoading, logout } = useAuth();
   const [vendorData, setVendorData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -20,41 +21,65 @@ export default function VendorAdminDashboard() {
   });
 
   useEffect(() => {
-    // Check authentication
-    const authData = localStorage.getItem('vendorAuth');
-    if (!authData) {
-      router.push('/vendor/login');
+    if (authLoading) return;
+
+    if (!accessToken || user?.role !== 'vendor' || !user.vendorId) {
+      setLoading(false);
+      router.replace('/vendor/login?expired=1');
       return;
     }
 
-    const auth = JSON.parse(authData);
-    const vendor = vendorStores[auth.vendorId];
-    
-    if (vendor) {
-      setVendorData({
-        ...vendor,
-        id: auth.vendorId
-      });
-      
-      // Calculate stats
-      const products = vendor.products || [];
-      setStats({
-        totalProducts: products.length,
-        activeProducts: products.filter(p => p.inStock).length,
-        todayRevenue: 0, // Will be connected to real revenue data
-        totalOrders: 0 // Will be connected to real order data
-      });
-    }
-    
-    setLoading(false);
-  }, [router]);
+    const loadVendor = async () => {
+      try {
+        const response = await fetch(`/api/vendor/${user.vendorId}`, {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!response.ok) throw new Error(`Vendor feed failed: ${response.status}`);
 
-  const handleLogout = () => {
-    localStorage.removeItem('vendorAuth');
+        const data = await response.json();
+        const vendor = data.vendor;
+        const products = Array.isArray(vendor?.products) ? vendor.products : [];
+
+        if (!vendor) return;
+
+        const normalizedProducts = products.map((product: any) => ({
+          id: product.id,
+          name: product.name,
+          price: Number(product.price) || 0,
+          image: product.image || product.images?.[0] || '/images/placeholder-product.jpg',
+          inStock: product.inStock !== false,
+        }));
+
+        setVendorData({
+          ...vendor,
+          id: user.vendorId,
+          logo: vendor.logo || '/images/vendors/default_logo.jpg',
+          products: normalizedProducts,
+        });
+      
+        setStats({
+          totalProducts: normalizedProducts.length,
+          activeProducts: normalizedProducts.filter((p: any) => p.inStock).length,
+          todayRevenue: 0,
+          totalOrders: 0,
+        });
+      } catch (error) {
+        console.error('Error loading vendor dashboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadVendor();
+  }, [accessToken, authLoading, router, user?.displayName, user?.role, user?.vendorId]);
+
+  const handleLogout = async () => {
+    await logout();
     router.push('/vendor/login');
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#fef9ef' }}>
         <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#478c0b' }}></div>
@@ -63,7 +88,18 @@ export default function VendorAdminDashboard() {
   }
 
   if (!vendorData) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#fef9ef' }}>
+        <div className="text-center">
+          <p className="text-lg font-medium mb-3" style={{ color: '#3a3a1d' }}>
+            Unable to load vendor dashboard.
+          </p>
+          <Link href="/vendor/login" className="text-[#478c0b] underline">
+            Sign in again
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -4,53 +4,84 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
-import { vendorDataService } from '@/lib/services/vendor-data-service';
-import { AdminAuthGuard } from '@/components/admin/AdminAuthGuard';
-import { Plus, Eye, ExternalLink } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
+import { Plus, Eye, ExternalLink, AlertTriangle } from 'lucide-react';
 import '@/styles/kfar-style-system.css';
 
 export default function VendorManagementPage() {
-  return (
-    <AdminAuthGuard>
-      <VendorManagementContent />
-    </AdminAuthGuard>
-  );
-}
-
-function VendorManagementContent() {
+  const { accessToken, isLoading: authLoading } = useAuth();
   const [vendors, setVendors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!accessToken) {
+      setLoading(false);
+      setError('Admin session expired. Please log in again.');
+      return;
+    }
+
     const loadVendors = async () => {
       try {
         setLoading(true);
-        const vendorList = Object.values(vendorStores);
-        const vendorAnalytics = await Promise.all(
-          vendorList.map(vendor => vendorDataService.getVendorAnalytics(vendor.id))
-        );
-        
-        const enrichedVendors = vendorList.map((vendor, index) => ({
-          ...vendor,
-          analytics: {
-            ...vendor.analytics,
-            ...vendorAnalytics[index]
-          }
-        }));
-        
+        setError(null);
+        const headers = { Authorization: `Bearer ${accessToken}` };
+        const [vendorFeedResponse, adminResponse] = await Promise.all([
+          fetch('/api/vendors', { cache: 'no-store' }),
+          fetch('/api/admin/accounts?type=vendors', { cache: 'no-store', headers }),
+        ]);
+
+        if (!adminResponse.ok) throw new Error(`Admin vendor feed failed: ${adminResponse.status}`);
+        if (!vendorFeedResponse.ok) throw new Error(`Vendor feed failed: ${vendorFeedResponse.status}`);
+
+        const [vendorFeedData, adminData] = await Promise.all([
+          vendorFeedResponse.json(),
+          adminResponse.json(),
+        ]);
+        const feedVendors = new Map((vendorFeedData.vendors || []).map((vendor: any) => [vendor.id, vendor]));
+        const sourceVendors = adminData.vendors?.length ? adminData.vendors : (vendorFeedData.vendors || []);
+        const enrichedVendors = sourceVendors.map((vendor: any) => {
+          const vendorId = vendor.vendorId || vendor.vendor_id || vendor.id;
+          const feedVendor: any = feedVendors.get(vendorId) || {};
+          const productCount = feedVendor.productCount || vendor.productCount || vendor.product_count || 0;
+          return {
+            id: vendorId,
+            accountId: vendor.userId || vendor.id,
+            name: vendor.name || vendor.storeName || feedVendor.name || vendor.business_name || vendorId,
+            featured: Boolean(vendor.featured ?? feedVendor.featured),
+            branding: {
+              logo: feedVendor.logo || vendor.logo_url || vendor.logo || '/images/vendors/default_logo.jpg',
+            },
+            info: {
+              description: vendor.description || feedVendor.description || '',
+            },
+            analytics: {
+              totalProducts: productCount,
+              activeProducts: productCount,
+              averageRating: feedVendor.rating || vendor.rating || 0,
+              reviewCount: feedVendor.totalReviews || vendor.review_count || 0,
+              totalOrders: vendor.totalOrders || 0,
+              totalRevenue: vendor.totalRevenue || 0,
+            },
+          };
+        });
+
         setVendors(enrichedVendors);
       } catch (error) {
         console.error('Error loading vendors:', error);
+        setError(error instanceof Error ? error.message : 'Failed to load vendors');
+        setVendors([]);
       } finally {
         setLoading(false);
       }
     };
 
     loadVendors();
-  }, []);
+  }, [accessToken, authLoading]);
 
   const filteredVendors = vendors.filter(vendor => {
     const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -83,6 +114,13 @@ function VendorManagementContent() {
           Manage all {vendors.length} marketplace vendors
         </p>
       </div>
+
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 stroke-[1.5]" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="card p-6 mb-8">
@@ -174,7 +212,7 @@ function VendorManagementContent() {
 
             {/* Actions */}
             <div className="flex gap-2">
-              <Link href={`/admin/vendors/${vendor.id}`} className="flex-1">
+              <Link href={`/admin/vendor/${vendor.id}`} className="flex-1">
                 <button className="btn btn-primary w-full">
                   <Eye className="w-5 h-5 stroke-[1.5] inline mr-2" />
                   View Details

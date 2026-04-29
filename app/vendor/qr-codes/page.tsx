@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import VendorQRGenerator from '@/components/vendor/VendorQRGenerator';
 import Link from 'next/link';
 import { ArrowLeft, AlertTriangle, QrCode } from 'lucide-react';
-import { getVendorStore, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
 
 interface VendorData {
   id: string;
@@ -35,7 +34,7 @@ export default function VendorQRCodesPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const loadVendorData = () => {
+    const loadVendorData = async () => {
       try {
         // Get vendor auth from localStorage (set by AuthContext on login)
         const authStr = localStorage.getItem('vendorAuth');
@@ -54,43 +53,34 @@ export default function VendorQRCodesPage() {
           return;
         }
 
-        // Get vendor store from static data layer
-        const store = getVendorStore(vendorId);
+        const response = await fetch(`/api/vendor/${vendorId}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Vendor feed failed: ${response.status}`);
 
-        if (store) {
-          setVendorData({
-            id: store.id,
-            storeName: store.name,
-            storeNameHe: (store as any).nameHe,
-            description: store.description,
-            descriptionHe: (store as any).descriptionHe,
-            logo: store.logo,
-            category: store.categories?.[0] || 'food',
-            phone: store.metadata?.phone || '',
-            email: store.metadata?.email || '',
-            address: store.metadata?.location || 'Village of Peace, Dimona, Israel',
-          });
+        const data = await response.json();
+        const store = data.vendor;
+        const metadata = store?.metadata || {};
 
-          // Get real products for this vendor
-          const vendorProducts = getProductsByVendor(vendorId);
-          setProducts(
-            vendorProducts.map((p) => ({
-              id: p.id,
-              name: p.name,
-              price: p.price,
-              image: p.image,
-            }))
-          );
-        } else {
-          // Vendor not in static data -- use auth info as fallback
-          setVendorData({
-            id: vendorId,
-            storeName: auth.vendorName || auth.name || 'My Store',
-            category: 'food',
-            address: 'Village of Peace, Dimona, Israel',
-          });
-          setProducts([]);
-        }
+        setVendorData({
+          id: store.id,
+          storeName: store.name || auth.vendorName || auth.name || 'My Store',
+          storeNameHe: store.nameHe,
+          description: store.description,
+          descriptionHe: store.descriptionHe,
+          logo: store.logo,
+          category: store.category || store.categories?.[0] || 'food',
+          phone: metadata.phone || '',
+          email: metadata.email || '',
+          address: metadata.location || 'Village of Peace, Dimona, Israel',
+        });
+
+        setProducts(
+          (store.products || []).map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            price: Number(product.price) || 0,
+            image: product.image,
+          }))
+        );
       } catch (err) {
         console.error('Error loading vendor data:', err);
         setError('load_failed');

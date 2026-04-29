@@ -277,9 +277,9 @@ export class AgentActionHandler {
         message: AGENT_RESPONSES['product-advisor'].recommendations.vegan
       };
     } catch {
-      // Fallback: import directly from the static data layer
-      const { getAllProducts } = await import('@/lib/data/wordpress-style-data-layer');
-      const allProducts = getAllProducts();
+      const res = await fetch('/api/products-db?limit=12');
+      const data = res.ok ? await res.json() : { products: [] };
+      const allProducts: Array<{ id: string; name: string; price: number; vegan?: boolean; isVegan?: boolean; vendorName?: string; image?: string }> = data.products || [];
       const recommended = allProducts.slice(0, 3);
 
       return {

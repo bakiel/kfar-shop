@@ -1,7 +1,7 @@
 // Products API
 
 import { api } from './client';
-import { Product } from '@/lib/data/products';
+import type { Product } from '@/lib/data/products';
 
 export interface ProductsQuery {
   category?: string;

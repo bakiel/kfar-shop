@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hybridSearch } from '@/lib/search/semantic-search';
-import { getAllProducts } from '@/lib/data/wordpress-style-data-layer';
+import { getProductFeed } from '@/lib/services/live-product-feed';
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
+};
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,27 +13,37 @@ export async function GET(request: NextRequest) {
   const vendor = searchParams.get('vendor') || undefined;
 
   if (!q || q.length < 2) {
-    return NextResponse.json({ results: [], query: q, total: 0 });
+    return NextResponse.json({ results: [], query: q, total: 0 }, { headers: NO_STORE_HEADERS });
   }
 
-  const products = getAllProducts();
-  const results = hybridSearch(q, products, { limit, category, vendor });
+  const feed = await getProductFeed({
+    search: q,
+    limit,
+    category,
+    vendorId: vendor,
+  });
 
   return NextResponse.json({
-    results: results.map(r => ({
-      id: r.product.id,
-      name: r.product.name,
-      nameHe: r.product.nameHe,
-      description: r.product.description,
-      price: r.product.price,
-      category: r.product.category,
-      vendorId: r.product.vendorId,
-      vendorName: r.product.vendorName,
-      image: r.product.image,
-      searchScore: r.score,
-      matchType: r.matchType,
+    success: feed.success,
+    source: feed.source,
+    stale: feed.stale,
+    results: feed.products.map(product => ({
+      id: product.id,
+      name: product.name,
+      nameHe: product.nameHe,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      vendorId: product.vendorId,
+      vendorName: product.vendorName,
+      image: product.image,
+      searchScore: 1,
+      matchType: feed.source,
     })),
     query: q,
-    total: results.length,
+    total: feed.products.length,
+  }, {
+    status: feed.success ? 200 : 503,
+    headers: NO_STORE_HEADERS,
   });
 }

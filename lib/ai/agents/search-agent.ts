@@ -3,17 +3,9 @@
  * Handles semantic product search with voice corrections
  */
 
-import {
-  getAllProducts,
-  getProductsByVendor,
-  getProductsByCategory,
-  getProductById,
-  getVendors,
-  getCategories,
-  searchProducts as dataLayerSearch,
-  type EnhancedProduct
-} from '@/lib/data/wordpress-style-data-layer';
-import { hybridSearch } from '@/lib/search/semantic-search';
+import { getProductById, getProductFeed, ProductFeedProduct } from '@/lib/services/live-product-feed';
+import { getVendorFeed } from '@/lib/services/live-vendor-feed';
+import { hybridSearch, type EnhancedProduct } from '@/lib/search/semantic-search';
 import type { ProductResult, SearchFilters } from '../events/shopping-events';
 
 // Semantic category mappings - what users say vs actual categories
@@ -60,6 +52,19 @@ const VOICE_CORRECTIONS: Record<string, string[]> = {
 };
 
 export class SearchAgent {
+  private normalizeProducts(products: ProductFeedProduct[]): EnhancedProduct[] {
+    return products.map(product => ({
+      ...product,
+      nameHe: product.nameHe || undefined,
+      description: product.description || '',
+      featured: product.isFeatured,
+      isVegan: product.vegan,
+      isKosher: Boolean(product.kashrut),
+      isOrganic: product.organic,
+      isGlutenFree: product.glutenFree,
+    }));
+  }
+
   /**
    * Apply voice corrections to search query
    */
@@ -151,8 +156,8 @@ export class SearchAgent {
     const correctedQuery = this.applyVoiceCorrections(query);
     console.log('[SearchAgent] After voice corrections:', correctedQuery);
 
-    // Get all products (already includes Hebrew translations)
-    let products = getAllProducts();
+    const feed = await getProductFeed();
+    let products = this.normalizeProducts(feed.products);
 
     // Apply dietary and price filters before search scoring
     if (filters?.dietary && filters.dietary.length > 0) {
@@ -160,10 +165,10 @@ export class SearchAgent {
         const productTags = (p.tags || []).map(t => t.toLowerCase());
         return filters.dietary!.some(d =>
           productTags.includes(d.toLowerCase()) ||
-          (d === 'vegan' && p.isVegan) ||
-          (d === 'kosher' && p.isKosher) ||
-          (d === 'organic' && p.isOrganic) ||
-          (d === 'gluten-free' && p.isGlutenFree)
+          (d === 'vegan' && (p.isVegan || p.vegan)) ||
+          (d === 'kosher' && (p.isKosher || p.kashrut)) ||
+          (d === 'organic' && (p.isOrganic || p.organic)) ||
+          (d === 'gluten-free' && (p.isGlutenFree || p.glutenFree))
         );
       });
     }
@@ -199,7 +204,8 @@ export class SearchAgent {
    * Browse products by category
    */
   async browseCategory(category: string): Promise<ProductResult[]> {
-    const products = getProductsByCategory(category);
+    const feed = await getProductFeed({ category });
+    const products = this.normalizeProducts(feed.products);
     return products.slice(0, 12).map(p => this.toProductResult(p));
   }
 
@@ -207,7 +213,8 @@ export class SearchAgent {
    * Browse products by vendor
    */
   async browseVendor(vendorId: string, category?: string): Promise<ProductResult[]> {
-    let products = getProductsByVendor(vendorId);
+    const feed = await getProductFeed({ vendorId });
+    let products = this.normalizeProducts(feed.products);
 
     if (category) {
       products = products.filter(p =>
@@ -222,15 +229,16 @@ export class SearchAgent {
    * Get products by dietary requirements
    */
   async getDietaryProducts(dietary: string[]): Promise<ProductResult[]> {
-    const products = getAllProducts().filter(p => {
+    const feed = await getProductFeed();
+    const products = this.normalizeProducts(feed.products).filter(p => {
       const productTags = (p.tags || []).map(t => t.toLowerCase());
       return dietary.some(d => {
         const dLower = d.toLowerCase();
         return productTags.includes(dLower) ||
-          (dLower === 'vegan' && p.isVegan) ||
-          (dLower === 'kosher' && p.isKosher) ||
-          (dLower === 'organic' && p.isOrganic) ||
-          (dLower === 'gluten-free' && p.isGlutenFree);
+          (dLower === 'vegan' && (p.isVegan || p.vegan)) ||
+          (dLower === 'kosher' && (p.isKosher || p.kashrut)) ||
+          (dLower === 'organic' && (p.isOrganic || p.organic)) ||
+          (dLower === 'gluten-free' && (p.isGlutenFree || p.glutenFree));
       });
     });
 
@@ -241,22 +249,23 @@ export class SearchAgent {
    * Get product details by ID
    */
   async getProductDetails(productId: string): Promise<ProductResult | null> {
-    const product = getProductById(productId);
+    const product = await getProductById(productId);
     if (!product) return null;
-    return this.toProductResult(product);
+    return this.toProductResult(this.normalizeProducts([product])[0]);
   }
 
   /**
    * List all vendors
    */
   async listVendors() {
-    const vendors = getVendors();
+    const feed = await getVendorFeed();
+    const vendors = feed.vendors;
     return vendors.map(v => ({
       id: v.id,
       name: v.name,
       description: v.description,
       logo: v.logo,
-      productCount: v.products.length,
+      productCount: v.productCount,
       categories: v.categories,
     }));
   }
@@ -265,7 +274,17 @@ export class SearchAgent {
    * List all categories with counts
    */
   async listCategories() {
-    return getCategories();
+    const feed = await getProductFeed();
+    const counts = new Map<string, number>();
+    for (const product of feed.products) {
+      const category = product.category || 'general';
+      counts.set(category, (counts.get(category) || 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([id, count]) => ({
+      id,
+      name: id.replace(/-/g, ' '),
+      count,
+    }));
   }
 
   /**

@@ -1,28 +1,30 @@
 import { NextResponse } from 'next/server';
-import { getAllProducts, vendorStores } from '@/lib/data/wordpress-style-data-layer';
+import { getProductFeed } from '@/lib/services/live-product-feed';
+import { getVendorFeed } from '@/lib/services/live-vendor-feed';
 
-// This endpoint is disabled in production — dev-only data introspection
 export async function GET() {
   if (process.env.NODE_ENV !== 'development') {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   try {
-    const vendors = Object.keys(vendorStores);
-    const vendorDetails = vendors.map(id => ({
-      id,
-      name: vendorStores[id].name,
-      productCount: vendorStores[id].products?.length || 0
-    }));
-
-    const allProducts = getAllProducts();
+    const [vendorFeed, productFeed] = await Promise.all([
+      getVendorFeed(),
+      getProductFeed(),
+    ]);
 
     return NextResponse.json({
-      success: true,
-      vendorCount: vendors.length,
-      vendors: vendorDetails,
-      totalProducts: allProducts.length,
-      sampleProducts: allProducts.slice(0, 3).map(p => ({
+      success: productFeed.success && vendorFeed.success,
+      source: productFeed.source,
+      stale: productFeed.stale || vendorFeed.stale,
+      vendorCount: vendorFeed.count,
+      vendors: vendorFeed.vendors.map(vendor => ({
+        id: vendor.id,
+        name: vendor.name,
+        productCount: vendor.productCount
+      })),
+      totalProducts: productFeed.count,
+      sampleProducts: productFeed.products.slice(0, 3).map(p => ({
         id: p.id,
         name: p.name,
         vendorId: p.vendorId,

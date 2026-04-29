@@ -2,21 +2,21 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export default function AdminPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    // Check if admin is authenticated
-    const adminAuth = localStorage.getItem('adminAuth');
-    
-    if (!adminAuth) {
-      router.push('/admin/login');
+    if (isLoading) return;
+
+    if (isAuthenticated && user?.role === 'admin') {
+      router.replace('/admin/dashboard');
     } else {
-      // If authenticated, redirect to dashboard
-      router.push('/admin/dashboard');
+      router.replace('/admin/login');
     }
-  }, [router]);
+  }, [isAuthenticated, isLoading, router, user?.role]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

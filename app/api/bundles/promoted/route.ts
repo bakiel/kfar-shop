@@ -8,7 +8,7 @@ import {
   isBundleRecordActive,
   sortBundleRecords,
 } from '@/lib/db/bundles';
-import { getProductById } from '@/lib/data/wordpress-style-data-layer';
+import { getProductFeed } from '@/lib/services/live-product-feed';
 
 // GET /api/bundles/promoted
 //
@@ -34,9 +34,11 @@ export async function GET() {
     const productIds = getBundleRecordProductIds(bundle);
     const price = getBundleRecordPrice(bundle);
     const originalPrice = getBundleRecordOriginalPrice(bundle);
+    const productFeed = await getProductFeed();
+    const productMap = new Map(productFeed.products.map((product) => [product.id, product]));
 
     const resolvedProducts = productIds.map((pid) => {
-      const product = getProductById(pid);
+      const product = productMap.get(pid);
       if (product) {
         return {
           id: product.id,

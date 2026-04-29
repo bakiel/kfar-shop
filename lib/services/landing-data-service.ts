@@ -1,6 +1,6 @@
 /**
  * Landing Page Data Service
- * Server-only module: queries PostgreSQL with fallback to static data layer
+ * Server-only module: queries PostgreSQL and DB-derived live feed cache.
  */
 
 import { unstable_cache } from 'next/cache';
@@ -14,7 +14,8 @@ import {
   sortBundleRecords,
 } from '@/lib/db/bundles';
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
-import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
+import { getProductById as getLiveProductById, getProductFeed, ProductFeedProduct } from '@/lib/services/live-product-feed';
+import { getVendorFeed } from '@/lib/services/live-vendor-feed';
 import type {
   LandingPageData,
   LandingVendor,
@@ -28,7 +29,6 @@ import type {
   EnrichedBundle,
   EnrichedBundleProduct,
 } from '@/lib/types/landing';
-import { getProductById } from '@/lib/data/wordpress-style-data-layer';
 
 // Category images mapping (AI-generated category banners)
 const categoryImages: Record<string, string> = {
@@ -92,28 +92,6 @@ function toStringArray(value: unknown): string[] {
   return [];
 }
 
-function mapStaticLandingProduct(store: any, product: any): LandingProduct {
-  return {
-    id: product.id,
-    name: product.name,
-    nameHe: product.nameHe || product.nameHebrew,
-    description: product.description,
-    price: product.price,
-    originalPrice: product.originalPrice,
-    category: product.category,
-    image: product.image,
-    vendorId: product.vendorId,
-    vendorName: product.vendorName,
-    vendorLogo: store.logo,
-    badge: product.badge,
-    rating: product.rating,
-    reviewCount: product.reviewCount || product.reviews || 0,
-    inStock: product.inStock,
-    isFeatured: product.isFeatured || product.featured || false,
-    tags: product.tags || [],
-  };
-}
-
 function mapDatabaseLandingProduct(row: any): LandingProduct {
   return {
     id: row.id,
@@ -136,102 +114,100 @@ function mapDatabaseLandingProduct(row: any): LandingProduct {
   };
 }
 
-function getStaticVendors(): LandingVendor[] {
-  return Object.values(vendorStores).map((store) => ({
-    id: store.id,
-    name: store.name,
-    slug: store.slug,
-    description: store.description,
-    logo: store.logo,
-    banner: store.banner,
-    productCount: store.products.length,
-    categories: store.categories,
-    rating: store.analytics?.averageRating || 4.5,
-    reviewCount: store.analytics?.reviewCount || 0,
-    established: store.metadata.established,
-    location: store.metadata.location,
-    specialty: store.metadata.specialty,
-    certifications: store.metadata.certifications || [],
-    topProducts: store.products.slice(0, 3).map((product) => mapStaticLandingProduct(store, product)),
-  }));
+function mapLiveLandingProduct(product: ProductFeedProduct): LandingProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    nameHe: product.nameHe || undefined,
+    description: product.description || '',
+    price: product.price,
+    originalPrice: product.originalPrice || undefined,
+    category: product.category,
+    image: product.image || '',
+    vendorId: product.vendorId,
+    vendorName: product.vendorName,
+    vendorLogo: product.vendorLogo || undefined,
+    badge: product.badge || undefined,
+    rating: product.rating || undefined,
+    reviewCount: product.reviewCount || 0,
+    inStock: product.inStock,
+    isFeatured: product.isFeatured || false,
+    tags: product.tags || [],
+  };
 }
 
-function getStaticFeaturedProducts(limit: number = 12): LandingProduct[] {
-  const allProducts: LandingProduct[] = [];
+async function getLiveLandingPageData(): Promise<LandingPageData> {
+  const [productFeed, vendorFeed] = await Promise.all([
+    getProductFeed(),
+    getVendorFeed({ includeProducts: true, productLimit: 3 }),
+  ]);
 
-  Object.values(vendorStores).forEach((store) => {
-    store.products.forEach((product) => {
-      allProducts.push(mapStaticLandingProduct(store, product));
-    });
-  });
+  const featuredProducts = productFeed.products
+    .map(mapLiveLandingProduct)
+    .sort((a, b) => {
+      if (a.isFeatured && !b.isFeatured) return -1;
+      if (!a.isFeatured && b.isFeatured) return 1;
+      return (b.rating || 0) - (a.rating || 0);
+    })
+    .slice(0, 12);
 
-  allProducts.sort((a, b) => {
-    if (a.isFeatured && !b.isFeatured) return -1;
-    if (!a.isFeatured && b.isFeatured) return 1;
-    return (b.rating || 0) - (a.rating || 0);
-  });
-
-  return allProducts.slice(0, limit);
-}
-
-function getStaticTopCategories(limit: number = 8): LandingCategory[] {
-  const categoryCounts: Record<string, number> = {};
-
-  Object.values(vendorStores).forEach((store) => {
-    store.products.forEach((product) => {
-      const category = product.category === 'ground-meat' ? 'ground-meatless' : product.category;
-      categoryCounts[category] = (categoryCounts[category] || 0) + 1;
-    });
-  });
-
-  return Object.entries(categoryCounts)
+  const categories = Array.from(
+    productFeed.products.reduce((counts, product) => {
+      const category = product.category === 'ground-meat' ? 'ground-meatless' : product.category || 'general';
+      counts.set(category, (counts.get(category) || 0) + 1);
+      return counts;
+    }, new Map<string, number>())
+  )
     .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
+    .slice(0, 8)
     .map(([category, count], idx) => {
       const slug = category.toLowerCase().replace(/\s+/g, '-');
       const display = categoryDisplayNames[slug];
-
       return {
         id: `cat-${idx}`,
-        name: display?.en || category.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        name: display?.en || category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
         nameHe: display?.he,
         slug,
         image: categoryImages[slug] || '/images/default_logo.svg',
         productCount: count,
       };
     });
-}
-
-function getStaticMarketplaceStats(): MarketplaceStats {
-  const stores = Object.values(vendorStores);
-  const totalProducts = stores.reduce((sum, store) => sum + store.products.length, 0);
-  const categories = new Set<string>();
-
-  stores.forEach((store) => store.products.forEach((product) => categories.add(product.category)));
 
   return {
-    totalVendors: stores.length,
-    totalProducts,
-    totalCategories: categories.size,
-    totalCustomers: 500,
-    yearsInBusiness: new Date().getFullYear() - 1973,
-  };
-}
-
-function getStaticLandingPageData(): LandingPageData {
-  return {
-    vendors: getStaticVendors(),
-    featuredProducts: getStaticFeaturedProducts(12),
-    categories: getStaticTopCategories(8),
+    vendors: vendorFeed.vendors.map((vendor) => ({
+      id: vendor.id,
+      name: vendor.name,
+      slug: vendor.slug || vendor.id,
+      description: vendor.description || '',
+      logo: vendor.logo,
+      banner: vendor.banner,
+      productCount: vendor.productCount,
+      categories: vendor.categories,
+      rating: vendor.rating || 4.5,
+      reviewCount: vendor.totalReviews || 0,
+      established: vendor.metadata?.established,
+      location: vendor.metadata?.location,
+      specialty: vendor.category || vendor.categories[0],
+      certifications: vendor.metadata?.certifications || [],
+      topProducts: (vendor.products || []).map(mapLiveLandingProduct),
+    })),
+    featuredProducts,
+    categories,
     flashDeals: [],
-    bundles: generateStaticBundles(),
+    bundles: [],
     promotions: [],
-    stats: getStaticMarketplaceStats(),
+    stats: {
+      totalVendors: vendorFeed.count,
+      totalProducts: productFeed.count,
+      totalCategories: categories.length,
+      totalCustomers: 0,
+      yearsInBusiness: new Date().getFullYear() - 1973,
+    },
   };
 }
 
 /**
- * Get active vendors from DB with fallback to static data
+ * Get active vendors from DB with live-feed fallback
  */
 async function getActiveVendors(): Promise<LandingVendor[]> {
   try {
@@ -307,10 +283,10 @@ async function getActiveVendors(): Promise<LandingVendor[]> {
       });
     }
   } catch (error) {
-    console.log('DB vendor fetch failed, using static data:', (error as Error).message);
+    console.log('DB vendor fetch failed, using live feed:', (error as Error).message);
   }
 
-  return getStaticVendors();
+  return (await getLiveLandingPageData()).vendors;
 }
 
 /**
@@ -332,14 +308,15 @@ async function getFeaturedProducts(limit: number = 12): Promise<LandingProduct[]
       return rows.map(mapDatabaseLandingProduct);
     }
   } catch (error) {
-    console.log('DB product fetch failed, using static data:', (error as Error).message);
+    console.log('DB product fetch failed, using live feed:', (error as Error).message);
   }
 
-  return getStaticFeaturedProducts(limit);
+  const feed = await getProductFeed({ limit });
+  return feed.products.map(mapLiveLandingProduct);
 }
 
 /**
- * Get top categories from DB or derive from static data
+ * Get top categories from DB or derive from live product feed
  */
 async function getTopCategories(limit: number = 8): Promise<LandingCategory[]> {
   try {
@@ -369,10 +346,10 @@ async function getTopCategories(limit: number = 8): Promise<LandingCategory[]> {
       });
     }
   } catch (error) {
-    console.log('DB category fetch failed, using static data:', (error as Error).message);
+    console.log('DB category fetch failed, using live feed:', (error as Error).message);
   }
 
-  return getStaticTopCategories(limit);
+  return (await getLiveLandingPageData()).categories.slice(0, limit);
 }
 
 /**
@@ -477,142 +454,7 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
     console.log('DB bundles fetch failed:', (error as Error).message);
   }
 
-  // Static fallback: generate smart bundles from product catalog
-  return generateStaticBundles();
-}
-
-/**
- * Generate curated promotional bundles from the static product catalog.
- * These are themed meal/lifestyle bundles that cross vendors.
- */
-function generateStaticBundles(): Bundle[] {
-  const allProducts: Record<string, { id: string; name: string; nameHe?: string; image: string; price: number; category: string; vendorId: string; vendorName: string }> = {};
-
-  Object.values(vendorStores).forEach((store) => {
-    store.products.forEach((p) => {
-      allProducts[p.id] = {
-        id: p.id,
-        name: p.name,
-        nameHe: (p as any).nameHe || (p as any).nameHebrew,
-        image: p.image,
-        price: p.price,
-        category: p.category,
-        vendorId: p.vendorId,
-        vendorName: p.vendorName,
-      };
-    });
-  });
-
-  // Helper to pick products by ID
-  const pick = (ids: string[]): BundleProduct[] =>
-    ids
-      .filter((id) => allProducts[id])
-      .map((id) => ({
-        id: allProducts[id].id,
-        name: allProducts[id].name,
-        image: allProducts[id].image,
-        price: allProducts[id].price,
-      }));
-
-  const bundleDefs: {
-    id: string;
-    name: string;
-    nameHe: string;
-    description: string;
-    descriptionHe: string;
-    productIds: string[];
-    discountPct: number;
-    image: string;
-    loyaltyBonus: number;
-  }[] = [
-    {
-      id: 'bundle-family-feast',
-      name: 'Family Feast Bundle',
-      nameHe: 'חבילת סעודה משפחתית',
-      description: 'A complete vegan dinner for the whole family: burger, sides, and dessert from 3 vendors',
-      descriptionHe: 'ארוחת ערב טבעונית שלמה לכל המשפחה: המבורגר, תוספות וקינוח מ-3 חנויות',
-      productIds: ['QC-001', 'TD-001', 'GD-003', 'PS004'],
-      discountPct: 15,
-      image: '/images/queens-cuisine/queens_cuisine_vegan_burger_seitan_patty_sesame_bun_tomato_lettuce_plant_based_sandwich.jpg',
-      loyaltyBonus: 50,
-    },
-    {
-      id: 'bundle-shabbat',
-      name: 'Shabbat Dinner Pack',
-      nameHe: 'חבילת ארוחת שבת',
-      description: 'Everything for a beautiful Shabbat meal: schnitzels, fresh salad, and sweet treats',
-      descriptionHe: 'הכל לארוחת שבת מושלמת: שניצלים, סלט טרי ומתוקים',
-      productIds: ['TD-008', 'GL001', 'GD-001', 'PS001'],
-      discountPct: 12,
-      image: '/images/vendors/teva-deli/teva_deli_vegan_seitan_schnitzel_breaded_cutlet_plant_based_meat_alternative_israeli_comfort_food.jpg',
-      loyaltyBonus: 40,
-    },
-    {
-      id: 'bundle-bbq',
-      name: 'BBQ Party Bundle',
-      nameHe: 'חבילת מנגל',
-      description: 'Fire up the grill! Seitan steaks, burgers, sausages and refreshments',
-      descriptionHe: 'תדליקו את המנגל! סטייקים, המבורגרים, נקניקיות ושתייה',
-      productIds: ['QC-003', 'TD-005', 'TD-011', 'PS007'],
-      discountPct: 18,
-      image: '/images/queens-cuisine/queens_cuisine_vegan_meat_grilled_seitan_steaks_plant_based_protein_alternative.jpg',
-      loyaltyBonus: 60,
-    },
-    {
-      id: 'bundle-sweet-tooth',
-      name: 'Sweet Tooth Collection',
-      nameHe: 'אוסף מתוקים',
-      description: 'Artisan ice cream, frozen treats, and gourmet desserts from Gahn Delight',
-      descriptionHe: 'גלידות אומנותיות, קינוחים קפואים וממתקי גורמה מגן תענוג',
-      productIds: ['GD-001', 'GD-003', 'GD-005', 'GD-006'],
-      discountPct: 10,
-      image: '/images/vendors/gahn-delight/gahn_delight_ice_cream_pistachio_rose_triple_scoop_ceramic_bowl.jpeg',
-      loyaltyBonus: 30,
-    },
-    {
-      id: 'bundle-healthy-start',
-      name: 'Healthy Start Pack',
-      nameHe: 'חבילת התחלה בריאה',
-      description: 'Kickstart your week with fresh spreads, salads, and wholesome pantry staples',
-      descriptionHe: 'התחילו את השבוע עם ממרחים טריים, סלטים ומוצרי מזווה בריאים',
-      productIds: ['GL001', 'GL003', 'PS001', 'PS003'],
-      discountPct: 14,
-      image: '/images/vendors/garden-of-light/products/1.jpg',
-      loyaltyBonus: 45,
-    },
-    {
-      id: 'bundle-kfar-essentials',
-      name: 'KFAR Essentials Box',
-      nameHe: 'קופסת חיוניים של כפר',
-      description: 'The Village of Peace starter box: community favorites from every vendor',
-      descriptionHe: 'קופסת ההתחלה של כפר השלום: מוצרים אהובים מכל חנות',
-      productIds: ['TD-001', 'QC-002', 'GL001', 'GD-001', 'PS001', 'vop-001'],
-      discountPct: 20,
-      image: '/images/vendors/vop-shop/vop_shop_community_apparel_product_01_wellness_lifestyle_village_of_peace_heritage_clothing.jpg',
-      loyaltyBonus: 100,
-    },
-  ];
-
-  return bundleDefs.map((def) => {
-    const products = pick(def.productIds);
-    const originalPrice = products.reduce((sum, p) => sum + p.price, 0);
-    const bundlePrice = Math.round(originalPrice * (1 - def.discountPct / 100) * 100) / 100;
-
-    return {
-      id: def.id,
-      name: def.name,
-      nameHe: def.nameHe,
-      description: def.description,
-      descriptionHe: def.descriptionHe,
-      products,
-      bundlePrice,
-      originalPrice,
-      savingsPercent: def.discountPct,
-      image: def.image,
-      isFeatured: true,
-      loyaltyPointsBonus: def.loyaltyBonus,
-    };
-  }).filter((b) => b.products.length >= 3); // Only show bundles with at least 3 resolved products
+  return [];
 }
 
 /**
@@ -667,20 +509,18 @@ async function getMarketplaceStats(): Promise<MarketplaceStats> {
       yearsInBusiness: new Date().getFullYear() - 1973,
     };
   } catch (error) {
-    console.log('DB stats fetch failed, using static:', (error as Error).message);
+    console.log('DB stats fetch failed, using live feed:', (error as Error).message);
   }
 
-  return getStaticMarketplaceStats();
+  return (await getLiveLandingPageData()).stats;
 }
 
 function resolveBundleProduct(productId: string): BundleProduct {
-  const product = getProductById(productId);
-
   return {
     id: productId,
-    name: product?.name || productId,
-    image: product?.image || '',
-    price: product?.price || 0,
+    name: productId,
+    image: '',
+    price: 0,
   };
 }
 
@@ -689,7 +529,6 @@ function mapDatabaseBundle(row: any): Bundle {
   const products = normalized.products.map(resolveBundleProduct);
   const bundlePrice = normalized.price;
   const originalPrice = normalized.originalPrice;
-  const primaryProduct = products.length === 1 ? getProductById(products[0].id) : undefined;
 
   return {
     id: normalized.id,
@@ -704,8 +543,7 @@ function mapDatabaseBundle(row: any): Bundle {
     image: normalized.image || products[0]?.image || '',
     isFeatured: normalized.isFeatured,
     loyaltyPointsBonus: normalized.loyaltyPointsBonus,
-    vendorId: normalized.vendorId || primaryProduct?.vendorId,
-    vendorName: primaryProduct?.vendorName,
+    vendorId: normalized.vendorId,
   };
 }
 
@@ -719,7 +557,7 @@ async function getDatabaseBundles(): Promise<Bundle[]> {
 
     return activeRows.map(mapDatabaseBundle);
   } catch (error) {
-    console.log('DB bundle fetch failed, using static bundles only:', (error as Error).message);
+    console.log('DB bundle fetch failed:', (error as Error).message);
     return [];
   }
 }
@@ -728,17 +566,13 @@ async function getDatabaseBundles(): Promise<Bundle[]> {
  * Get all bundles (for dedicated bundles page)
  */
 async function loadAllBundles(): Promise<Bundle[]> {
-  const [staticBundles, databaseBundles] = await Promise.all([
+  const [featuredBundles, databaseBundles] = await Promise.all([
     getFeaturedBundles(),
     getDatabaseBundles(),
   ]);
 
-  if (databaseBundles.length === 0) {
-    return staticBundles;
-  }
-
   const merged = new Map<string, Bundle>();
-  for (const bundle of staticBundles) merged.set(bundle.id, bundle);
+  for (const bundle of featuredBundles) merged.set(bundle.id, bundle);
   for (const bundle of databaseBundles) merged.set(bundle.id, bundle);
 
   return Array.from(merged.values());
@@ -761,11 +595,11 @@ export async function getEnrichedBundle(id: string): Promise<EnrichedBundle | nu
   const bundle = await getBundleById(id);
   if (!bundle) return null;
 
-  const enrichedProducts: EnrichedBundleProduct[] = bundle.products.map(bp => {
-    const fullProduct = getProductById(bp.id);
+  const enrichedProducts: EnrichedBundleProduct[] = await Promise.all(bundle.products.map(async (bp) => {
+    const fullProduct = await getLiveProductById(bp.id);
     return {
       ...bp,
-      nameHe: fullProduct?.nameHe || fullProduct?.nameHebrew,
+      nameHe: fullProduct?.nameHe || undefined,
       description: fullProduct?.description,
       descriptionHe: fullProduct?.descriptionHe,
       vendorId: fullProduct?.vendorId || '',
@@ -774,7 +608,7 @@ export async function getEnrichedBundle(id: string): Promise<EnrichedBundle | nu
       category: fullProduct?.category || '',
       tags: fullProduct?.tags || [],
     };
-  });
+  }));
 
   return {
     ...bundle,
@@ -787,8 +621,8 @@ async function loadLandingPageData(): Promise<LandingPageData> {
   // If DB is down this returns in <2s instead of waiting for every query to timeout.
   const dbUp = await isDbAvailable();
   if (!dbUp) {
-    console.log('DB unreachable — using static data for landing page');
-    return getStaticLandingPageData();
+    console.log('DB unreachable - using DB-derived live feed cache for landing page');
+    return getLiveLandingPageData();
   }
 
   const [vendors, featuredProducts, categories, flashDeals, bundles, promotions, stats] =
