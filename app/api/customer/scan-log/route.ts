@@ -8,18 +8,26 @@ function getUser(request: NextRequest) {
 }
 
 async function ensureScanLogTable() {
-  await query(`
-    CREATE TABLE IF NOT EXISTS vendor_customer_scans (
-      id VARCHAR(80) PRIMARY KEY,
-      vendor_id VARCHAR(50) NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
-      customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
-      scanned_by UUID REFERENCES users(id) ON DELETE SET NULL,
-      scanned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      metadata JSONB NOT NULL DEFAULT '{}'
-    )
-  `);
-  await query('CREATE INDEX IF NOT EXISTS idx_vendor_customer_scans_vendor ON vendor_customer_scans(vendor_id, scanned_at DESC)');
-  await query('CREATE INDEX IF NOT EXISTS idx_vendor_customer_scans_customer ON vendor_customer_scans(customer_id, scanned_at DESC)');
+  const statements = [
+    `CREATE TABLE IF NOT EXISTS vendor_customer_scans (
+       id VARCHAR(80) PRIMARY KEY,
+       vendor_id VARCHAR(50) NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
+       customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+       scanned_by UUID REFERENCES users(id) ON DELETE SET NULL,
+       scanned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+       metadata JSONB NOT NULL DEFAULT '{}'
+     )`,
+    'CREATE INDEX IF NOT EXISTS idx_vendor_customer_scans_vendor ON vendor_customer_scans(vendor_id, scanned_at DESC)',
+    'CREATE INDEX IF NOT EXISTS idx_vendor_customer_scans_customer ON vendor_customer_scans(customer_id, scanned_at DESC)',
+  ];
+
+  for (const statement of statements) {
+    try {
+      await query(statement);
+    } catch (error: any) {
+      if (error?.code !== '42501') throw error;
+    }
+  }
 }
 
 function scanId() {

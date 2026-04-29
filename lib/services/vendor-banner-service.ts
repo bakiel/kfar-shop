@@ -27,8 +27,19 @@ export interface VendorBannerInput {
 
 const VALID_TEMPLATES = new Set(['sale', 'announcement', 'product_highlight', 'product', 'event', 'seasonal', 'custom']);
 
+async function runOptionalDdl(sql: string) {
+  try {
+    await query(sql);
+  } catch (error: any) {
+    if (error?.code === '42501') {
+      return;
+    }
+    throw error;
+  }
+}
+
 export async function ensureVendorBannersTable() {
-  await query(`
+  await runOptionalDdl(`
     CREATE TABLE IF NOT EXISTS vendor_banners (
       id VARCHAR(80) PRIMARY KEY,
       vendor_id VARCHAR(50) NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
@@ -48,8 +59,8 @@ export async function ensureVendorBannersTable() {
     )
   `);
 
-  await query('CREATE INDEX IF NOT EXISTS idx_vendor_banners_vendor ON vendor_banners(vendor_id)');
-  await query('CREATE INDEX IF NOT EXISTS idx_vendor_banners_active ON vendor_banners(vendor_id, is_active, order_position)');
+  await runOptionalDdl('CREATE INDEX IF NOT EXISTS idx_vendor_banners_vendor ON vendor_banners(vendor_id)');
+  await runOptionalDdl('CREATE INDEX IF NOT EXISTS idx_vendor_banners_active ON vendor_banners(vendor_id, is_active, order_position)');
 }
 
 function asObject(value: unknown): Record<string, any> {

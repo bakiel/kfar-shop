@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS vendor_banners (
 CREATE INDEX IF NOT EXISTS idx_vendor_banners_vendor ON vendor_banners(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_vendor_banners_active ON vendor_banners(vendor_id, is_active, order_position);
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON vendor_banners TO kfar;
+
 CREATE TABLE IF NOT EXISTS vendor_customer_scans (
   id VARCHAR(80) PRIMARY KEY,
   vendor_id VARCHAR(50) NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
@@ -33,3 +35,5 @@ CREATE TABLE IF NOT EXISTS vendor_customer_scans (
 
 CREATE INDEX IF NOT EXISTS idx_vendor_customer_scans_vendor ON vendor_customer_scans(vendor_id, scanned_at DESC);
 CREATE INDEX IF NOT EXISTS idx_vendor_customer_scans_customer ON vendor_customer_scans(customer_id, scanned_at DESC);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON vendor_customer_scans TO kfar;

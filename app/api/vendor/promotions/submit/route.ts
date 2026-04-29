@@ -37,6 +37,10 @@ function normalizeDate(value: unknown) {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+function truncate(value: unknown, maxLength: number) {
+  return String(value || '').slice(0, maxLength);
+}
+
 function normalizePromotion(row: any) {
   const conditions = row.conditions && typeof row.conditions === 'object' ? row.conditions : {};
   return {
@@ -127,7 +131,7 @@ export async function POST(request: NextRequest) {
         user.vendorId,
         JSON.stringify(productIds),
         body.productImage || null,
-        body.productName || title,
+        truncate(body.productName || title, 50),
         conditions,
         user.id,
       ]
