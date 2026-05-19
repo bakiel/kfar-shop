@@ -88,7 +88,7 @@ export async function PATCH(
     }
 
     const { rows: existingRows } = await query(
-      'SELECT id, order_number, status, payment_status, vendor_id, customer_id, customer_name FROM orders WHERE id = $1 OR order_number = $1',
+      'SELECT id, order_number, status, payment_status, vendor_id, customer_id, customer_name FROM orders WHERE id::text = $1 OR order_number = $1',
       [id]
     );
 

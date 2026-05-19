@@ -73,7 +73,7 @@ export async function GET(
 
   const { id } = await params;
   const { rows } = await query(
-    'SELECT * FROM orders WHERE id = $1 OR order_number = $1 LIMIT 1',
+    'SELECT * FROM orders WHERE id::text = $1 OR order_number = $1 LIMIT 1',
     [id]
   );
 
@@ -99,7 +99,7 @@ export async function POST(
   }
 
   const { rows } = await query(
-    'SELECT * FROM orders WHERE id = $1 OR order_number = $1 LIMIT 1',
+    'SELECT * FROM orders WHERE id::text = $1 OR order_number = $1 LIMIT 1',
     [id]
   );
   const row = rows[0];

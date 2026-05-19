@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, isDbAvailable } from '@/lib/db/postgres-client';
+import { db, isDbAvailable, query } from '@/lib/db/postgres-client';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import {
+  notifyCustomerAccount,
+  notifyVendorOwners,
+} from '@/lib/services/account-notification-events.server';
 
 const VALID_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
@@ -110,13 +114,75 @@ export async function PATCH(request: NextRequest) {
     }
 
     try {
-      const updated = await db.orders.updateStatus(orderId, status);
+      const { rows: existingRows } = await query(
+        'SELECT id, order_number, status, vendor_id, customer_id FROM orders WHERE id::text = $1 OR order_number = $1',
+        [orderId]
+      );
+
+      if (existingRows.length === 0) {
+        return NextResponse.json(
+          { error: `Order ${orderId} not found` },
+          { status: 404 }
+        );
+      }
+
+      const existingOrder = existingRows[0];
+      const updated = await db.orders.updateStatus(existingOrder.id, status);
       if (!updated) {
         return NextResponse.json(
           { error: `Order ${orderId} not found` },
           { status: 404 }
         );
       }
+
+      if (existingOrder.status !== status) {
+        const statusLabels: Record<string, string> = {
+          pending: 'Pending',
+          processing: 'Processing',
+          shipped: 'Shipped',
+          delivered: 'Delivered',
+          cancelled: 'Cancelled',
+        };
+
+        if (updated.customer_id) {
+          notifyCustomerAccount(updated.customer_id, {
+            type: 'order_update',
+            channel: 'in_app',
+            title: `Order ${updated.order_number} updated`,
+            titleHe: `הזמנה ${updated.order_number} עודכנה`,
+            message: `Your order is now ${statusLabels[status] || status}.`,
+            messageHe: `ההזמנה שלך כעת בסטטוס ${statusLabels[status] || status}.`,
+            data: {
+              orderId: updated.id,
+              orderNumber: updated.order_number,
+              previousStatus: existingOrder.status,
+              status,
+              actionUrl: `/customer/orders/${updated.id}`,
+              actionLabel: 'View order',
+            },
+          }).catch(err => console.error('Failed to create admin order customer notification:', err));
+        }
+
+        if (updated.vendor_id) {
+          notifyVendorOwners(updated.vendor_id, {
+            type: 'order_update',
+            channel: 'in_app',
+            title: `Order ${updated.order_number} updated`,
+            titleHe: `הזמנה ${updated.order_number} עודכנה`,
+            message: `Admin updated the order to ${statusLabels[status] || status}.`,
+            messageHe: `מנהל עדכן את ההזמנה לסטטוס ${statusLabels[status] || status}.`,
+            data: {
+              orderId: updated.id,
+              orderNumber: updated.order_number,
+              previousStatus: existingOrder.status,
+              status,
+              actionUrl: '/vendor/orders',
+              actionLabel: 'View orders',
+            },
+          }).catch(err => console.error('Failed to create admin order vendor notification:', err));
+        }
+      }
+
       return NextResponse.json({
         success: true,
         order: updated,
