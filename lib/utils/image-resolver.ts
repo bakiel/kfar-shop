@@ -50,6 +50,18 @@ export function resolveImagePath(path: string | undefined | null): string {
     // Gahn Delight logo
     '/images/vendors/gahn_delight_official_logo_master_brand_ice_cream.jpg':
       '/images/gahn-delight/gahn_delight_official_logo_master_brand_ice_cream.jpg',
+
+    '/images/gahn-delight/gahn_delight_official_logo_master_brand_vegan_ice_cream.jpg':
+      '/images/gahn-delight/gahn_delight_official_logo_master_brand_ice_cream.jpg',
+
+    '/images/people-store/people_store_official_logo_master_brand_bulk_foods_grocery.jpg':
+      '/images/people-store/peoples_store_official_logo_master_brand_community_market.jpg',
+
+    '/images/queens-cuisine/queens_cuisine_official_logo_master_brand_vegan_gourmet_catering.jpg':
+      '/images/queens-cuisine/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg',
+
+    '/images/vop-shop/vop_shop_official_logo_master_brand_community_marketplace.jpg':
+      '/images/vop-shop/vop_shop_official_logo_master_brand_village_of_peace.jpg',
     
     // VOP Shop logo
     '/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg':

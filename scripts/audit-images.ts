@@ -7,6 +7,12 @@ const outDir = path.join(process.cwd(), 'project-reports');
 const outFile = path.join(outDir, `image-audit-${new Date().toISOString().slice(0, 10)}.csv`);
 const manifestPath = path.join(process.cwd(), 'lib', 'utils', 'image-manifest.json');
 const fallbackImage = '/images/placeholder-product.jpg';
+const legacyCorrections: Record<string, string> = {
+  '/images/gahn-delight/gahn_delight_official_logo_master_brand_vegan_ice_cream.jpg': '/images/gahn-delight/gahn_delight_official_logo_master_brand_ice_cream.jpg',
+  '/images/people-store/people_store_official_logo_master_brand_bulk_foods_grocery.jpg': '/images/people-store/peoples_store_official_logo_master_brand_community_market.jpg',
+  '/images/queens-cuisine/queens_cuisine_official_logo_master_brand_vegan_gourmet_catering.jpg': '/images/queens-cuisine/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg',
+  '/images/vop-shop/vop_shop_official_logo_master_brand_community_marketplace.jpg': '/images/vop-shop/vop_shop_official_logo_master_brand_village_of_peace.jpg',
+};
 const { Pool } = pg;
 const pool = new Pool({
   host: process.env.POSTGRES_HOST || 'localhost',
@@ -41,6 +47,7 @@ function resolveAuditImagePath(value: string) {
   if (!cleanPath) return { src: fallbackImage, placeholder: true };
   if (/^https?:\/\//i.test(cleanPath)) return { src: cleanPath, placeholder: false };
   if (!cleanPath.startsWith('/')) cleanPath = `/${cleanPath}`;
+  if (legacyCorrections[cleanPath]) return { src: legacyCorrections[cleanPath], placeholder: false };
   const basename = cleanPath.split('/').pop() || cleanPath;
   const src = manifest[cleanPath] || manifest[basename] || manifest[basename.toLowerCase()];
   return src ? { src, placeholder: false } : { src: fallbackImage, placeholder: true };
