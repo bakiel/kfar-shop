@@ -8,6 +8,7 @@ import Layout from '@/components/layout/Layout';
 import { useCart } from '@/lib/context/CartContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
+import PaymentMethodSelector, { CheckoutPaymentMethod, getPaymentMethodLabel } from '@/components/checkout/PaymentMethodSelector';
 
 export default function CheckoutPage() {
   const { items, getCartTotal, clearCart } = useCart();
@@ -20,6 +21,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<CheckoutPaymentMethod>('cash');
 
   const total = getCartTotal();
   const canSubmit = fullName.trim().length >= 2
@@ -52,7 +54,7 @@ export default function CheckoutPage() {
           })),
           subtotal: total,
           total,
-          paymentMethod: 'cash',
+          paymentMethod,
           deliveryMethod: 'delivery',
           currency: 'ILS',
           customer: {
@@ -94,8 +96,8 @@ export default function CheckoutPage() {
             </h1>
             <p className="text-sm text-gray-600 mb-6">
               {isRTL
-                ? 'נצור קשר בהקדם לתיאום המשלוח. התשלום במזומן בעת האיסוף.'
-                : "We'll be in touch shortly to arrange delivery. Payment is cash on arrival."}
+                ? `נצור קשר בהקדם לתיאום המשלוח. אמצעי התשלום: ${getPaymentMethodLabel(paymentMethod)}.`
+                : `We'll be in touch shortly to arrange delivery. Payment method: ${getPaymentMethodLabel(paymentMethod)}.`}
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#F5F0E8] rounded-lg mb-6">
               <span className="text-xs uppercase tracking-wider text-gray-500">
@@ -152,7 +154,7 @@ export default function CheckoutPage() {
             <p className="text-sm text-gray-600">
               {isRTL
                 ? 'משלוח לכפר. תשלום במזומן בעת המסירה.'
-                : 'Delivery to the village. Pay cash on arrival.'}
+                : `Delivery to the village. ${getPaymentMethodLabel(paymentMethod)} is selected.`}
             </p>
           </div>
 
@@ -203,6 +205,12 @@ export default function CheckoutPage() {
               />
             </div>
 
+            <PaymentMethodSelector
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              isRTL={isRTL}
+            />
+
             <div>
               <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
                 {isRTL ? 'כתובת' : 'Delivery address'}
@@ -251,7 +259,7 @@ export default function CheckoutPage() {
                 : <CheckCircle2 className="w-4 h-4 stroke-[1.5]" />}
               {submitting
                 ? (isRTL ? 'שולח...' : 'Placing order...')
-                : (isRTL ? 'אשר הזמנה - תשלום במסירה' : 'Place order - pay on delivery')}
+                : (isRTL ? 'אשר הזמנה - תשלום במסירה' : `Place order - ${getPaymentMethodLabel(paymentMethod)}`)}
             </motion.button>
           </form>
 

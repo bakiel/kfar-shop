@@ -5,6 +5,11 @@ import { sendTransactional } from '@/lib/services/email/email-service';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 import { createNotification } from '@/lib/services/notification-service.server';
 import { sendOrderConfirmationSMS } from '@/lib/services/sms-service';
+import {
+  notifyCustomerAccount,
+  notifyVendorOwners,
+} from '@/lib/services/account-notification-events.server';
+import { resolveOrderQuote, totalsMatch } from '@/lib/services/order-cart-resolver.server';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -67,6 +72,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body: OrderCreateBody = await request.json();
+    const paymentMethod = body.paymentMethod || 'cash';
+
+    if (paymentMethod !== 'cash') {
+      return NextResponse.json(
+        { success: false, error: 'Only Cash on Delivery is enabled' },
+        { status: 400 }
+      );
+    }
 
     // Validate required fields
     if (!body.items || body.items.length === 0) {
@@ -76,41 +89,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!body.total || body.total <= 0) {
+    let quote;
+    try {
+      quote = await resolveOrderQuote(body.items);
+    } catch (err) {
       return NextResponse.json(
-        { success: false, error: 'Invalid order total' },
+        { success: false, error: err instanceof Error ? err.message : 'Invalid order items' },
         { status: 400 }
       );
     }
-
-    const normalizedItems = body.items.map((item) => {
-      const productId = item.productId || item.id || item.product_id || '';
-
-      return {
-        id: productId,
-        productId,
-        name: item.name,
-        quantity: Number(item.quantity) || 0,
-        price: Number(item.price) || 0,
-        vendorId: item.vendorId || item.vendor_id || '',
-        vendorName: item.vendorName || item.vendor_name || '',
-        image: item.image || '',
-      };
-    });
-
-    if (normalizedItems.some((item) => !item.id)) {
+    if (!totalsMatch(body.total, quote.total)) {
       return NextResponse.json(
-        { success: false, error: 'Each order item must include a product ID' },
-        { status: 400 }
+        {
+          success: false,
+          code: 'ORDER_TOTAL_CHANGED',
+          error: 'Order total changed. Please review your cart and try again.',
+          quote,
+        },
+        { status: 409 }
       );
     }
+
+    const normalizedItems = quote.items;
 
     // Derive canonical name (fullName wins; falls back to first+last)
     const fullName = (body.customer?.fullName
       || `${body.customer?.firstName || ''} ${body.customer?.lastName || ''}`
     ).trim();
 
-    const isCOD = (body.paymentMethod || 'cash') === 'cash';
+    const isCOD = paymentMethod === 'cash';
 
     if (!fullName) {
       return NextResponse.json(
@@ -183,10 +190,10 @@ export async function POST(request: NextRequest) {
         customerName,
         customerEmail,
         body.customer.phone || null,
-        body.total,
-        body.subtotal || body.total,
-        body.deliveryFee || 0,
-        body.paymentMethod || 'cash',
+        quote.total,
+        quote.subtotal,
+        quote.deliveryFee,
+        paymentMethod,
         'pending',
         'pending',
         addressJson,
@@ -218,7 +225,7 @@ export async function POST(request: NextRequest) {
            last_order_at = NOW(),
            updated_at   = NOW()
          WHERE id = $1`,
-        [customerId, body.total]
+        [customerId, quote.total]
       ).catch(err => console.error('Failed to update customer stats:', err));
     }
 
@@ -250,9 +257,9 @@ export async function POST(request: NextRequest) {
           customer_name: customerName,
           order_number: orderNumber,
           items_html: itemsTable,
-          total: body.total.toFixed(2),
+          total: quote.total.toFixed(2),
           currency: body.currency || 'ILS',
-          payment_method: body.paymentMethod || 'Cash on Delivery',
+          payment_method: 'Cash on Delivery',
           delivery_method: body.deliveryMethod || 'Pickup',
         }).catch(err => console.error('Failed to send order confirmation email:', err))
       );
@@ -315,22 +322,74 @@ export async function POST(request: NextRequest) {
       channel: 'in_app',
       title: `New order ${orderNumber}`,
       titleHe: `הזמנה חדשה ${orderNumber}`,
-      message: `${customerName} placed an order · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
-      messageHe: `${customerName} ביצע/ה הזמנה · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
+      message: `${customerName} placed an order · ₪${quote.total.toFixed(2)} · ${paymentMethod}`,
+      messageHe: `${customerName} ביצע/ה הזמנה · ₪${quote.total.toFixed(2)} · ${paymentMethod}`,
       data: {
         orderId: order.id,
         orderNumber,
-        total: body.total,
-        paymentMethod: body.paymentMethod || 'cash',
+        total: quote.total,
+        paymentMethod,
         actionUrl: `/admin/orders`,
         actionLabel: 'View order',
       },
     }).catch(err => console.error('Failed to create admin notification:', err));
 
+    const inAppNotificationPromises: Promise<unknown>[] = [];
+
+    if (customerId) {
+      inAppNotificationPromises.push(
+        notifyCustomerAccount(customerId, {
+          type: 'order_update',
+          channel: 'in_app',
+          title: `Order ${orderNumber} received`,
+          titleHe: `הזמנה ${orderNumber} התקבלה`,
+          message: `Your order was received and is pending vendor review.`,
+          messageHe: `ההזמנה שלך התקבלה וממתינה לאישור הספק.`,
+          data: {
+            orderId: order.id,
+            orderNumber,
+            total: quote.total,
+            actionUrl: `/customer/orders/${order.id}`,
+            actionLabel: 'View order',
+          },
+        })
+      );
+    }
+
+    for (const vendorId of vendorIds) {
+      const vendorItems = normalizedItems.filter((item) => item.vendorId === vendorId);
+      const vendorTotal = vendorItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      inAppNotificationPromises.push(
+        notifyVendorOwners(vendorId as string, {
+          type: 'order_update',
+          channel: 'in_app',
+          title: `New order ${orderNumber}`,
+          titleHe: `הזמנה חדשה ${orderNumber}`,
+          message: `${customerName} ordered ${vendorItems.length} item${vendorItems.length === 1 ? '' : 's'} · ₪${vendorTotal.toFixed(2)}.`,
+          messageHe: `${customerName} הזמין/ה ${vendorItems.length} פריטים · ₪${vendorTotal.toFixed(2)}.`,
+          data: {
+            orderId: order.id,
+            orderNumber,
+            vendorId,
+            total: vendorTotal,
+            actionUrl: '/vendor/orders',
+            actionLabel: 'View orders',
+          },
+        })
+      );
+    }
+
+    Promise.allSettled(inAppNotificationPromises).then(results => {
+      const sent = results.filter(r => r.status === 'fulfilled').length;
+      if (results.length > 0) {
+        console.log(`Order ${orderNumber}: ${sent}/${results.length} in-app notification jobs completed`);
+      }
+    });
+
     // Task #6: SMS is off until client pays (SMS_ENABLED=false by default).
     // Code path is wired — flipping the env var enables live sends.
     if (body.customer?.phone) {
-      sendOrderConfirmationSMS(body.customer.phone, orderNumber, body.total)
+      sendOrderConfirmationSMS(body.customer.phone, orderNumber, quote.total)
         .then(r => console.log(`Order ${orderNumber} SMS:`, r))
         .catch(err => console.error('SMS dispatch error:', err));
     }

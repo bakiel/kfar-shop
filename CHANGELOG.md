@@ -1,5 +1,14 @@
 # KFAR Marketplace Changelog
 
+## [2.2.0] - 2026-05-20
+
+### Launch Readiness
+- Added admin order detail management with status updates and resend-confirmation support.
+- Simplified admin bundle creation to name, bundle price, original price, product picker, and catalog visibility.
+- Added a build-time image manifest, resolver fallback, and image audit script; removed documented unsafe/duplicate community images.
+- Added checkout payment method selection with Cash on Delivery enabled and upcoming payment methods disabled.
+- Enforced Cash on Delivery only in order creation until a payment gateway is selected.
+
 ## [2.1.0] - 2025-01-21
 
 ### AI Shopping Assistant - Major Update
