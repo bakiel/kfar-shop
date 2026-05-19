@@ -109,6 +109,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const vendorIds = [...new Set(quote.items.map((item) => item.vendorId).filter(Boolean))];
+    if (vendorIds.length > 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'SINGLE_VENDOR_CHECKOUT_REQUIRED',
+          error: 'Cash on Delivery checkout supports one store per order. Please check out each store separately.',
+        },
+        { status: 400 }
+      );
+    }
+
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
     const seq = Math.floor(Math.random() * 9000) + 1000;

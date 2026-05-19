@@ -111,6 +111,18 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedItems = quote.items;
+    const vendorIds = [...new Set(normalizedItems.map((item) => item.vendorId).filter(Boolean))];
+
+    if (vendorIds.length > 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'SINGLE_VENDOR_CHECKOUT_REQUIRED',
+          error: 'Cash on Delivery checkout supports one store per order. Please check out each store separately.',
+        },
+        { status: 400 }
+      );
+    }
 
     // Derive canonical name (fullName wins; falls back to first+last)
     const fullName = (body.customer?.fullName
@@ -275,7 +287,6 @@ export async function POST(request: NextRequest) {
       'vop-shop': 'vop@kfarapp.com',
     };
 
-    const vendorIds = [...new Set(normalizedItems.map((item) => item.vendorId).filter(Boolean))];
     for (const vendorId of vendorIds) {
       const vendorEmail = vendorEmails[vendorId as string];
       if (vendorEmail) {

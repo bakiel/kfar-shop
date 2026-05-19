@@ -93,7 +93,7 @@ export default function VendorOrders() {
               customerPhone: order.customer_phone || '',
               items: items.map((itm: any) => ({
                 id: itm.product_id || itm.id || '',
-                productName: itm.product_name || itm.productName || `Product`,
+                productName: itm.product_name || itm.productName || itm.name || `Product`,
                 quantity: itm.quantity || 1,
                 price: parseFloat(itm.price || '0'),
               })),

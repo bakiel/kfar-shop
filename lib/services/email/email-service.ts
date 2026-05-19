@@ -34,6 +34,7 @@ const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'noreply@kfarapp.co
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'KFAR Marketplace';
 const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com').replace(/\/$/, '');
 const EMAIL_LOGO_URL = `${SITE_URL}/images/logos/kfar_logo_white_on_green.png`;
+const EMAIL_BANNER_URL = `${SITE_URL}/images/email/kfar-transactional-banner.png`;
 
 // Detect if we are running on the VPS (Postfix available) or local dev
 const isLocalDev = SMTP_HOST === 'localhost' && !process.env.SMTP_HOST;
@@ -188,7 +189,7 @@ function shouldShowOrderSequence(templateName?: string): boolean {
   return Boolean(templateName && [
     'order_confirmation',
     'order_status_update',
-    'vendor_order_notification',
+    'vendor_new_order',
   ].includes(templateName));
 }
 
@@ -231,8 +232,9 @@ function wrapInLayout(
     .shell { width:100%; padding:24px 12px; box-sizing:border-box; }
     .container { max-width:640px; margin:0 auto; background:#ffffff; border-radius:8px; overflow:hidden; border:1px solid #e5dccd; }
     .header { background:#2D5A27; color:#ffffff; text-align:center; }
-    .brand-banner { padding:26px 24px 22px; background:#2D5A27; }
-    .brand-banner img { width:172px; max-width:72%; height:auto; display:block; margin:0 auto 12px; }
+    .brand-banner { padding:0 0 22px; background:#2D5A27; }
+    .hero-banner { width:100%; max-width:640px; height:auto; display:block; margin:0 auto 14px; }
+    .fallback-logo { width:150px; max-width:54%; height:auto; display:block; margin:0 auto 12px; }
     .brand-banner h1 { color:#ffffff; margin:0; font-size:24px; line-height:1.25; font-weight:800; letter-spacing:0; }
     .brand-banner p { color:#F6C343; margin:8px 0 0; font-size:14px; font-weight:600; }
     .brand-ribbon { background:#F6C343; color:#3A2A1A; padding:9px 18px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0; }
@@ -261,7 +263,8 @@ function wrapInLayout(
     <div class="container">
       <div class="header">
         <div class="brand-banner">
-          <img src="${EMAIL_LOGO_URL}" alt="${language === 'he' ? 'כפר' : 'KFAR Marketplace'}" />
+          <img class="hero-banner" src="${EMAIL_BANNER_URL}" alt="${language === 'he' ? 'שוק כפר - כל הכפר ביד שלך' : 'KFAR Marketplace - The Whole Village, In Your Hand'}" />
+          <img class="fallback-logo" src="${EMAIL_LOGO_URL}" alt="${language === 'he' ? 'כפר' : 'KFAR Marketplace'}" />
           <h1>${language === 'he' ? 'שוק כפר' : 'KFAR Marketplace'}</h1>
           <p>${language === 'he' ? 'כל הכפר ביד שלך' : 'The Whole Village, In Your Hand'}</p>
         </div>

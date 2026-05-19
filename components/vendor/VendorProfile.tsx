@@ -28,7 +28,7 @@ const vendorOwners: Record<string, { name: string; image: string; bio: string }>
   },
   'gahn-delight': {
     name: 'Ahmeeteeyah Cohen',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_04.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_42.jpg',
     bio: 'Artisan ice cream maker creating unique dairy-free frozen desserts with love and creativity.'
   },
   'people-store': {

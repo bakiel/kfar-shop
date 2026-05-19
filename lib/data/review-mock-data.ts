@@ -56,7 +56,7 @@ export const reviewAuthors: ReviewAuthor[] = [
   {
     id: 'auth-004',
     name: 'Ahmeeteeyah Cohen',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_04.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_42.jpg',
     location: 'Dimona',
     memberType: 'community',
     verified: true
