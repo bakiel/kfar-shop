@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   ShoppingCart, Eye, RefreshCw, AlertTriangle
@@ -77,6 +78,7 @@ function normalizeOrder(o: Order): NormalizedOrder {
 type FilterStatus = 'all' | OrderStatus;
 
 export default function OrdersPage() {
+  const router = useRouter();
   const { language, t, isRTL } = useLanguage();
   const { accessToken } = useAuth();
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
@@ -271,7 +273,7 @@ export default function OrdersPage() {
           emptyIcon="cart"
           isRTL={isRTL}
           rowActions={(row) => [
-            { label: t('View Details'), onClick: () => {} },
+            { label: t('View Details'), onClick: () => router.push(`/admin/orders/${row.id}`) },
             {
               label: isRTL ? 'סמן כבעיבוד' : 'Mark Processing',
               onClick: () => handleStatusUpdate(row.id, 'processing'),
