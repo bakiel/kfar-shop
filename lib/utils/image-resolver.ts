@@ -1,12 +1,15 @@
-/**
- * Image path resolver for KFAR Marketplace
- * Ensures all image paths are correctly resolved
- */
+import imageManifest from './image-manifest.json';
+
+const manifest = imageManifest as Record<string, string>;
+const fallbackImage = '/images/placeholder-product.jpg';
+
+function warnMissingImage(path: string) {
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`[image-resolver] Missing image path: ${path}`);
+  }
+}
 
 export function resolveImagePath(path: string | undefined | null): string {
-  // Default fallback image
-  const fallbackImage = '/images/placeholder-product.jpg';
-  
   if (!path) {
     return fallbackImage;
   }
@@ -24,7 +27,13 @@ export function resolveImagePath(path: string | undefined | null): string {
     cleanPath = '/' + cleanPath;
   }
   
-  // Common image path corrections
+  const basename = cleanPath.split('/').pop() || cleanPath;
+  const manifestHit = manifest[cleanPath] || manifest[basename] || manifest[basename.toLowerCase()];
+  if (manifestHit) {
+    return manifestHit;
+  }
+
+  // Common image path corrections retained for legacy vendor logo rows.
   const pathCorrections: Record<string, string> = {
     // Teva Deli logo
     '/images/vendors/teva_deli_official_logo_master_brand_israeli_vegan_food_company.jpg': 
@@ -62,8 +71,9 @@ export function resolveImagePath(path: string | undefined | null): string {
       return correctedPath;
     }
   }
-  
-  return cleanPath;
+
+  warnMissingImage(cleanPath);
+  return fallbackImage;
 }
 
 /**

@@ -122,7 +122,7 @@ export const reviewAuthors: ReviewAuthor[] = [
   {
     id: 'auth-012',
     name: 'David Cohen',
-    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_12.jpg',
+    image: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_42.jpg',
     location: 'Tel Aviv',
     memberType: 'local',
     verified: false

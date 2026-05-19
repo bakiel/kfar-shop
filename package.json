@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:admin": "next dev -H 127.0.0.1 -p 3000",
+    "prebuild": "node --experimental-strip-types scripts/build-image-manifest.ts",
     "build": "next build --no-lint",
     "build:standalone": "next build --no-lint",
     "start": "next start",
@@ -14,7 +15,8 @@
     "lint": "next lint",
     "check:alt": "node scripts/check-image-alts.js",
     "fix:alt": "node scripts/fix-undefined-alts.js",
-    "verify:alt": "node scripts/final-alt-verification.js"
+    "verify:alt": "node scripts/final-alt-verification.js",
+    "audit:images": "node --experimental-strip-types scripts/audit-images.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.3",
@@ -91,6 +93,7 @@
     "eslint-config-next": "15.1.8",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.6"
   }
 }

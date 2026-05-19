@@ -203,7 +203,7 @@ export const serviceProviders: ServiceProvider[] = [
     description: "Natural healing, herbal medicine, and spiritual wellness guidance",
     rating: 5,
     reviews: 63,
-    image: "/images/community/11.jpg"
+    image: "/images/community/10.jpg"
   },
   {
     id: "david",
