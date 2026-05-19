@@ -32,6 +32,8 @@ const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const EMAIL_FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || 'noreply@kfarapp.com';
 const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'KFAR Marketplace';
+const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com').replace(/\/$/, '');
+const EMAIL_LOGO_URL = `${SITE_URL}/images/logos/kfar_logo_white_on_green.png`;
 
 // Detect if we are running on the VPS (Postfix available) or local dev
 const isLocalDev = SMTP_HOST === 'localhost' && !process.env.SMTP_HOST;
@@ -182,11 +184,41 @@ async function send(
 // Wrap the HTML body in a branded email layout
 // -------------------------------------------------------------------
 
-function wrapInLayout(bodyHtml: string, language: 'en' | 'he' = 'en'): string {
+function shouldShowOrderSequence(templateName?: string): boolean {
+  return Boolean(templateName && [
+    'order_confirmation',
+    'order_status_update',
+    'vendor_order_notification',
+  ].includes(templateName));
+}
+
+function renderOrderSequence(language: 'en' | 'he'): string {
+  const steps = language === 'he'
+    ? ['הזמנה התקבלה', 'החנות מאשרת', 'הסל נארז', 'תשלום במשלוח']
+    : ['Order received', 'Store confirms', 'Basket packed', 'COD on delivery'];
+
+  return `
+    <div class="sequence" aria-label="${language === 'he' ? 'רצף ניהול הזמנה' : 'Order management sequence'}">
+      ${steps.map((step, index) => `
+        <div class="sequence-step">
+          <span>${index + 1}</span>
+          <strong>${step}</strong>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function wrapInLayout(
+  bodyHtml: string,
+  language: 'en' | 'he' = 'en',
+  templateName?: string
+): string {
   const dir = language === 'he' ? 'rtl' : 'ltr';
   const fontFamily = language === 'he'
     ? "'Segoe UI', Tahoma, Arial, sans-serif"
     : "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+  const sequenceHtml = shouldShowOrderSequence(templateName) ? renderOrderSequence(language) : '';
 
   return `
 <!DOCTYPE html>
@@ -196,29 +228,53 @@ function wrapInLayout(bodyHtml: string, language: 'en' | 'he' = 'en'): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body { margin:0; padding:0; background:#f5f0e8; font-family:${fontFamily}; color:#1a1a1a; }
-    .container { max-width:600px; margin:0 auto; background:#ffffff; border-radius:8px; overflow:hidden; }
-    .header { background:#2D5A27; padding:24px; text-align:center; }
-    .header img { height:40px; }
-    .header h1 { color:#ffffff; margin:8px 0 0; font-size:20px; font-weight:700; }
+    .shell { width:100%; padding:24px 12px; box-sizing:border-box; }
+    .container { max-width:640px; margin:0 auto; background:#ffffff; border-radius:8px; overflow:hidden; border:1px solid #e5dccd; }
+    .header { background:#2D5A27; color:#ffffff; text-align:center; }
+    .brand-banner { padding:26px 24px 22px; background:#2D5A27; }
+    .brand-banner img { width:172px; max-width:72%; height:auto; display:block; margin:0 auto 12px; }
+    .brand-banner h1 { color:#ffffff; margin:0; font-size:24px; line-height:1.25; font-weight:800; letter-spacing:0; }
+    .brand-banner p { color:#F6C343; margin:8px 0 0; font-size:14px; font-weight:600; }
+    .brand-ribbon { background:#F6C343; color:#3A2A1A; padding:9px 18px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0; }
+    .sequence { display:table; width:100%; table-layout:fixed; background:#fff8e6; border-bottom:1px solid #eadfca; }
+    .sequence-step { display:table-cell; padding:13px 8px; text-align:center; vertical-align:top; border-right:1px solid #eadfca; }
+    .sequence-step:last-child { border-right:0; }
+    .sequence-step span { display:inline-block; width:22px; height:22px; line-height:22px; border-radius:50%; background:#2D5A27; color:#ffffff; font-size:12px; font-weight:800; margin-bottom:6px; }
+    .sequence-step strong { display:block; color:#3A2A1A; font-size:12px; line-height:1.25; }
     .body { padding:32px 24px; line-height:1.6; }
     .body h2 { color:#2D5A27; margin-top:0; }
-    .body h3 { color:#333; }
+    .body h3 { color:#3A2A1A; }
     .body a { color:#2D5A27; }
-    .footer { background:#f5f0e8; padding:16px 24px; text-align:center; font-size:12px; color:#777; }
+    .footer { background:#f5f0e8; padding:18px 24px; text-align:center; font-size:12px; color:#6b6256; }
     .footer a { color:#2D5A27; text-decoration:none; }
+    @media (max-width:520px) {
+      .shell { padding:0; }
+      .container { border-radius:0; border-left:0; border-right:0; }
+      .sequence, .sequence-step { display:block; width:auto; }
+      .sequence-step { border-right:0; border-bottom:1px solid #eadfca; }
+      .sequence-step:last-child { border-bottom:0; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>${language === 'he' ? 'שוק כפר' : 'KFAR Marketplace'}</h1>
-    </div>
-    <div class="body">
-      ${bodyHtml}
-    </div>
-    <div class="footer">
-      <p>${language === 'he' ? 'כפר השלום, דימונה, ישראל' : 'Village of Peace, Dimona, Israel'}</p>
-      <p><a href="https://kfarapp.com">kfarapp.com</a></p>
+  <div class="shell">
+    <div class="container">
+      <div class="header">
+        <div class="brand-banner">
+          <img src="${EMAIL_LOGO_URL}" alt="${language === 'he' ? 'כפר' : 'KFAR Marketplace'}" />
+          <h1>${language === 'he' ? 'שוק כפר' : 'KFAR Marketplace'}</h1>
+          <p>${language === 'he' ? 'כל הכפר ביד שלך' : 'The Whole Village, In Your Hand'}</p>
+        </div>
+        <div class="brand-ribbon">${language === 'he' ? 'קהילה מקומית | הזמנות מאומתות | תשלום במשלוח' : 'Local community market | Verified orders | Cash on Delivery'}</div>
+      </div>
+      ${sequenceHtml}
+      <div class="body">
+        ${bodyHtml}
+      </div>
+      <div class="footer">
+        <p>${language === 'he' ? 'כפר השלום, דימונה, ישראל' : 'Village of Peace, Dimona, Israel'}</p>
+        <p><a href="https://kfarapp.com">kfarapp.com</a></p>
+      </div>
     </div>
   </div>
 </body>
@@ -260,7 +316,7 @@ export async function sendTransactional(
 
   const subject = renderTemplate(rawSubject, variables);
   const bodyHtml = renderTemplate(rawBody, variables);
-  const html = wrapInLayout(bodyHtml, language);
+  const html = wrapInLayout(bodyHtml, language, templateName);
 
   const result = await send(to, subject, html);
 
@@ -316,7 +372,7 @@ export async function sendMarketing(
 
     const subject = renderTemplate(rawSubject, vars);
     const bodyHtml = renderTemplate(rawBody, vars);
-    const html = wrapInLayout(bodyHtml, language);
+    const html = wrapInLayout(bodyHtml, language, templateName);
 
     const result = await send(recipient.email, subject, html);
 
