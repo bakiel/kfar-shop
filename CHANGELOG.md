@@ -8,6 +8,8 @@
 - Added a build-time image manifest, resolver fallback, and image audit script; removed documented unsafe/duplicate community images.
 - Added checkout payment method selection with Cash on Delivery enabled and upcoming payment methods disabled.
 - Enforced Cash on Delivery only in order creation until a payment gateway is selected.
+- Added a Kfar-branded transactional email banner and order sequence strip for order emails.
+- Blocked synthetic COD placeholder email sends, preserved vendor order item names, and rejected mixed-vendor COD checkout until order splitting is implemented.
 
 ## [2.1.0] - 2025-01-21
 
