@@ -593,24 +593,49 @@ async function getDatabaseBundles(): Promise<Bundle[]> {
  * Get all bundles (for dedicated bundles page)
  */
 async function loadAllBundles(): Promise<Bundle[]> {
-  const [featuredBundles, databaseBundles] = await Promise.all([
-    getFeaturedBundles(),
-    getDatabaseBundles(),
-  ]);
+  const dbUp = await isDbAvailable();
+  if (!dbUp) return [];
 
-  const merged = new Map<string, Bundle>();
-  for (const bundle of databaseBundles) merged.set(bundle.id, bundle);
-  for (const bundle of featuredBundles) merged.set(bundle.id, bundle);
+  try {
+    const [{ rows }, productFeed] = await Promise.all([
+      query('SELECT * FROM bundles'),
+      getProductFeed(),
+    ]);
+    const productMap = new Map(productFeed.products.map((product) => [product.id.toLowerCase(), product]));
 
-  return Array.from(merged.values());
+    return sortBundleRecords(rows)
+      .filter((row) => getBundleRecordStatus(row) === 'active')
+      .map((row: any) => {
+        const normalized = normalizeBundleRecord(row) as any;
+        const products = normalized.products.map((productId: string) => {
+          const liveProduct = productMap.get(productId.toLowerCase());
+          return liveProduct ? mapLiveBundleProduct(liveProduct) : resolveBundleProduct(productId);
+        });
+
+        return {
+          id: normalized.id,
+          name: normalized.name,
+          nameHe: normalized.nameHe || undefined,
+          description: normalized.description || '',
+          descriptionHe: normalized.descriptionHe || undefined,
+          products,
+          bundlePrice: normalized.price,
+          originalPrice: normalized.originalPrice,
+          savingsPercent: normalized.savingsPercent,
+          image: resolveBundleHeroImage(normalized.id, normalized.image, products[0]?.image, normalized.name),
+          isFeatured: normalized.isFeatured,
+          loyaltyPointsBonus: normalized.loyaltyPointsBonus,
+          vendorId: normalized.vendorId,
+        };
+      });
+  } catch (error) {
+    console.log('DB bundle fetch failed:', (error as Error).message);
+    return [];
+  }
 }
 
-const getAllBundlesCached = unstable_cache(loadAllBundles, ['landing-all-bundles'], {
-  revalidate: 300,
-});
-
 export async function getAllBundles(): Promise<Bundle[]> {
-  return getAllBundlesCached();
+  return loadAllBundles();
 }
 
 export async function getBundleById(id: string): Promise<Bundle | null> {
