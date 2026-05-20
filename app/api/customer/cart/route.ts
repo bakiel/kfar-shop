@@ -62,3 +62,24 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save cart' }, { status: 500 });
   }
 }
+
+// DELETE — clear the saved shopping list for authenticated customer
+export async function DELETE(request: NextRequest) {
+  try {
+    const auth = requireCustomer(request);
+    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+    await query(
+      `INSERT INTO customer_carts (customer_id, items, updated_at)
+       VALUES ($1, '[]'::jsonb, NOW())
+       ON CONFLICT (customer_id)
+       DO UPDATE SET items = '[]'::jsonb, updated_at = NOW()`,
+      [auth.user.customerId]
+    );
+
+    return NextResponse.json({ success: true, count: 0 });
+  } catch (err) {
+    console.error('customer/cart DELETE error', err);
+    return NextResponse.json({ error: 'Failed to clear cart' }, { status: 500 });
+  }
+}

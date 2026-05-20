@@ -8,16 +8,19 @@ import { Bell } from 'lucide-react';
 
 interface NotificationBellProps {
   customerId?: string;
+  userId?: string;
+  notificationsHref?: string;
 }
 
-export default function NotificationBell({ customerId }: NotificationBellProps) {
+export default function NotificationBell({ customerId, userId, notificationsHref = '/customer/notifications' }: NotificationBellProps) {
+  const recipientId = userId || customerId;
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const bellRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!customerId) return;
+    if (!recipientId) return;
     
     // Load initial unread count
     loadUnreadCount();
@@ -26,14 +29,14 @@ export default function NotificationBell({ customerId }: NotificationBellProps) 
     const interval = setInterval(loadUnreadCount, 30000); // Check every 30 seconds
     
     return () => clearInterval(interval);
-  }, [customerId]);
+  }, [recipientId]);
 
   const loadUnreadCount = async () => {
-    if (!customerId) return;
+    if (!recipientId) return;
     
     try {
       const { unreadCount: count } = await notificationService.getNotifications(
-        customerId,
+        recipientId,
         { unreadOnly: true, limit: 0 }
       );
       
@@ -49,7 +52,7 @@ export default function NotificationBell({ customerId }: NotificationBellProps) 
     }
   };
 
-  if (!customerId) {
+  if (!recipientId) {
     return null; // Don't show notification bell for non-logged-in users
   }
 
@@ -84,7 +87,8 @@ export default function NotificationBell({ customerId }: NotificationBellProps) 
       </motion.button>
 
       <NotificationCenter
-        customerId={customerId}
+        recipientId={recipientId}
+        notificationsHref={notificationsHref}
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false);

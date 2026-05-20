@@ -78,18 +78,18 @@ export default function TechDemoSection() {
             </div>
           </div>
 
-          {/* Demo Testing CTA */}
+          {/* Account Access CTA */}
           <div className="text-center mt-12">
             <div className="inline-block bg-white rounded-xl shadow-lg p-6 border border-green-200">
-              <h3 className="text-xl font-bold mb-3 text-green-600">🧪 Test All Features</h3>
+              <h3 className="text-xl font-bold mb-3 text-green-600">Account Access</h3>
               <p className="text-gray-600 mb-4">
-                Try our complete demo with admin, vendor, and customer flows
+                Sign in as a customer, vendor, or authorized admin.
               </p>
               <Link 
-                href="/demo-test" 
+                href="/login-portal"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
-                <span>Launch Demo Center</span>
+                <span>Open Account Access</span>
                 <ArrowRight className="w-3.5 h-3.5 stroke-[1.5]" />
               </Link>
             </div>

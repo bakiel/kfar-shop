@@ -34,7 +34,7 @@ interface CartContextType {
   isInCart: (id: string) => boolean;
   getQuantity: (id: string) => number;
   // Persistent shopping list — authenticated customers only (Task #3)
-  loadFromServer: (accessToken: string) => Promise<void>;
+  loadFromServer: (accessToken: string, options?: { replaceEmpty?: boolean }) => Promise<void>;
   syncToServer: (accessToken: string) => Promise<void>;
   reorderFromOrder: (orderId: string, accessToken: string, mode?: 'replace' | 'merge') => Promise<number>;
 }
@@ -147,7 +147,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // For authenticated customers, the cart is persisted server-side so the list
   // survives device changes. Guest carts remain localStorage-only.
 
-  const loadFromServer = async (accessToken: string) => {
+  const loadFromServer = async (accessToken: string, options?: { replaceEmpty?: boolean }) => {
     if (!accessToken) return;
     try {
       const res = await fetch('/api/customer/cart', {
@@ -155,7 +155,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (!res.ok) return;
       const data = await res.json();
-      if (Array.isArray(data.items) && data.items.length > 0) {
+      if (Array.isArray(data.items) && (data.items.length > 0 || options?.replaceEmpty)) {
         setItems(data.items);
       }
     } catch (e) {

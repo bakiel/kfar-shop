@@ -15,7 +15,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const success = await markAllRead(user.id);
+    const actorId = user.customerId || user.id;
+    const success = await markAllRead(actorId);
 
     return NextResponse.json({ success });
   } catch (error) {

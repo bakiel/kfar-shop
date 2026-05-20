@@ -520,6 +520,18 @@ export default function CustomerLogin() {
                 <><LogIn className="w-4 h-4 stroke-[1.5]" />{language === 'he' ? 'התחברו לחשבון קיים' : 'Sign in to existing account'}</>
               )}
             </button>
+
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-gray-500">
+              <Link href="/login-portal" className="hover:text-leaf-green transition-colors">
+                {language === 'he' ? 'כל אפשרויות הכניסה' : 'Account Access'}
+              </Link>
+              <Link href="/vendor/login" className="hover:text-leaf-green transition-colors">
+                {language === 'he' ? 'פורטל ספקים' : 'Vendor Portal'}
+              </Link>
+              <Link href="/admin/login" className="hover:text-leaf-green transition-colors">
+                {language === 'he' ? 'כניסת מנהלים' : 'Admin Access'}
+              </Link>
+            </div>
           </div>
         </div>
       </div>

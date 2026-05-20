@@ -13,11 +13,9 @@ import { sendTransactional, sendRaw } from '@/lib/services/email/email-service';
 
 /**
  * GET /api/notifications
- * Get notifications for the authenticated user OR by customerId query param
- * (backward compatible with existing client components).
+ * Get notifications for the authenticated user.
  *
  * Query params:
- *  - customerId (legacy - used by existing components)
  *  - page (default 1)
  *  - limit (default 20, max 100)
  *  - offset (legacy - used by existing components)
@@ -26,9 +24,11 @@ import { sendTransactional, sendRaw } from '@/lib/services/email/email-service';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Try auth header first, fall back to customerId param (legacy)
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     const user = token ? verifyAccessToken(token) : null;
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
@@ -38,13 +38,9 @@ export async function GET(request: NextRequest) {
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
     const type = searchParams.get('type') || undefined;
 
-    // Resolve the user/customer ID to query against
-    const queryId = user?.id || customerId;
-    if (!queryId) {
-      return NextResponse.json(
-        { error: 'Authentication required or customerId param needed' },
-        { status: 401 }
-      );
+    const queryId = user.customerId || user.id;
+    if (customerId && customerId !== queryId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const result = await getNotifications(queryId, {
@@ -103,7 +99,7 @@ export async function POST(request: NextRequest) {
           }
           // Verify the notification belongs to the authenticated user
           const { rows: readRows } = await query(
-            'SELECT id FROM notifications WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM notifications WHERE id = $1 AND (user_id = $2 OR customer_id::text = $2)',
             [notificationId, actorId]
           );
           if (readRows.length === 0) {
@@ -118,7 +114,7 @@ export async function POST(request: NextRequest) {
           }
           // Verify the notification belongs to the authenticated user
           const { rows: deleteRows } = await query(
-            'SELECT id FROM notifications WHERE id = $1 AND user_id = $2',
+            'SELECT id FROM notifications WHERE id = $1 AND (user_id = $2 OR customer_id::text = $2)',
             [notificationId, actorId]
           );
           if (deleteRows.length === 0) {

@@ -103,7 +103,7 @@ export async function getNotifications(
   opts: GetNotificationsOptions = {}
 ): Promise<PaginatedNotifications> {
   const page = opts.page || 1;
-  const limit = Math.min(opts.limit || 20, 100);
+  const limit = Math.min(opts.limit ?? 20, 100);
   const offset = opts.offset !== undefined ? opts.offset : (page - 1) * limit;
 
   try {

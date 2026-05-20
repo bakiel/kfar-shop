@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import { query } from '@/lib/db/postgres-client';
 import { markAsRead } from '@/lib/services/notification-service.server';
 
 /**
@@ -19,11 +20,24 @@ export async function PATCH(
     }
 
     const { id } = await params;
+    const actorId = user.customerId || user.id;
 
     if (!id) {
       return NextResponse.json(
         { error: 'Notification ID is required' },
         { status: 400 }
+      );
+    }
+
+    const { rows } = await query(
+      'SELECT id FROM notifications WHERE id = $1 AND (user_id = $2 OR customer_id::text = $2)',
+      [id, actorId]
+    );
+
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Notification not found' },
+        { status: 404 }
       );
     }
 

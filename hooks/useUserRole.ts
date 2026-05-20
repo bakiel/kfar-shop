@@ -1,7 +1,10 @@
+'use client';
+
 // useUserRole Hook - Detects current user role
 // Used for menu visibility and access control
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 export type UserRole = 'guest' | 'customer' | 'vendor' | 'admin';
 
@@ -16,71 +19,22 @@ export interface UserRoleInfo {
 }
 
 export function useUserRole(): UserRoleInfo {
-  const [roleInfo, setRoleInfo] = useState<UserRoleInfo>({
-    role: 'guest',
-    isGuest: true,
-    isCustomer: false,
-    isVendor: false,
-    isAdmin: false
-  });
+  const { user, isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    // Check localStorage for tokens
-    const customerToken = localStorage.getItem('customerToken');
-    const vendorToken = localStorage.getItem('vendorToken');
-    const adminToken = localStorage.getItem('adminToken');
+  return useMemo(() => {
+    const role: UserRole = !isLoading && isAuthenticated && user ? user.role : 'guest';
+    const userId = user?.customerId || user?.vendorId || user?.id;
 
-    // Determine role based on tokens (priority: admin > vendor > customer > guest)
-    if (adminToken) {
-      setRoleInfo({
-        role: 'admin',
-        isGuest: false,
-        isCustomer: false,
-        isVendor: false,
-        isAdmin: true,
-        userId: 'admin-001',
-        userName: 'Admin User'
-      });
-    } else if (vendorToken) {
-      // Parse vendor info from token if needed
-      const vendorInfo = localStorage.getItem('vendorInfo');
-      const vendorData = vendorInfo ? JSON.parse(vendorInfo) : null;
-      
-      setRoleInfo({
-        role: 'vendor',
-        isGuest: false,
-        isCustomer: false,
-        isVendor: true,
-        isAdmin: false,
-        userId: vendorData?.id || 'vendor-001',
-        userName: vendorData?.name || 'Vendor User'
-      });
-    } else if (customerToken) {
-      // Parse customer info from token if needed
-      const customerInfo = localStorage.getItem('customerInfo');
-      const customerData = customerInfo ? JSON.parse(customerInfo) : null;
-      
-      setRoleInfo({
-        role: 'customer',
-        isGuest: false,
-        isCustomer: true,
-        isVendor: false,
-        isAdmin: false,
-        userId: customerData?.id || 'customer-001',
-        userName: customerData?.name || 'Customer User'
-      });
-    } else {
-      setRoleInfo({
-        role: 'guest',
-        isGuest: true,
-        isCustomer: false,
-        isVendor: false,
-        isAdmin: false
-      });
-    }
-  }, []);
-
-  return roleInfo;
+    return {
+      role,
+      isGuest: role === 'guest',
+      isCustomer: role === 'customer',
+      isVendor: role === 'vendor',
+      isAdmin: role === 'admin',
+      userId,
+      userName: user?.displayName,
+    };
+  }, [isAuthenticated, isLoading, user]);
 }
 
 // Helper function to check if user has access to a specific route
@@ -98,18 +52,33 @@ export function hasAccess(role: UserRole, requiredRole: UserRole): boolean {
 // Helper to get pending order count for vendors
 export function useVendorOrderCount(): number {
   const [orderCount, setOrderCount] = useState(0);
+  const { accessToken } = useAuth();
   const { isVendor } = useUserRole();
 
   useEffect(() => {
-    if (isVendor) {
-      fetch('/api/vendor/orders?limit=1', {
-        headers: { 'Authorization': `Bearer ${typeof window !== 'undefined' ? sessionStorage.getItem('kfar_access_token') || '' : ''}` }
-      })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => { if (data?.summary?.total) setOrderCount(data.summary.total); })
-        .catch(() => {});
+    if (!isVendor || !accessToken) {
+      setOrderCount(0);
+      return;
     }
-  }, [isVendor]);
+
+    const controller = new AbortController();
+
+    fetch('/api/vendor/orders?limit=1', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      signal: controller.signal,
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!controller.signal.aborted) {
+          setOrderCount(Number(data?.summary?.total || 0));
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setOrderCount(0);
+      });
+
+    return () => controller.abort();
+  }, [isVendor, accessToken]);
 
   return orderCount;
 }

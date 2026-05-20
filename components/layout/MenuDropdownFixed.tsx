@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import Link from 'next/link';
-import { X, Store, ShieldCheck, User, UserCircle, Languages, ChevronDown, FlaskConical } from 'lucide-react';
+import { X, Store, ShieldCheck, User, UserCircle, Languages, ChevronDown } from 'lucide-react';
 import { useUserRole, useVendorOrderCount } from '@/hooks/useUserRole';
 import { getMenuConfig } from '@/lib/config/menu-config';
 import { usePathname } from 'next/navigation';
@@ -275,20 +275,19 @@ const MenuDropdownFixed: React.FC<MenuDropdownProps> = ({ isOpen, onClose }) => 
 
         {/* Menu Footer */}
         <div className="border-t border-gray-200 p-4">
-          {/* Temporary Portal Button */}
+          {/* Account Access */}
           <Link
             href="/login-portal"
             onClick={onClose}
-            className="flex items-center justify-center gap-3 w-full mb-4 px-4 py-3 rounded-lg border-2 border-dashed transition-all duration-300 hover:shadow-lg relative"
+            className="flex items-center justify-center gap-3 w-full mb-4 px-4 py-3 rounded-lg border transition-all duration-300 hover:shadow-lg relative"
             style={{
               borderColor: '#f6af0d',
               backgroundColor: 'rgba(246, 175, 13, 0.05)',
               color: '#3a3a1d'
             }}
           >
-            <FlaskConical className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
-            <span className="font-medium">Testing Portal</span>
-            <span className="absolute -top-2 -right-2 px-2 py-0.5 bg-yellow-500 text-white text-xs rounded-full">TEMP</span>
+            <UserCircle className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
+            <span className="font-medium">Account Access</span>
           </Link>
 
           <div className="text-center text-xs text-gray-500">

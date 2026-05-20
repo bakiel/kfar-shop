@@ -86,7 +86,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'Platform management': { en: 'Platform management', he: 'ניהול פלטפורמה' },
   'Admin Access': { en: 'Admin Access', he: 'גישת מנהל' },
   'Platform overview →': { en: 'Platform overview →', he: 'סקירת פלטפורמה ←' },
-  'Just Testing?': { en: 'Just Testing?', he: 'רק בודק?' },
   'Skip the login and test all features with our demo center': { en: 'Skip the login and test all features with our demo center', he: 'דלג על ההתחברות ובדוק את כל התכונות במרכז הדמו' },
   'Open Demo Center': { en: 'Open Demo Center', he: 'פתח מרכז דמו' },
   

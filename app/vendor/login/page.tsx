@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Store, Lock, ChevronDown, Eye, EyeOff, Globe, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
@@ -105,13 +106,16 @@ export default function VendorLoginPage() {
       >
         {/* Logo */}
         <motion.div variants={item} className="text-center mb-8">
-          <Image
-            src="/images/logos/kfar_logo_primary_horizontal.png"
-            alt="KFAR Marketplace"
-            width={200}
-            height={60}
-            className="h-12 w-auto mx-auto mb-3"
-          />
+          <Link href="/" className="inline-block cursor-pointer">
+            <Image
+              src="/images/logos/kfar_logo_primary_horizontal.png"
+              alt="KFAR Marketplace"
+              width={200}
+              height={60}
+              className="h-12 w-auto mx-auto mb-3"
+              priority
+            />
+          </Link>
           <p className="text-gray-500 text-sm">
             {isRTL ? 'פורטל ספקים' : 'Vendor Portal'}
           </p>
@@ -269,10 +273,16 @@ export default function VendorLoginPage() {
         </motion.div>
 
         {/* Back link */}
-        <motion.div variants={item} className="text-center mt-6">
-          <a href="/" className="text-sm text-gray-500 hover:text-[#478c0b] transition-colors cursor-pointer">
+        <motion.div variants={item} className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+          <Link href="/marketplace" className="text-gray-500 hover:text-[#478c0b] transition-colors cursor-pointer">
             {isRTL ? 'חזרה לשוק' : 'Back to Marketplace'}
-          </a>
+          </Link>
+          <Link href="/login-portal" className="text-gray-500 hover:text-[#478c0b] transition-colors cursor-pointer">
+            {isRTL ? 'כל אפשרויות הכניסה' : 'Account Access'}
+          </Link>
+          <Link href="/customer/login?role=customer" className="text-gray-500 hover:text-[#478c0b] transition-colors cursor-pointer">
+            {isRTL ? 'כניסת לקוחות' : 'Customer Login'}
+          </Link>
         </motion.div>
       </motion.div>
     </div>

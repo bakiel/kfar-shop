@@ -125,6 +125,12 @@ function getDefaultPreferences(): NotificationPreferences {
 // routes. No Node.js-only dependencies are used here.
 // -------------------------------------------------------------------
 
+function getAuthHeaders(extra: Record<string, string> = {}) {
+  if (typeof window === 'undefined') return extra;
+  const token = window.sessionStorage.getItem('kfar_access_token');
+  return token ? { ...extra, Authorization: `Bearer ${token}` } : extra;
+}
+
 export const notificationService = {
   async getNotifications(
     userOrCustomerId: string,
@@ -132,12 +138,13 @@ export const notificationService = {
   ): Promise<{ notifications: Notification[]; unreadCount: number }> {
     try {
       const params = new URLSearchParams();
-      params.set('customerId', userOrCustomerId);
       if (opts.unreadOnly) params.set('unreadOnly', 'true');
       if (opts.limit !== undefined) params.set('limit', String(opts.limit));
       if (opts.offset !== undefined) params.set('offset', String(opts.offset));
 
-      const res = await fetch(`/api/notifications?${params.toString()}`);
+      const res = await fetch(`/api/notifications?${params.toString()}`, {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       // Normalize dates and legacy fields
@@ -158,7 +165,7 @@ export const notificationService = {
     try {
       const res = await fetch('/api/notifications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ notificationId, action: 'markAsRead' }),
       });
       const data = await res.json();
@@ -172,8 +179,8 @@ export const notificationService = {
     try {
       const res = await fetch('/api/notifications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: customerOrUserId, action: 'markAllAsRead' }),
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ action: 'markAllAsRead' }),
       });
       const data = await res.json();
       return data.success ?? false;
@@ -186,7 +193,7 @@ export const notificationService = {
     try {
       const res = await fetch('/api/notifications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ notificationId, action: 'delete' }),
       });
       const data = await res.json();
@@ -198,7 +205,9 @@ export const notificationService = {
 
   async getUnreadCount(userOrCustomerId: string): Promise<number> {
     try {
-      const res = await fetch(`/api/notifications?customerId=${userOrCustomerId}&unreadOnly=true&limit=0`);
+      const res = await fetch('/api/notifications/unread-count', {
+        headers: getAuthHeaders(),
+      });
       const data = await res.json();
       return data.unreadCount ?? 0;
     } catch {
@@ -208,9 +217,12 @@ export const notificationService = {
 
   async getPreferences(customerId: string): Promise<NotificationPreferences> {
     try {
-      const res = await fetch(`/api/notifications/preferences?customerId=${customerId}`);
+      const res = await fetch(`/api/notifications/preferences?customerId=${customerId}`, {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) return getDefaultPreferences();
-      return await res.json();
+      const data = await res.json();
+      return data.preferences || data;
     } catch {
       return getDefaultPreferences();
     }
@@ -223,7 +235,7 @@ export const notificationService = {
     try {
       const res = await fetch('/api/notifications/preferences', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ customerId, preferences }),
       });
       const data = await res.json();
