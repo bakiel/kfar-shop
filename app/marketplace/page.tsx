@@ -108,8 +108,29 @@ const normalizeProduct = (product: any): Product => {
   };
 };
 
-const PRODUCT_FETCH_TIMEOUT_MS = 4_000;
+const PRODUCT_FETCH_TIMEOUT_MS = 15_000;
 const SEARCH_FETCH_TIMEOUT_MS = 2_500;
+const PRODUCT_FEED_ENDPOINTS = ['/api/products-db', '/api/products'];
+
+async function fetchProductFeed(endpoint: string, timeoutMs: number) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(endpoint, {
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Products API error: ${response.status}`);
+    }
+
+    return await response.json();
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
 
 export default function MarketplacePage() {
   const { addToCart } = useCart();
@@ -166,35 +187,41 @@ export default function MarketplacePage() {
   }, [searchParams]);
 
   const fetchProducts = useCallback(async () => {
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), PRODUCT_FETCH_TIMEOUT_MS);
     setLoading(true);
+    let lastError: unknown = null;
 
     try {
-      const response = await fetch('/api/products-db', {
-        cache: 'no-store',
-        signal: controller.signal,
-      });
+      let data: any = null;
 
-      if (!response.ok) {
-        throw new Error(`Products API error: ${response.status}`);
+      for (const endpoint of PRODUCT_FEED_ENDPOINTS) {
+        try {
+          data = await fetchProductFeed(endpoint, PRODUCT_FETCH_TIMEOUT_MS);
+          if (Array.isArray(data.products)) {
+            break;
+          }
+        } catch (error) {
+          lastError = error;
+          console.warn(`Product feed unavailable from ${endpoint}:`, error);
+        }
       }
 
-      const data = await response.json();
+      if (!data || !Array.isArray(data.products)) {
+        throw lastError || new Error('Product feed response did not include products');
+      }
+
       const apiProducts = Array.isArray(data.products)
         ? data.products.map(normalizeProduct).filter((product: Product) => product.id && product.name)
         : [];
 
       setProducts(apiProducts);
       setFeedStale(Boolean(data.stale));
-      setFeedError(data.success ? null : data.error || 'Product feed unavailable');
+      setFeedError(apiProducts.length > 0 && data.success !== false ? null : data.error || 'Product feed unavailable');
     } catch (error) {
       if ((error as any)?.name !== 'AbortError') {
         console.warn('Product feed unavailable:', error);
       }
       setFeedError('Product feed is temporarily unavailable');
     } finally {
-      window.clearTimeout(timeout);
       setLoading(false);
     }
   }, []);
