@@ -113,14 +113,24 @@ export default function UserAccountDropdown() {
                   </Link>
 
                   {userRole === 'customer' && (
-                    <Link
-                      href="/customer/orders"
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <ShoppingBag className="w-4 h-4 stroke-[1.5] text-purple-600" />
-                      <span>My Orders</span>
-                    </Link>
+                    <>
+                      <Link
+                        href="/customer/orders"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <ShoppingBag className="w-4 h-4 stroke-[1.5] text-purple-600" />
+                        <span>My Orders</span>
+                      </Link>
+                      <Link
+                        href="/customer/shopping-list"
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <ClipboardList className="w-4 h-4 stroke-[1.5] text-green-600" />
+                        <span>Shopping List</span>
+                      </Link>
+                    </>
                   )}
 
                   {userRole === 'vendor' && (
