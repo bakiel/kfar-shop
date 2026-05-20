@@ -94,6 +94,9 @@ export async function PATCH(
         customer_name: order.customer_name || 'Customer',
         order_number: order.order_number,
         status: statusLabels[status] || status,
+        status_he: statusLabels[status] || status,
+        status_message: '',
+        status_message_he: '',
       }).catch(err => console.error('Failed to send vendor status email:', err));
     }
 

@@ -175,6 +175,9 @@ export async function PATCH(
         customer_name: updatedOrder.customer_name || 'Customer',
         order_number: updatedOrder.order_number,
         status: statusLabels[status] || status,
+        status_he: statusLabels[status] || status,
+        status_message: '',
+        status_message_he: '',
       }).catch(err => console.error('Failed to send status update email:', err));
     }
 

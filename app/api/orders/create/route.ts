@@ -320,6 +320,7 @@ export async function POST(request: NextRequest) {
             items_html: vendorTable,
             total: vendorItems.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2),
             currency: body.currency || 'ILS',
+            dashboard_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com'}/vendor/orders`,
           }).catch(err => console.error('Failed to send vendor notification email:', err))
         );
       }

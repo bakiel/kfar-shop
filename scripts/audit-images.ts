@@ -47,6 +47,7 @@ function resolveAuditImagePath(value: string) {
   if (!cleanPath) return { src: fallbackImage, placeholder: true };
   if (/^https?:\/\//i.test(cleanPath)) return { src: cleanPath, placeholder: false };
   if (!cleanPath.startsWith('/')) cleanPath = `/${cleanPath}`;
+  if (cleanPath.startsWith('/uploads/vendor-products/')) return { src: cleanPath, placeholder: false };
   if (legacyCorrections[cleanPath]) return { src: legacyCorrections[cleanPath], placeholder: false };
   const basename = cleanPath.split('/').pop() || cleanPath;
   const src = manifest[cleanPath] || manifest[basename] || manifest[basename.toLowerCase()];

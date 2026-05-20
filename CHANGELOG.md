@@ -121,7 +121,7 @@
 GEMINI_API_KEY=your_key_here
 
 # Database (Hostinger VPS)
-DATABASE_URL=postgresql://kfar:kfar_secure_2025@72.61.201.237:5432/kfar_marketplace
+DATABASE_URL=postgresql://kfar:<password>@<vps-host>:5432/kfar_marketplace
 
 # Optional
 ELEVENLABS_API_KEY=fallback_tts

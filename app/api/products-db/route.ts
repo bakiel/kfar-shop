@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
 import { getProductFeed, invalidateProductFeedCache } from '@/lib/services/live-product-feed';
 import { invalidateVendorFeedCache } from '@/lib/services/live-vendor-feed';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 const NO_STORE_HEADERS = {
   'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
@@ -10,6 +11,15 @@ const NO_STORE_HEADERS = {
 function invalidateLiveFeedCaches() {
   invalidateProductFeedCache();
   invalidateVendorFeedCache();
+}
+
+function getAuthorizedUser(request: NextRequest) {
+  const token = request.headers.get('authorization')?.replace('Bearer ', '') || '';
+  return token ? verifyAccessToken(token) : null;
+}
+
+function forbidden(message = 'Forbidden') {
+  return NextResponse.json({ success: false, error: message }, { status: 403 });
 }
 
 export async function GET(request: NextRequest) {
@@ -32,12 +42,22 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Check if user is authenticated as vendor or admin
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    const user = getAuthorizedUser(request);
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+    if (user.role !== 'admin' && user.role !== 'vendor') {
+      return forbidden('Vendor or admin access required');
+    }
+
+    const vendorId = user.role === 'admin' ? body.vendorId : user.vendorId;
+    if (!vendorId) {
+      return NextResponse.json(
+        { success: false, error: 'Vendor ID required' },
+        { status: 400 }
       );
     }
 
@@ -53,7 +73,7 @@ export async function POST(request: NextRequest) {
       RETURNING *`,
       [
         productId,
-        body.vendorId,
+        vendorId,
         body.name,
         slug,
         body.description,
@@ -91,13 +111,37 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { productId, updates } = body;
 
-    // Check if user is authenticated as vendor or admin
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    const user = getAuthorizedUser(request);
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
+    }
+    if (user.role !== 'admin' && user.role !== 'vendor') {
+      return forbidden('Vendor or admin access required');
+    }
+    if (!productId) {
+      return NextResponse.json(
+        { success: false, error: 'Product ID required' },
+        { status: 400 }
+      );
+    }
+
+    if (user.role === 'vendor') {
+      const { rows: ownedRows } = await query(
+        'SELECT vendor_id FROM products WHERE id = $1 LIMIT 1',
+        [productId]
+      );
+      if (!ownedRows[0]) {
+        return NextResponse.json(
+          { success: false, error: 'Product not found' },
+          { status: 404 }
+        );
+      }
+      if (ownedRows[0].vendor_id !== user.vendorId) {
+        return forbidden('Product does not belong to this vendor');
+      }
     }
 
     const { rows } = await query(
@@ -158,13 +202,30 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Check if user is authenticated as vendor or admin
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    const user = getAuthorizedUser(request);
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       );
+    }
+    if (user.role !== 'admin' && user.role !== 'vendor') {
+      return forbidden('Vendor or admin access required');
+    }
+    if (user.role === 'vendor') {
+      const { rows: ownedRows } = await query(
+        'SELECT vendor_id FROM products WHERE id = $1 LIMIT 1',
+        [productId]
+      );
+      if (!ownedRows[0]) {
+        return NextResponse.json(
+          { success: false, error: 'Product not found' },
+          { status: 404 }
+        );
+      }
+      if (ownedRows[0].vendor_id !== user.vendorId) {
+        return forbidden('Product does not belong to this vendor');
+      }
     }
 
     await query('DELETE FROM products WHERE id = $1', [productId]);

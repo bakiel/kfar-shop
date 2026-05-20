@@ -26,6 +26,10 @@ export function resolveImagePath(path: string | undefined | null): string {
   if (!cleanPath.startsWith('/')) {
     cleanPath = '/' + cleanPath;
   }
+
+  if (cleanPath.startsWith('/uploads/vendor-products/')) {
+    return cleanPath;
+  }
   
   const basename = cleanPath.split('/').pop() || cleanPath;
   const manifestHit = manifest[cleanPath] || manifest[basename] || manifest[basename.toLowerCase()];

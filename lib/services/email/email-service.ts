@@ -35,6 +35,12 @@ const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || 'KFAR Marketplace';
 const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com').replace(/\/$/, '');
 const EMAIL_LOGO_URL = `${SITE_URL}/images/logos/kfar_logo_white_on_green.png`;
 const EMAIL_BANNER_URL = `${SITE_URL}/images/email/kfar-transactional-banner.png`;
+const DEFAULT_VARIABLES: Record<string, string> = {
+  dashboard_url: `${SITE_URL}/vendor/orders`,
+  status_message: '',
+  status_message_he: '',
+  status_he: '',
+};
 
 // Detect if we are running on the VPS (Postfix available) or local dev
 const isLocalDev = SMTP_HOST === 'localhost' && !process.env.SMTP_HOST;
@@ -79,12 +85,13 @@ export function renderTemplate(
   variables: Record<string, string>
 ): string {
   let rendered = templateBody;
-  for (const [key, value] of Object.entries(variables)) {
+  const mergedVariables = { ...DEFAULT_VARIABLES, ...variables };
+  for (const [key, value] of Object.entries(mergedVariables)) {
     // Replace all occurrences of {{key}} (global, case-sensitive)
     const pattern = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
     rendered = rendered.replace(pattern, value ?? '');
   }
-  return rendered;
+  return rendered.replace(/\{\{[^{}]+\}\}/g, '');
 }
 
 // -------------------------------------------------------------------
