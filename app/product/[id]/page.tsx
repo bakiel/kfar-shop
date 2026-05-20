@@ -1621,7 +1621,7 @@ export default function ProductDetailPage() {
                 </motion.div>
 
                 {/* QR Code Section */}
-                <div className="border-t pt-4 mt-4">
+                <div className={`border-t pt-4 mt-4 ${isMobile ? 'pb-6' : ''}`}>
                   <h4 className="font-semibold mb-3 text-center">Quick Access QR Code</h4>
                   <div className="flex justify-center">
                     <SmartQRCompactFixed
@@ -1635,7 +1635,7 @@ export default function ProductDetailPage() {
                         category: product.category,
                         description: product.description
                       }}
-                      size={180}
+                      size={isMobile ? 140 : 180}
                       hideActions={true}
                     />
                   </div>
