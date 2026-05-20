@@ -34,6 +34,15 @@ interface PromotedBundle {
   loyaltyPointsBonus?: number;
 }
 
+function formatShekel(value: number): string {
+  const rounded = Math.round((Number(value) || 0) * 100) / 100;
+  return rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(2);
+}
+
+function formatPercent(value: number): string {
+  return formatShekel(value).replace(/\.?0+$/, '');
+}
+
 export default function PromotedBundleCard({ isRTL = false }: { isRTL?: boolean }) {
   const [bundles, setBundles] = useState<PromotedBundle[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -148,7 +157,7 @@ export default function PromotedBundleCard({ isRTL = false }: { isRTL?: boolean 
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 {discount > 0 && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#E8B84D] text-[#1E3D1A] rounded-full text-xs font-bold uppercase tracking-wider shadow">
-                    -{discount}%
+                    -{formatPercent(discount)}%
                   </span>
                 )}
                 {bundle.loyaltyPointsBonus ? (
@@ -177,15 +186,15 @@ export default function PromotedBundleCard({ isRTL = false }: { isRTL?: boolean 
                     {isRTL ? 'מחיר חבילה' : 'Package price'}
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold text-[#E8B84D]">₪{price}</span>
+                    <span className="text-4xl font-bold text-[#E8B84D]">₪{formatShekel(price)}</span>
                     {bundle.originalPrice > price && (
-                      <span className="text-base text-white/45 line-through">₪{bundle.originalPrice}</span>
+                      <span className="text-base text-white/45 line-through">₪{formatShekel(bundle.originalPrice)}</span>
                     )}
                   </div>
                 </div>
                 {savings > 0 && (
                   <div className="pb-1 text-sm text-white/70">
-                    {isRTL ? `חיסכון ₪${savings}` : `Save ₪${savings}`}
+                    {isRTL ? `חיסכון ₪${formatShekel(savings)}` : `Save ₪${formatShekel(savings)}`}
                   </div>
                 )}
               </div>
@@ -237,9 +246,9 @@ export default function PromotedBundleCard({ isRTL = false }: { isRTL?: boolean 
                         {item.products.slice(0, 2).map((product) => product.name).join(' + ')}
                       </div>
                       <div className="mt-1 flex items-center gap-2">
-                        <span className="text-sm font-bold text-[#478c0b]">₪{itemPrice}</span>
+                        <span className="text-sm font-bold text-[#478c0b]">₪{formatShekel(itemPrice)}</span>
                         {item.originalPrice > itemPrice && (
-                          <span className="text-xs text-gray-400 line-through">₪{item.originalPrice}</span>
+                          <span className="text-xs text-gray-400 line-through">₪{formatShekel(item.originalPrice)}</span>
                         )}
                       </div>
                     </div>
