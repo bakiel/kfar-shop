@@ -54,7 +54,14 @@ const bundleHeroImages: Record<string, string> = {
   'bundle-shabbat': '/images/bundles/kfar-sheshe-dinner-hero.jpg',
   '140d5de1-4cf1-4704-80d7-8af3fa1b15b9': '/images/bundles/kfar-sheshe-dinner-hero.jpg',
   'sheshe dinner pack': '/images/bundles/kfar-sheshe-dinner-hero.jpg',
+  'b0e85800-6864-4cbb-9283-6c27826a9dce': '/images/teva-deli/teva_deli_vegan_specialty_product_03_plant_based_meat_alternative_israeli_cuisine.jpg',
+  'tofu & tahini starter pack': '/images/teva-deli/teva_deli_vegan_specialty_product_03_plant_based_meat_alternative_israeli_cuisine.jpg',
 };
+
+const hiddenPublicBundleIds = new Set([
+  // Legacy draft-quality record: tevadeli-01 is not a live product id and renders as ₪0.
+  '43970ab7-6088-4aaf-b3d1-24d0769d10e7',
+]);
 
 // Display name mapping -- proper casing + language rule enforcement
 const categoryDisplayNames: Record<string, { en: string; he: string }> = {
@@ -604,7 +611,7 @@ async function loadAllBundles(): Promise<Bundle[]> {
     const productMap = new Map(productFeed.products.map((product) => [product.id.toLowerCase(), product]));
 
     return sortBundleRecords(rows)
-      .filter((row) => getBundleRecordStatus(row) === 'active')
+      .filter((row) => getBundleRecordStatus(row) === 'active' && !hiddenPublicBundleIds.has(String(row.id)))
       .map((row: any) => {
         const normalized = normalizeBundleRecord(row) as any;
         const products = normalized.products.map((productId: string) => {
