@@ -8,6 +8,7 @@ export { GeminiService } from './gemini-service';
 
 // Import UnifiedAIService to use it
 import { UnifiedAIService } from './unified-ai-service';
+import { MockAIService } from './mock-ai-service';
 
 // Export it after importing
 export { UnifiedAIService };
@@ -29,7 +30,12 @@ export function getAIService(): UnifiedAIService {
 // Export convenience methods
 export const AI = {
   search: (query: any, image?: any) => getAIService().smartSearch(query, image),
-  generateQR: (type: string, data: any) => getAIService().generateSmartQR(type, data),
+  generateQR: (type: string, data: any) => {
+    if (typeof window !== 'undefined') {
+      return MockAIService.generateQR(type as any, data);
+    }
+    return getAIService().generateSmartQR(type, data);
+  },
   analyzeProduct: (image: any, context?: any) => getAIService().analyzeProductForListing(image, context),
   translate: (content: any, language: string) => getAIService().translateContent(content, language),
   recommend: (userId: string, context?: any) => getAIService().getRecommendations(userId, context),

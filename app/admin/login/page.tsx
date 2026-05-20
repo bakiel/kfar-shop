@@ -126,8 +126,9 @@ export default function AdminLoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? (isRTL ? 'הסתר סיסמה' : 'Hide password') : (isRTL ? 'הצג סיסמה' : 'Show password')}
+                  aria-pressed={showPassword}
                   className={`absolute top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 cursor-pointer ${isRTL ? 'left-2' : 'right-2'}`}
-                  tabIndex={-1}
                 >
                   {showPassword
                     ? <EyeOff className="w-4 h-4 stroke-[1.5]" />

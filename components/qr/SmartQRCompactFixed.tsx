@@ -191,7 +191,9 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
       {!hideActions && !loading && !error && (
         <div className="flex justify-center gap-2 mt-6">
           <button
+            type="button"
             onClick={downloadQR}
+            aria-label={`Download ${typeInfo.label}`}
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
             title="Download"
           >
@@ -199,7 +201,9 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
           </button>
           
           <button
+            type="button"
             onClick={copyQRLink}
+            aria-label={`Copy ${typeInfo.label} link`}
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors relative"
             title="Copy Link"
           >
@@ -213,7 +217,9 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
           
           {typeof window !== 'undefined' && typeof navigator.share === 'function' && (
             <button
+              type="button"
               onClick={shareQR}
+              aria-label={`Share ${typeInfo.label}`}
               className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
               title="Share"
             >

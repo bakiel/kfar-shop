@@ -530,7 +530,7 @@ export default function MarketplacePage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setSearchFocused(true)}
                     onBlur={() => setSearchFocused(false)}
-                    className={`w-full ${isMobile ? 'px-4 py-3.5 min-h-[48px]' : 'px-6 py-4 text-lg'} rounded-2xl text-gray-800 shadow-2xl border-0 focus:outline-none focus:ring-0 ${
+                    className={`w-full ${isMobile ? 'px-4 py-3.5 min-h-[48px]' : 'px-6 py-4 text-lg'} rounded-2xl text-gray-800 shadow-2xl border-0 focus:outline-none focus:ring-4 focus:ring-[#f6af0d]/45 ${
                       isRTL
                         ? (isMobile ? 'pl-32 pr-4 text-right' : 'pl-48 pr-6 text-right')
                         : (isMobile ? 'pr-32 pl-4' : 'pr-48 pl-6')
@@ -545,6 +545,7 @@ export default function MarketplacePage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setShowQRScanner(true)}
+                    aria-label={language === 'he' ? 'פתח סורק קוד QR' : 'Open QR scanner'}
                     className={`${isMobile ? 'px-3 py-2 min-h-[44px] min-w-[44px]' : 'px-4 py-2'} rounded-full bg-white text-gray-700 hover:bg-gray-100 transition-all shadow-md flex items-center justify-center cursor-pointer`}
                   >
                     <QrCode className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} stroke-[1.5]`} />
@@ -569,6 +570,8 @@ export default function MarketplacePage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setViewMode('vendors')}
+                  aria-label={language === 'he' ? 'עיון לפי חנויות' : 'Browse by vendor'}
+                  aria-pressed={viewMode === 'vendors'}
                   className={`${isMobile ? 'px-4 py-2 text-sm min-h-[44px] min-w-[100px]' : 'px-6 py-3'} rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
                     viewMode === 'vendors'
                       ? 'bg-white text-green-700'
@@ -582,6 +585,8 @@ export default function MarketplacePage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setViewMode('products')}
+                  aria-label={language === 'he' ? 'הצג את כל המוצרים' : 'Show all products'}
+                  aria-pressed={viewMode === 'products'}
                   className={`${isMobile ? 'px-4 py-2 text-sm min-h-[44px] min-w-[100px]' : 'px-6 py-3'} rounded-full font-semibold transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
                     viewMode === 'products'
                       ? 'bg-white text-green-700'
@@ -997,6 +1002,7 @@ export default function MarketplacePage() {
                             e.stopPropagation();
                             handleAddToCart(product);
                           }}
+                          aria-label={language === 'he' ? `הוסף את ${product.name} לסל` : `Add ${product.name} to cart`}
                           className="w-full py-2.5 rounded-xl font-semibold text-white text-sm transition-all flex items-center justify-center gap-2 cursor-pointer backdrop-blur-sm"
                           style={{ backgroundColor: 'rgba(71, 140, 11, 0.92)' }}
                         >
@@ -1084,6 +1090,7 @@ export default function MarketplacePage() {
                           e.stopPropagation();
                           handleAddToCart(product);
                         }}
+                        aria-label={language === 'he' ? `הוסף את ${product.name} לסל` : `Add ${product.name} to cart`}
                         className="w-10 h-10 rounded-xl font-semibold text-white transition-all flex items-center justify-center cursor-pointer"
                         style={{ backgroundColor: '#478c0b' }}
                       >

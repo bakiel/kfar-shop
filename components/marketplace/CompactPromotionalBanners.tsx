@@ -163,8 +163,11 @@ export default function CompactPromotionalBanners() {
               <div className="flex justify-center gap-1 pb-1">
                 {banners.map((_, index) => (
                   <button
+                    type="button"
                     key={index}
                     onClick={() => setCurrentBanner(index)}
+                    aria-label={`Show promotion ${index + 1}`}
+                    aria-current={index === currentBanner ? 'true' : undefined}
                     className={`h-0.5 rounded-full transition-all ${
                       index === currentBanner ? 'w-4 bg-white' : 'w-1 bg-white/50'
                     }`}
@@ -206,8 +209,11 @@ export default function CompactPromotionalBanners() {
                   <div className="hidden lg:flex items-center gap-1 mr-4">
                     {banners.map((b, index) => (
                       <button
+                        type="button"
                         key={b.id}
                         onClick={() => setCurrentBanner(index)}
+                        aria-label={`Show ${b.title} promotion`}
+                        aria-current={index === currentBanner ? 'true' : undefined}
                         className={`px-2 py-1 rounded text-xs transition-all ${
                           index === currentBanner
                             ? 'bg-white/20 text-white'
