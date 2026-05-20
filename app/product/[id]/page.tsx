@@ -400,13 +400,15 @@ export default function ProductDetailPage() {
             className="bg-white shadow-sm sticky top-0 z-30"
           >
             <div className="flex items-center justify-between px-4 py-3">
-              <Link href="/marketplace" className="p-2">
+              <Link href="/marketplace" className="p-2" aria-label={language === 'he' ? 'חזרה לשוק' : 'Back to marketplace'}>
                 <ArrowLeft className="w-5 h-5 text-gray-600 stroke-[1.5]" />
               </Link>
               <h1 className="text-lg font-semibold truncate flex-1 mx-3" style={{ color: '#3a3a1d' }}>
                 {product.name}
               </h1>
               <motion.button
+                type="button"
+                aria-label={language === 'he' ? 'שתף מוצר' : 'Share product'}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="p-2 cursor-pointer"
@@ -534,7 +536,10 @@ export default function ProductDetailPage() {
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1">
                           {product.images.map((_: string, idx: number) => (
                             <button
+                              type="button"
                               key={idx}
+                              aria-label={`Show product image ${idx + 1}`}
+                              aria-current={selectedImage === idx ? 'true' : undefined}
                               className={`w-2 h-2 rounded-full transition-all ${
                                 selectedImage === idx 
                                   ? 'bg-white w-6' 
@@ -572,7 +577,10 @@ export default function ProductDetailPage() {
                 {isMobile && (
                   <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                      <button 
+                      <button
+                        type="button"
+                        aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                        aria-pressed={isWishlisted}
                         className="text-gray-400 hover:text-red-500 transition-colors"
                         onClick={() => {
                           setIsWishlisted(!isWishlisted);
@@ -584,7 +592,9 @@ export default function ProductDetailPage() {
                       >
                         <Heart className={`w-6 h-6 stroke-[1.5] ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
                       </button>
-                      <button 
+                      <button
+                        type="button"
+                        aria-label={language === 'he' ? 'שתף מוצר' : 'Share product'}
                         className="text-gray-400 hover:text-blue-500 transition-colors"
                         onClick={() => {
                           if (navigator.share) {
@@ -639,7 +649,10 @@ export default function ProductDetailPage() {
                       )}
                     </div>
                   </div>
-                  <button 
+                  <button
+                    type="button"
+                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    aria-pressed={isWishlisted}
                     className={`text-gray-400 hover:text-red-500 ${isMobile ? 'text-lg' : 'text-xl'} transition-colors`}
                     onClick={() => setIsWishlisted(!isWishlisted)}
                   >
@@ -858,7 +871,9 @@ export default function ProductDetailPage() {
                         </div>
                       </div>
                       <Link href={`/store/${product.vendorId}`}>
-                        <button 
+                        <button
+                          type="button"
+                          aria-label={`Visit ${product.vendor} store`}
                           className="w-10 h-10 bg-[#478c0b] text-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
                           onClick={(e) => {
                             // Haptic feedback
@@ -1125,16 +1140,16 @@ export default function ProductDetailPage() {
                         {/* Helpful Actions */}
                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                           <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
                               <ThumbsUp className="w-4 h-4 stroke-[1.5]" />
                               <span>Helpful (12)</span>
                             </button>
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
                               <ThumbsDown className="w-4 h-4 stroke-[1.5]" />
                               <span>Not Helpful</span>
                             </button>
                           </div>
-                          <button className="text-xs text-gray-500">
+                          <button type="button" aria-label="Report review" className="text-xs text-gray-500">
                             <Flag className="w-4 h-4 stroke-[1.5]" />
                           </button>
                         </div>
@@ -1188,16 +1203,16 @@ export default function ProductDetailPage() {
                         {/* Helpful Actions */}
                         <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-3">
                           <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
                               <ThumbsUp className="w-4 h-4 stroke-[1.5]" />
                               <span>Helpful (8)</span>
                             </button>
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
                               <ThumbsDown className="w-4 h-4 stroke-[1.5]" />
                               <span>Not Helpful</span>
                             </button>
                           </div>
-                          <button className="text-xs text-gray-500">
+                          <button type="button" aria-label="Report review" className="text-xs text-gray-500">
                             <Flag className="w-4 h-4 stroke-[1.5]" />
                           </button>
                         </div>
@@ -1219,7 +1234,9 @@ export default function ProductDetailPage() {
                         <div className="flex gap-2">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
+                              type="button"
                               key={star}
+                              aria-label={`Rate ${star} out of 5`}
                               className="text-2xl"
                               style={{ color: star <= 4 ? '#f6af0d' : '#e5e7eb' }}
                             >
@@ -1306,6 +1323,8 @@ export default function ProductDetailPage() {
               {!showSidebar && (
                 <div className="fixed right-4 top-24 z-40">
                   <button
+                    type="button"
+                    aria-label="Show purchase options"
                     onClick={() => setShowSidebar(true)}
                     className="group relative"
                     title="Show purchase options"
@@ -1328,6 +1347,8 @@ export default function ProductDetailPage() {
                   {/* Header */}
                   <div className="relative p-5 pb-4 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, rgba(71, 140, 11, 0.04) 0%, rgba(196, 162, 101, 0.04) 100%)' }}>
                     <button
+                      type="button"
+                      aria-label="Hide purchase panel"
                       onClick={() => setShowSidebar(false)}
                       className="absolute top-4 right-4 w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center justify-center group cursor-pointer"
                       title="Hide panel"
@@ -1362,7 +1383,8 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div className="mb-4">
-                    <select 
+                    <select
+                      aria-label="Select currency"
                       className="w-full px-3 py-2 border rounded-lg text-sm"
                       value={selectedCurrency}
                       onChange={(e) => setSelectedCurrency(e.target.value)}
@@ -1387,19 +1409,26 @@ export default function ProductDetailPage() {
                   <div className="mb-4">
                     <label className="block text-sm font-semibold mb-2">Quantity:</label>
                     <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden mb-3">
-                      <button 
+                      <button
+                        type="button"
+                        aria-label="Decrease quantity"
                         className="px-3 py-2 bg-gray-100 hover:bg-[#cfe7c1] transition-colors font-semibold"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       >
                         -
                       </button>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
+                        name="quantity"
+                        aria-label="Quantity"
+                        inputMode="numeric"
                         className="w-16 px-3 py-2 text-center border-none outline-none"
                         value={quantity}
                         onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                       />
-                      <button 
+                      <button
+                        type="button"
+                        aria-label="Increase quantity"
                         className="px-3 py-2 bg-gray-100 hover:bg-[#cfe7c1] transition-colors font-semibold"
                         onClick={() => setQuantity(quantity + 1)}
                       >
@@ -1647,6 +1676,8 @@ export default function ProductDetailPage() {
                           From {product.vendor}
                         </span>
                         <button
+                          type="button"
+                          aria-label="Hide suggestions"
                           onClick={() => setShowSuggestions(false)}
                           className="w-7 h-7 bg-white/70 hover:bg-white rounded-full flex items-center justify-center transition-all group"
                           title="Hide suggestions"
@@ -1814,6 +1845,8 @@ export default function ProductDetailPage() {
                               ₪{recentProduct.price}
                             </span>
                             <button
+                              type="button"
+                              aria-label={`Add ${recentProduct.name} to cart`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -1985,6 +2018,8 @@ export default function ProductDetailPage() {
                               {/* Quick Actions Overlay */}
                               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity">
                                 <button
+                                  type="button"
+                                  aria-label={`Add ${relProduct.name} to cart`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -2052,6 +2087,8 @@ export default function ProductDetailPage() {
                                   )}
                                 </div>
                                 <button
+                                  type="button"
+                                  aria-label={`Add ${relProduct.name} to cart`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -2217,6 +2254,8 @@ export default function ProductDetailPage() {
                   className="object-contain"
                 />
                 <motion.button
+                  type="button"
+                  aria-label="Close product image preview"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors"
@@ -2255,6 +2294,8 @@ export default function ProductDetailPage() {
                 {/* Quantity Selector */}
                 <div className="flex items-center gap-2 ml-3">
                   <motion.button
+                    type="button"
+                    aria-label="Decrease quantity"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className="w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-[#478c0b] transition-colors cursor-pointer"
@@ -2271,6 +2312,8 @@ export default function ProductDetailPage() {
                     {quantity}
                   </motion.span>
                   <motion.button
+                    type="button"
+                    aria-label="Increase quantity"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className="w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-[#478c0b] transition-colors cursor-pointer"

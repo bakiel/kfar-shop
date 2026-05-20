@@ -20,6 +20,8 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
     <>
       {/* Africa Logo Button - Positioned with safe distance from footer */}
       <motion.button
+        type="button"
+        aria-label="Open KFAR quick actions"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileTap={{ scale: 0.9 }}
@@ -64,6 +66,8 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
               <div className="bg-white rounded-3xl shadow-2xl p-6 pointer-events-auto">
                 {/* Close button */}
                 <button
+                  type="button"
+                  aria-label="Close quick actions"
                   onClick={() => setIsExpanded(false)}
                   className="absolute top-3 right-3 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"
                 >
@@ -78,6 +82,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
                   {/* Store */}
                   <Link href="/marketplace">
                     <motion.button
+                      type="button"
                       whileTap={{ scale: 0.95 }}
                       className="flex flex-col items-center gap-2 p-4 bg-[#f6af0d]/10 rounded-2xl"
                     >
@@ -90,6 +95,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
 
                   {/* Cart */}
                   <motion.button
+                    type="button"
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       onCartClick();
@@ -110,6 +116,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
 
                   {/* Voice Chat */}
                   <motion.button
+                    type="button"
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       // Dispatch event to open voice chat
@@ -127,6 +134,7 @@ export default function CompactFloatingMenu({ onCartClick }: CompactFloatingMenu
 
                   {/* Share */}
                   <motion.button
+                    type="button"
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       if (navigator.share) {

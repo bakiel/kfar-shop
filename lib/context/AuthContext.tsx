@@ -47,6 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
       const data = await res.json();
+      if (!data?.user || !data?.accessToken) {
+        setUser(null);
+        setAccessToken(null);
+        return false;
+      }
       setUser(data.user);
       setAccessToken(data.accessToken);
       scheduleRefresh();

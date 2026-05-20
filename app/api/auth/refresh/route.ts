@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const refreshToken = request.cookies.get('refreshToken')?.value;
 
     if (!refreshToken) {
-      return NextResponse.json({ error: 'No refresh token' }, { status: 401 });
+      return NextResponse.json({ authenticated: false });
     }
 
     const result = await refreshAccessToken(refreshToken);
