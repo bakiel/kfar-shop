@@ -45,11 +45,15 @@ fi
 echo "[build-release] Verifying live data source guard..."
 "$NODE_BIN" scripts/guard-live-data-source.mjs
 
-echo "[build-release] Building standalone Next.js output..."
-if [[ -n "$NPM_BIN" ]]; then
-  NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}" "$NPM_BIN" run build:standalone
+if [[ "${SKIP_NEXT_BUILD:-false}" == "true" ]]; then
+  echo "[build-release] SKIP_NEXT_BUILD=true; using existing .next/standalone output..."
 else
-  NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}" "$NODE_BIN" node_modules/next/dist/bin/next build --no-lint
+  echo "[build-release] Building standalone Next.js output..."
+  if [[ -n "$NPM_BIN" ]]; then
+    NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}" "$NPM_BIN" run build:standalone
+  else
+    NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}" "$NODE_BIN" node_modules/next/dist/bin/next build --no-lint
+  fi
 fi
 
 if [[ ! -f .next/standalone/server.js ]]; then
