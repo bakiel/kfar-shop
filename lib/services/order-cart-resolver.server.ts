@@ -1,9 +1,16 @@
 import { query } from '@/lib/db/postgres-client';
+import {
+  getBundleRecordStatus,
+  normalizeBundleRecord,
+} from '@/lib/db/bundles';
 
 type CartInputItem = {
   id?: string;
   productId?: string;
   product_id?: string;
+  itemType?: 'product' | 'bundle';
+  bundleId?: string;
+  bundle_id?: string;
   quantity?: number;
 };
 
@@ -16,6 +23,9 @@ export interface ResolvedOrderItem {
   vendorId: string;
   vendorName: string;
   image: string;
+  itemType?: 'product' | 'bundle';
+  bundleId?: string;
+  bundleProductIds?: string[];
 }
 
 export interface OrderQuote {
@@ -42,6 +52,18 @@ function parseQuantity(value: unknown) {
 
 function getInputProductId(item: CartInputItem) {
   return String(item.productId || item.id || item.product_id || '').trim();
+}
+
+function getInputBundleId(item: CartInputItem) {
+  const explicit = String(item.bundleId || item.bundle_id || '').trim();
+  if (explicit) return explicit;
+
+  const rawId = String(item.id || item.productId || item.product_id || '').trim();
+  if (item.itemType === 'bundle' && rawId.startsWith('bundle:')) {
+    return rawId.slice('bundle:'.length);
+  }
+
+  return '';
 }
 
 function toStringArray(value: unknown): string[] {
@@ -77,34 +99,101 @@ export async function resolveOrderQuote(items: CartInputItem[]): Promise<OrderQu
   }
 
   const requested = new Map<string, number>();
+  const requestedBundles = new Map<string, number>();
   for (const item of items) {
-    const productId = getInputProductId(item);
     const quantity = parseQuantity(item.quantity);
-    if (!productId) throw new Error('Each order item must include a product ID');
     if (!quantity) throw new Error('Each order item must include a valid quantity');
+
+    const bundleId = getInputBundleId(item);
+    if (bundleId) {
+      requestedBundles.set(bundleId, (requestedBundles.get(bundleId) || 0) + quantity);
+      continue;
+    }
+
+    const productId = getInputProductId(item);
+    if (!productId) throw new Error('Each order item must include a product ID');
     requested.set(productId, (requested.get(productId) || 0) + quantity);
   }
 
   const productIds = [...requested.keys()];
-  const { rows } = await query(
-    `SELECT
-       p.id::text,
-       p.vendor_id::text,
-       p.name,
-       p.price,
-       p.image_url,
-       p.image_gallery,
-       p.status,
-       p.in_stock,
-       v.name AS vendor_name
-     FROM products p
-     LEFT JOIN vendors v ON v.id::text = p.vendor_id::text
-     WHERE p.id::text = ANY($1::text[])`,
-    [productIds]
-  );
+  const { rows } = productIds.length > 0
+    ? await query(
+      `SELECT
+         p.id::text,
+         p.vendor_id::text,
+         p.name,
+         p.price,
+         p.image_url,
+         p.image_gallery,
+         p.status,
+         p.in_stock,
+         v.name AS vendor_name
+       FROM products p
+       LEFT JOIN vendors v ON v.id::text = p.vendor_id::text
+       WHERE p.id::text = ANY($1::text[])`,
+      [productIds]
+    )
+    : { rows: [] };
 
   const productsById = new Map(rows.map((row: any) => [String(row.id), row]));
   const resolvedItems: ResolvedOrderItem[] = [];
+
+  const bundleIds = [...requestedBundles.keys()];
+  if (bundleIds.length > 0) {
+    const { rows: bundleRows } = await query(
+      'SELECT * FROM bundles WHERE id::text = ANY($1::text[])',
+      [bundleIds]
+    );
+    const bundlesById = new Map(bundleRows.map((row: any) => [String(row.id), row]));
+
+    for (const bundleId of bundleIds) {
+      const bundleRow = bundlesById.get(bundleId);
+      if (!bundleRow) {
+        throw new Error(`Bundle ${bundleId} is no longer available`);
+      }
+      if (getBundleRecordStatus(bundleRow) !== 'active') {
+        throw new Error(`${bundleRow.name || bundleId} is not currently available`);
+      }
+
+      const normalized = normalizeBundleRecord(bundleRow) as any;
+      const quantity = requestedBundles.get(bundleId) || 0;
+      const price = roundMoney(normalized.price);
+      if (price <= 0) {
+        throw new Error(`${normalized.name || bundleId} cannot be ordered right now`);
+      }
+      if (!Array.isArray(normalized.products) || normalized.products.length === 0) {
+        throw new Error(`${normalized.name || bundleId} does not have orderable products`);
+      }
+
+      const { rows: bundleProductRows } = await query(
+        `SELECT p.id::text
+         FROM products p
+         WHERE p.id::text = ANY($1::text[])
+           AND p.status IN ('published', 'active')
+           AND COALESCE(p.in_stock, true) = true`,
+        [normalized.products]
+      );
+      const orderableProductIds = new Set(bundleProductRows.map((row: any) => String(row.id).toLowerCase()));
+      const missingProductIds = normalized.products.filter((productId: string) => !orderableProductIds.has(productId.toLowerCase()));
+      if (missingProductIds.length > 0) {
+        throw new Error(`${normalized.name || bundleId} is missing orderable products`);
+      }
+
+      resolvedItems.push({
+        id: `bundle:${normalized.id}`,
+        productId: `bundle:${normalized.id}`,
+        itemType: 'bundle',
+        bundleId: normalized.id,
+        bundleProductIds: normalized.products,
+        name: normalized.name || 'Bundle',
+        quantity,
+        price,
+        vendorId: normalized.vendorId || '',
+        vendorName: normalized.vendorId || 'KFAR Marketplace',
+        image: normalized.image || '/images/placeholder-product.jpg',
+      });
+    }
+  }
 
   for (const productId of productIds) {
     const product = productsById.get(productId);

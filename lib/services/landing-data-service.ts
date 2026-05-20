@@ -604,37 +604,70 @@ async function loadAllBundles(): Promise<Bundle[]> {
   if (!dbUp) return [];
 
   try {
-    const [{ rows }, productFeed] = await Promise.all([
-      query('SELECT * FROM bundles'),
-      getProductFeed(),
-    ]);
-    const productMap = new Map(productFeed.products.map((product) => [product.id.toLowerCase(), product]));
+    const { rows } = await query('SELECT * FROM bundles');
+    const activeRows = sortBundleRecords(rows)
+      .filter((row) => getBundleRecordStatus(row) === 'active' && !hiddenPublicBundleIds.has(String(row.id)));
+    const bundleProductIds = activeRows.map((row: any) => getBundleRecordProductIds(row));
+    const allProductIds = Array.from(new Set(bundleProductIds.flat())).filter(Boolean);
+    const productMap = new Map<string, BundleProduct>();
 
-    return sortBundleRecords(rows)
-      .filter((row) => getBundleRecordStatus(row) === 'active' && !hiddenPublicBundleIds.has(String(row.id)))
-      .map((row: any) => {
-        const normalized = normalizeBundleRecord(row) as any;
-        const products = normalized.products.map((productId: string) => {
-          const liveProduct = productMap.get(productId.toLowerCase());
-          return liveProduct ? mapLiveBundleProduct(liveProduct) : resolveBundleProduct(productId);
+    if (allProductIds.length > 0) {
+      const { rows: productRows } = await query(
+        `SELECT
+           p.id::text,
+           p.name,
+           p.image_url,
+           p.image_gallery,
+           p.price
+         FROM products p
+         WHERE p.id::text = ANY($1::text[])
+           AND p.status IN ('published', 'active')
+           AND COALESCE(p.in_stock, true) = true`,
+        [allProductIds]
+      );
+
+      for (const product of productRows) {
+        const images = toStringArray(product.image_gallery);
+        productMap.set(String(product.id).toLowerCase(), {
+          id: String(product.id),
+          name: product.name || String(product.id),
+          image: resolveImagePath(product.image_url || images[0] || ''),
+          price: parseFloat(product.price) || 0,
         });
+      }
+    }
 
-        return {
-          id: normalized.id,
-          name: normalized.name,
-          nameHe: normalized.nameHe || undefined,
-          description: normalized.description || '',
-          descriptionHe: normalized.descriptionHe || undefined,
-          products,
-          bundlePrice: normalized.price,
-          originalPrice: normalized.originalPrice,
-          savingsPercent: normalized.savingsPercent,
-          image: resolveBundleHeroImage(normalized.id, normalized.image, products[0]?.image, normalized.name),
-          isFeatured: normalized.isFeatured,
-          loyaltyPointsBonus: normalized.loyaltyPointsBonus,
-          vendorId: normalized.vendorId,
-        };
+    const bundles: Bundle[] = [];
+
+    activeRows.forEach((row: any, index) => {
+      const normalized = normalizeBundleRecord(row) as any;
+      const productIds = bundleProductIds[index];
+      const products = productIds
+        .map((productId: string) => productMap.get(productId.toLowerCase()))
+        .filter((product): product is BundleProduct => !!product && product.price > 0);
+
+      if (products.length !== productIds.length || products.length === 0) {
+        return;
+      }
+
+      bundles.push({
+        id: normalized.id,
+        name: normalized.name,
+        nameHe: normalized.nameHe || undefined,
+        description: normalized.description || '',
+        descriptionHe: normalized.descriptionHe || undefined,
+        products,
+        bundlePrice: normalized.price,
+        originalPrice: normalized.originalPrice,
+        savingsPercent: normalized.savingsPercent,
+        image: resolveBundleHeroImage(normalized.id, normalized.image, products[0]?.image, normalized.name),
+        isFeatured: normalized.isFeatured,
+        loyaltyPointsBonus: normalized.loyaltyPointsBonus,
+        vendorId: normalized.vendorId,
       });
+    });
+
+    return bundles;
   } catch (error) {
     console.log('DB bundle fetch failed:', (error as Error).message);
     return [];
@@ -715,5 +748,10 @@ const getLandingPageDataCached = unstable_cache(loadLandingPageData, ['landing-p
 });
 
 export async function getLandingPageData(): Promise<LandingPageData> {
-  return getLandingPageDataCached();
+  const cached = await getLandingPageDataCached();
+  const bundles = await getAllBundles();
+  return {
+    ...cached,
+    bundles: bundles.length > 0 ? bundles : cached.bundles,
+  };
 }

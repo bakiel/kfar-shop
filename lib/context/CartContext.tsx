@@ -4,6 +4,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CartItem {
   id: string;
+  productId?: string;
+  itemType?: 'product' | 'bundle';
+  bundleId?: string;
+  bundleName?: string;
+  bundleProductIds?: string[];
   name: string;
   vendorId?: string;
   vendorName?: string;

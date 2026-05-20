@@ -18,8 +18,12 @@ import { resolveOrderQuote, totalsMatch } from '@/lib/services/order-cart-resolv
 interface OrderCreateBody {
   items: Array<{
     id?: string;
-    productId: string;
+    productId?: string;
     product_id?: string;
+    itemType?: 'product' | 'bundle';
+    bundleId?: string;
+    bundleName?: string;
+    bundleProductIds?: string[];
     name: string;
     quantity: number;
     price: number;

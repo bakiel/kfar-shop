@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useCart } from '@/lib/context/CartContext';
+import { createBundleCartItem } from '@/lib/utils/bundle-cart';
 import type { Bundle, LandingProduct } from '@/lib/types/landing';
 
 interface PromoBundlesProps {
@@ -165,18 +166,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
   const theme = themes[index % themes.length];
 
   const handleAddBundle = () => {
-    // Add all products in the bundle to cart
-    bundle.products.forEach((product) => {
-      cart.addToCart({
-        id: product.id,
-        name: product.name,
-        vendorId: '',
-        vendorName: '',
-        price: product.price,
-        quantity: 1,
-        image: product.image,
-      });
-    });
+    cart.addToCart(createBundleCartItem(bundle));
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };

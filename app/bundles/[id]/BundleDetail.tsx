@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useCart } from '@/lib/context/CartContext';
+import { createBundleCartItem } from '@/lib/utils/bundle-cart';
 import type { EnrichedBundle, Bundle } from '@/lib/types/landing';
 
 interface BundleDetailProps {
@@ -75,17 +76,7 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
   const savings = bundle.originalPrice - bundle.bundlePrice;
 
   const handleAddBundle = () => {
-    bundle.products.forEach((product) => {
-      cart.addToCart({
-        id: product.id,
-        name: product.name,
-        vendorId: product.vendorId || '',
-        vendorName: product.vendorName || '',
-        price: product.price,
-        quantity: 1,
-        image: product.image,
-      });
-    });
+    cart.addToCart(createBundleCartItem(bundle));
     setAdded(true);
     setTimeout(() => setAdded(false), 3000);
   };

@@ -46,7 +46,12 @@ export default function CheckoutPage() {
         headers,
         body: JSON.stringify({
           items: items.map(it => ({
-            productId: it.id,
+            id: it.id,
+            productId: it.productId || (it.bundleId ? undefined : it.id),
+            itemType: it.itemType,
+            bundleId: it.bundleId,
+            bundleName: it.bundleName,
+            bundleProductIds: it.bundleProductIds,
             name: it.name,
             quantity: it.quantity,
             price: it.price,
@@ -180,6 +185,11 @@ export default function CheckoutPage() {
                   <span className="text-gray-800">
                     {it.name}{' '}
                     <span className="text-gray-400">x {it.quantity}</span>
+                    {it.itemType === 'bundle' && (
+                      <span className="ml-2 text-xs text-[#478c0b]">
+                        {isRTL ? 'חבילה' : 'bundle'}
+                      </span>
+                    )}
                   </span>
                   <span className="font-medium text-gray-900">&#8362;{(it.price * it.quantity).toFixed(2)}</span>
                 </li>
