@@ -16,6 +16,7 @@ import {
 import { query, isDbAvailable } from '@/lib/db/postgres-client';
 import { getProductById as getLiveProductById, getProductFeed, ProductFeedProduct } from '@/lib/services/live-product-feed';
 import { getVendorFeed } from '@/lib/services/live-vendor-feed';
+import { resolveImagePath } from '@/lib/utils/image-resolver';
 import type {
   LandingPageData,
   LandingVendor,
@@ -47,6 +48,12 @@ const categoryImages: Record<string, string> = {
   'spreads': '/images/vendors/garden-of-light/products/2.jpg',
   'catering': '/images/queens-cuisine/queens_cuisine_product_banner_vegan_meat_alternatives_plant_based_cuisine_display_01.jpg',
   'salads': '/images/vendors/garden-of-light/products/1.jpg',
+};
+
+const bundleHeroImages: Record<string, string> = {
+  'bundle-shabbat': '/images/bundles/kfar-sheshe-dinner-hero.jpg',
+  '140d5de1-4cf1-4704-80d7-8af3fa1b15b9': '/images/bundles/kfar-sheshe-dinner-hero.jpg',
+  'sheshe dinner pack': '/images/bundles/kfar-sheshe-dinner-hero.jpg',
 };
 
 // Display name mapping -- proper casing + language rule enforcement
@@ -133,6 +140,26 @@ function mapLiveLandingProduct(product: ProductFeedProduct): LandingProduct {
     inStock: product.inStock,
     isFeatured: product.isFeatured || false,
     tags: product.tags || [],
+  };
+}
+
+function resolveBundleHeroImage(
+  bundleId: string,
+  configuredImage?: string,
+  firstProductImage?: string,
+  bundleName?: string
+): string {
+  const bundleKey = bundleName?.trim().toLowerCase() || '';
+  const heroImage = bundleHeroImages[bundleId] || bundleHeroImages[bundleKey] || configuredImage || firstProductImage;
+  return resolveImagePath(heroImage);
+}
+
+function mapLiveBundleProduct(product: ProductFeedProduct): BundleProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    image: resolveImagePath(product.image || product.images?.[0]),
+    price: product.price,
   };
 }
 
@@ -413,7 +440,7 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
             productMap.set(product.id, {
               id: product.id,
               name: product.name,
-              image: product.image_url || '',
+              image: resolveImagePath(product.image_url || ''),
               price: parseFloat(product.price),
             });
           }
@@ -443,7 +470,7 @@ async function getFeaturedBundles(): Promise<Bundle[]> {
           bundlePrice,
           originalPrice,
           savingsPercent,
-          image: bundle.image || '',
+          image: resolveBundleHeroImage(bundle.id, bundle.image || '', products[0]?.image, bundle.name),
           isFeatured: bundle.is_featured || false,
           loyaltyPointsBonus: bundle.loyalty_points_bonus || 0,
           vendorId: bundle.vendor_id,
@@ -519,7 +546,7 @@ function resolveBundleProduct(productId: string): BundleProduct {
   return {
     id: productId,
     name: productId,
-    image: '',
+    image: resolveImagePath(''),
     price: 0,
   };
 }
@@ -540,7 +567,7 @@ function mapDatabaseBundle(row: any): Bundle {
     bundlePrice,
     originalPrice,
     savingsPercent: normalized.savingsPercent,
-    image: normalized.image || products[0]?.image || '',
+    image: resolveBundleHeroImage(normalized.id, normalized.image, products[0]?.image, normalized.name),
     isFeatured: normalized.isFeatured,
     loyaltyPointsBonus: normalized.loyaltyPointsBonus,
     vendorId: normalized.vendorId,
@@ -572,8 +599,8 @@ async function loadAllBundles(): Promise<Bundle[]> {
   ]);
 
   const merged = new Map<string, Bundle>();
-  for (const bundle of featuredBundles) merged.set(bundle.id, bundle);
   for (const bundle of databaseBundles) merged.set(bundle.id, bundle);
+  for (const bundle of featuredBundles) merged.set(bundle.id, bundle);
 
   return Array.from(merged.values());
 }
@@ -597,8 +624,11 @@ export async function getEnrichedBundle(id: string): Promise<EnrichedBundle | nu
 
   const enrichedProducts: EnrichedBundleProduct[] = await Promise.all(bundle.products.map(async (bp) => {
     const fullProduct = await getLiveProductById(bp.id);
+    const liveProduct = fullProduct ? mapLiveBundleProduct(fullProduct) : null;
+
     return {
       ...bp,
+      ...(liveProduct || {}),
       nameHe: fullProduct?.nameHe || undefined,
       description: fullProduct?.description,
       descriptionHe: fullProduct?.descriptionHe || undefined,
@@ -612,6 +642,7 @@ export async function getEnrichedBundle(id: string): Promise<EnrichedBundle | nu
 
   return {
     ...bundle,
+    image: resolveBundleHeroImage(bundle.id, bundle.image, enrichedProducts[0]?.image, bundle.name),
     products: enrichedProducts,
   };
 }
