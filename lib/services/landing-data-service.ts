@@ -687,7 +687,7 @@ async function loadLandingPageData(): Promise<LandingPageData> {
       getFeaturedProducts(12),
       getTopCategories(8),
       getActiveFlashDeals(),
-      getFeaturedBundles(),
+      getAllBundles(),
       getActivePromotions(),
       getMarketplaceStats(),
     ]);
