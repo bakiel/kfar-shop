@@ -194,10 +194,12 @@ export default function CheckoutPage() {
           {/* Form */}
           <form onSubmit={onSubmit} className="bg-white rounded-xl border border-[#F5F0E8] p-6 space-y-5">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
+              <label htmlFor="checkout-full-name" className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
                 {isRTL ? 'שם מלא' : 'Full name'}
               </label>
               <input
+                id="checkout-full-name"
+                name="fullName"
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -209,10 +211,11 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
+              <label htmlFor="checkout-email" className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
                 {isRTL ? 'אימייל לאישור הזמנה' : 'Email for order confirmation'}
               </label>
               <input
+                id="checkout-email"
                 type="email"
                 name="email"
                 value={email}
@@ -232,10 +235,12 @@ export default function CheckoutPage() {
             />
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
+              <label htmlFor="checkout-address" className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
                 {isRTL ? 'כתובת' : 'Delivery address'}
               </label>
               <textarea
+                id="checkout-address"
+                name="address"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 autoComplete="street-address"
@@ -247,10 +252,12 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
+              <label htmlFor="checkout-phone" className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
                 {isRTL ? 'טלפון' : 'Phone'}
               </label>
               <input
+                id="checkout-phone"
+                name="phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
