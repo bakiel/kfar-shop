@@ -55,6 +55,7 @@ export default function AddProductPage() {
   const [currentTag, setCurrentTag] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [pendingImageFiles, setPendingImageFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -86,9 +87,12 @@ export default function AddProductPage() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // In production, these would be uploaded to a server
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
+      const remainingSlots = Math.max(0, 5 - product.images.length);
+      const selectedFiles = Array.from(files).slice(0, remainingSlots);
+      const newImages = selectedFiles.map(file => URL.createObjectURL(file));
       setProduct(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
+      setPendingImageFiles(prev => [...prev, ...selectedFiles]);
+      e.target.value = '';
     }
   };
 
@@ -97,6 +101,28 @@ export default function AddProductPage() {
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
     }));
+    setPendingImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadProductImages = async () => {
+    if (pendingImageFiles.length === 0) return [];
+    if (!accessToken) throw new Error('Vendor session expired. Please log in again.');
+
+    const formData = new FormData();
+    pendingImageFiles.forEach(file => formData.append('files', file));
+
+    const res = await fetch('/api/vendor/products/images', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || 'Failed to upload product images');
+    }
+
+    return (data.images || []).map((image: { url: string }) => image.url).filter(Boolean);
   };
 
   const generateAISuggestions = () => {
@@ -164,7 +190,9 @@ export default function AddProductPage() {
     }
 
     try {
+      const uploadedImages = await uploadProductImages();
       const persistentImages = product.images.filter(src => !src.startsWith('blob:'));
+      const productImages = [...persistentImages, ...uploadedImages];
       const res = await fetch('/api/vendor/products', {
         method: 'POST',
         headers: {
@@ -182,8 +210,8 @@ export default function AddProductPage() {
           stock_quantity: product.stock ? parseInt(product.stock) : 0,
           unit: product.unit,
           tags: product.tags,
-          image_url: persistentImages[0] || null,
-          image_gallery: persistentImages,
+          image_url: productImages[0] || null,
+          image_gallery: productImages,
           is_vegan: product.dietaryInfo.vegan,
           is_gluten_free: product.dietaryInfo.glutenFree,
           is_organic: product.dietaryInfo.organic,
@@ -674,7 +702,7 @@ export default function AddProductPage() {
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleImageUpload}
                   className="hidden"
                 />

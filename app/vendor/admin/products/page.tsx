@@ -21,6 +21,7 @@ export default function VendorProductsPage() {
   const [editFormData, setEditFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Get vendor info from the authenticated session.
@@ -39,6 +40,32 @@ export default function VendorProductsPage() {
 
   // Helper: get auth token
   const getToken = () => accessToken || '';
+
+  const uploadEditProductImages = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const token = getToken();
+    if (!token) throw new Error('Please log in again before uploading images.');
+
+    const formData = new FormData();
+    Array.from(files).slice(0, 5).forEach(file => formData.append('files', file));
+
+    setImageUploading(true);
+    try {
+      const res = await fetch('/api/vendor/products/images', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'Failed to upload image');
+      const uploaded = (data.images || []).map((image: { url: string }) => image.url).filter(Boolean);
+      if (uploaded[0]) {
+        setEditFormData((prev: any) => ({ ...prev, image: uploaded[0], images: uploaded }));
+      }
+    } finally {
+      setImageUploading(false);
+    }
+  };
 
   // Fetch products from the live DB-backed vendor feed.
   useEffect(() => {
@@ -84,6 +111,7 @@ export default function VendorProductsPage() {
             stock: parseInt(p.stock_quantity) || 0,
             inStock: isPublished && p.in_stock !== false,
             status: st,
+            dbStatus: p.status || (isPublished ? 'published' : 'draft'),
             category: p.category || 'uncategorized',
             rating: 4.5,
             reviewCount: p.reviewCount || p.review_count || 0,
@@ -159,6 +187,7 @@ export default function VendorProductsPage() {
       glutenFree: product.glutenFree,
       kashrut: product.kashrut || '',
       image: product.image,
+      images: product.images || (product.image ? [product.image] : []),
       // New fields
       specifications: product.specifications || '',
       nutritionalInfo: product.nutritionalInfo || {
@@ -196,9 +225,11 @@ export default function VendorProductsPage() {
           category: editFormData.category,
           unit: editFormData.unit,
           stock_quantity: parseInt(editFormData.stock) || 0,
-          status: parseInt(editFormData.stock) > 0 ? 'published' : 'draft',
         };
-        if (editFormData.image) body.image = editFormData.image;
+        if (editFormData.image) {
+          body.image = editFormData.image;
+          body.image_gallery = editFormData.images?.length ? editFormData.images : [editFormData.image];
+        }
 
         const res = await fetch(`/api/vendor/products/${editingProduct}`, {
           method: 'PUT',
@@ -215,8 +246,9 @@ export default function VendorProductsPage() {
           return {
             ...p,
             ...editFormData,
-            status: parseInt(editFormData.stock) > 0 ? 'active' : 'out-of-stock',
-            inStock: parseInt(editFormData.stock) > 0,
+            status: p.status,
+            dbStatus: p.dbStatus,
+            inStock: p.inStock,
           };
         }
         return p;
@@ -260,7 +292,7 @@ export default function VendorProductsPage() {
 
       setProducts(prev => prev.map(p => {
         if (p.id === productId) {
-          return { ...p, status: newStatus, stock: newStock, inStock: newStatus === 'active' };
+          return { ...p, status: newStatus, dbStatus, stock: newStock, inStock: newStatus === 'active' };
         }
         return p;
       }));
@@ -437,6 +469,15 @@ export default function VendorProductsPage() {
                                     className="w-full px-3 py-2 border rounded-lg focus:border-leaf-green focus:outline-none"
                                     placeholder="/images/vendors/..."
                                   />
+                                  <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={(e) => uploadEditProductImages(e.target.files).catch((err) => alert(err.message || 'Failed to upload image'))}
+                                    className="mt-2 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#478c0b] file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[#3b7309]"
+                                  />
+                                  {imageUploading && (
+                                    <p className="mt-1 text-xs text-gray-500">Uploading image...</p>
+                                  )}
                                 </div>
                                 
                                 <div>

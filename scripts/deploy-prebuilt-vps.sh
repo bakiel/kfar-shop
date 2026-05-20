@@ -85,6 +85,7 @@ const clonedApps = apps.map((app) => {
       NODE_ENV: 'production',
       HOSTNAME: '0.0.0.0',
       PORT: String(port),
+      KFAR_UPLOAD_DIR: (app.env && app.env.KFAR_UPLOAD_DIR) || '/opt/kfar-uploads',
     },
   };
 
@@ -96,6 +97,7 @@ fs.writeFileSync(targetPath, `module.exports = ${JSON.stringify({ apps: clonedAp
 NODE
 
 ln -sfn "$release_dir" "$VPS_CURRENT_LINK"
+mkdir -p /opt/kfar-uploads/vendor-products
 
 if pm2 describe kfar >/dev/null 2>&1; then
   pm2 delete kfar

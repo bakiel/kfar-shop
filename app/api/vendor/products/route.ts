@@ -3,6 +3,11 @@ import { verifyAccessToken } from '@/lib/services/auth-service';
 import { query } from '@/lib/db/postgres-client';
 import { invalidateProductFeedCache } from '@/lib/services/live-product-feed';
 import { invalidateVendorFeedCache } from '@/lib/services/live-vendor-feed';
+import {
+  getVendorDisplayName,
+  notifyActiveCustomers,
+  notifyVendorOwners,
+} from '@/lib/services/account-notification-events.server';
 
 function getUser(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -36,6 +41,51 @@ function normalizeVendorProduct(row: any) {
 function invalidateLiveFeedCaches() {
   invalidateProductFeedCache();
   invalidateVendorFeedCache();
+}
+
+function isLiveProductStatus(status?: string | null) {
+  return status === 'published' || status === 'active';
+}
+
+async function sendProductCreatedNotifications(vendorId: string, product: any) {
+  try {
+    const isLive = isLiveProductStatus(product.status);
+
+    await notifyVendorOwners(vendorId, {
+      type: 'product',
+      channel: 'in_app',
+      title: isLive ? 'Product published' : 'Product saved as draft',
+      titleHe: isLive ? 'המוצר פורסם' : 'המוצר נשמר כטיוטה',
+      message: `${product.name} was ${isLive ? 'published to the marketplace' : 'saved in your product list'}.`,
+      messageHe: `${product.name} ${isLive ? 'פורסם בשוק' : 'נשמר ברשימת המוצרים שלך'}.`,
+      data: {
+        productId: product.id,
+        vendorId,
+        actionUrl: '/vendor/admin/products',
+        actionLabel: 'Manage products',
+      },
+    });
+
+    if (isLive) {
+      const vendorName = await getVendorDisplayName(vendorId);
+      notifyActiveCustomers({
+        type: 'product',
+        channel: 'in_app',
+        title: `New product from ${vendorName}`,
+        titleHe: `מוצר חדש מאת ${vendorName}`,
+        message: `${product.name} is now available in KFAR Marketplace.`,
+        messageHe: `${product.name} זמין כעת בשוק כפר.`,
+        data: {
+          productId: product.id,
+          vendorId,
+          actionUrl: `/product/${product.id}`,
+          actionLabel: 'View product',
+        },
+      }).catch(error => console.error('Customer product notification fanout failed:', error));
+    }
+  } catch (error) {
+    console.error('Product notification dispatch failed:', error);
+  }
 }
 
 // GET - Retrieve products for authenticated vendor
@@ -186,6 +236,7 @@ export async function POST(request: NextRequest) {
     );
 
     invalidateLiveFeedCaches();
+    await sendProductCreatedNotifications(user.vendorId, rows[0]);
 
     return NextResponse.json({
       success: true,

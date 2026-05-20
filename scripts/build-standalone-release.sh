@@ -68,6 +68,30 @@ mkdir -p "$RELEASE_ROOT/public"
 cp -R public/. "$RELEASE_ROOT/public/"
 git rev-parse HEAD > "$RELEASE_ROOT/REVISION"
 
+if [[ -n "$NPM_BIN" ]]; then
+  SHARP_VERSION="$("$NODE_BIN" - <<'NODE'
+const lock = require('./package-lock.json');
+process.stdout.write(lock.packages?.['node_modules/sharp']?.version || '0.34.5');
+NODE
+  )"
+  SHARP_LIBVIPS_VERSION="$("$NODE_BIN" - <<'NODE'
+const lock = require('./package-lock.json');
+process.stdout.write(lock.packages?.['node_modules/@img/sharp-libvips-linux-x64']?.version || '1.2.4');
+NODE
+  )"
+  SHARP_RUNTIME_DIR="$DEPLOY_DIR/sharp-linux-runtime"
+  echo "[build-release] Installing Linux sharp runtime for VPS uploads..."
+  rm -rf "$SHARP_RUNTIME_DIR"
+  mkdir -p "$SHARP_RUNTIME_DIR"
+  printf '{"private":true}\n' > "$SHARP_RUNTIME_DIR/package.json"
+  "$NPM_BIN" install --prefix "$SHARP_RUNTIME_DIR" --no-save --no-package-lock --no-audit --no-fund --force \
+    "@img/sharp-linux-x64@${SHARP_VERSION}" \
+    "@img/sharp-libvips-linux-x64@${SHARP_LIBVIPS_VERSION}"
+  mkdir -p "$RELEASE_ROOT/node_modules/@img"
+  cp -R "$SHARP_RUNTIME_DIR/node_modules/@img/sharp-linux-x64" "$RELEASE_ROOT/node_modules/@img/"
+  cp -R "$SHARP_RUNTIME_DIR/node_modules/@img/sharp-libvips-linux-x64" "$RELEASE_ROOT/node_modules/@img/"
+fi
+
 ARTIFACT_SHA="$(git rev-parse --short HEAD)"
 ARTIFACT_NAME="kfar-release-${ARTIFACT_SHA}.tar.gz"
 ARTIFACT_PATH="$DEPLOY_DIR/$ARTIFACT_NAME"

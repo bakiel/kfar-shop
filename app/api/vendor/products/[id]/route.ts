@@ -3,6 +3,11 @@ import { verifyAccessToken } from '@/lib/services/auth-service';
 import { query } from '@/lib/db/postgres-client';
 import { invalidateProductFeedCache } from '@/lib/services/live-product-feed';
 import { invalidateVendorFeedCache } from '@/lib/services/live-vendor-feed';
+import {
+  getVendorDisplayName,
+  notifyActiveCustomers,
+  notifyVendorOwners,
+} from '@/lib/services/account-notification-events.server';
 
 function getUser(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -33,11 +38,85 @@ function invalidateLiveFeedCaches() {
 // Helper to verify product ownership
 async function verifyProductOwnership(productId: string, vendorId: string) {
   const { rows } = await query(
-    'SELECT id, vendor_id FROM products WHERE id = $1',
+    'SELECT id, vendor_id, name, status FROM products WHERE id = $1',
     [productId]
   );
-  if (rows.length === 0) return { exists: false, owned: false };
-  return { exists: true, owned: rows[0].vendor_id === vendorId };
+  if (rows.length === 0) return { exists: false, owned: false, product: null };
+  return { exists: true, owned: rows[0].vendor_id === vendorId, product: rows[0] };
+}
+
+function isLiveProductStatus(status?: string | null) {
+  return status === 'published' || status === 'active';
+}
+
+async function sendProductUpdatedNotifications(vendorId: string, previousProduct: any, product: any) {
+  try {
+    const wasLive = isLiveProductStatus(previousProduct?.status);
+    const isLive = isLiveProductStatus(product.status);
+    const statusChanged = previousProduct?.status && previousProduct.status !== product.status;
+
+    await notifyVendorOwners(vendorId, {
+      type: 'product',
+      channel: 'in_app',
+      title: statusChanged ? 'Product status updated' : 'Product updated',
+      titleHe: statusChanged ? 'סטטוס המוצר עודכן' : 'המוצר עודכן',
+      message: statusChanged
+        ? `${product.name} is now ${product.status}.`
+        : `${product.name} was updated successfully.`,
+      messageHe: statusChanged
+        ? `${product.name} כעת בסטטוס ${product.status}.`
+        : `${product.name} עודכן בהצלחה.`,
+      data: {
+        productId: product.id,
+        vendorId,
+        previousStatus: previousProduct?.status,
+        status: product.status,
+        actionUrl: '/vendor/admin/products',
+        actionLabel: 'Manage products',
+      },
+    });
+
+    if (!wasLive && isLive) {
+      const vendorName = await getVendorDisplayName(vendorId);
+      notifyActiveCustomers({
+        type: 'product',
+        channel: 'in_app',
+        title: `New product from ${vendorName}`,
+        titleHe: `מוצר חדש מאת ${vendorName}`,
+        message: `${product.name} is now available in KFAR Marketplace.`,
+        messageHe: `${product.name} זמין כעת בשוק כפר.`,
+        data: {
+          productId: product.id,
+          vendorId,
+          actionUrl: `/product/${product.id}`,
+          actionLabel: 'View product',
+        },
+      }).catch(error => console.error('Customer product notification fanout failed:', error));
+    }
+  } catch (error) {
+    console.error('Product update notification dispatch failed:', error);
+  }
+}
+
+async function sendProductArchivedNotification(vendorId: string, product: any) {
+  try {
+    await notifyVendorOwners(vendorId, {
+      type: 'product',
+      channel: 'in_app',
+      title: 'Product archived',
+      titleHe: 'המוצר הועבר לארכיון',
+      message: `${product.name} was removed from the live marketplace.`,
+      messageHe: `${product.name} הוסר מהשוק הפעיל.`,
+      data: {
+        productId: product.id,
+        vendorId,
+        actionUrl: '/vendor/admin/products',
+        actionLabel: 'Manage products',
+      },
+    });
+  } catch (error) {
+    console.error('Product archive notification dispatch failed:', error);
+  }
 }
 
 // GET - Retrieve a single product
@@ -187,6 +266,7 @@ export async function PUT(
     );
 
     invalidateLiveFeedCaches();
+    await sendProductUpdatedNotifications(user.vendorId, ownership.product, rows[0]);
 
     return NextResponse.json({
       success: true,
@@ -245,6 +325,7 @@ export async function DELETE(
     );
 
     invalidateLiveFeedCaches();
+    await sendProductArchivedNotification(user.vendorId, rows[0]);
 
     return NextResponse.json({
       success: true,
