@@ -16,6 +16,7 @@ export default function CheckoutPage() {
   const { accessToken } = useAuth();
 
   const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
 
   const total = getCartTotal();
   const canSubmit = fullName.trim().length >= 2
+    && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
     && address.trim().length >= 5
     && phone.trim().length >= 7
     && items.length > 0
@@ -59,6 +61,7 @@ export default function CheckoutPage() {
           currency: 'ILS',
           customer: {
             fullName: fullName.trim(),
+            email: email.trim().toLowerCase(),
             phone: phone.trim(),
             address: address.trim(),
           },
@@ -202,6 +205,23 @@ export default function CheckoutPage() {
                 required
                 className="w-full py-3 px-4 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
                 placeholder={isRTL ? 'לדוגמה, ישראל ישראלי' : 'e.g. Dawid Israel'}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2">
+                {isRTL ? 'אימייל לאישור הזמנה' : 'Email for order confirmation'}
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                spellCheck={false}
+                required
+                className="w-full py-3 px-4 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
+                placeholder={isRTL ? 'לדוגמה, name@example.com' : 'e.g. customer@example.com'}
               />
             </div>
 
