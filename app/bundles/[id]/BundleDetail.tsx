@@ -714,13 +714,18 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
 /* ================================================================ */
 
 function AnimatedPrice({ price, inView }: { price: number; inView: boolean }) {
-  const [displayPrice, setDisplayPrice] = useState(0);
+  const [displayPrice, setDisplayPrice] = useState(price);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView) {
+      setDisplayPrice(price);
+      return;
+    }
+
     const target = price;
     const duration = 800;
     const startTime = Date.now();
+    setDisplayPrice(0);
 
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;
