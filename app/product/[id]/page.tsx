@@ -443,7 +443,7 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        <div className={`${isMobile ? '' : 'container mx-auto px-4'} pb-8`}>
+        <div className={isMobile ? 'pb-56' : 'container mx-auto px-4 pb-8'}>
           <div className={`${isMobile ? '' : 'grid lg:grid-cols-3 gap-8'}`}>
             {/* Main Content */}
             <div className={`${isMobile ? '' : 'lg:col-span-2'}`}>

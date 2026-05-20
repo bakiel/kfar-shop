@@ -156,8 +156,8 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
   const typeInfo = getTypeInfo();
 
   return (
-    <div className="inline-block">
-      <div className="bg-white rounded-lg shadow-md p-4 relative">
+    <div className="inline-flex flex-col items-center">
+      <div className="bg-white rounded-lg shadow-md p-4">
         {/* QR Code Container */}
         <div className="relative" style={{ width: size, height: size }}>
           {loading ? (
@@ -176,20 +176,19 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
             />
           ) : null}
         </div>
+      </div>
 
-        {/* Type Badge - Bottom Center */}
-        <div 
-          className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium text-white shadow-md"
-          style={{ backgroundColor: typeInfo.color }}
-        >
-          <span className="mr-1">{typeInfo.icon}</span>
-          {typeInfo.label}
-        </div>
+      <div
+        className="mt-3 mx-auto flex w-fit items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-white shadow-md"
+        style={{ backgroundColor: typeInfo.color }}
+      >
+        {typeInfo.icon}
+        <span>{typeInfo.label}</span>
       </div>
 
       {/* Action Buttons - Below QR Container */}
       {!hideActions && !loading && !error && (
-        <div className="flex justify-center gap-2 mt-6">
+        <div className="flex justify-center gap-2 mt-4">
           <button
             type="button"
             onClick={downloadQR}
