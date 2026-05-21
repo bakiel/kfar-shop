@@ -63,6 +63,19 @@ interface OrderCreateBody {
 // For orders with YPAY payment, use /api/payment/create instead.
 // ---------------------------------------------------------------------------
 
+function generateOrderNumber() {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const seq = Math.floor(Math.random() * 9000) + 1000;
+  return `KFAR-${dateStr}-${seq}`;
+}
+
+function isOrderNumberCollision(error: unknown) {
+  const err = error as { code?: string; constraint?: string; message?: string };
+  return err?.code === '23505'
+    && String(err.constraint || err.message || '').toLowerCase().includes('order');
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limit order creation
@@ -158,12 +171,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate order number: KFAR-YYYYMMDD-XXXX
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-    const seq = Math.floor(Math.random() * 9000) + 1000;
-    const orderNumber = `KFAR-${dateStr}-${seq}`;
-
     const customerName = fullName;
     // Synthesize a placeholder email when the customer didn't provide one.
     // Keeps downstream (vendor_emails, audit, etc) consistent with a non-null
@@ -190,37 +197,49 @@ export async function POST(request: NextRequest) {
     // Derive primary vendor_id from items (first vendor found)
     const primaryVendorId = normalizedItems.find((item) => item.vendorId)?.vendorId || null;
 
-    // Create order (columns match actual DB schema)
-    const { rows: orderRows } = await query(
-      `INSERT INTO orders (
-        order_number, customer_name, customer_email, customer_phone,
-        total, subtotal, delivery_fee, payment_method,
-        status, payment_status,
-        delivery_address, items, delivery_notes,
-        vendor_id, customer_id,
-        created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
-      RETURNING *`,
-      [
-        orderNumber,
-        customerName,
-        customerEmail,
-        body.customer.phone || null,
-        quote.total,
-        quote.subtotal,
-        quote.deliveryFee,
-        paymentMethod,
-        'pending',
-        'pending',
-        addressJson,
-        JSON.stringify(normalizedItems),
-        body.notes || null,
-        primaryVendorId,
-        customerId,
-      ]
-    );
+    let orderNumber = '';
+    let order: any = null;
 
-    const order = orderRows[0];
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      orderNumber = generateOrderNumber();
+      try {
+        const { rows: orderRows } = await query(
+          `INSERT INTO orders (
+            order_number, customer_name, customer_email, customer_phone,
+            total, subtotal, delivery_fee, payment_method,
+            status, payment_status,
+            delivery_address, items, delivery_notes,
+            vendor_id, customer_id,
+            created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+          RETURNING *`,
+          [
+            orderNumber,
+            customerName,
+            customerEmail,
+            body.customer.phone || null,
+            quote.total,
+            quote.subtotal,
+            quote.deliveryFee,
+            paymentMethod,
+            'pending',
+            'pending',
+            addressJson,
+            JSON.stringify(normalizedItems),
+            body.notes || null,
+            primaryVendorId,
+            customerId,
+          ]
+        );
+        order = orderRows[0];
+        break;
+      } catch (error) {
+        if (isOrderNumberCollision(error) && attempt < 4) {
+          continue;
+        }
+        throw error;
+      }
+    }
 
     if (!order) {
       return NextResponse.json(
