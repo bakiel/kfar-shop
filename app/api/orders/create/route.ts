@@ -296,7 +296,7 @@ export async function POST(request: NextRequest) {
           currency: body.currency || 'ILS',
           payment_method: 'Cash on Delivery',
           delivery_method: body.deliveryMethod || 'Pickup',
-          tracking_url: `${(process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com').replace(/\/$/, '')}/customer/orders/${order.id}`,
+          tracking_url: `${(process.env.NEXT_PUBLIC_APP_URL || "https://kfarapp.com").replace(/\/$/, '')}/customer/orders/${order.id}`,
         }).catch(err => console.error('Failed to send order confirmation email:', err))
       );
     }
@@ -340,7 +340,7 @@ export async function POST(request: NextRequest) {
             items_html: vendorTable,
             total: vendorItems.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2),
             currency: body.currency || 'ILS',
-            dashboard_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com'}/vendor/orders`,
+            dashboard_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://kfarapp.com"}/vendor/orders`,
           }).catch(err => console.error('Failed to send vendor notification email:', err))
         );
       }

@@ -97,7 +97,7 @@ export async function PATCH(
         status_he: statusLabels[status] || status,
         status_message: '',
         status_message_he: '',
-        tracking_url: `${(process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com').replace(/\/$/, '')}/customer/orders/${order.id}`,
+        tracking_url: `${(process.env.NEXT_PUBLIC_APP_URL || "https://kfarapp.com").replace(/\/$/, '')}/customer/orders/${order.id}`,
       }).catch(err => console.error('Failed to send vendor status email:', err));
     }
 
