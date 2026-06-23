@@ -11,7 +11,6 @@ import {
   Store, Heart, Share2, Phone, Mail, ExternalLink, Leaf, X
 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import { vendorStores, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
 import { useCart } from '@/lib/context/CartContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import type { Product, Vendor } from '@/lib/types/products';
@@ -57,133 +56,93 @@ export default function VendorStorePage() {
     try {
       setLoading(true);
 
-      // Debug logging
-      console.log('🔍 Fetching vendor data for:', vendorId);
-      console.log('🔍 Available vendors:', Object.keys(vendorStores));
-
-      // Get vendor details from our data
-      const vendorStore = vendorStores[vendorId];
-      console.log('🔍 Vendor store found:', !!vendorStore);
-      console.log('🔍 Vendor products count:', vendorStore?.products?.length || 0);
-
-      if (!vendorStore) {
+      const response = await fetch(`/api/vendors/${vendorId}`, { cache: 'no-store' });
+      if (!response.ok) {
         console.error('Vendor not found:', vendorId);
         setLoading(false);
         return;
       }
-      
-      // Set vendor data with correct banner mappings (vision-verified)
-      const vendorBanners: Record<string, string> = {
-        'teva-deli': '/images/vendor-banners/5.jpg',        // Plant-Based Protein products
-        'garden-of-light': '/images/vendor-banners/2.jpg',  // Vegan deli containers with sun logo
-        'queens-cuisine': '/images/vendor-banners/6.jpg',   // Queen's Cuisine prepared meals
-        'people-store': '/images/vendor-banners/4.jpg',     // Community store with multiple brands
-        'vop-shop': '/images/vendor-banners/3.jpg',         // T-shirts, mugs "Wear the Message"
-        'gahn-delight': '/images/vendor-banners/1.jpg'      // Ice cream with "NATURALLY INSPIRED"
-      };
-      
-      // Enhanced vendor data with additional information
-      const vendorDetails: Record<string, any> = {
-        'teva-deli': {
-          founded: '1986',
-          specialty: 'Vegan Deli Products',
-          location: 'Tel Aviv, Israel',
-          kashrut: 'Badatz Mehadrin',
-          highlights: ['Family-Owned Since 1986', 'Traditional Israeli Flavors', '100% Plant-Based', 'Kosher Certified'],
-          deliveryTime: '1-2 days',
-          minimumOrder: 150,
-          yearsInBusiness: 38
-        },
-        'garden-of-light': {
-          founded: '2018',
-          specialty: 'Mediterranean Vegan Cuisine',
-          location: 'Jerusalem, Israel',
-          kashrut: 'Badatz Jerusalem',
-          highlights: ['Fresh Daily Preparation', 'Organic Ingredients', 'Traditional Recipes', 'Gluten-Free Options'],
-          deliveryTime: '2-3 days',
-          minimumOrder: 200,
-          yearsInBusiness: 6
-        },
-        'queens-cuisine': {
-          founded: '2020',
-          specialty: 'Gourmet Plant-Based Meals',
-          location: 'Haifa, Israel',
-          kashrut: 'Rabbanut Haifa',
-          highlights: ['Chef-Crafted Meals', 'Meal Prep Solutions', 'International Flavors', 'Protein-Rich Options'],
-          deliveryTime: '1-2 days',
-          minimumOrder: 180,
-          yearsInBusiness: 4
-        },
-        'people-store': {
-          founded: '1975',
-          specialty: 'Natural & Organic Products',
-          location: 'Multiple Locations',
-          kashrut: 'Various Certifications',
-          highlights: ['Community Co-op', 'Local Suppliers', 'Bulk Options', 'Zero-Waste Focus'],
-          deliveryTime: 'Same day',
-          minimumOrder: 100,
-          yearsInBusiness: 49
-        },
-        'vop-shop': {
-          founded: '1969',
-          specialty: 'Community Wellness Products',
-          location: 'Dimona, Israel',
-          kashrut: 'Community Certified',
-          highlights: ['50+ Years Heritage', 'Community Made', 'Holistic Wellness', 'Cultural Preservation'],
-          deliveryTime: '3-5 days',
-          minimumOrder: 200,
-          yearsInBusiness: 55
-        },
-        'gahn-delight': {
-          founded: '2015',
-          specialty: 'Artisanal Vegan Ice Cream',
-          location: 'Beer Sheva, Israel',
-          kashrut: 'Badatz Beer Sheva',
-          highlights: ['Natural Ingredients', 'Unique Flavors', 'Sugar-Free Options', 'Allergen-Friendly'],
-          deliveryTime: '2-3 days',
-          minimumOrder: 120,
-          yearsInBusiness: 9
-        }
-      };
-      
-      const details = vendorDetails[vendorId] || {};
-      
+
+      const vendorStore = await response.json();
+      if (!vendorStore) {
+        setLoading(false);
+        return;
+      }
+
+      const liveProducts: Product[] = (vendorStore.products || []).map((product: any) => ({
+        id: String(product.id),
+        name: product.name || '',
+        nameHe: product.nameHe || product.name_he,
+        description: product.description || '',
+        price: Number(product.price) || 0,
+        originalPrice: product.originalPrice ?? product.original_price,
+        image: product.image || product.images?.[0] || '/images/placeholder-product.jpg',
+        images: product.images || [],
+        category: product.category || 'general',
+        vendor: vendorStore.name,
+        vendorId: vendorStore.id,
+        inStock: product.inStock !== false,
+        unit: product.unit || 'unit',
+        minimumOrder: product.minimumOrder || 1,
+        rating: product.rating || 4.5,
+        reviewCount: product.reviewCount || 0,
+        badge: product.badge,
+        kosher: Boolean(product.kashrut),
+        vegan: product.vegan !== false,
+        organic: product.organic === true,
+        glutenFree: product.glutenFree === true,
+        tags: product.tags || [],
+        specifications: Array.isArray(product.specifications)
+          ? Object.fromEntries(product.specifications.map((item: any) => [item.label, item.value]))
+          : product.specifications || {},
+        nutritionalInfo: product.nutritionalInfo || undefined,
+        allergens: product.allergens || [],
+        ingredients: product.ingredients || [],
+      }));
+
+      const metadata = vendorStore.metadata || {};
+      const categories = Array.from(new Set([
+        ...(vendorStore.categories || []),
+        ...liveProducts.map(product => product.category),
+      ].filter(Boolean)));
+      const establishedYear = metadata.established ? Number(metadata.established) : null;
+
       setVendor({
         id: vendorId,
         name: vendorStore.name,
         logo: vendorStore.logo,
-        banner: vendorBanners[vendorId] || '/images/vendor-banners/1.jpg',
+        banner: vendorStore.banner || '/images/default-store-banner.svg',
         description: vendorStore.description,
         rating: vendorStore.rating || 4.5,
-        reviewCount: vendorStore.products.length * 3, // Estimated reviews
-        categories: [...new Set(vendorStore.products.map(p => p.category))],
-        tags: vendorStore.tags || [],
-        verified: true,
-        ...details,
-        totalProducts: vendorStore.products.length,
-        phone: '+972-50-123-4567',
-        email: `info@${vendorId}.co.il`,
-        address: details.location,
-        businessHours: 'Sunday-Thursday: 9:00 AM - 6:00 PM\nFriday: 9:00 AM - 2:00 PM',
-        deliveryPolicy: 'Free delivery on orders above ₪' + details.minimumOrder + '. Standard delivery fees apply for smaller orders.',
+        reviewCount: vendorStore.totalReviews || 0,
+        categories,
+        tags: vendorStore.categories || [],
+        verified: vendorStore.verified !== false,
+        founded: metadata.established,
+        specialty: vendorStore.category || categories[0],
+        location: metadata.location,
+        kashrut: metadata.certifications?.[0],
+        highlights: metadata.highlights || categories.slice(0, 4),
+        deliveryTime: metadata.preparationTime || '1-2 days',
+        minimumOrder: Number(metadata.minimumOrder) || 0,
+        yearsInBusiness: establishedYear ? new Date().getFullYear() - establishedYear : undefined,
+        totalProducts: liveProducts.length,
+        phone: metadata.phone || '',
+        email: metadata.email || '',
+        address: metadata.location,
+        businessHours: metadata.businessHours || '',
+        deliveryPolicy: Number(metadata.minimumOrder)
+          ? 'Free delivery on orders above ₪' + metadata.minimumOrder + '. Standard delivery fees apply for smaller orders.'
+          : 'Standard delivery fees apply.',
         returnPolicy: '30-day satisfaction guarantee. Full refund for unopened items.',
-        promotions: [
-          {
-            title: 'New Customer Special',
-            description: 'Get 10% off your first order with code WELCOME10'
-          }
-        ]
+        promotions: metadata.promotions || []
       });
       
-      // Get vendor products
-      let vendorProducts = getProductsByVendor(vendorId);
-      console.log('🔍 Products from getProductsByVendor:', vendorProducts.length);
-      console.log('🔍 First 3 products:', vendorProducts.slice(0, 3).map(p => p.name));
+      let vendorProducts = [...liveProducts];
 
       // Filter by category
       if (selectedCategory !== 'all') {
         vendorProducts = vendorProducts.filter(p => p.category === selectedCategory);
-        console.log('🔍 Products after category filter:', vendorProducts.length);
       }
 
       // Sort products
@@ -195,7 +154,6 @@ export default function VendorStorePage() {
         vendorProducts.sort((a, b) => a.name.localeCompare(b.name));
       }
 
-      console.log('🔍 Setting products state with', vendorProducts.length, 'products');
       setProducts(vendorProducts);
     } catch (error) {
       console.error('Error fetching vendor data:', error);
@@ -274,7 +232,7 @@ export default function VendorStorePage() {
   }
 
   // Get unique categories from products
-  const categories = Array.from(new Set(products.flatMap(p => p.categories || [])));
+  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
 
   return (
     <Layout>
@@ -349,7 +307,7 @@ export default function VendorStorePage() {
                         className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-5 py-3 rounded-full border border-white/20"
                       >
                         <Star className="w-5 h-5 stroke-[1.5]" fill="#f6af0d" stroke="#f6af0d" />
-                        <span className="font-bold text-lg">{vendor.rating.toFixed(1)}</span>
+                        <span className="font-bold text-lg">{(vendor.rating ?? 0).toFixed(1)}</span>
                         <span className="opacity-90">({vendor.reviewCount} reviews)</span>
                       </motion.div>
                       <motion.div
@@ -499,8 +457,14 @@ export default function VendorStorePage() {
               <div className="absolute inset-0 opacity-10 cultural-pattern"></div>
               <div className="relative flex items-center justify-between">
                 <div>
-                  <h3 className="text-h2 mb-2">🎉 {vendor.promotions[0].title}</h3>
-                  <p className="text-body-lg opacity-90">{vendor.promotions[0].description}</p>
+                  <h3 className="text-h2 mb-2">
+                    🎉 {typeof vendor.promotions[0] === 'string'
+                      ? vendor.promotions[0]
+                      : vendor.promotions[0].title}
+                  </h3>
+                  {typeof vendor.promotions[0] !== 'string' && vendor.promotions[0].description && (
+                    <p className="text-body-lg opacity-90">{vendor.promotions[0].description}</p>
+                  )}
                 </div>
                 <Gift className="w-10 h-10 opacity-50 stroke-[1.5]" />
               </div>
@@ -823,7 +787,9 @@ export default function VendorStorePage() {
                   <div className="p-4 rounded-lg border-l-4 kfar-bg-cream kfar-border-earth-flame">
                     <h4 className="text-h6 mb-2">Business Hours</h4>
                     <p className="text-body-sm kfar-text-gray-600">
-                      {vendor.businessHours || 'Sunday-Thursday: 9:00 AM - 6:00 PM\nFriday: 9:00 AM - 2:00 PM'}
+                      {typeof vendor.businessHours === 'string'
+                        ? vendor.businessHours
+                        : 'Sunday-Thursday: 9:00 AM - 6:00 PM\nFriday: 9:00 AM - 2:00 PM'}
                     </p>
                   </div>
                 </div>

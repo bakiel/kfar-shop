@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Package } from 'lucide-react';
 import BulkProductImport from '@/components/vendor/BulkProductImport';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface ProductRow {
   name: string;
@@ -24,58 +25,77 @@ interface ProductRow {
 export default function BulkImportPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const vendorId = searchParams.get('vendorId') || 'demo-vendor';
+  const { user, accessToken, isLoading: authLoading } = useAuth();
+  const vendorId = user?.vendorId || searchParams.get('vendorId') || '';
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const listFromCsv = (value?: string) =>
+    (value || '')
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean);
 
   const handleImportComplete = async (products: ProductRow[]) => {
     setIsProcessing(true);
     
     try {
-      // In a real app, this would call an API to save products
-      console.log('Importing products:', products);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In production, this would save to PostgreSQL database
-      // For now, we'll save to localStorage and prepare for API integration
-      const existingProducts = JSON.parse(localStorage.getItem(`vendor_${vendorId}_products`) || '[]');
-      const newProducts = products.map((product, index) => ({
-        id: `${vendorId}-bulk-${Date.now()}-${index}`,
-        vendorId,
-        ...product,
-        isVegan: true, // VOP compliance
-        isKosher: true, // VOP compliance
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-      
-      // Store locally for demo
-      localStorage.setItem(
-        `vendor_${vendorId}_products`,
-        JSON.stringify([...existingProducts, ...newProducts])
-      );
-      
-      // TODO: When database is ready, use this API call:
-      // await fetch('/api/vendor/products/bulk-import', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ vendorId, products: newProducts })
-      // });
+      if (!accessToken || !vendorId) {
+        throw new Error('Vendor session expired. Please log in again.');
+      }
+
+      for (const product of products) {
+        const dietary = listFromCsv(product.dietaryInfo).map(item => item.toLowerCase());
+        const response = await fetch('/api/vendor/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+          body: JSON.stringify({
+            name: product.name,
+            name_he: product.nameHe || null,
+            description: product.description || null,
+            description_he: product.descriptionHe || null,
+            price: product.price,
+            category: product.category,
+            stock_quantity: product.inStock ? 100 : 0,
+            unit: product.servingSize || 'unit',
+            image_url: product.imageUrl || null,
+            image_gallery: product.imageUrl ? [product.imageUrl] : [],
+            ingredients: listFromCsv(product.ingredients),
+            tags: listFromCsv(product.dietaryInfo),
+            is_vegan: dietary.includes('vegan') || true,
+            is_kosher: true,
+            is_organic: dietary.includes('organic'),
+            is_gluten_free: dietary.includes('gluten-free') || dietary.includes('gluten free'),
+            status: product.inStock ? 'published' : 'draft',
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || `Failed to import ${product.name}`);
+        }
+      }
       
       // Redirect to products page
-      router.push(`/vendor/products?vendorId=${vendorId}&imported=${products.length}`);
+      router.push(`/vendor/admin/products?imported=${products.length}`);
     } catch (error) {
       console.error('Error importing products:', error);
-      alert('Failed to import products. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to import products. Please try again.');
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleCancel = () => {
-    router.push(`/vendor/products?vendorId=${vendorId}`);
+    router.push('/vendor/admin/products');
   };
+
+  if (authLoading || !vendorId) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[#478c0b] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -85,7 +105,7 @@ export default function BulkImportPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
-                href={`/vendor/products?vendorId=${vendorId}`}
+                href="/vendor/admin/products"
                 className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />

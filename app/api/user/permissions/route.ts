@@ -5,7 +5,7 @@ import { verifyAccessToken } from '@/lib/services/auth-service'
 export async function GET(request: NextRequest) {
   try {
     // Get auth token from cookies
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const token = cookieStore.get('auth-token')
 
     if (!token) {

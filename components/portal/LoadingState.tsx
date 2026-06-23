@@ -7,6 +7,7 @@ interface LoadingStateProps {
   type?: 'cards' | 'table' | 'page';
   count?: number;
   className?: string;
+  message?: string;
 }
 
 function ShimmerBar({ className }: { className?: string }) {
@@ -74,9 +75,10 @@ function PageSkeleton() {
   );
 }
 
-export default function LoadingState({ type = 'page', count = 4, className }: LoadingStateProps) {
+export default function LoadingState({ type = 'page', count = 4, className, message }: LoadingStateProps) {
   return (
     <div className={cn('', className)}>
+      {message && <p className="sr-only">{message}</p>}
       {type === 'cards' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({ length: count }).map((_, i) => (

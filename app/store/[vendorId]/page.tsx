@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
-import { completeProductCatalog } from '@/lib/data/complete-catalog';
 import VendorStorePage from '@/components/vendor/VendorStorePage';
 import Layout from '@/components/layout/Layout';
-import { Product } from '@/lib/data/products';
+import type { Product } from '@/lib/types/products';
+import { getVendorById } from '@/lib/services/live-vendor-feed';
 
 interface PageProps {
   params: Promise<{
@@ -152,62 +152,9 @@ const vendorConfigs = {
 
 export default async function StorePage({ params }: PageProps) {
   const { vendorId } = await params;
-  
-  // First, try to get from static catalog
-  let vendorStore = completeProductCatalog[vendorId];
-  let vendorData: any = null;
-  
-  // If not in static catalog, check if it's a dynamic vendor (from onboarding)
-  if (!vendorStore) {
-    try {
-      // Try to get from localStorage (for newly onboarded vendors)
-      // Note: This is a temporary solution. In production, we'd fetch from database
-      const storedData = typeof window !== 'undefined' 
-        ? localStorage.getItem(`vendor_${vendorId}`)
-        : null;
-        
-      if (storedData) {
-        const parsedData = JSON.parse(storedData);
-        vendorStore = {
-          id: vendorId,
-          name: parsedData.storeName,
-          description: parsedData.description,
-          logo: parsedData.logo,
-          banner: parsedData.banner,
-          products: parsedData.products || [],
-          categories: [parsedData.category],
-          metadata: {
-            established: new Date().getFullYear().toString(),
-            location: parsedData.address || 'Dimona, Israel',
-            specialty: parsedData.category
-          }
-        };
-      } else {
-        // For server-side rendering, we'll need to fetch from API
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 
-          (process.env.NODE_ENV === 'production' ? 'https://kfarapp.com' : 'http://localhost:3001');
-        const response = await fetch(`${apiUrl}/api/vendor/${vendorId}`, {
-          cache: 'no-store'
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          vendorStore = data.vendor;
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching dynamic vendor:', error);
-    }
-  }
-  
-  // Debug logging
-  console.log('StorePage Debug:', {
-    vendorId,
-    vendorStoreFound: !!vendorStore,
-    vendorKeys: vendorStore ? Object.keys(vendorStore) : [],
-    productCount: vendorStore?.products?.length || 0
-  });
-  
+
+  const vendorStore = await getVendorById(vendorId, true);
+
   if (!vendorStore) {
     notFound();
   }
@@ -216,8 +163,8 @@ export default async function StorePage({ params }: PageProps) {
   const vendor = {
     id: vendorStore.id,
     name: vendorStore.name,
-    nameHe: vendorStore.name, // Can be enhanced later
-    products: vendorStore.products,
+    nameHe: vendorStore.nameHe || vendorStore.name,
+    products: vendorStore.products || [],
     description: vendorStore.description,
     logo: vendorStore.logo,
     banner: vendorStore.banner,
@@ -233,13 +180,13 @@ export default async function StorePage({ params }: PageProps) {
     description: p.description,
     descriptionHe: p.descriptionHe || p.description,
     price: p.price,
-    originalPrice: p.originalPrice,
+    originalPrice: p.originalPrice || undefined,
     image: p.image,
     category: p.category || 'general',
     vendor: vendor.name,
     vendorId: vendor.id,
     inStock: p.inStock !== false,
-    isNew: p.isNew || false,
+    isNew: false,
     isFeatured: p.isFeatured || false,
     tags: p.tags || [],
     kashrut: p.kashrut || 'badatz',
@@ -249,21 +196,7 @@ export default async function StorePage({ params }: PageProps) {
     sugarFree: p.sugarFree || false
   }));
 
-  // Map vendor logos to correct paths
-  const getVendorLogo = (vendorId: string) => {
-    const logoMap: { [key: string]: string } = {
-      'teva-deli': '/images/teva-deli/teva_deli_official_logo_master_brand_israeli_vegan_food_company.jpg',
-      'queens-cuisine': '/images/queens-cuisine/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg',
-      'gahn-delight': '/images/gahn-delight/gahn_delight_official_logo_master_brand_ice_cream.jpg',
-      'atur-avior': '/images/garden-of-light/garden_of_light_official_logo_master_brand_organic_vegan_deli.jpg',
-      'garden-of-light': '/images/garden-of-light/garden_of_light_official_logo_master_brand_organic_vegan_deli.jpg',
-      'people-store': '/images/people-store/peoples_store_official_logo_master_brand_community_market.jpg',
-      'vop-shop': '/images/vop-shop/vop_shop_official_logo_master_brand_village_of_peace.jpg'
-    };
-    return logoMap[vendorId] || logoMap['garden-of-light'];
-  };
-
-    // Merge vendor data with extended configurations
+  // Merge vendor data with extended configurations
   const mergedVendorData = {
     ...vendor,
     businessName: vendor.name,

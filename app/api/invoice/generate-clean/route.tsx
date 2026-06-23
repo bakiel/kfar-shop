@@ -280,7 +280,7 @@ const CleanInvoice = ({ data, invoiceNumber, qrCodeUrl }: any) => {
               key={index} 
               style={[
                 styles.tableRow,
-                index % 2 === 1 && styles.tableRowAlt
+                ...(index % 2 === 1 ? [styles.tableRowAlt] : [])
               ]}
             >
               <Text style={styles.colDescription}>

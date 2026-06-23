@@ -45,7 +45,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
 // --- Helpers ---
@@ -125,8 +125,8 @@ export default function RevenueFeedPage() {
       if (vendorsRes.ok) {
         const vendorsJson = await vendorsRes.json();
         const vendorList: VendorInfo[] = (vendorsJson.vendors || []).map((v: any, i: number) => ({
-          id: v.id,
-          name: v.name || v.store_name || '',
+          id: v.vendorId || v.vendor_id || v.id,
+          name: v.name || v.storeName || v.store_name || '',
           logo: v.logo_url || v.logo || `/images/vendors/default-vendor.png`,
           color: v.primary_color || defaultColors[i % defaultColors.length],
           totalRevenue: v.totalRevenue || 0,
@@ -272,7 +272,7 @@ export default function RevenueFeedPage() {
             <motion.div
               key={store.id}
               whileHover={{ y: -4, boxShadow: '0 12px 24px -6px rgba(0,0,0,0.1)' }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              transition={{ duration: 0.2, ease: 'easeOut' as const }}
               className={`bg-white rounded-xl border p-4 cursor-pointer transition-all ${
                 filter === store.id
                   ? 'ring-2 ring-offset-2 border-transparent'

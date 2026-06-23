@@ -86,7 +86,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'Platform management': { en: 'Platform management', he: 'ניהול פלטפורמה' },
   'Admin Access': { en: 'Admin Access', he: 'גישת מנהל' },
   'Platform overview →': { en: 'Platform overview →', he: 'סקירת פלטפורמה ←' },
-  'Just Testing?': { en: 'Just Testing?', he: 'רק בודק?' },
   'Skip the login and test all features with our demo center': { en: 'Skip the login and test all features with our demo center', he: 'דלג על ההתחברות ובדוק את כל התכונות במרכז הדמו' },
   'Open Demo Center': { en: 'Open Demo Center', he: 'פתח מרכז דמו' },
   
@@ -94,7 +93,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'Welcome to KFAR': { en: 'Welcome to KFAR', he: 'ברוכים הבאים לכפר' },
   'Join the Village of Peace Community': { en: 'Join the Village of Peace Community', he: 'הצטרפו לקהילת כפר השלום' },
   'Welcome Back!': { en: 'Welcome Back!', he: 'ברוכים השבים!' },
-  'Join KFAR': { en: 'Join KFAR', he: 'הצטרף לכפר' },
   'Access your personalized dashboard': { en: 'Access your personalized dashboard', he: 'גש לדשבורד האישי שלך' },
   'Start your journey with us': { en: 'Start your journey with us', he: 'התחל את המסע שלך איתנו' },
   'Full Name': { en: 'Full Name', he: 'שם מלא' },
@@ -131,11 +129,7 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'Sort by': { en: 'Sort by', he: 'מיין לפי' },
   'Price': { en: 'Price', he: 'מחיר' },
   'Name': { en: 'Name', he: 'שם' },
-  'Rating': { en: 'Rating', he: 'דירוג' },
-  'Category': { en: 'Category', he: 'קטגוריה' },
   'All Categories': { en: 'All Categories', he: 'כל הקטגוריות' },
-  'Vendor': { en: 'Vendor', he: 'ספק' },
-  'All Vendors': { en: 'All Vendors', he: 'כל הספקים' },
   'Organic': { en: 'Organic', he: 'אורגני' },
   'Vegan': { en: 'Vegan', he: 'טבעוני' },
   'Gluten Free': { en: 'Gluten Free', he: 'ללא גלוטן' },
@@ -269,9 +263,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'Smart Shopping: QR & NFC': { en: 'Smart Shopping: QR & NFC', he: 'קניות חכמות: QR ו-NFC' },
   
   // Special Feed Section
-  'Live Marketplace Feed': { en: 'Live Marketplace Feed', he: 'הזנה חיה של השוק' },
-  "Today's Special Deals": { en: "Today's Special Deals", he: 'המבצעים המיוחדים של היום' },
-  'Fresh promotions from our vendors • Updated every hour': { en: 'Fresh promotions from our vendors • Updated every hour', he: 'מבצעים טריים מהספקים שלנו • מעודכן כל שעה' },
   'Ends in': { en: 'Ends in', he: 'נגמר בעוד' },
   'Quick Add to Cart': { en: 'Quick Add to Cart', he: 'הוספה מהירה לסל' },
   'View Details': { en: 'View Details', he: 'צפה בפרטים' },
@@ -310,13 +301,9 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'active': { en: 'active', he: 'פעיל' },
   'coming soon': { en: 'coming soon', he: 'בקרוב' },
   
-  // Additional SpecialFeedSection
-  'Save': { en: 'Save', he: 'שמור' },
-  
   // CustomerCTA translations
   'Personal QR Code': { en: 'Personal QR Code', he: 'קוד QR אישי' },
   'Quick checkout & loyalty tracking': { en: 'Quick checkout & loyalty tracking', he: 'תשלום מהיר ומעקב נאמנות' },
-  'Voice Shopping': { en: 'Voice Shopping', he: 'קניות קוליות' },
   'Order in your preferred language': { en: 'Order in your preferred language', he: 'הזמן בשפה המועדפת עליך' },
   'Earn Rewards': { en: 'Earn Rewards', he: 'צבור פרסים' },
   'Get points on every purchase': { en: 'Get points on every purchase', he: 'קבל נקודות על כל רכישה' },
@@ -352,7 +339,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'Reach diverse customers': { en: 'Reach diverse customers', he: 'הגיעו ללקוחות מגוונים' },
   "Today's Performance": { en: "Today's Performance", he: 'הביצועים של היום' },
   'Revenue': { en: 'Revenue', he: 'הכנסות' },
-  'Rating': { en: 'Rating', he: 'דירוג' },
   '6 Professional Banner Templates': { en: '6 Professional Banner Templates', he: '6 תבניות באנר מקצועיות' },
   'Success!': { en: 'Success!', he: 'הצלחה!' },
   'Vendor Opportunity': { en: 'Vendor Opportunity', he: 'הזדמנות לספקים' },
@@ -366,7 +352,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'View Demo': { en: 'View Demo', he: 'צפה בהדגמה' },
   'Setup Fees': { en: 'Setup Fees', he: 'עמלות הקמה' },
   'Banner Templates': { en: 'Banner Templates', he: 'תבניות באנר' },
-  'Support': { en: 'Support', he: 'תמיכה' },
   'Payment Methods': { en: 'Payment Methods', he: 'אמצעי תשלום' },
   
   // VillageEnterprises translations
@@ -472,7 +457,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'Become a Driver': { en: 'Become a Driver', he: 'הפוך לנהג' },
   'Flash Deals': { en: 'Flash Deals', he: 'מבצעי בזק' },
   'Bundle & Save': { en: 'Bundle & Save', he: 'חבילה וחסוך' },
-  'Ends in': { en: 'Ends in', he: 'נגמר בעוד' },
   'Buy Now': { en: 'Buy Now', he: 'קנה עכשיו' },
   'Add Bundle to Cart': { en: 'Add Bundle to Cart', he: 'הוסף חבילה לסל' },
   'Visit Store': { en: 'Visit Store', he: 'בקר בחנות' },
@@ -495,7 +479,6 @@ const commonTranslations: Record<string, Record<'en' | 'he', string>> = {
   'years': { en: 'years', he: 'שנים' },
   'Your Community Marketplace': { en: 'Your Community Marketplace', he: 'השוק הקהילתי שלכם' },
   'Join the digital revolution': { en: 'Join the digital revolution', he: 'הצטרפו למהפכה הדיגיטלית' },
-  'Save': { en: 'Save', he: 'חסוך' },
   'Stock running low': { en: 'Stock running low', he: 'המלאי אוזל' },
   'left': { en: 'left', he: 'נותרו' },
   'Sold out': { en: 'Sold out', he: 'אזל' },

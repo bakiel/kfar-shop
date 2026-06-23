@@ -13,7 +13,7 @@ import {
   getFeaturedProducts,
   getVendorStore,
   EnhancedProduct
-} from '@/lib/data/wordpress-style-data-layer';
+} from './archived-data';
 
 // Confetti particle for wishlist animation
 const ConfettiParticle = ({ index, color }: { index: number; color: string }) => {

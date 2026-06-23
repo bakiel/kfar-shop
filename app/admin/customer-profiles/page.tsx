@@ -115,7 +115,7 @@ export default function AdminCustomerProfilesPage() {
           <div className="bg-white rounded-xl shadow-lg p-12 flex flex-col items-center justify-center gap-4">
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+              transition={{ repeat: Infinity, duration: 1, ease: 'easeOut' as const }}
             >
               <Loader className="w-8 h-8 stroke-[1.5] text-green-600" />
             </motion.div>

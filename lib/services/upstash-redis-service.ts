@@ -82,7 +82,7 @@ export class UpstashRedisService {
 
   async getPopularProducts(limit: number = 10) {
     const key = `${this.CACHE_PREFIX}popular:products`;
-    const popular = await redis.zrevrange(key, 0, limit - 1, { withScores: true });
+    const popular = await (redis as any).zrevrange(key, 0, limit - 1, { withScores: true });
     
     // Format the response
     const products = [];
@@ -184,7 +184,7 @@ export class UpstashRedisService {
       await redis.ping();
       return { status: 'ok', service: 'redis' };
     } catch (error) {
-      return { status: 'error', service: 'redis', error: error.message };
+      return { status: 'error', service: 'redis', error: error instanceof Error ? error.message : String(error) };
     }
   }
 }

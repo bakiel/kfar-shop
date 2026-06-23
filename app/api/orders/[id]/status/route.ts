@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
 import { sendTransactional } from '@/lib/services/email/email-service';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import {
+  notifyCustomerAccount,
+  notifyVendorOwners,
+} from '@/lib/services/account-notification-events.server';
 
 // ---------------------------------------------------------------------------
 // PATCH /api/orders/[id]/status
@@ -83,6 +87,26 @@ export async function PATCH(
       );
     }
 
+    const { rows: existingRows } = await query(
+      'SELECT id, order_number, status, payment_status, vendor_id, customer_id, customer_name FROM orders WHERE id::text = $1 OR order_number = $1',
+      [id]
+    );
+
+    if (existingRows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    const existingOrder = existingRows[0];
+    if (user.role === 'vendor' && existingOrder.vendor_id !== user.vendorId) {
+      return NextResponse.json(
+        { success: false, error: 'Order does not belong to this vendor' },
+        { status: 403 }
+      );
+    }
+
     // Build dynamic update query
     const setClauses: string[] = [];
     const values: any[] = [];
@@ -118,31 +142,13 @@ export async function PATCH(
 
     setClauses.push('updated_at = NOW()');
 
-    // Add order ID as final parameter
-    values.push(id);
+    // Add canonical order ID as final parameter
+    values.push(existingOrder.id);
 
     const { rows } = await query(
       `UPDATE orders SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
       values
     );
-
-    if (rows.length === 0) {
-      // Try by order_number
-      values[values.length - 1] = id;
-      const { rows: byNumber } = await query(
-        `UPDATE orders SET ${setClauses.join(', ')} WHERE order_number = $${paramIndex} RETURNING *`,
-        values
-      );
-
-      if (byNumber.length === 0) {
-        return NextResponse.json(
-          { success: false, error: 'Order not found' },
-          { status: 404 }
-        );
-      }
-
-      rows.push(byNumber[0]);
-    }
 
     const updatedOrder = rows[0];
 
@@ -153,22 +159,73 @@ export async function PATCH(
       'payment:', updatedOrder.payment_status
     );
 
+    const statusLabels: Record<string, string> = {
+      confirmed: 'Order Confirmed',
+      processing: 'Being Prepared',
+      ready: 'Ready for Pickup',
+      shipped: 'Shipped',
+      delivered: 'Delivered',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+    };
+
     // Send order status update email to customer (fire-and-forget)
-    if (status && updatedOrder.customer_email) {
-      const statusLabels: Record<string, string> = {
-        confirmed: 'Order Confirmed',
-        processing: 'Being Prepared',
-        ready: 'Ready for Pickup',
-        shipped: 'Shipped',
-        delivered: 'Delivered',
-        completed: 'Completed',
-        cancelled: 'Cancelled',
-      };
+    if (status && updatedOrder.customer_email && !String(updatedOrder.customer_email).startsWith('cod+')) {
       sendTransactional(updatedOrder.customer_email, 'order_status_update', {
         customer_name: updatedOrder.customer_name || 'Customer',
         order_number: updatedOrder.order_number,
         status: statusLabels[status] || status,
+        status_he: statusLabels[status] || status,
+        status_message: '',
+        status_message_he: '',
+        tracking_url: `${(process.env.NEXT_PUBLIC_APP_URL || "https://kfarapp.com").replace(/\/$/, '')}/customer/orders/${updatedOrder.id}`,
       }).catch(err => console.error('Failed to send status update email:', err));
+    }
+
+    const statusChanged = status && existingOrder.status !== updatedOrder.status;
+    const paymentChanged = paymentStatus && existingOrder.payment_status !== updatedOrder.payment_status;
+
+    if ((statusChanged || paymentChanged) && updatedOrder.customer_id) {
+      const message = statusChanged
+        ? `Your order is now ${statusLabels[updatedOrder.status] || updatedOrder.status}.`
+        : `Your payment status is now ${updatedOrder.payment_status}.`;
+      notifyCustomerAccount(updatedOrder.customer_id, {
+        type: 'order_update',
+        channel: 'in_app',
+        title: `Order ${updatedOrder.order_number} updated`,
+        titleHe: `הזמנה ${updatedOrder.order_number} עודכנה`,
+        message,
+        messageHe: message,
+        data: {
+          orderId: updatedOrder.id,
+          orderNumber: updatedOrder.order_number,
+          previousStatus: existingOrder.status,
+          status: updatedOrder.status,
+          previousPaymentStatus: existingOrder.payment_status,
+          paymentStatus: updatedOrder.payment_status,
+          actionUrl: `/customer/orders/${updatedOrder.id}`,
+          actionLabel: 'View order',
+        },
+      }).catch(err => console.error('Failed to create order customer notification:', err));
+    }
+
+    if (user.role === 'admin' && statusChanged && updatedOrder.vendor_id) {
+      notifyVendorOwners(updatedOrder.vendor_id, {
+        type: 'order_update',
+        channel: 'in_app',
+        title: `Order ${updatedOrder.order_number} updated`,
+        titleHe: `הזמנה ${updatedOrder.order_number} עודכנה`,
+        message: `Admin updated the order to ${statusLabels[updatedOrder.status] || updatedOrder.status}.`,
+        messageHe: `מנהל עדכן את ההזמנה לסטטוס ${statusLabels[updatedOrder.status] || updatedOrder.status}.`,
+        data: {
+          orderId: updatedOrder.id,
+          orderNumber: updatedOrder.order_number,
+          previousStatus: existingOrder.status,
+          status: updatedOrder.status,
+          actionUrl: '/vendor/orders',
+          actionLabel: 'View orders',
+        },
+      }).catch(err => console.error('Failed to create order vendor notification:', err));
     }
 
     return NextResponse.json({

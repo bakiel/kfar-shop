@@ -5,6 +5,11 @@ import { sendTransactional } from '@/lib/services/email/email-service';
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/utils/rate-limiter';
 import { createNotification } from '@/lib/services/notification-service.server';
 import { sendOrderConfirmationSMS } from '@/lib/services/sms-service';
+import {
+  notifyCustomerAccount,
+  notifyVendorOwners,
+} from '@/lib/services/account-notification-events.server';
+import { resolveOrderQuote, totalsMatch } from '@/lib/services/order-cart-resolver.server';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -13,8 +18,12 @@ import { sendOrderConfirmationSMS } from '@/lib/services/sms-service';
 interface OrderCreateBody {
   items: Array<{
     id?: string;
-    productId: string;
+    productId?: string;
     product_id?: string;
+    itemType?: 'product' | 'bundle';
+    bundleId?: string;
+    bundleName?: string;
+    bundleProductIds?: string[];
     name: string;
     quantity: number;
     price: number;
@@ -54,6 +63,19 @@ interface OrderCreateBody {
 // For orders with YPAY payment, use /api/payment/create instead.
 // ---------------------------------------------------------------------------
 
+function generateOrderNumber() {
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const seq = Math.floor(Math.random() * 9000) + 1000;
+  return `KFAR-${dateStr}-${seq}`;
+}
+
+function isOrderNumberCollision(error: unknown) {
+  const err = error as { code?: string; constraint?: string; message?: string };
+  return err?.code === '23505'
+    && String(err.constraint || err.message || '').toLowerCase().includes('order');
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limit order creation
@@ -67,6 +89,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body: OrderCreateBody = await request.json();
+    const paymentMethod = body.paymentMethod || 'cash';
+
+    if (paymentMethod !== 'cash') {
+      return NextResponse.json(
+        { success: false, error: 'Only Cash on Delivery is enabled' },
+        { status: 400 }
+      );
+    }
 
     // Validate required fields
     if (!body.items || body.items.length === 0) {
@@ -76,31 +106,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!body.total || body.total <= 0) {
+    let quote;
+    try {
+      quote = await resolveOrderQuote(body.items);
+    } catch (err) {
       return NextResponse.json(
-        { success: false, error: 'Invalid order total' },
+        { success: false, error: err instanceof Error ? err.message : 'Invalid order items' },
         { status: 400 }
       );
     }
-
-    const normalizedItems = body.items.map((item) => {
-      const productId = item.productId || item.id || item.product_id || '';
-
-      return {
-        id: productId,
-        productId,
-        name: item.name,
-        quantity: Number(item.quantity) || 0,
-        price: Number(item.price) || 0,
-        vendorId: item.vendorId || item.vendor_id || '',
-        vendorName: item.vendorName || item.vendor_name || '',
-        image: item.image || '',
-      };
-    });
-
-    if (normalizedItems.some((item) => !item.id)) {
+    if (!totalsMatch(body.total, quote.total)) {
       return NextResponse.json(
-        { success: false, error: 'Each order item must include a product ID' },
+        {
+          success: false,
+          code: 'ORDER_TOTAL_CHANGED',
+          error: 'Order total changed. Please review your cart and try again.',
+          quote,
+        },
+        { status: 409 }
+      );
+    }
+
+    const normalizedItems = quote.items;
+    const vendorIds = [...new Set(normalizedItems.map((item) => item.vendorId).filter(Boolean))];
+
+    if (vendorIds.length > 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'SINGLE_VENDOR_CHECKOUT_REQUIRED',
+          error: 'Cash on Delivery checkout supports one store per order. Please check out each store separately.',
+        },
         { status: 400 }
       );
     }
@@ -110,7 +146,7 @@ export async function POST(request: NextRequest) {
       || `${body.customer?.firstName || ''} ${body.customer?.lastName || ''}`
     ).trim();
 
-    const isCOD = (body.paymentMethod || 'cash') === 'cash';
+    const isCOD = paymentMethod === 'cash';
 
     if (!fullName) {
       return NextResponse.json(
@@ -134,12 +170,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Generate order number: KFAR-YYYYMMDD-XXXX
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
-    const seq = Math.floor(Math.random() * 9000) + 1000;
-    const orderNumber = `KFAR-${dateStr}-${seq}`;
 
     const customerName = fullName;
     // Synthesize a placeholder email when the customer didn't provide one.
@@ -167,37 +197,49 @@ export async function POST(request: NextRequest) {
     // Derive primary vendor_id from items (first vendor found)
     const primaryVendorId = normalizedItems.find((item) => item.vendorId)?.vendorId || null;
 
-    // Create order (columns match actual DB schema)
-    const { rows: orderRows } = await query(
-      `INSERT INTO orders (
-        order_number, customer_name, customer_email, customer_phone,
-        total, subtotal, delivery_fee, payment_method,
-        status, payment_status,
-        delivery_address, items, delivery_notes,
-        vendor_id, customer_id,
-        created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
-      RETURNING *`,
-      [
-        orderNumber,
-        customerName,
-        customerEmail,
-        body.customer.phone || null,
-        body.total,
-        body.subtotal || body.total,
-        body.deliveryFee || 0,
-        body.paymentMethod || 'cash',
-        'pending',
-        'pending',
-        addressJson,
-        JSON.stringify(normalizedItems),
-        body.notes || null,
-        primaryVendorId,
-        customerId,
-      ]
-    );
+    let orderNumber = '';
+    let order: any = null;
 
-    const order = orderRows[0];
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      orderNumber = generateOrderNumber();
+      try {
+        const { rows: orderRows } = await query(
+          `INSERT INTO orders (
+            order_number, customer_name, customer_email, customer_phone,
+            total, subtotal, delivery_fee, payment_method,
+            status, payment_status,
+            delivery_address, items, delivery_notes,
+            vendor_id, customer_id,
+            created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+          RETURNING *`,
+          [
+            orderNumber,
+            customerName,
+            customerEmail,
+            body.customer.phone || null,
+            quote.total,
+            quote.subtotal,
+            quote.deliveryFee,
+            paymentMethod,
+            'pending',
+            'pending',
+            addressJson,
+            JSON.stringify(normalizedItems),
+            body.notes || null,
+            primaryVendorId,
+            customerId,
+          ]
+        );
+        order = orderRows[0];
+        break;
+      } catch (error) {
+        if (isOrderNumberCollision(error) && attempt < 4) {
+          continue;
+        }
+        throw error;
+      }
+    }
 
     if (!order) {
       return NextResponse.json(
@@ -218,7 +260,7 @@ export async function POST(request: NextRequest) {
            last_order_at = NOW(),
            updated_at   = NOW()
          WHERE id = $1`,
-        [customerId, body.total]
+        [customerId, quote.total]
       ).catch(err => console.error('Failed to update customer stats:', err));
     }
 
@@ -250,10 +292,11 @@ export async function POST(request: NextRequest) {
           customer_name: customerName,
           order_number: orderNumber,
           items_html: itemsTable,
-          total: body.total.toFixed(2),
+          total: quote.total.toFixed(2),
           currency: body.currency || 'ILS',
-          payment_method: body.paymentMethod || 'Cash on Delivery',
+          payment_method: 'Cash on Delivery',
           delivery_method: body.deliveryMethod || 'Pickup',
+          tracking_url: `${(process.env.NEXT_PUBLIC_APP_URL || "https://kfarapp.com").replace(/\/$/, '')}/customer/orders/${order.id}`,
         }).catch(err => console.error('Failed to send order confirmation email:', err))
       );
     }
@@ -268,7 +311,6 @@ export async function POST(request: NextRequest) {
       'vop-shop': 'vop@kfarapp.com',
     };
 
-    const vendorIds = [...new Set(normalizedItems.map((item) => item.vendorId).filter(Boolean))];
     for (const vendorId of vendorIds) {
       const vendorEmail = vendorEmails[vendorId as string];
       if (vendorEmail) {
@@ -298,6 +340,7 @@ export async function POST(request: NextRequest) {
             items_html: vendorTable,
             total: vendorItems.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2),
             currency: body.currency || 'ILS',
+            dashboard_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://kfarapp.com"}/vendor/orders`,
           }).catch(err => console.error('Failed to send vendor notification email:', err))
         );
       }
@@ -315,22 +358,74 @@ export async function POST(request: NextRequest) {
       channel: 'in_app',
       title: `New order ${orderNumber}`,
       titleHe: `הזמנה חדשה ${orderNumber}`,
-      message: `${customerName} placed an order · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
-      messageHe: `${customerName} ביצע/ה הזמנה · ₪${body.total.toFixed(2)} · ${body.paymentMethod || 'cash'}`,
+      message: `${customerName} placed an order · ₪${quote.total.toFixed(2)} · ${paymentMethod}`,
+      messageHe: `${customerName} ביצע/ה הזמנה · ₪${quote.total.toFixed(2)} · ${paymentMethod}`,
       data: {
         orderId: order.id,
         orderNumber,
-        total: body.total,
-        paymentMethod: body.paymentMethod || 'cash',
+        total: quote.total,
+        paymentMethod,
         actionUrl: `/admin/orders`,
         actionLabel: 'View order',
       },
     }).catch(err => console.error('Failed to create admin notification:', err));
 
+    const inAppNotificationPromises: Promise<unknown>[] = [];
+
+    if (customerId) {
+      inAppNotificationPromises.push(
+        notifyCustomerAccount(customerId, {
+          type: 'order_update',
+          channel: 'in_app',
+          title: `Order ${orderNumber} received`,
+          titleHe: `הזמנה ${orderNumber} התקבלה`,
+          message: `Your order was received and is pending vendor review.`,
+          messageHe: `ההזמנה שלך התקבלה וממתינה לאישור הספק.`,
+          data: {
+            orderId: order.id,
+            orderNumber,
+            total: quote.total,
+            actionUrl: `/customer/orders/${order.id}`,
+            actionLabel: 'View order',
+          },
+        })
+      );
+    }
+
+    for (const vendorId of vendorIds) {
+      const vendorItems = normalizedItems.filter((item) => item.vendorId === vendorId);
+      const vendorTotal = vendorItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      inAppNotificationPromises.push(
+        notifyVendorOwners(vendorId as string, {
+          type: 'order_update',
+          channel: 'in_app',
+          title: `New order ${orderNumber}`,
+          titleHe: `הזמנה חדשה ${orderNumber}`,
+          message: `${customerName} ordered ${vendorItems.length} item${vendorItems.length === 1 ? '' : 's'} · ₪${vendorTotal.toFixed(2)}.`,
+          messageHe: `${customerName} הזמין/ה ${vendorItems.length} פריטים · ₪${vendorTotal.toFixed(2)}.`,
+          data: {
+            orderId: order.id,
+            orderNumber,
+            vendorId,
+            total: vendorTotal,
+            actionUrl: '/vendor/orders',
+            actionLabel: 'View orders',
+          },
+        })
+      );
+    }
+
+    Promise.allSettled(inAppNotificationPromises).then(results => {
+      const sent = results.filter(r => r.status === 'fulfilled').length;
+      if (results.length > 0) {
+        console.log(`Order ${orderNumber}: ${sent}/${results.length} in-app notification jobs completed`);
+      }
+    });
+
     // Task #6: SMS is off until client pays (SMS_ENABLED=false by default).
     // Code path is wired — flipping the env var enables live sends.
     if (body.customer?.phone) {
-      sendOrderConfirmationSMS(body.customer.phone, orderNumber, body.total)
+      sendOrderConfirmationSMS(body.customer.phone, orderNumber, quote.total)
         .then(r => console.log(`Order ${orderNumber} SMS:`, r))
         .catch(err => console.error('SMS dispatch error:', err));
     }

@@ -3,6 +3,15 @@ import { Pool, PoolClient } from 'pg';
 // PostgreSQL connection pool for KFAR Marketplace
 // Migrated from Supabase to Hostinger VPS
 
+function envInt(name: string, fallback: number) {
+  const parsed = parseInt(process.env[name] || '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+const DB_CONNECT_TIMEOUT_MS = envInt('POSTGRES_CONNECT_TIMEOUT_MS', 2_000);
+const DB_QUERY_TIMEOUT_MS = envInt('POSTGRES_QUERY_TIMEOUT_MS', 8_000);
+const DB_CHECK_TIMEOUT_MS = envInt('POSTGRES_HEALTH_TIMEOUT_MS', 1_500);
+
 // Defer env validation to runtime (not build time) so Next.js build succeeds
 // without DB credentials in the CI/build environment.
 const pool = new Pool({
@@ -13,11 +22,14 @@ const pool = new Pool({
   password: process.env.POSTGRES_PASSWORD || '',
   max: 5,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 3000,
+  connectionTimeoutMillis: DB_CONNECT_TIMEOUT_MS,
+  statement_timeout: DB_QUERY_TIMEOUT_MS,
+  query_timeout: DB_QUERY_TIMEOUT_MS,
+  idle_in_transaction_session_timeout: DB_QUERY_TIMEOUT_MS,
   keepAlive: true,
   keepAliveInitialDelayMillis: 10000,
   keepAliveIntervalMillis: 30000,
-});
+} as any);
 
 // Fast DB availability check -- caches result to avoid repeated timeouts
 // Success cached 5min, failure cached only 5s (allows quick recovery after restart)
@@ -26,7 +38,23 @@ let _dbCheckTime = 0;
 let _dbCheckPromise: Promise<boolean> | null = null;
 const DB_CHECK_TTL_OK = 300_000;  // 5 minutes when DB is up
 const DB_CHECK_TTL_FAIL = 5_000;  // 5 seconds when DB is down (retry quickly)
-const DB_CHECK_TIMEOUT_MS = 1_500;
+
+function markDbAvailability(available: boolean) {
+  _dbAvailable = available;
+  _dbCheckTime = Date.now();
+}
+
+function isTransientDbError(error: unknown) {
+  const msg = (error as any)?.message || '';
+  const code = (error as any)?.code || '';
+  return code === 'ECONNREFUSED'
+    || code === 'ETIMEDOUT'
+    || code === '57P01'
+    || code === '53300'
+    || msg.includes('timeout')
+    || msg.includes('terminated')
+    || msg.includes('Connection terminated');
+}
 
 export async function isDbAvailable(): Promise<boolean> {
   const ttl = _dbAvailable === false ? DB_CHECK_TTL_FAIL : DB_CHECK_TTL_OK;
@@ -38,26 +66,32 @@ export async function isDbAvailable(): Promise<boolean> {
     return _dbCheckPromise;
   }
 
-  const dbCheck = pool.query('SELECT 1');
+  const dbCheck = pool.query({
+    text: 'SELECT 1',
+    statement_timeout: DB_CHECK_TIMEOUT_MS,
+    query_timeout: DB_CHECK_TIMEOUT_MS,
+  } as any);
   _dbCheckPromise = new Promise<boolean>((resolve) => {
-    const timeout = setTimeout(() => {
-      _dbAvailable = false;
-      _dbCheckTime = Date.now();
-      resolve(false);
+    let timeout: ReturnType<typeof setTimeout>;
+    let settled = false;
+    const finish = (available: boolean) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      markDbAvailability(available);
+      resolve(available);
+    };
+
+    timeout = setTimeout(() => {
+      finish(false);
     }, DB_CHECK_TIMEOUT_MS);
 
     dbCheck
       .then(() => {
-        clearTimeout(timeout);
-        _dbAvailable = true;
-        _dbCheckTime = Date.now();
-        resolve(true);
+        finish(true);
       })
       .catch(() => {
-        clearTimeout(timeout);
-        _dbAvailable = false;
-        _dbCheckTime = Date.now();
-        resolve(false);
+        finish(false);
       });
   }).finally(() => {
     _dbCheckPromise = null;
@@ -72,7 +106,8 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err) => {
-  console.error('❌ PostgreSQL pool error:', err);
+  markDbAvailability(false);
+  console.error('❌ PostgreSQL pool error:', err?.message || err);
 });
 
 // Query helper with proper typing
@@ -86,21 +121,22 @@ export async function query<T = any>(
   }
   const start = Date.now();
   try {
-    const result = await pool.query(text, params);
+    const result = await pool.query({
+      text,
+      values: params || [],
+      statement_timeout: DB_QUERY_TIMEOUT_MS,
+      query_timeout: DB_QUERY_TIMEOUT_MS,
+    } as any);
     const duration = Date.now() - start;
-    _dbAvailable = true;
-    _dbCheckTime = Date.now();
+    markDbAvailability(true);
     if (duration > 100) {
       console.log(`Slow query (${duration}ms):`, text.substring(0, 100));
     }
     return { rows: result.rows, rowCount: result.rowCount || 0 };
   } catch (error) {
     // Mark DB unavailable on connection errors (do not crash the process)
-    const msg = (error as any)?.message || '';
-    const code = (error as any)?.code || '';
-    if (code === 'ECONNREFUSED' || msg.includes('timeout') || msg.includes('terminated') || msg.includes('Connection terminated')) {
-      _dbAvailable = false;
-      _dbCheckTime = Date.now();
+    if (isTransientDbError(error)) {
+      markDbAvailability(false);
     }
     throw error;
   }
@@ -113,6 +149,7 @@ export async function transaction<T>(
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+    await client.query(`SET LOCAL statement_timeout = ${DB_QUERY_TIMEOUT_MS}`);
     const result = await callback(client);
     await client.query('COMMIT');
     return result;

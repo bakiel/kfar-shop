@@ -102,7 +102,7 @@ export interface CustomerJourney {
 
 export interface TouchPoint {
   id: string;
-  type: 'website' | 'email' | 'sms' | 'qr' | 'nfc' | 'store' | 'support';
+  type: 'website' | 'email' | 'sms' | 'qr' | 'nfc' | 'store' | 'support' | 'purchase';
   action: string;
   timestamp: Date;
   channel: string;

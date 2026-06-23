@@ -2,6 +2,67 @@ import { Product, Vendor } from '../types/products';
 import { api } from '../config/api';
 import { getNumericVendorId, getStringVendorId } from '../utils/vendor-id-mapping';
 
+function localApiBase() {
+  if (typeof window !== 'undefined') return '';
+  return process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+}
+
+function transformLiveProductToProduct(product: any): Product {
+  return {
+    id: String(product.id),
+    vendorId: product.vendorId || product.vendor_id || '',
+    vendor: product.vendorName || product.vendor || '',
+    name: product.name || '',
+    nameHe: product.nameHe || product.name_he,
+    description: product.description || '',
+    price: Number(product.price) || 0,
+    originalPrice: product.originalPrice ?? product.original_price,
+    image: product.image || product.images?.[0] || '/images/placeholder-product.jpg',
+    images: product.images || [],
+    category: product.category || 'general',
+    tags: product.tags || [],
+    inStock: product.inStock ?? product.in_stock ?? true,
+    unit: product.unit || 'unit',
+    minimumOrder: product.minimumOrder || product.minimum_order || 1,
+    kosher: Boolean(product.kashrut || product.isKosher || product.is_kosher),
+    vegan: product.vegan ?? product.isVegan ?? product.is_vegan ?? true,
+    organic: product.organic ?? product.isOrganic ?? product.is_organic ?? false,
+    glutenFree: product.glutenFree ?? product.isGlutenFree ?? product.is_gluten_free ?? false,
+    rating: product.rating || 0,
+    reviewCount: product.reviewCount || product.review_count || 0,
+    badge: product.badge,
+    nutritionalInfo: product.nutritionalInfo || product.nutritional_info,
+    allergens: product.allergens || [],
+    ingredients: product.ingredients || [],
+  };
+}
+
+async function fetchLiveProducts(params: Record<string, string> = {}): Promise<Product[]> {
+  const query = new URLSearchParams(params).toString();
+  const response = await fetch(`${localApiBase()}/api/products-db${query ? `?${query}` : ''}`, { cache: 'no-store' });
+  if (!response.ok) return [];
+  const data = await response.json();
+  return (data.products || []).map(transformLiveProductToProduct);
+}
+
+async function fetchLiveVendors(params: Record<string, string> = {}): Promise<Vendor[]> {
+  const query = new URLSearchParams(params).toString();
+  const response = await fetch(`${localApiBase()}/api/vendors${query ? `?${query}` : ''}`, { cache: 'no-store' });
+  if (!response.ok) return [];
+  const data = await response.json();
+  return (data.vendors || []).map((vendor: any) => ({
+    id: vendor.id,
+    name: vendor.name,
+    logo: vendor.logo || '/images/vendors/default_logo.jpg',
+    banner: vendor.banner,
+    description: vendor.description || '',
+    rating: vendor.rating || 0,
+    reviewCount: vendor.totalReviews || 0,
+    categories: vendor.categories || [],
+    tags: vendor.categories || [],
+  }));
+}
+
 // Service for fetching products from the API
 export const productService = {
   // Get all products with filtering
@@ -40,9 +101,12 @@ export const productService = {
       };
     } catch (error) {
       console.error('Error fetching products:', error);
-      // Fallback to our data layer
-      const { getAllProducts } = await import('../data/wordpress-style-data-layer');
-      const allProducts = getAllProducts();
+      const allProducts = await fetchLiveProducts({
+        ...(params?.category ? { category: params.category } : {}),
+        ...(params?.vendor ? { vendor: params.vendor } : {}),
+        ...(params?.search ? { search: params.search } : {}),
+        ...(params?.limit ? { limit: String(params.limit) } : {}),
+      });
       return { 
         products: allProducts, 
         pagination: { total: allProducts.length, hasMore: false } 
@@ -57,9 +121,9 @@ export const productService = {
       return transformApiProductToProduct(product);
     } catch (error) {
       console.error('Error fetching product:', error);
-      // Fallback to mock data
-      const { getProduct } = await import('../data/complete-catalog');
-      return getProduct(id) || null;
+      const response = await fetch(`${localApiBase()}/api/products/${id}`, { cache: 'no-store' });
+      if (!response.ok) return null;
+      return transformLiveProductToProduct(await response.json());
     }
   },
   
@@ -70,9 +134,9 @@ export const productService = {
       return response.products.map(transformApiProductToProduct);
     } catch (error) {
       console.error('Error fetching featured products:', error);
-      // Fallback to our data layer
-      const { getAllProducts } = await import('../data/wordpress-style-data-layer');
-      return getAllProducts().filter(p => p.badge === 'hot' || p.badge === 'new').slice(0, 6);
+      const products = await fetchLiveProducts({ limit: '24' });
+      const featured = products.filter(product => product.badge === 'hot' || product.badge === 'new');
+      return (featured.length ? featured : products).slice(0, 6);
     }
   },
   
@@ -83,9 +147,7 @@ export const productService = {
       return response.products.map(transformApiProductToProduct);
     } catch (error) {
       console.error('Error searching products:', error);
-      // Fallback to our data layer
-      const { searchProducts } = await import('../data/wordpress-style-data-layer');
-      return searchProducts(query);
+      return fetchLiveProducts({ search: query });
     }
   },
   
@@ -96,12 +158,11 @@ export const productService = {
       return response.products.map(transformApiProductToProduct);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
-      // Fallback to our data layer
-      const { getProduct, getAllProducts } = await import('../data/wordpress-style-data-layer');
-      const product = getProduct(productId);
+      const product = await this.getProduct(productId);
       if (!product) return [];
-      
-      return getAllProducts()
+
+      const products = await fetchLiveProducts({ category: product.category || '' });
+      return products
         .filter(p => p.id !== productId && p.category === product.category)
         .slice(0, 4);
     }
@@ -130,18 +191,13 @@ export const vendorService = {
       };
     } catch (error) {
       console.error('Error fetching vendors:', error);
-      // Fallback to our data layer
-      const { vendorStores } = await import('../data/wordpress-style-data-layer');
-      const vendors = Object.entries(vendorStores).map(([id, store]) => ({
-        id,
-        name: store.name,
-        logo: store.logo,
-        description: store.description,
-        rating: store.rating || 4.5
-      }));
+      const vendors = await fetchLiveVendors({
+        ...(params?.category ? { category: params.category } : {}),
+        ...(params?.search ? { search: params.search } : {}),
+      });
       return { 
         vendors, 
-        pagination: { total: Object.keys(vendors).length, hasMore: false } 
+        pagination: { total: vendors.length, hasMore: false }
       };
     }
   },
@@ -160,16 +216,19 @@ export const vendorService = {
       return transformApiVendorToVendor(vendor);
     } catch (error) {
       console.error('Error fetching vendor:', error);
-      // Fallback to our data layer
-      const { vendorStores } = await import('../data/wordpress-style-data-layer');
-      const store = vendorStores[id];
-      if (!store) return null;
+      const response = await fetch(`${localApiBase()}/api/vendors/${id}`, { cache: 'no-store' });
+      if (!response.ok) return null;
+      const vendor = await response.json();
       return {
-        id,
-        name: store.name,
-        logo: store.logo,
-        description: store.description,
-        rating: store.rating || 4.5
+        id: vendor.id,
+        name: vendor.name,
+        logo: vendor.logo || '/images/vendors/default_logo.jpg',
+        banner: vendor.banner,
+        description: vendor.description || '',
+        rating: vendor.rating || 0,
+        reviewCount: vendor.totalReviews || 0,
+        categories: vendor.categories || [],
+        tags: vendor.categories || [],
       };
     }
   },
@@ -193,9 +252,7 @@ export const vendorService = {
       };
     } catch (error) {
       console.error('Error fetching vendor products:', error);
-      // Fallback to data from our complete catalog
-      const { getProductsByVendor } = await import('../data/wordpress-style-data-layer');
-      const vendorProducts = getProductsByVendor(vendorId);
+      const vendorProducts = await fetchLiveProducts({ vendor: vendorId });
       return { 
         products: vendorProducts, 
         pagination: { total: vendorProducts.length, hasMore: false } 
@@ -212,10 +269,10 @@ function transformApiProductToProduct(apiProduct: any): Product {
   return {
     id: apiProduct.id.toString(),
     vendorId: vendorIdString,
+    vendor: apiProduct.vendor || apiProduct.vendorName || apiProduct.vendor_name || vendorIdString,
     name: apiProduct.name,
-    nameHebrew: apiProduct.nameHebrew || '',
+    nameHe: apiProduct.nameHebrew || apiProduct.nameHe || '',
     description: apiProduct.description,
-    descriptionHebrew: apiProduct.descriptionHebrew || '',
     price: apiProduct.price,
     originalPrice: apiProduct.originalPrice,
     image: apiProduct.image || apiProduct.images?.[0] || '',
@@ -246,9 +303,7 @@ function transformApiVendorToVendor(apiVendor: any): Vendor {
   return {
     id: vendorIdString,
     name: apiVendor.name,
-    nameHebrew: apiVendor.nameHebrew || '',
     description: apiVendor.description,
-    descriptionHebrew: apiVendor.descriptionHebrew || '',
     logo: apiVendor.logo || '',
     banner: apiVendor.banner || '',
     rating: apiVendor.rating || 0,

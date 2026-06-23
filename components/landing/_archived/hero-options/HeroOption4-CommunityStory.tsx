@@ -22,7 +22,7 @@ import {
   Star, Leaf, ShoppingBag, Play, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getVendors, TOTAL_PRODUCTS, VENDOR_COUNT } from '@/lib/data/wordpress-style-data-layer';
+import { getVendors, TOTAL_PRODUCTS, VENDOR_COUNT } from '../archived-data';
 
 const testimonials = [
   {

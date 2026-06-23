@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyAccessToken } from '@/lib/services/auth-service'
 import { query } from '@/lib/db/postgres-client'
+import { getProductById, invalidateProductFeedCache } from '@/lib/services/live-product-feed'
+import { invalidateVendorFeedCache } from '@/lib/services/live-vendor-feed'
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
+};
+
+function invalidateLiveFeedCaches() {
+  invalidateProductFeedCache()
+  invalidateVendorFeedCache()
+}
 
 // Get product by ID
 export async function GET(
@@ -11,51 +22,19 @@ export async function GET(
   try {
     const params = await context.params;
     const productId = params.id
-    console.log(`API: Fetching product with ID: ${productId}`)
-    
-    // Import product data from complete catalog
-    const { getProduct } = await import('@/lib/data/complete-catalog')
-    
-    // Find product using the helper function
-    let product = getProduct(productId)
-    
+
+    const product = await getProductById(productId);
     if (!product) {
-      console.log(`Product not found with ID: ${productId}`)
-      
-      // Try alternative lookups
-      const { getAllProducts } = await import('@/lib/data/wordpress-style-data-layer')
-      const allProducts = getAllProducts()
-      
-      // Log first few product IDs for debugging
-      console.log('Sample product IDs:', allProducts.slice(0, 5).map(p => ({ id: p.id, name: p.name })))
-      
-      // Try to find by partial match
-      product = allProducts.find(p => 
-        p.id === productId ||
-        p.id.toLowerCase() === productId.toLowerCase() ||
-        p.id.includes(productId) ||
-        productId.includes(p.id)
+      return NextResponse.json(
+        {
+          error: 'Product not found',
+          requestedId: productId,
+        },
+        { status: 404, headers: NO_STORE_HEADERS }
       )
-      
-      if (!product) {
-        return NextResponse.json(
-          { 
-            error: 'Product not found',
-            requestedId: productId,
-            availableIds: allProducts.slice(0, 10).map(p => p.id)
-          },
-          { status: 404 }
-        )
-      }
     }
-    
-    // Ensure we have a mutable copy
-    const productData = { ...product }
-    
-    // Add vendorName if not present
-    if (!productData.vendorName && productData.vendorId) {
-      productData.vendorName = getVendorName(productData.vendorId)
-    }
+
+    const productData: any = { ...product }
     
     // Add extended data if available
     const extendedData = await getExtendedProductData(productId)
@@ -63,13 +42,12 @@ export async function GET(
       productData.extendedData = extendedData
     }
     
-    console.log(`API: Successfully found product: ${productData.name}`)
-    return NextResponse.json(productData)
+    return NextResponse.json(productData, { headers: NO_STORE_HEADERS })
   } catch (error) {
     console.error('Error fetching product:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: NO_STORE_HEADERS }
     )
   }
 }
@@ -84,9 +62,11 @@ export async function PUT(
     const productId = params.id
     const updates = await request.json()
     
-    // Verify authentication
-    const cookieStore = cookies()
-    const token = cookieStore.get('auth-token')
+    // Verify authentication from the modern Authorization header, with the
+    // legacy cookie retained for older admin/vendor screens.
+    const cookieStore = await cookies()
+    const bearerToken = request.headers.get('authorization')?.replace('Bearer ', '')
+    const token = bearerToken || cookieStore.get('auth-token')?.value
     
     if (!token) {
       return NextResponse.json(
@@ -96,7 +76,7 @@ export async function PUT(
     }
 
     // Verify token using auth-service (no insecure fallback secret)
-    const user = verifyAccessToken(token.value)
+    const user = verifyAccessToken(token)
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -116,12 +96,8 @@ export async function PUT(
     }
     
     // Update product in database
-    const updatedProduct = await updateProduct(productId, updates, userId)
-    
-    // Sync to frontend data files if needed
-    if (userRole === 'superadmin') {
-      await syncToFrontendData(productId, updates)
-    }
+    const updatedProduct = await updateProduct(productId, updates)
+    invalidateLiveFeedCaches()
     
     return NextResponse.json(updatedProduct)
   } catch (error) {
@@ -214,21 +190,97 @@ async function checkUpdatePermission(
   return false
 }
 
-async function updateProduct(productId: string, updates: any, userId: string) {
-  // In production, this would update the database
-  // For now, return the updated product
-  const timestamp = new Date().toISOString()
-  
-  return {
-    ...updates,
-    id: productId,
-    lastUpdatedBy: userId,
-    lastUpdatedAt: timestamp
-  }
-}
+async function updateProduct(productId: string, updates: any) {
+  const { rows: columnRows } = await query<{ column_name: string }>(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name = 'products'`
+  )
+  const availableColumns = new Set(columnRows.map(row => row.column_name))
 
-async function syncToFrontendData(productId: string, updates: any) {
-  // In production, this would trigger a sync to update the TypeScript data files
-  // This ensures the static data stays in sync with database changes
-  console.log(`Syncing product ${productId} to frontend data files...`)
+  const fieldMap: Record<string, string> = {
+    name: 'name',
+    name_he: 'name_he',
+    nameHe: 'name_he',
+    description: 'description',
+    description_he: 'description_he',
+    descriptionHe: 'description_he',
+    price: 'price',
+    original_price: 'original_price',
+    originalPrice: 'original_price',
+    category: 'category',
+    image: 'image_url',
+    image_url: 'image_url',
+    images: 'image_gallery',
+    image_gallery: 'image_gallery',
+    tags: 'tags',
+    status: 'status',
+    stock_quantity: 'stock_quantity',
+    stockQuantity: 'stock_quantity',
+    in_stock: 'in_stock',
+    inStock: 'in_stock',
+    unit: 'unit',
+    is_vegan: 'is_vegan',
+    vegan: 'is_vegan',
+    is_kosher: 'is_kosher',
+    kosher: 'is_kosher',
+    is_organic: 'is_organic',
+    organic: 'is_organic',
+    is_gluten_free: 'is_gluten_free',
+    glutenFree: 'is_gluten_free',
+    nutritional_info: 'nutritional_info',
+    nutritionalInfo: 'nutritional_info',
+    ingredients: 'ingredients',
+    allergens: 'allergens',
+    specifications: 'specifications',
+  }
+
+  const arrayColumns = new Set(['image_gallery', 'tags', 'ingredients', 'allergens'])
+  const jsonColumns = new Set(['nutritional_info', 'specifications'])
+  const updateFields: string[] = []
+  const values: any[] = [productId]
+  const seenColumns = new Set<string>()
+  let hasWritableField = false
+
+  for (const [field, column] of Object.entries(fieldMap)) {
+    if (updates[field] === undefined || seenColumns.has(column) || !availableColumns.has(column)) continue
+
+    let value = updates[field]
+    if (arrayColumns.has(column)) {
+      value = Array.isArray(value)
+        ? value.map(String).filter(Boolean)
+        : String(value || '').split(',').map(item => item.trim()).filter(Boolean)
+    }
+    if (jsonColumns.has(column) && value === '') {
+      value = null
+    }
+
+    values.push(value)
+    updateFields.push(`${column} = $${values.length}`)
+    seenColumns.add(column)
+    hasWritableField = true
+  }
+
+  if (!hasWritableField) {
+    throw new Error('No valid product fields to update')
+  }
+
+  if (availableColumns.has('updated_at')) {
+    updateFields.push('updated_at = NOW()')
+  }
+
+  const { rows } = await query(
+    `UPDATE products
+     SET ${updateFields.join(', ')}
+     WHERE id = $1
+     RETURNING *`,
+    values
+  )
+
+  if (!rows[0]) {
+    throw new Error('Product not found')
+  }
+
+  return rows[0]
 }

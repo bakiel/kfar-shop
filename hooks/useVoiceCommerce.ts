@@ -100,7 +100,7 @@ export function useVoiceCommerce() {
       return [];
     } catch (error) {
       console.error('Search error:', error);
-      performanceTracker.trackError('search', error.message, { query });
+      performanceTracker.trackError('search', error instanceof Error ? error.message : String(error), { query });
       return [];
     } finally {
       performanceTracker.endTimer('search');
@@ -464,7 +464,7 @@ export function useVoiceCommerce() {
         
       } catch (error) {
         console.error('Command processing error:', error);
-        performanceTracker.trackError('system', error.message, { transcript });
+        performanceTracker.trackError('system', error instanceof Error ? error.message : String(error), { transcript });
         
         // Fallback to basic pattern matching
         let matched = false;

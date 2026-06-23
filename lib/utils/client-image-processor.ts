@@ -8,13 +8,80 @@ interface ImageDimensions {
   height: number;
 }
 
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export function validateImageFile(file: File): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  if (!file.type.startsWith('image/')) {
+    errors.push('Please upload an image file.');
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    errors.push('Image must be smaller than 10MB.');
+  }
+  return { valid: errors.length === 0, errors };
+}
+
+export async function resizeImageClient(
+  file: File,
+  maxWidth: number,
+  maxHeight: number,
+  quality = 0.9
+): Promise<{ dataUrl: string }> {
+  const imageDataUrl = await fileToDataUrl(file);
+  const resized = await processImageClientSide(imageDataUrl, { width: maxWidth, height: maxHeight }, quality);
+  return { dataUrl: resized };
+}
+
+export async function createSquareCrop(imageDataUrl: string, size: number): Promise<string> {
+  return processImageClientSide(imageDataUrl, { width: size, height: size });
+}
+
+export async function compressToSize(
+  imageDataUrl: string,
+  maxKb: number,
+  format: 'jpeg' | 'png' = 'jpeg'
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      let quality = 0.9;
+      let output = canvas.toDataURL(`image/${format}`, quality);
+      while (((output.length * 3) / 4 / 1024) > maxKb && quality > 0.45) {
+        quality -= 0.1;
+        output = canvas.toDataURL(`image/${format}`, quality);
+      }
+      resolve(output);
+    };
+    img.onerror = () => reject(new Error('Failed to load image for compression'));
+    img.src = imageDataUrl;
+  });
+}
+
 /**
  * Process image on client-side before upload
  * Converts to JPEG and resizes maintaining aspect ratio
  */
 export async function processImageClientSide(
   imageDataUrl: string,
-  targetDimensions: ImageDimensions
+  targetDimensions: ImageDimensions,
+  quality = 0.85
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -71,7 +138,6 @@ export async function processImageClientSide(
         );
         
         // Convert to JPEG with quality setting
-        const quality = 0.85; // 85% quality for good balance
         const processedDataUrl = canvas.toDataURL('image/jpeg', quality);
         
         // Check file size and adjust quality if needed
@@ -103,7 +169,11 @@ export async function processImageClientSide(
 /**
  * Get image dimensions from data URL
  */
-export function getImageDimensions(imageDataUrl: string): Promise<ImageDimensions> {
+export async function getImageDimensions(imageDataUrlOrFile: string | File): Promise<ImageDimensions> {
+  const imageDataUrl = typeof imageDataUrlOrFile === 'string'
+    ? imageDataUrlOrFile
+    : await fileToDataUrl(imageDataUrlOrFile);
+
   return new Promise((resolve, reject) => {
     const img = new Image();
     

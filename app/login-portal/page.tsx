@@ -3,224 +3,154 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ArrowRight, Handshake, Home, KeyRound, ShieldCheck, ShoppingBag, Store, UserPlus } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { KeyRound, ShoppingBag, Store, Crown, UserPlus, Handshake, TrendingUp, Rocket, ArrowRight, FlaskConical } from 'lucide-react';
+
+const roleCards = [
+  {
+    id: 'customer',
+    titleEn: 'Customer',
+    titleHe: 'לקוחות',
+    descriptionEn: 'Shop the marketplace, track orders, save favorites, and manage rewards.',
+    descriptionHe: 'קניות בשוק, מעקב הזמנות, שמירת מועדפים וניהול הטבות.',
+    href: '/customer/login?role=customer',
+    ctaEn: 'Customer Login',
+    ctaHe: 'כניסת לקוחות',
+    secondaryHref: '/customer/onboarding',
+    secondaryEn: 'Customer Sign Up',
+    secondaryHe: 'הרשמת לקוחות',
+    accent: '#478c0b',
+    icon: ShoppingBag,
+    secondaryIcon: UserPlus,
+  },
+  {
+    id: 'vendor',
+    titleEn: 'Vendor',
+    titleHe: 'ספקים',
+    descriptionEn: 'Manage products, orders, store details, bundles, and customer activity.',
+    descriptionHe: 'ניהול מוצרים, הזמנות, פרטי חנות, חבילות ופעילות לקוחות.',
+    href: '/vendor/login',
+    ctaEn: 'Vendor Portal',
+    ctaHe: 'פורטל ספקים',
+    secondaryHref: '/vendor/onboarding',
+    secondaryEn: 'Become a Vendor',
+    secondaryHe: 'הצטרפות כספק',
+    accent: '#f6af0d',
+    icon: Store,
+    secondaryIcon: Handshake,
+  },
+  {
+    id: 'admin',
+    titleEn: 'Admin',
+    titleHe: 'ניהול',
+    descriptionEn: 'Authorized access for marketplace operations and account support.',
+    descriptionHe: 'כניסה מורשית לניהול השוק ותמיכה בחשבונות.',
+    href: '/admin/login',
+    ctaEn: 'Admin Access',
+    ctaHe: 'כניסת מנהלים',
+    secondaryHref: '/support',
+    secondaryEn: 'Need help?',
+    secondaryHe: 'צריך עזרה?',
+    accent: '#c23c09',
+    icon: ShieldCheck,
+    secondaryIcon: KeyRound,
+  },
+];
 
 export default function LoginPortal() {
-  const { t, isRTL } = useLanguage();
-  
+  const { language, isRTL } = useLanguage();
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#fef9ef' }}>
-      {/* Hero Section - KFAR Design System Aligned */}
-      <div className="relative h-[300px] overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(71, 140, 11, 0.1) 35px, rgba(71, 140, 11, 0.1) 70px)'
-          }}></div>
-        </div>
-        
-        {/* Decorative Elements */}
-        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full animate-pulse" style={{ backgroundColor: '#f6af0d', opacity: 0.2 }}></div>
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full animate-pulse" style={{ backgroundColor: '#478c0b', opacity: 0.2, animationDelay: '1s' }}></div>
-        
-        <div className="relative z-10 flex items-center justify-center h-full text-center px-4">
-          <div>
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-semibold shadow-lg mb-4 animate-fade-in" style={{ backgroundColor: '#f6af0d' }}>
-              <KeyRound className="w-4 h-4 stroke-[1.5]" />
-              <span>Secure Access</span>
+    <main
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className="min-h-screen bg-[#fef9ef] text-[#3a3a1d]"
+    >
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex items-center justify-between gap-4">
+          <Link href="/" className="inline-flex items-center cursor-pointer">
+            <Image
+              src="/images/logos/kfar_logo_primary_horizontal.png"
+              alt="KFAR Marketplace"
+              width={168}
+              height={50}
+              className="h-12 w-auto"
+              priority
+            />
+          </Link>
+          <Link
+            href="/marketplace"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#478c0b]/20 bg-white px-3 py-2 text-sm font-semibold text-[#478c0b] shadow-sm transition-colors hover:bg-[#478c0b]/5"
+          >
+            <Home className="h-4 w-4 stroke-[1.5]" />
+            {language === 'he' ? 'חזרה לשוק' : 'Back to Marketplace'}
+          </Link>
+        </header>
+
+        <section className="flex flex-1 flex-col justify-center py-10 sm:py-14">
+          <div className="mx-auto mb-8 max-w-2xl text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-lg border border-[#f6af0d]/30 bg-white px-3 py-2 text-sm font-semibold text-[#3a3a1d] shadow-sm">
+              <KeyRound className="h-4 w-4 text-[#478c0b] stroke-[1.5]" />
+              {language === 'he' ? 'גישה מאובטחת לחשבון' : 'Secure Account Access'}
             </div>
-            
-            <h1 className="text-3xl md:text-5xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
-              {t('KFAR Access Portal')}
+            <h1 className="font-display text-3xl font-bold leading-tight text-[#3a3a1d] sm:text-5xl">
+              {language === 'he' ? 'בחרו איך להיכנס ל-KFAR' : 'Choose Your KFAR Account'}
             </h1>
-            <p className="text-lg md:text-xl" style={{ color: '#478c0b' }}>
-              {t('Choose your role to continue')}
+            <p className="mx-auto mt-3 max-w-xl text-base leading-7 text-gray-600">
+              {language === 'he'
+                ? 'כניסה אחת ברורה ללקוחות, ספקים וצוות הניהול של השוק.'
+                : 'One clear access point for customers, store owners, and marketplace administrators.'}
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* Login Options */}
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* Customer Login */}
-          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-            <div className="relative p-8 text-center" style={{ backgroundColor: '#478c0b' }}>
-              {/* Decorative background */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-4 right-4 w-16 h-16 rounded-full" style={{ backgroundColor: '#f6af0d' }}></div>
-                <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full" style={{ backgroundColor: '#cfe7c1' }}></div>
-              </div>
-              
-              <div className="relative z-10 text-white">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <ShoppingBag className="w-7 h-7 stroke-[1.5]" />
-                </div>
-                <h3 className="text-2xl font-bold mb-2">{t('Customer')}</h3>
-                <p className="opacity-90 text-lg">{t('Shop & track your orders')}</p>
-              </div>
-            </div>
-            <div className="p-8">
-              <div className="space-y-6">
-                <div className="text-center">
-                  <Link 
-                    href="/customer/login?role=customer"
-                    className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-                    style={{ backgroundColor: '#478c0b' }}
-                  >
-                    <ShoppingBag className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
-                    {t('Customer Login')}
-                  </Link>
-                </div>
-                
-                <div className="text-center">
-                  <div className="rounded-2xl p-4 border-2" style={{ backgroundColor: '#cfe7c1', borderColor: '#478c0b' }}>
-                    <div className="font-semibold mb-2" style={{ color: '#3a3a1d' }}>{t('Demo Access:')}</div>
-                    <div className="text-sm rounded-xl p-3" style={{ backgroundColor: 'rgba(71, 140, 11, 0.1)', color: '#3a3a1d' }}>
-                      {t('Use any email/password')}<br/>
-                      {t('to create a demo account')}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="text-center">
-                  <Link 
-                    href="/customer/onboarding"
-                    className="inline-flex items-center gap-2 text-sm font-semibold hover:underline transition-colors"
-                    style={{ color: '#478c0b' }}
-                  >
-                    <UserPlus className="w-4 h-4 stroke-[1.5]" />
-                    {t('New? Start onboarding →')}
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {roleCards.map((card) => {
+              const Icon = card.icon;
+              const SecondaryIcon = card.secondaryIcon;
+              const isAdmin = card.id === 'admin';
 
-          {/* Vendor Login */}
-          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-            <div className="relative p-8 text-center" style={{ backgroundColor: '#f6af0d' }}>
-              {/* Decorative background */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-4 right-4 w-16 h-16 rounded-full" style={{ backgroundColor: '#c23c09' }}></div>
-                <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full" style={{ backgroundColor: '#478c0b' }}></div>
-              </div>
-              
-              <div className="relative z-10 text-white">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <Store className="w-7 h-7 stroke-[1.5]" />
-                </div>
-                <h3 className="text-2xl font-bold mb-2">{t('Vendor')}</h3>
-                <p className="opacity-90 text-lg">{t('Manage your store')}</p>
-              </div>
-            </div>
-            <div className="p-8">
-              <div className="space-y-6">
-                <div className="text-center">
-                  <Link 
-                    href="/customer/login?role=vendor"
-                    className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-                    style={{ backgroundColor: '#f6af0d' }}
-                  >
-                    <Store className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
-                    {t('Vendor Portal')}
-                  </Link>
-                </div>
-                
-                <div className="text-center">
-                  <Link 
-                    href="/vendor/onboarding"
-                    className="inline-flex items-center gap-2 text-sm font-semibold hover:underline transition-colors"
-                    style={{ color: '#f6af0d' }}
-                  >
-                    <Handshake className="w-4 h-4 stroke-[1.5]" />
-                    {t('New vendor? Join us →')}
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Admin Login */}
-          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-            <div className="relative p-8 text-center" style={{ backgroundColor: '#c23c09' }}>
-              {/* Decorative background */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-4 right-4 w-16 h-16 rounded-full" style={{ backgroundColor: '#f6af0d' }}></div>
-                <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full" style={{ backgroundColor: '#478c0b' }}></div>
-              </div>
-              
-              <div className="relative z-10 text-white">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                  <Crown className="w-7 h-7 stroke-[1.5]" />
-                </div>
-                <h3 className="text-2xl font-bold mb-2">{t('Admin')}</h3>
-                <p className="opacity-90 text-lg">{t('Platform management')}</p>
-              </div>
-            </div>
-            <div className="p-8">
-              <div className="space-y-6">
-                <div className="text-center">
-                  <Link 
-                    href="/customer/login?role=admin"
-                    className="inline-block w-full py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-                    style={{ backgroundColor: '#c23c09' }}
-                  >
-                    <Crown className="w-5 h-5 stroke-[1.5] mr-2 inline-block" />
-                    {t('Admin Access')}
-                  </Link>
-                </div>
-                
-                <div className="text-center">
-                  <Link 
-                    href="/admin/dashboard"
-                    className="inline-flex items-center gap-2 text-sm font-semibold hover:underline transition-colors"
-                    style={{ color: '#c23c09' }}
-                  >
-                    <TrendingUp className="w-4 h-4 stroke-[1.5]" />
-                    {t('Platform overview →')}
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Demo Button */}
-        <div className="text-center mt-16">
-          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2" style={{ borderColor: '#f6af0d' }}>
-            <div className="relative p-8">
-              {/* Decorative elements */}
-              <div className="absolute top-4 right-4 w-12 h-12 rounded-full animate-pulse" style={{ backgroundColor: '#cfe7c1', opacity: 0.5 }}></div>
-              <div className="absolute bottom-4 left-4 w-8 h-8 rounded-full animate-pulse" style={{ backgroundColor: '#f6af0d', opacity: 0.3, animationDelay: '0.5s' }}></div>
-              
-              <div className="relative z-10">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ backgroundColor: '#f6af0d' }}>
-                  <FlaskConical className="w-7 h-7 stroke-[1.5] text-white" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4" style={{ color: '#3a3a1d' }}>
-                  🧪 {t('Just Testing?')}
-                </h3>
-                <p className="mb-6 text-lg" style={{ color: '#6b7280' }}>
-                  {t('Skip the login and test all features with our demo center')}
-                </p>
-                <Link 
-                  href="/demo-test" 
-                  className="inline-flex items-center gap-3 px-8 py-4 text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
-                  style={{ backgroundColor: '#f6af0d' }}
+              return (
+                <article
+                  key={card.id}
+                  className={`flex h-full flex-col rounded-lg border bg-white p-6 shadow-sm ${
+                    isAdmin ? 'border-[#c23c09]/20' : 'border-gray-100'
+                  }`}
                 >
-                  <Rocket className="w-5 h-5 stroke-[1.5]" />
-                  <span>{t('Open Demo Center')}</span>
-                  <ArrowRight className="w-4 h-4 stroke-[1.5]" />
-                </Link>
-              </div>
-            </div>
+                  <div
+                    className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: `${card.accent}14`, color: card.accent }}
+                  >
+                    <Icon className="h-6 w-6 stroke-[1.5]" />
+                  </div>
+                  <h2 className="text-xl font-bold text-[#3a3a1d]">
+                    {language === 'he' ? card.titleHe : card.titleEn}
+                  </h2>
+                  <p className="mt-2 min-h-[72px] text-sm leading-6 text-gray-600">
+                    {language === 'he' ? card.descriptionHe : card.descriptionEn}
+                  </p>
+
+                  <div className="mt-auto pt-6">
+                    <Link
+                      href={card.href}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-bold text-white shadow-sm transition-transform hover:-translate-y-0.5"
+                      style={{ backgroundColor: card.accent }}
+                    >
+                      {language === 'he' ? card.ctaHe : card.ctaEn}
+                      <ArrowRight className={`h-4 w-4 stroke-[1.5] ${isRTL ? 'rotate-180' : ''}`} />
+                    </Link>
+                    <Link
+                      href={card.secondaryHref}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:border-[#478c0b]/30 hover:text-[#478c0b]"
+                    >
+                      <SecondaryIcon className="h-4 w-4 stroke-[1.5]" />
+                      {language === 'he' ? card.secondaryHe : card.secondaryEn}
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

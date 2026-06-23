@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { Store, Star, Truck, Clock, Leaf, Search, SlidersHorizontal, Package, ChevronRight, Sparkles, Heart, Users } from 'lucide-react'
-import { vendorStores } from '@/lib/data/wordpress-style-data-layer'
 import { useLanguage } from '@/lib/context/LanguageContext'
 
 // Local vendor interface
@@ -48,20 +47,25 @@ export default function VendorsPage() {
     loadVendors()
   }, [])
 
-  const loadVendors = () => {
+  const loadVendors = async () => {
     try {
       setLoading(true)
-      // Use local data from wordpress-style-data-layer
-      const vendorData: Vendor[] = Object.entries(vendorStores).map(([id, store]) => ({
-        id,
-        name: store.name,
-        description: store.description,
-        logo: store.logo,
-        banner: vendorBanners[id as keyof typeof vendorBanners] || '/images/banners/1.jpg',
-        category: store.tags?.includes('food') ? 'food' : store.tags?.includes('merchandise') ? 'merchandise' : 'wellness',
-        rating: store.rating || 4.5,
-        product_count: store.products?.length || 0,
-        tags: store.tags
+      const response = await fetch('/api/vendors', { cache: 'no-store' })
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to load vendors')
+      }
+
+      const vendorData: Vendor[] = (data.vendors || []).map((vendor: any) => ({
+        id: vendor.id,
+        name: vendor.name,
+        description: vendor.description || '',
+        logo: vendor.logo,
+        banner: vendor.banner || vendorBanners[vendor.id as keyof typeof vendorBanners] || '/images/banners/1.jpg',
+        category: vendor.category || vendor.categories?.[0] || 'wellness',
+        rating: vendor.rating || 4.5,
+        product_count: vendor.productCount || 0,
+        tags: vendor.categories || []
       }))
       setVendors(vendorData)
     } catch (error) {
@@ -283,7 +287,7 @@ export default function VendorsPage() {
                 key={vendor.id}
                 variants={listItem}
                 whileHover={{ y: -6, boxShadow: '0 20px 40px -8px rgba(0,0,0,0.12)' }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
+                transition={{ duration: 0.25, ease: 'easeOut' as const }}
               >
                 <Link href={`/store/${vendor.id}`}>
                   <div className="bg-white rounded-2xl overflow-hidden cursor-pointer group h-full border border-gray-100/80" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)' }}>

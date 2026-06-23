@@ -17,9 +17,9 @@ export interface VendorData {
   description: string;
   category: string;
   is_active: boolean;
-  contact_email: string;
-  contact_phone: string;
-  address: string;
+  contact_email?: string;
+  contact_phone?: string;
+  address?: string;
   product_count?: number;
 }
 
@@ -81,6 +81,7 @@ export class MarketplaceDatabase {
   
   // Get vendor by slug or name
   async getVendorBySlug(slug: string): Promise<VendorData | null> {
+    if (!pool) return null;
     try {
       const result = await pool.query(
         'SELECT * FROM vendors WHERE slug = $1 OR LOWER(name) = LOWER($1) AND is_active = true',
@@ -96,6 +97,7 @@ export class MarketplaceDatabase {
   
   // Search products by query
   async searchProducts(query: string, limit: number = 10): Promise<ProductData[]> {
+    if (!pool) return [];
     try {
       const searchTerm = `%${query}%`;
       const result = await pool.query(`
@@ -134,6 +136,7 @@ export class MarketplaceDatabase {
   
   // Get products by vendor
   async getVendorProducts(vendorId: string): Promise<ProductData[]> {
+    if (!pool) return [];
     try {
       const result = await pool.query(`
         SELECT 
@@ -159,6 +162,7 @@ export class MarketplaceDatabase {
   
   // Get products by category
   async getProductsByCategory(category: string): Promise<ProductData[]> {
+    if (!pool) return [];
     try {
       const result = await pool.query(`
         SELECT 
@@ -184,6 +188,7 @@ export class MarketplaceDatabase {
   
   // Get featured/popular products
   async getFeaturedProducts(limit: number = 6): Promise<ProductData[]> {
+    if (!pool) return [];
     try {
       const result = await pool.query(`
         SELECT 

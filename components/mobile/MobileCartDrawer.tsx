@@ -72,7 +72,7 @@ export default function MobileCartDrawer({ isOpen, onClose }: MobileCartDrawerPr
                     {/* Product Image */}
                     <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                       <Image
-                        src={item.image}
+                        src={item.image || '/images/placeholder-product.jpg'}
                         alt={item.name || "Image"}
                         fill
                         className="object-cover"
@@ -84,7 +84,7 @@ export default function MobileCartDrawer({ isOpen, onClose }: MobileCartDrawerPr
                       <h4 className="font-semibold text-sm mb-1" style={{ color: '#3a3a1d' }}>
                         {item.name}
                       </h4>
-                      <p className="text-xs text-gray-600 mb-2">{item.vendorName}</p>
+                      <p className="text-xs text-gray-600 mb-2">{item.vendorName || item.vendor || 'Marketplace Vendor'}</p>
                       
                       {/* Quantity and Price */}
                       <div className="flex items-center justify-between">

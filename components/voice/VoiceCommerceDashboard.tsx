@@ -83,7 +83,7 @@ export function VoiceCommerceDashboard() {
           <div className="text-sm text-gray-600">Avg Confidence</div>
           <div className="text-2xl font-bold">
             {metrics.confidenceScores.length > 0 
-              ? (metrics.confidenceScores.reduce((a, b) => a + b, 0) / metrics.confidenceScores.length).toFixed(2)
+              ? (metrics.confidenceScores.reduce((a: number, b: number) => a + b, 0) / metrics.confidenceScores.length).toFixed(2)
               : 'N/A'}
           </div>
         </div>
@@ -132,7 +132,7 @@ export function VoiceCommerceDashboard() {
             </div>
             
             <div className="space-y-2">
-              {health.diagnostics.map((diagnostic, index) => (
+              {health.diagnostics.map((diagnostic: any, index: number) => (
                 <div key={index} className="flex items-start space-x-2 p-3 bg-gray-50 rounded">
                   <span className={`text-lg ${getStatusColor(diagnostic.status)}`}>
                     {getStatusIcon(diagnostic.status)}

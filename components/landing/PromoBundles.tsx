@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useCart } from '@/lib/context/CartContext';
+import { createBundleCartItem } from '@/lib/utils/bundle-cart';
 import type { Bundle, LandingProduct } from '@/lib/types/landing';
 
 interface PromoBundlesProps {
@@ -51,15 +52,15 @@ export default function PromoBundles({ bundles, featuredProducts }: PromoBundles
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+      transition: { duration: 0.5, ease: 'easeOut' as const },
     },
   };
 
   const hasBundles = bundles && bundles.length > 0;
-  const showFeatured = !hasBundles && featuredProducts && featuredProducts.length > 0;
+  if (!hasBundles) return null;
 
   // Show max 3 bundles on landing page
-  const displayBundles = hasBundles ? bundles.slice(0, 3) : [];
+  const displayBundles = bundles.slice(0, 3);
 
   return (
     <section
@@ -81,47 +82,40 @@ export default function PromoBundles({ bundles, featuredProducts }: PromoBundles
             style={{ backgroundColor: `${BRAND.flame}15`, color: BRAND.flame }}
           >
             <Gift className="w-4 h-4 stroke-[1.5]" />
-            <span>{hasBundles ? t('Bundle & Save') : t('Popular This Week')}</span>
+            <span>{t('Bundle & Save')}</span>
           </motion.div>
           <h2 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: BRAND.soil }}>
-            {hasBundles
-              ? (language === 'he' ? 'חבילות חיסכון' : 'Bundle & Save')
-              : t('Popular This Week')
-            }
+            {language === 'he' ? 'חבילות חיסכון' : 'Bundle & Save'}
           </h2>
-          {hasBundles && (
-            <p className="text-base text-gray-500 max-w-lg mx-auto">
-              {language === 'he'
-                ? 'קנו ביחד, חסכו יותר. חבילות מיוחדות מהקהילה שלנו'
-                : 'Buy together, save more. Curated bundles from our community vendors'
-              }
-            </p>
-          )}
+          <p className="text-base text-gray-500 max-w-lg mx-auto">
+            {language === 'he'
+              ? 'קנו ביחד, חסכו יותר. חבילות מיוחדות מהקהילה שלנו'
+              : 'Buy together, save more. Curated bundles from our community vendors'
+            }
+          </p>
         </motion.div>
 
         {/* Bundle Cards - Premium Grid */}
-        {hasBundles && (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate={isInView ? 'visible' : 'hidden'}
-          >
-            {displayBundles.map((bundle, i) => (
-              <BundleCard
-                key={bundle.id}
-                bundle={bundle}
-                index={i}
-                language={language}
-                isRTL={isRTL}
-                t={t}
-              />
-            ))}
-          </motion.div>
-        )}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {displayBundles.map((bundle, i) => (
+            <BundleCard
+              key={bundle.id}
+              bundle={bundle}
+              index={i}
+              language={language}
+              isRTL={isRTL}
+              t={t}
+            />
+          ))}
+        </motion.div>
 
         {/* "See All Bundles" link */}
-        {hasBundles && bundles.length > 3 && (
+        {bundles.length > 3 && (
           <motion.div
             className="text-center mt-8"
             initial={{ opacity: 0 }}
@@ -137,50 +131,6 @@ export default function PromoBundles({ bundles, featuredProducts }: PromoBundles
               <ChevronRight className={`w-4 h-4 stroke-[1.5] ${isRTL ? 'rotate-180' : ''}`} />
             </Link>
           </motion.div>
-        )}
-
-        {/* Featured Products Fallback */}
-        {showFeatured && (
-          <>
-            {/* Mobile: horizontal scroll */}
-            <div className="sm:hidden -mx-4 px-4">
-              <motion.div
-                className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
-                style={{ WebkitOverflowScrolling: 'touch' }}
-                variants={containerVariants}
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-              >
-                {featuredProducts.slice(0, 6).map((product) => (
-                  <div key={product.id} className="flex-shrink-0 w-[65vw] max-w-[240px] snap-start">
-                    <FeaturedProductCard
-                      product={product}
-                      language={language}
-                      isRTL={isRTL}
-                      t={t}
-                    />
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-            {/* Desktop: grid */}
-            <motion.div
-              className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-            >
-              {featuredProducts.slice(0, 4).map((product) => (
-                <FeaturedProductCard
-                  key={product.id}
-                  product={product}
-                  language={language}
-                  isRTL={isRTL}
-                  t={t}
-                />
-              ))}
-            </motion.div>
-          </>
         )}
       </div>
     </section>
@@ -216,18 +166,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
   const theme = themes[index % themes.length];
 
   const handleAddBundle = () => {
-    // Add all products in the bundle to cart
-    bundle.products.forEach((product) => {
-      cart.addToCart({
-        id: product.id,
-        name: product.name,
-        vendorId: '',
-        vendorName: '',
-        price: product.price,
-        quantity: 1,
-        image: product.image,
-      });
-    });
+    cart.addToCart(createBundleCartItem(bundle));
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };
@@ -237,7 +176,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+      transition: { duration: 0.5, ease: 'easeOut' as const },
     },
   };
 
@@ -245,7 +184,7 @@ function BundleCard({ bundle, index, language, isRTL, t }: BundleCardProps) {
     <motion.div
       variants={itemVariants}
       whileHover={{ y: -6, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)' }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.2, ease: 'easeOut' as const }}
       className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 group flex flex-col"
     >
       {/* Header with gradient + overlaid product thumbnails — links to detail page */}
@@ -422,7 +361,7 @@ function FeaturedProductCard({ product, language, isRTL, t }: FeaturedProductCar
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+      transition: { duration: 0.5, ease: 'easeOut' as const },
     },
   };
 
@@ -434,7 +373,7 @@ function FeaturedProductCard({ product, language, isRTL, t }: FeaturedProductCar
       >
         <motion.div
           whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)' }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          transition={{ duration: 0.2, ease: 'easeOut' as const }}
           className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100"
         >
           {/* Product Image */}

@@ -8,23 +8,30 @@
 const fs = require('fs');
 const path = require('path');
 
-// Import vendor catalogs
-const tevaDeli = require('../lib/data/teva-deli-complete-catalog');
-const gahnDelight = require('../lib/data/gahn-delight-complete-catalog.json');
-const gardenOfLight = require('../lib/data/garden-of-light-complete-catalog.json');
-const peopleStore = require('../lib/data/people-store-complete-catalog.json');
-const queensCuisine = require('../lib/data/queens-cuisine-complete-catalog.json');
-const vopShop = require('../lib/data/vop-shop-complete-catalog.json');
+const baseUrl = process.env.KFAR_KNOWLEDGE_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://kfarapp.com';
 
-// Combine all product data
-const allProducts = [
-  ...tevaDeli.products.map(p => ({ ...p, vendorId: 'teva-deli', vendor: 'Teva Deli' })),
-  ...gahnDelight.products.map(p => ({ ...p, vendorId: 'gahn-delight', vendor: 'Gahn Delight' })),
-  ...gardenOfLight.products.map(p => ({ ...p, vendorId: 'garden-of-light', vendor: 'Garden of Light' })),
-  ...peopleStore.products.map(p => ({ ...p, vendorId: 'people-store', vendor: 'People Store' })),
-  ...queensCuisine.products.map(p => ({ ...p, vendorId: 'queens-cuisine', vendor: "Queen's Cuisine" })),
-  ...vopShop.products.map(p => ({ ...p, vendorId: 'vop-shop', vendor: 'VOP Shop' })),
-];
+async function fetchJson(apiPath) {
+  const response = await fetch(new URL(apiPath, baseUrl), {
+    headers: { 'Cache-Control': 'no-cache' },
+  });
+
+  if (!response.ok) {
+    throw new Error(`${apiPath} returned HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+function normalizeProduct(product) {
+  return {
+    ...product,
+    vendor: product.vendorName,
+    isVegan: product.vegan !== false,
+    isKosher: Boolean(product.kashrut),
+    isOrganic: product.organic === true,
+    isGlutenFree: product.glutenFree === true,
+  };
+}
 
 // Additional knowledge data
 const additionalKnowledge = {
@@ -169,76 +176,74 @@ const additionalKnowledge = {
   ]
 };
 
-// Generate knowledge base initialization file
-const knowledgeBaseInit = {
-  products: allProducts,
-  vendors: [
-    {
-      id: 'teva-deli',
-      name: 'Teva Deli',
-      productCount: tevaDeli.products.length,
-      description: 'Israeli vegan deli specializing in plant-based meat alternatives',
-      specialties: ['seitan', 'tofu', 'meat alternatives', 'Israeli cuisine'],
-    },
-    {
-      id: 'gahn-delight',
-      name: 'Gahn Delight',
-      productCount: gahnDelight.products.length,
-      description: 'Artisanal vegan ice cream and frozen desserts',
-      specialties: ['ice cream', 'desserts', 'sugar-free', 'frozen treats'],
-    },
-    {
-      id: 'garden-of-light',
-      name: 'Garden of Light',
-      productCount: gardenOfLight.products.length,
-      description: 'Fresh salads and healthy prepared foods',
-      specialties: ['salads', 'raw food', 'juices', 'healthy meals'],
-    },
-    {
-      id: 'people-store',
-      name: 'People Store',
-      productCount: peopleStore.products.length,
-      description: 'Community market with organic groceries and household items',
-      specialties: ['organic', 'bulk foods', 'fermented', 'eco-friendly'],
-    },
-    {
-      id: 'queens-cuisine',
-      name: "Queen's Cuisine",
-      productCount: queensCuisine.products.length,
-      description: 'Plant-based catering and prepared meals',
-      specialties: ['burgers', 'prepared meals', 'catering', 'Middle Eastern'],
-    },
-    {
-      id: 'vop-shop',
-      name: 'VOP Shop',
-      productCount: vopShop.products.length,
-      description: 'Village of Peace merchandise and cultural items',
-      specialties: ['merchandise', 'books', 'music', 'crafts', 'cultural items'],
-    },
-  ],
-  additionalKnowledge,
-  stats: {
-    totalProducts: allProducts.length,
-    totalVendors: 6,
-    priceRange: {
-      min: Math.min(...allProducts.map(p => p.price)),
-      max: Math.max(...allProducts.map(p => p.price)),
-      average: Math.round(allProducts.reduce((sum, p) => sum + p.price, 0) / allProducts.length),
-    },
-    categories: [...new Set(allProducts.map(p => p.category).filter(Boolean))],
+function buildPriceStats(products) {
+  const prices = products
+    .map(product => Number(product.price))
+    .filter(Number.isFinite);
+
+  return {
+    min: prices.length ? Math.min(...prices) : 0,
+    max: prices.length ? Math.max(...prices) : 0,
+    average: prices.length
+      ? Math.round(prices.reduce((sum, price) => sum + price, 0) / prices.length)
+      : 0,
+  };
+}
+
+async function main() {
+  const [productFeed, vendorFeed] = await Promise.all([
+    fetchJson('/api/products-db'),
+    fetchJson('/api/vendors'),
+  ]);
+
+  if (productFeed.source !== 'database' || productFeed.stale === true) {
+    throw new Error(`Product feed is not a fresh database feed (source=${productFeed.source}, stale=${productFeed.stale})`);
   }
-};
 
-// Write initialization data
-const outputPath = path.join(__dirname, '../lib/data/knowledge-base-init.json');
-fs.writeFileSync(outputPath, JSON.stringify(knowledgeBaseInit, null, 2));
+  if (vendorFeed.source !== 'database' || vendorFeed.stale === true) {
+    throw new Error(`Vendor feed is not a fresh database feed (source=${vendorFeed.source}, stale=${vendorFeed.stale})`);
+  }
 
-console.log('✅ Knowledge Base initialization data created!');
-console.log(`📊 Stats:`);
-console.log(`   - Total Products: ${knowledgeBaseInit.stats.totalProducts}`);
-console.log(`   - Total Vendors: ${knowledgeBaseInit.stats.totalVendors}`);
-console.log(`   - Price Range: ₪${knowledgeBaseInit.stats.priceRange.min} - ₪${knowledgeBaseInit.stats.priceRange.max}`);
-console.log(`   - Average Price: ₪${knowledgeBaseInit.stats.priceRange.average}`);
-console.log(`   - Categories: ${knowledgeBaseInit.stats.categories.length}`);
-console.log(`\n📁 Output: ${outputPath}`);
-console.log(`\n🚀 Next step: Run 'npm run init-knowledge-base' to populate the database`);
+  const products = (productFeed.products || []).map(normalizeProduct);
+  const vendors = (vendorFeed.vendors || []).map(vendor => ({
+    id: vendor.id,
+    name: vendor.name,
+    productCount: vendor.productCount || 0,
+    description: vendor.description || '',
+    specialties: vendor.categories || [],
+  }));
+
+  const knowledgeBaseInit = {
+    products,
+    vendors,
+    additionalKnowledge,
+    stats: {
+      totalProducts: products.length,
+      totalVendors: vendors.length,
+      priceRange: buildPriceStats(products),
+      categories: [...new Set(products.map(product => product.category).filter(Boolean))],
+    },
+    source: {
+      products: productFeed.source,
+      vendors: vendorFeed.source,
+      generatedAt: new Date().toISOString(),
+    },
+  };
+
+  const outputPath = path.join(__dirname, '../lib/data/knowledge-base-init.json');
+  fs.writeFileSync(outputPath, JSON.stringify(knowledgeBaseInit, null, 2));
+
+  console.log('Knowledge Base initialization data created from the live database feed');
+  console.log('Stats:');
+  console.log(`   - Total Products: ${knowledgeBaseInit.stats.totalProducts}`);
+  console.log(`   - Total Vendors: ${knowledgeBaseInit.stats.totalVendors}`);
+  console.log(`   - Price Range: ₪${knowledgeBaseInit.stats.priceRange.min} - ₪${knowledgeBaseInit.stats.priceRange.max}`);
+  console.log(`   - Average Price: ₪${knowledgeBaseInit.stats.priceRange.average}`);
+  console.log(`   - Categories: ${knowledgeBaseInit.stats.categories.length}`);
+  console.log(`Output: ${outputPath}`);
+}
+
+main().catch(error => {
+  console.error('Failed to create Knowledge Base initialization data:', error);
+  process.exit(1);
+});

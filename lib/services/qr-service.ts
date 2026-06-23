@@ -22,6 +22,7 @@ export type QRCodeType =
   | 'vendor'         // Vendor profile
   | 'support'        // Support ticket
   | 'membership'     // Digital ID card
+  | 'customer'       // Customer profile/card
   | 'event'          // Event check-in
   | 'discount'       // Discount/coupon
   | 'return'         // Return process

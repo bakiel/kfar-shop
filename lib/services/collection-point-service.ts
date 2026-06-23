@@ -147,7 +147,7 @@ export class CollectionPointService {
     const point = await this.getCollectionPoint(collectionPointId);
     if (!point) return [];
 
-    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     const hours = point.operatingHours[dayOfWeek];
     
     if (!hours || hours === 'closed') return [];

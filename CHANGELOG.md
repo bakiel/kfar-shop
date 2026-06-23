@@ -1,5 +1,16 @@
 # KFAR Marketplace Changelog
 
+## [2.2.0] - 2026-05-20
+
+### Launch Readiness
+- Added admin order detail management with status updates and resend-confirmation support.
+- Simplified admin bundle creation to name, bundle price, original price, product picker, and catalog visibility.
+- Added a build-time image manifest, resolver fallback, and image audit script; removed documented unsafe/duplicate community images.
+- Added checkout payment method selection with Cash on Delivery enabled and upcoming payment methods disabled.
+- Enforced Cash on Delivery only in order creation until a payment gateway is selected.
+- Added a Kfar-branded transactional email banner and order sequence strip for order emails.
+- Blocked synthetic COD placeholder email sends, preserved vendor order item names, and rejected mixed-vendor COD checkout until order splitting is implemented.
+
 ## [2.1.0] - 2025-01-21
 
 ### AI Shopping Assistant - Major Update
@@ -110,7 +121,7 @@
 GEMINI_API_KEY=your_key_here
 
 # Database (Hostinger VPS)
-DATABASE_URL=postgresql://kfar:kfar_secure_2025@72.61.201.237:5432/kfar_marketplace
+DATABASE_URL=postgresql://kfar:<password>@<vps-host>:5432/kfar_marketplace
 
 # Optional
 ELEVENLABS_API_KEY=fallback_tts

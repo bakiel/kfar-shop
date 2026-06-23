@@ -375,7 +375,7 @@ END:VCARD`;
             Print
           </button>
           
-          {navigator.share && (
+          {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
             <button
               onClick={shareQR}
               className="flex-1 px-4 py-2 bg-earth-flame text-white rounded-lg hover:bg-earth-flame-dark transition-colors flex items-center justify-center gap-2"

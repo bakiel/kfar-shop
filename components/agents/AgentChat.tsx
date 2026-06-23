@@ -123,7 +123,7 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
   };
   
   const handleQuickAction = async (action: string) => {
-    let result;
+    let result: any;
     
     switch (selectedAgent) {
       case 'vendor-support':
@@ -139,7 +139,7 @@ export default function AgentChat({ defaultAgent = 'customer-service', language 
     if (result.action === 'redirect' && result.url) {
       window.location.href = result.url;
     } else if (result.action === 'message' && result.content) {
-      addAgentMessage(result.content[language] || result.content);
+      addAgentMessage(typeof result.content === 'string' ? result.content : result.content[language]);
     }
   };
   

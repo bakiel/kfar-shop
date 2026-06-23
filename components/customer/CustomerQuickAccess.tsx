@@ -11,7 +11,8 @@ import {
   Gift, 
   Settings,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  ClipboardList
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -279,7 +280,7 @@ function CustomerMenu({ customerData, onLogout }: any) {
 
       {/* Quick Links */}
       <nav className="space-y-2">
-        <Link 
+        <Link
           href="/customer/dashboard"
           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
         >
@@ -287,12 +288,20 @@ function CustomerMenu({ customerData, onLogout }: any) {
           <span>My Dashboard</span>
         </Link>
 
-        <Link 
+        <Link
           href="/customer/orders"
           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <ShoppingBag className="h-4 w-4" style={{ color: '#478c0b' }} />
           <span>My Orders</span>
+        </Link>
+
+        <Link
+          href="/customer/shopping-list"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <ClipboardList className="h-4 w-4" style={{ color: '#478c0b' }} />
+          <span>Shopping List</span>
         </Link>
 
         <Link 
@@ -304,11 +313,11 @@ function CustomerMenu({ customerData, onLogout }: any) {
         </Link>
 
         <Link 
-          href="/customer/wishlist"
+          href="/customer/favorites"
           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <Heart className="h-4 w-4" style={{ color: '#478c0b' }} />
-          <span>Wishlist</span>
+          <span>Favorites</span>
         </Link>
 
         <Link 

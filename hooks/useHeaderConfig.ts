@@ -22,7 +22,7 @@ export function useHeaderConfig(): HeaderConfig {
   // Vendor store pages
   if (pathname.startsWith('/store/')) {
     const vendorId = params.vendorId as string;
-    const vendor = completeProductCatalog.find(v => v.id === vendorId);
+    const vendor = Object.values(completeProductCatalog).find((v: any) => v.id === vendorId);
     
     return {
       variant: 'vendor',
@@ -35,9 +35,9 @@ export function useHeaderConfig(): HeaderConfig {
         id: vendor.id,
         name: vendor.name,
         logo: vendor.logo,
-        rating: vendor.rating,
+        rating: (vendor as any).rating,
         productCount: vendor.products.length,
-        category: vendor.category || 'General'
+        category: (vendor as any).category || 'General'
       } : undefined,
       showCategories: true
     };
@@ -49,8 +49,8 @@ export function useHeaderConfig(): HeaderConfig {
     
     // Find which vendor this product belongs to
     let vendorId = null;
-    for (const vendor of completeProductCatalog) {
-      if (vendor.products.find(p => p.id === productId)) {
+    for (const vendor of Object.values(completeProductCatalog)) {
+      if (vendor.products.find((p: any) => p.id === productId)) {
         vendorId = vendor.id;
         break;
       }

@@ -9,7 +9,7 @@ import {
   Leaf, Star, Users, Heart, Quote, Gift, Zap, Award, TrendingUp
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { VENDOR_COUNT, TOTAL_PRODUCTS, getFeaturedProducts, getVendors } from '@/lib/data/wordpress-style-data-layer';
+import { VENDOR_COUNT, TOTAL_PRODUCTS, getFeaturedProducts, getVendors } from './archived-data';
 
 // Payment method SVG icons - Clean, properly rendered versions
 const PaymentIcons = {

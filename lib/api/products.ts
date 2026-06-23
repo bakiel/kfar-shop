@@ -1,7 +1,25 @@
 // Products API
 
 import { api } from './client';
-import { Product } from '@/lib/data/products';
+
+export interface Product {
+  id: string;
+  vendorId: string;
+  nameEn: string;
+  nameHe: string;
+  descriptionEn: string;
+  descriptionHe: string;
+  price: number;
+  unit: string;
+  category: string;
+  images: string[];
+  tags: string[];
+  dietaryInfo: string[];
+  stockStatus: 'in_stock' | 'out_of_stock';
+  featured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface ProductsQuery {
   category?: string;
@@ -14,6 +32,7 @@ export interface ProductsQuery {
   limit?: number;
   offset?: number;
   dietary_info?: string;
+  tags?: string;
 }
 
 export interface ApiProduct {

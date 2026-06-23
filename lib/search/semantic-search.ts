@@ -4,7 +4,22 @@
  * Designed to gracefully support semantic/embedding search when available.
  */
 
-import { EnhancedProduct } from '@/lib/data/wordpress-style-data-layer';
+export interface EnhancedProduct {
+  id: string;
+  name: string;
+  nameHe?: string | null;
+  description?: string | null;
+  category?: string | null;
+  vendorId?: string | null;
+  vendorName?: string | null;
+  tags?: string[];
+  ingredients?: string[];
+  inStock?: boolean;
+  featured?: boolean;
+  isFeatured?: boolean;
+  badge?: string | null;
+  [key: string]: any;
+}
 
 export interface ScoredProduct {
   product: EnhancedProduct;

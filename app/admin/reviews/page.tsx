@@ -68,10 +68,13 @@ export default function AdminReviewsPage() {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
-      const response = await fetch('/api/admin/reviews/moderate', {
-        method: 'POST',
+      const response = await fetch('/api/admin/reviews', {
+        method: 'PATCH',
         headers,
-        body: JSON.stringify({ reviewId, action })
+        body: JSON.stringify({
+          id: reviewId,
+          status: action === 'approve' ? 'approved' : 'rejected',
+        })
       });
 
       if (response.ok) {
@@ -91,12 +94,15 @@ export default function AdminReviewsPage() {
     }
   };
 
-  const filteredReviews = reviews.filter(review => 
-    review.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    review.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    review.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    review.product_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredReviews = reviews.filter(review => {
+    const haystack = [
+      review.title,
+      review.comment,
+      review.user_name,
+      review.product_name,
+    ].filter(Boolean).join(' ').toLowerCase();
+    return haystack.includes(searchTerm.toLowerCase());
+  });
 
   const stats = {
     total: reviews.length,

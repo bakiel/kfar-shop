@@ -6,10 +6,11 @@ import Image from 'next/image';
 import {
   ChevronDown, ShoppingBag, UtensilsCrossed, Home, Sparkles, CalendarDays,
   Mountain, Wrench, BookOpen, Headphones, HelpCircle, Truck, Shield,
-  Store, UserPlus, Info, ShoppingCart, Menu, X, FlaskConical, Users,
+  Store, UserPlus, Info, ShoppingCart, Menu, X, Users,
   MapPin, ConciergeBell, Mic
 } from 'lucide-react';
 import { useCart } from '@/lib/context/CartContext';
+import { useAuth } from '@/lib/context/AuthContext';
 import NotificationBell from '@/components/customer/NotificationBell';
 import CustomerQuickAccess from './CustomerQuickAccess';
 import UserAccountDropdown from './UserAccountDropdown';
@@ -27,6 +28,8 @@ const Header = () => {
   const [hideHeader, setHideHeader] = useState(false);
   const [language, setLanguage] = useState<'en' | 'he'>('en');
   const { getCartCount } = useCart();
+  const { user: authUser } = useAuth();
+  const notificationAccountId = authUser?.customerId || authUser?.id;
 
   // Load language preference on mount
   useEffect(() => {
@@ -419,24 +422,23 @@ const Header = () => {
                 </div>
               </div>
 
-              {/* Temporary Portal Testing Button */}
+              {/* Account Access */}
               <div className="relative group hidden sm:block">
                 <Link
                   href="/login-portal"
-                  className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed transition-all duration-300 hover:shadow-lg group"
+                  className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-all duration-300 hover:shadow-lg group"
                   style={{
                     borderColor: '#f6af0d',
                     backgroundColor: 'rgba(246, 175, 13, 0.05)'
                   }}
                 >
-                  <FlaskConical className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
-                  <span className="text-sm font-medium" style={{ color: '#3a3a1d' }}>Portal</span>
+                  <Users className="w-4 h-4 stroke-[1.5]" style={{ color: '#f6af0d' }} />
+                  <span className="text-sm font-medium" style={{ color: '#3a3a1d' }}>Account</span>
 
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                    <div className="font-bold mb-1">Testing Portal</div>
-                    <div>For development & testing purposes only</div>
-                    <div className="text-yellow-300 mt-1">Will be removed in production</div>
+                    <div className="font-bold mb-1">Account Access</div>
+                    <div>Customer, vendor, and admin login options</div>
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                       <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
                     </div>
@@ -447,8 +449,13 @@ const Header = () => {
               {/* Customer Quick Access */}
               <CustomerQuickAccess />
 
-              {/* Notifications - Show only for logged-in customers */}
-              <NotificationBell customerId={typeof window !== 'undefined' && localStorage.getItem('customerToken') ? 'demo-customer-001' : undefined} />
+              {/* Notifications */}
+              {(authUser?.role === 'customer' || authUser?.role === 'vendor') && notificationAccountId && (
+                <NotificationBell
+                  userId={notificationAccountId}
+                  notificationsHref={authUser.role === 'vendor' ? '/vendor/notifications' : '/customer/notifications'}
+                />
+              )}
 
               {/* User Account Dropdown */}
               <UserAccountDropdown />
@@ -729,7 +736,7 @@ const Header = () => {
                   <span className="text-base text-purple-600">Customer Login</span>
                 </Link>
                 <Link
-                  href="/customer/login?role=vendor"
+                  href="/vendor/login"
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-50 transition-all"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -737,7 +744,7 @@ const Header = () => {
                   <span className="text-base text-blue-600">Vendor Portal</span>
                 </Link>
                 <Link
-                  href="/customer/login?role=admin"
+                  href="/admin/login"
                   className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-green-50 transition-all"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -760,10 +767,10 @@ const Header = () => {
 
           {/* Mobile Menu Footer */}
           <div className="p-6 border-t">
-            {/* Temporary Portal Button for Mobile */}
+            {/* Account Access for Mobile */}
             <Link
               href="/login-portal"
-              className="w-full mb-3 py-4 rounded-xl border-2 border-dashed font-semibold text-lg flex items-center justify-center gap-3 relative"
+              className="w-full mb-3 py-4 rounded-xl border font-semibold text-lg flex items-center justify-center gap-3 relative"
               style={{
                 borderColor: '#f6af0d',
                 backgroundColor: 'rgba(246, 175, 13, 0.05)',
@@ -771,9 +778,8 @@ const Header = () => {
               }}
               onClick={() => setMobileMenuOpen(false)}
             >
-              <FlaskConical className="w-5 h-5 stroke-[1.5]" style={{ color: '#f6af0d' }} />
-              <span>Testing Portal</span>
-              <span className="absolute -top-2 -right-2 px-2 py-1 bg-yellow-500 text-white text-xs rounded-full">TEMP</span>
+              <Users className="w-5 h-5 stroke-[1.5]" style={{ color: '#f6af0d' }} />
+              <span>Account Access</span>
             </Link>
 
             <button

@@ -59,7 +59,7 @@ export interface ProductRecognition {
 
 export interface SmartQRContent {
   version: number;
-  type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
+  type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p' | 'customer';
   payload: any;
   metadata: {
     created: Date;

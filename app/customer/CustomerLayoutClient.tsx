@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, ShoppingCart, Gift, User, Heart
+  LayoutDashboard, ShoppingCart, Gift, User, Heart, ClipboardList
 } from 'lucide-react';
 import { PortalLayout, ConfirmDialog } from '@/components/portal';
 import type { MenuItem } from '@/components/portal';
@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 const customerMenuItems: MenuItem[] = [
   { id: 'dashboard', path: '/customer/dashboard', label: 'Dashboard', labelHe: 'לוח בקרה', icon: <LayoutDashboard className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'orders', path: '/customer/orders', label: 'My Orders', labelHe: 'ההזמנות שלי', icon: <ShoppingCart className="w-5 h-5 stroke-[1.5]" /> },
+  { id: 'shopping-list', path: '/customer/shopping-list', label: 'Shopping List', labelHe: 'רשימת קניות', icon: <ClipboardList className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'rewards', path: '/customer/rewards', label: 'Rewards', labelHe: 'פרסים', icon: <Gift className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'profile', path: '/customer/profile', label: 'Profile', labelHe: 'פרופיל', icon: <User className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'favorites', path: '/customer/favorites', label: 'Favorites', labelHe: 'מועדפים', icon: <Heart className="w-5 h-5 stroke-[1.5]" /> },

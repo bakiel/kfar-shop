@@ -49,12 +49,12 @@ export function useIntelligentChat(initialContext?: ChatContext) {
     body: {
       context,
     },
-    onResponse: (response) => {
+    onResponse: (response: Response) => {
       // Check headers for knowledge usage
       const knowledgeEnabled = response.headers.get('X-Knowledge-Enabled');
       console.log('Knowledge-enabled response:', knowledgeEnabled);
     },
-    onFinish: (message) => {
+    onFinish: (message: any) => {
       // Extract any knowledge results from tool calls
       if (message.toolInvocations) {
         const results: KnowledgeResult[] = [];
@@ -92,7 +92,7 @@ export function useIntelligentChat(initialContext?: ChatContext) {
     setIsSearching(true);
     try {
       const results = await kfarKnowledgeBase.search(query, { type, limit: 5 });
-      setKnowledgeResults(results.map(doc => ({
+      setKnowledgeResults(results.map((doc: any) => ({
         type: doc.type,
         title: doc.title,
         content: doc.content,
@@ -173,7 +173,7 @@ export function useIntelligentChat(initialContext?: ChatContext) {
     const mentionedProducts = new Set<string>();
     const mentionedVendors = new Set<string>();
     
-    messages.forEach(msg => {
+    messages.forEach((msg: any) => {
       // Extract topics from user messages
       if (msg.role === 'user') {
         const content = msg.content.toLowerCase();
@@ -201,7 +201,7 @@ export function useIntelligentChat(initialContext?: ChatContext) {
       topics: Array.from(topics),
       mentionedProducts: Array.from(mentionedProducts),
       mentionedVendors: Array.from(mentionedVendors),
-      hasCartActivity: messages.some(m => m.content.toLowerCase().includes('cart')),
+      hasCartActivity: messages.some((m: any) => m.content.toLowerCase().includes('cart')),
     };
   }, [messages]);
 

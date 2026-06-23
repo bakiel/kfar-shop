@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useCart } from '@/lib/context/CartContext';
 import { useUserRole, useVendorOrderCount } from '@/hooks/useUserRole';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
 import NotificationBell from '@/components/customer/NotificationBell';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from 'framer-motion';
@@ -23,12 +24,13 @@ import {
   ShoppingBag,
   Compass,
   Users,
-  LogIn,
   UserPlus,
   LayoutDashboard,
   Package,
+  ClipboardList,
   Heart,
-  HelpCircle
+  HelpCircle,
+  Bell
 } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
@@ -46,7 +48,8 @@ const NAV_ITEMS = [
 // ---------------------------------------------------------------------------
 const SimplifiedHeader = () => {
   const { getCartCount } = useCart();
-  const { role, userId } = useUserRole();
+  const { role } = useUserRole();
+  const { user: authUser } = useAuth();
   const orderCount = useVendorOrderCount();
   const { language, toggleLanguage, t, isRTL } = useLanguage();
   const pathname = usePathname();
@@ -65,6 +68,7 @@ const SimplifiedHeader = () => {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const cartCount = getCartCount();
+  const notificationAccountId = authUser?.customerId || authUser?.id;
 
   // ---- Detect mobile ----
   useEffect(() => {
@@ -265,15 +269,23 @@ const SimplifiedHeader = () => {
               </motion.button>
 
               {/* Notifications */}
-              {role !== 'guest' && (
-                <div className="relative">
-                  <NotificationBell customerId={userId} />
-                  {role === 'vendor' && orderCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold ring-2 ring-white">
-                      {orderCount}
-                    </span>
-                  )}
-                </div>
+              {role === 'customer' && notificationAccountId && (
+                <NotificationBell userId={notificationAccountId} />
+              )}
+              {role === 'vendor' && notificationAccountId && (
+                <NotificationBell userId={notificationAccountId} notificationsHref="/vendor/notifications" />
+              )}
+              {role === 'vendor' && orderCount > 0 && (
+                <Link
+                  href="/vendor/orders"
+                  className="relative p-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer flex items-center"
+                  aria-label="Vendor orders"
+                >
+                  <Package className="w-5 h-5 text-[#478c0b] stroke-[1.5]" />
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold ring-2 ring-white">
+                    {orderCount}
+                  </span>
+                </Link>
               )}
 
               {/* User / Dashboard */}
@@ -349,7 +361,7 @@ const SimplifiedHeader = () => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ duration: 0.2, ease: 'easeOut' as const }}
                 className="overflow-hidden"
               >
                 <form onSubmit={handleSearchSubmit} className="pb-3">
@@ -488,13 +500,35 @@ const SimplifiedHeader = () => {
                   {role === 'guest' ? (
                     <>
                       <Link
-                        href="/login-portal"
+                        href="/customer/login?role=customer"
                         onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
                       >
-                        <LogIn className="w-5 h-5 text-gray-400 stroke-[1.5]" />
+                        <ShoppingBag className="w-5 h-5 text-[#478c0b] stroke-[1.5]" />
                         <span className="font-medium text-sm">
-                          {language === 'he' ? 'התחבר' : 'Sign In'}
+                          {language === 'he' ? 'כניסת לקוחות' : 'Customer Login'}
+                        </span>
+                        <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
+                      </Link>
+                      <Link
+                        href="/vendor/login"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                      >
+                        <Store className="w-5 h-5 text-[#f6af0d] stroke-[1.5]" />
+                        <span className="font-medium text-sm">
+                          {language === 'he' ? 'פורטל ספקים' : 'Vendor Portal'}
+                        </span>
+                        <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
+                      </Link>
+                      <Link
+                        href="/admin/login"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                      >
+                        <ShieldCheck className="w-5 h-5 text-[#c23c09] stroke-[1.5]" />
+                        <span className="font-medium text-sm">
+                          {language === 'he' ? 'כניסת מנהלים' : 'Admin Access'}
                         </span>
                         <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
                       </Link>
@@ -535,22 +569,35 @@ const SimplifiedHeader = () => {
                         <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
                       </Link>
                       {role === 'vendor' && (
-                        <Link
-                          href="/vendor/orders"
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
-                        >
-                          <Package className="w-5 h-5 text-[#f6af0d] stroke-[1.5]" />
-                          <span className="font-medium text-sm">
-                            {language === 'he' ? 'הזמנות' : 'Orders'}
-                          </span>
-                          {orderCount > 0 && (
-                            <span className="bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                              {orderCount}
+                        <>
+                          <Link
+                            href="/vendor/orders"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                          >
+                            <Package className="w-5 h-5 text-[#f6af0d] stroke-[1.5]" />
+                            <span className="font-medium text-sm">
+                              {language === 'he' ? 'הזמנות' : 'Orders'}
                             </span>
-                          )}
-                          <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
-                        </Link>
+                            {orderCount > 0 && (
+                              <span className="bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                                {orderCount}
+                              </span>
+                            )}
+                            <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
+                          </Link>
+                          <Link
+                            href="/vendor/notifications"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                          >
+                            <Bell className="w-5 h-5 text-[#478c0b] stroke-[1.5]" />
+                            <span className="font-medium text-sm">
+                              {language === 'he' ? 'התראות' : 'Notifications'}
+                            </span>
+                            <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
+                          </Link>
+                        </>
                       )}
                       {role === 'customer' && (
                         <>
@@ -566,13 +613,24 @@ const SimplifiedHeader = () => {
                             <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
                           </Link>
                           <Link
-                            href="/customer/wishlist"
+                            href="/customer/shopping-list"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                          >
+                            <ClipboardList className="w-5 h-5 text-[#478c0b] stroke-[1.5]" />
+                            <span className="font-medium text-sm">
+                              {language === 'he' ? 'רשימת קניות' : 'Shopping List'}
+                            </span>
+                            <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
+                          </Link>
+                          <Link
+                            href="/customer/favorites"
                             onClick={() => setIsMenuOpen(false)}
                             className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
                           >
                             <Heart className="w-5 h-5 text-[#c23c09] stroke-[1.5]" />
                             <span className="font-medium text-sm">
-                              {language === 'he' ? 'מועדפים' : 'Wishlist'}
+                              {language === 'he' ? 'מועדפים' : 'Favorites'}
                             </span>
                             <ChevronRight className={`w-4 h-4 text-gray-300 ${isRTL ? 'mr-auto rotate-180' : 'ml-auto'} stroke-[1.5]`} />
                           </Link>
@@ -598,7 +656,7 @@ const SimplifiedHeader = () => {
                     </span>
                   </Link>
                   <Link
-                    href="/help"
+                    href="/support"
                     onClick={() => setIsMenuOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-xl mb-0.5 text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
                   >

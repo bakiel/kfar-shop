@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
@@ -39,7 +40,14 @@ export default function ForgotPasswordPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <img src="/images/logos/kfar_logo_africa_heritage.png" alt="KFAR" className="h-12 mx-auto" />
+            <Image
+              src="/images/logos/kfar_logo_primary_horizontal.png"
+              alt="KFAR Marketplace"
+              width={184}
+              height={55}
+              className="h-12 w-auto mx-auto"
+              priority
+            />
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-gray-900">Forgot your password?</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -107,6 +115,18 @@ export default function ForgotPasswordPage() {
               </div>
             </form>
           )}
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-gray-500">
+          <Link href="/marketplace" className="hover:text-leaf-green transition-colors">
+            Back to Marketplace
+          </Link>
+          <Link href="/login-portal" className="hover:text-leaf-green transition-colors">
+            Account Access
+          </Link>
+          <Link href="/vendor/login" className="hover:text-leaf-green transition-colors">
+            Vendor Portal
+          </Link>
         </div>
       </div>
     </div>

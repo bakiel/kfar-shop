@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllProducts } from '@/lib/data/wordpress-style-data-layer';
+import { getProductFeed, ProductFeedProduct } from '@/lib/services/live-product-feed';
 
 interface CartItem {
   id: string;
@@ -86,7 +86,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ suggestions: [] });
     }
 
-    const allProducts = getAllProducts();
+    const feed = await getProductFeed();
+    const allProducts = feed.products;
     const cartIds = new Set(cartItems.map(item => item.id));
     const cartVendorIds = new Set(cartItems.map(item => item.vendorId));
     const cartCategories = new Set<string>();
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
         cartCategories.add(cartItem.category);
       } else {
         // Look up category from product catalog
-        const product = allProducts.find(p => p.id === cartItem.id);
+        const product = allProducts.find((p: ProductFeedProduct) => p.id === cartItem.id);
         if (product?.category) {
           cartCategories.add(product.category);
         }
@@ -157,7 +158,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Featured/best-seller bonus
-      if (product.isFeatured || product.featured) {
+      if (product.isFeatured) {
         score += 3;
       }
 
@@ -182,9 +183,9 @@ export async function POST(request: NextRequest) {
       candidates.push({
         id: product.id,
         name: product.name,
-        nameHe: product.nameHe || product.nameHebrew,
+        nameHe: product.nameHe || undefined,
         price: product.price,
-        originalPrice: product.originalPrice,
+        originalPrice: product.originalPrice ?? undefined,
         image: product.image,
         vendorId: product.vendorId,
         vendorName: product.vendorName,

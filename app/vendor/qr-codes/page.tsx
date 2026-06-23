@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import VendorQRGenerator from '@/components/vendor/VendorQRGenerator';
 import Link from 'next/link';
 import { ArrowLeft, AlertTriangle, QrCode } from 'lucide-react';
-import { getVendorStore, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface VendorData {
   id: string;
@@ -28,69 +27,55 @@ interface ProductData {
 }
 
 export default function VendorQRCodesPage() {
-  const router = useRouter();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
   const [vendorData, setVendorData] = useState<VendorData | null>(null);
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const loadVendorData = () => {
+    if (authLoading) return;
+
+    const loadVendorData = async () => {
       try {
-        // Get vendor auth from localStorage (set by AuthContext on login)
-        const authStr = localStorage.getItem('vendorAuth');
-        if (!authStr) {
+        if (!accessToken || user?.role !== 'vendor' || !user.vendorId) {
           setError('not_authenticated');
           setLoading(false);
           return;
         }
 
-        const auth = JSON.parse(authStr);
-        const vendorId = auth.vendorId || '';
+        const vendorId = user.vendorId;
+        const response = await fetch(`/api/vendor/${vendorId}`, {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (!response.ok) throw new Error(`Vendor feed failed: ${response.status}`);
 
-        if (!vendorId) {
-          setError('no_vendor_id');
-          setLoading(false);
-          return;
-        }
+        const data = await response.json();
+        const store = data.vendor;
+        const metadata = store?.metadata || {};
 
-        // Get vendor store from static data layer
-        const store = getVendorStore(vendorId);
+        setVendorData({
+          id: store.id,
+          storeName: store.name || user.displayName || 'My Store',
+          storeNameHe: store.nameHe,
+          description: store.description,
+          descriptionHe: store.descriptionHe,
+          logo: store.logo,
+          category: store.category || store.categories?.[0] || 'food',
+          phone: metadata.phone || '',
+          email: metadata.email || '',
+          address: metadata.location || 'Village of Peace, Dimona, Israel',
+        });
 
-        if (store) {
-          setVendorData({
-            id: store.id,
-            storeName: store.name,
-            storeNameHe: (store as any).nameHe,
-            description: store.description,
-            descriptionHe: (store as any).descriptionHe,
-            logo: store.logo,
-            category: store.categories?.[0] || 'food',
-            phone: store.metadata?.phone || '',
-            email: store.metadata?.email || '',
-            address: store.metadata?.location || 'Village of Peace, Dimona, Israel',
-          });
-
-          // Get real products for this vendor
-          const vendorProducts = getProductsByVendor(vendorId);
-          setProducts(
-            vendorProducts.map((p) => ({
-              id: p.id,
-              name: p.name,
-              price: p.price,
-              image: p.image,
-            }))
-          );
-        } else {
-          // Vendor not in static data -- use auth info as fallback
-          setVendorData({
-            id: vendorId,
-            storeName: auth.vendorName || auth.name || 'My Store',
-            category: 'food',
-            address: 'Village of Peace, Dimona, Israel',
-          });
-          setProducts([]);
-        }
+        setProducts(
+          (store.products || []).map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            price: Number(product.price) || 0,
+            image: product.image,
+          }))
+        );
       } catch (err) {
         console.error('Error loading vendor data:', err);
         setError('load_failed');
@@ -100,7 +85,7 @@ export default function VendorQRCodesPage() {
     };
 
     loadVendorData();
-  }, []);
+  }, [accessToken, authLoading, user?.displayName, user?.role, user?.vendorId]);
 
   if (loading) {
     return (

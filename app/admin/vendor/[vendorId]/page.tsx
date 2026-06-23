@@ -5,30 +5,17 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/lib/context/AuthContext';
 import {
   Store, Package, Pencil, Save, Trash2, Plus,
   Eye, EyeOff, Star, DollarSign, ArrowLeft,
   CheckCircle, AlertCircle, ImageIcon
 } from 'lucide-react';
-import { vendorStores, getVendorStore, getProductsByVendor } from '@/lib/data/wordpress-style-data-layer';
-import { vendorDataService, productDataService } from '@/lib/services/vendor-data-service';
-
-// Get vendor logo helper
-const getVendorLogo = (vendorId: string) => {
-  const logoMap: { [key: string]: string } = {
-    'teva-deli': '/images/vendors/teva_deli_logo_vegan_factory.jpg',
-    'garden-of-light': '/images/vendors/Garden of Light Logo.jpg',
-    'queens-cuisine': '/images/vendors/queens_cuisine_logo_vegan_food_art.jpg',
-    'gahn-delight': '/images/vendors/gahn_delight_logo_handcrafted_foods.jpg',
-    'people-store': '/images/vendors/people_store_logo_community_retail.jpg',
-    'vop-shop': '/images/vendors/vop_shop_logo_village_marketplace.jpg'
-  };
-  return logoMap[vendorId] || '/images/vendors/default-vendor.jpg';
-};
 
 export default function VendorAdminDashboard() {
   const params = useParams();
   const router = useRouter();
+  const { accessToken, isLoading: authLoading } = useAuth();
   const vendorId = params.vendorId as string;
 
   const [loading, setLoading] = useState(true);
@@ -40,33 +27,84 @@ export default function VendorAdminDashboard() {
   const [productForm, setProductForm] = useState<any>({});
   const [vendorForm, setVendorForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!accessToken) {
+      setLoading(false);
+      router.replace('/admin/login?expired=1');
+      return;
+    }
     loadVendorData();
-  }, [vendorId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, authLoading, vendorId]);
 
   const loadVendorData = async () => {
+    if (!accessToken) return;
+
     try {
       setLoading(true);
-      
-      const vendorData = getVendorStore(vendorId);
-      const vendorProducts = getProductsByVendor(vendorId);
-      
-      if (!vendorData) {
-        router.push('/admin');
+      setError(null);
+
+      const response = await fetch(`/api/vendor/${vendorId}`, {
+        cache: 'no-store',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          router.replace('/admin/login?expired=1');
+          return;
+        }
+        setError(`Vendor feed failed: ${response.status}`);
         return;
       }
 
-      // Get analytics
-      const vendorAnalytics = await vendorDataService.getVendorAnalytics(vendorId);
+      const data = await response.json();
+      const vendorData = data.vendor;
+      if (!vendorData) {
+        setError('Vendor not found');
+        return;
+      }
+
+      const vendorProducts = (vendorData.products || []).map((product: any) => ({
+        id: product.id,
+        name: product.name,
+        description: product.description || '',
+        price: Number(product.price) || 0,
+        category: product.category || 'general',
+        image: product.image || product.images?.[0] || '/images/placeholder-product.jpg',
+        inStock: product.inStock !== false,
+        status: product.status,
+        rating: product.rating || 0,
+        reviewCount: product.reviewCount || 0,
+        viewCount: product.viewCount || 0,
+        servingSize: product.servingSize || '',
+        shelfLife: product.shelfLife || '',
+        storageInstructions: product.storageInstructions || '',
+        allergens: product.allergens || '',
+        nutritionalInfo: product.nutritionalInfo || {},
+      }));
+
+      const activeProducts = vendorProducts.filter((product: any) => product.inStock && product.status !== 'archived');
+      const averageRating = vendorProducts.length
+        ? vendorProducts.reduce((sum: number, product: any) => sum + (product.rating || 0), 0) / vendorProducts.length
+        : (vendorData.rating || 0);
       
       setVendor(vendorData);
       setProducts(vendorProducts);
       setAnalytics({
-        ...vendorAnalytics,
-        revenue: Math.floor(Math.random() * 50000) + 10000,
-        monthlyOrders: Math.floor(Math.random() * 200) + 50,
-        conversionRate: (Math.random() * 5 + 2).toFixed(1)
+        totalProducts: vendorProducts.length,
+        activeProducts: activeProducts.length,
+        totalViews: vendorProducts.reduce((sum: number, product: any) => sum + (product.viewCount || 0), 0),
+        totalSales: 0,
+        averageRating,
+        topProducts: [...vendorProducts]
+          .sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
+          .slice(0, 5),
+        revenue: 0,
+        monthlyOrders: 0,
+        conversionRate: '0.0'
       });
 
       setVendorForm({
@@ -78,6 +116,7 @@ export default function VendorAdminDashboard() {
       });
     } catch (error) {
       console.error('Error loading vendor data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load vendor');
     } finally {
       setLoading(false);
     }
@@ -112,12 +151,27 @@ export default function VendorAdminDashboard() {
   const handleProductSave = async (productId: string) => {
     try {
       setIsSaving(true);
-      
-      await productDataService.updateProduct({
-        productId,
-        vendorId,
-        updates: productForm
+
+      if (!accessToken) throw new Error('Admin session expired. Please log in again.');
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          name: productForm.name,
+          description: productForm.description,
+          price: productForm.price,
+          category: productForm.category,
+          in_stock: productForm.inStock,
+          nutritional_info: productForm.nutritionalInfo,
+          allergens: Array.isArray(productForm.allergens)
+            ? productForm.allergens
+            : String(productForm.allergens || '').split(',').map((item: string) => item.trim()).filter(Boolean),
+        }),
       });
+      if (!response.ok) throw new Error(`Product update failed: ${response.status}`);
 
       // Reload data
       await loadVendorData();
@@ -132,11 +186,16 @@ export default function VendorAdminDashboard() {
 
   const handleProductToggle = async (productId: string, inStock: boolean) => {
     try {
-      await productDataService.updateProduct({
-        productId,
-        vendorId,
-        updates: { inStock }
+      if (!accessToken) throw new Error('Admin session expired. Please log in again.');
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ in_stock: inStock }),
       });
+      if (!response.ok) throw new Error(`Product update failed: ${response.status}`);
       
       await loadVendorData();
     } catch (error) {
@@ -147,19 +206,25 @@ export default function VendorAdminDashboard() {
   const handleVendorSave = async () => {
     try {
       setIsSaving(true);
-      
-      await vendorDataService.updateVendor({
-        vendorId,
-        updates: {
+
+      if (!accessToken) throw new Error('Admin session expired. Please log in again.');
+      const response = await fetch(`/api/vendors/${vendorId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
           name: vendorForm.name,
           description: vendorForm.description,
           metadata: {
             location: vendorForm.location,
             specialty: vendorForm.specialty,
             certifications: vendorForm.certifications.split(',').map((c: string) => c.trim())
-          }
-        }
+          },
+        }),
       });
+      if (!response.ok) throw new Error(`Vendor update failed: ${response.status}`);
 
       await loadVendorData();
     } catch (error) {
@@ -186,9 +251,9 @@ export default function VendorAdminDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#fef9ef' }}>
         <div className="text-center">
-          <p className="text-xl text-gray-600 mb-4">Vendor not found</p>
-          <Link href="/admin" className="text-blue-600 hover:underline">
-            Back to Admin Dashboard
+          <p className="text-xl text-gray-600 mb-4">{error || 'Vendor not found'}</p>
+          <Link href="/admin/vendors" className="text-blue-600 hover:underline">
+            Back to Vendor Management
           </Link>
         </div>
       </div>
@@ -202,14 +267,14 @@ export default function VendorAdminDashboard() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link
-              href="/admin"
+              href="/admin/vendors"
               className="p-2 rounded-lg hover:bg-gray-100 transition-all"
             >
               <ArrowLeft className="w-5 h-5 stroke-[1.5] text-gray-600" />
             </Link>
             <div className="flex items-center gap-4">
               <Image
-                src={getVendorLogo(vendorId)}
+                src={vendor.logo || '/images/vendors/default_logo.jpg'}
                 alt={vendor.name}
                 width={64}
                 height={64}
@@ -377,7 +442,7 @@ export default function VendorAdminDashboard() {
                     <div className="border rounded-lg p-4">
                       <p className="text-sm text-gray-600">Avg Order Value</p>
                       <p className="text-2xl font-bold" style={{ color: '#c23c09' }}>
-                        ₪{Math.floor(analytics.revenue / analytics.monthlyOrders)}
+                        ₪{analytics.monthlyOrders > 0 ? Math.floor(analytics.revenue / analytics.monthlyOrders) : 0}
                       </p>
                     </div>
                   </div>

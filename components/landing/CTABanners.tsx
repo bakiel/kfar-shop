@@ -73,7 +73,7 @@ export default function CTABanners() {
             <motion.div
               className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-[300px] sm:h-[380px] lg:h-[420px]"
               whileHover={{ scale: 1.015 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 0.3, ease: 'easeOut' as const }}
             >
               <Image
                 src="/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_03.jpg"
@@ -151,7 +151,7 @@ export default function CTABanners() {
             <motion.div
               className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-[300px] sm:h-[380px] lg:h-[420px]"
               whileHover={{ scale: 1.015 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 0.3, ease: 'easeOut' as const }}
             >
               <Image
                 src="/images/community/agriculture/1.jpg"
@@ -228,7 +228,7 @@ export default function CTABanners() {
             <motion.div
               className="relative overflow-hidden rounded-2xl sm:rounded-3xl h-[300px] sm:h-[380px] lg:h-[420px]"
               whileHover={{ scale: 1.015 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 0.3, ease: 'easeOut' as const }}
             >
               <Image
                 src="/images/community/delivery_driver_1.jpg"

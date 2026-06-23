@@ -21,7 +21,7 @@ import {
   ArrowRight, ShoppingBag, Star, Leaf, ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getFeaturedProducts, getVendors, TOTAL_PRODUCTS, VENDOR_COUNT } from '@/lib/data/wordpress-style-data-layer';
+import { getFeaturedProducts, getVendors, TOTAL_PRODUCTS, VENDOR_COUNT } from '../archived-data';
 
 const HeroOption2MinimalElegant = () => {
   const { language, isRTL } = useLanguage();

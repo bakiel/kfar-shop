@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useCart } from '@/lib/context/CartContext';
+import { createBundleCartItem } from '@/lib/utils/bundle-cart';
 import type { EnrichedBundle, Bundle } from '@/lib/types/landing';
 
 interface BundleDetailProps {
@@ -75,17 +76,7 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
   const savings = bundle.originalPrice - bundle.bundlePrice;
 
   const handleAddBundle = () => {
-    bundle.products.forEach((product) => {
-      cart.addToCart({
-        id: product.id,
-        name: product.name,
-        vendorId: product.vendorId || '',
-        vendorName: product.vendorName || '',
-        price: product.price,
-        quantity: 1,
-        image: product.image,
-      });
-    });
+    cart.addToCart(createBundleCartItem(bundle));
     setAdded(true);
     setTimeout(() => setAdded(false), 3000);
   };
@@ -146,7 +137,7 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
               className="flex-1 max-w-2xl"
               initial={{ opacity: 0, y: 30 }}
               animate={heroInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.6, ease: 'easeOut' as const }}
             >
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2 mb-5">
@@ -179,7 +170,7 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
               className="w-full lg:w-auto"
               initial={{ opacity: 0, y: 30 }}
               animate={heroInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+              transition={{ duration: 0.6, delay: 0.2, ease: 'easeOut' as const }}
             >
               <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 sm:p-8">
                 {/* Price comparison */}
@@ -334,10 +325,10 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
                   key={product.id}
                   variants={{
                     hidden: { opacity: 0, y: 30 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
                   }}
                   whileHover={{ y: -8, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.12)' }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  transition={{ duration: 0.2, ease: 'easeOut' as const }}
                   className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 group flex flex-col"
                 >
                   {/* Product image */}
@@ -438,7 +429,7 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={pricingInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ duration: 0.6, ease: 'easeOut' as const }}
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8" style={{ color: BRAND.soil }}>
               {language === 'he' ? 'פירוט החיסכון שלך' : 'Your Savings Breakdown'}
@@ -494,7 +485,7 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
                       style={{ backgroundColor: '#22c55e' }}
                       initial={{ width: 0 }}
                       animate={pricingInView ? { width: `${bundle.savingsPercent}%` } : {}}
-                      transition={{ delay: 0.5, duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+                      transition={{ delay: 0.5, duration: 0.8, ease: 'easeOut' as const }}
                     />
                   </div>
                 </div>
@@ -614,7 +605,7 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
                     <Link href={`/bundles/${rb.id}`} className="block cursor-pointer group">
                       <motion.div
                         whileHover={{ y: -6, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.12)' }}
-                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        transition={{ duration: 0.2, ease: 'easeOut' as const }}
                         className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100"
                       >
                         {/* Header gradient */}
@@ -723,13 +714,18 @@ export default function BundleDetail({ bundle, relatedBundles }: BundleDetailPro
 /* ================================================================ */
 
 function AnimatedPrice({ price, inView }: { price: number; inView: boolean }) {
-  const [displayPrice, setDisplayPrice] = useState(0);
+  const [displayPrice, setDisplayPrice] = useState(price);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView) {
+      setDisplayPrice(price);
+      return;
+    }
+
     const target = price;
     const duration = 800;
     const startTime = Date.now();
+    setDisplayPrice(0);
 
     const timer = setInterval(() => {
       const elapsed = Date.now() - startTime;

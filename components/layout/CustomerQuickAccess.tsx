@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User, ChevronDown, Gauge, ShoppingBag, QrCode, Star, Settings, Shield, Store, TrendingUp, BarChart3, LogOut, Package } from 'lucide-react';
+import { User, ChevronDown, Gauge, ShoppingBag, QrCode, Star, Settings, Shield, Store, TrendingUp, BarChart3, LogOut, Package, ClipboardList } from 'lucide-react';
 
 const CustomerQuickAccess = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,6 +121,15 @@ const CustomerQuickAccess = () => {
             >
               <ShoppingBag className="w-4 h-4 stroke-[1.5] text-sun-gold" />
               <span className="text-soil-brown">My Orders</span>
+            </Link>
+
+            <Link
+              href="/customer/shopping-list"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-herbal-mint/20 transition-all"
+              onClick={() => setIsOpen(false)}
+            >
+              <ClipboardList className="w-4 h-4 stroke-[1.5] text-leaf-green" />
+              <span className="text-soil-brown">Shopping List</span>
             </Link>
 
             <Link

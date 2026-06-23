@@ -43,10 +43,14 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
   };
 
   return (
-    <Link href={`/product/${product.id}`} className="block">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-        {/* Image Container - Clickable */}
-        <div className="relative aspect-square bg-gray-100">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      {/* Image Container - Clickable */}
+      <div className="relative aspect-square bg-gray-100">
+        <Link
+          href={`/product/${product.id}`}
+          className="block h-full"
+          aria-label={`View ${product.name}`}
+        >
           {product.badge && (
             <div className="absolute top-2 left-2 z-10">
               <span 
@@ -57,18 +61,6 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
               </span>
             </div>
           )}
-          
-          {/* Wishlist Button */}
-          <button 
-            className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center z-10 shadow-sm"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // Add wishlist logic
-            }}
-          >
-            <Heart className="w-4 h-4 stroke-[1.5] text-gray-600" />
-          </button>
 
           <Image
             src={imageSrc}
@@ -94,10 +86,26 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
               <div className="w-8 h-8 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
-        </div>
+        </Link>
 
-        {/* Content - Clickable except for button */}
-        <div className="p-3">
+        {/* Wishlist Button */}
+        <button
+          type="button"
+          aria-label={`Save ${product.name} to wishlist`}
+          className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center z-10 shadow-sm"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // Add wishlist logic
+          }}
+        >
+          <Heart className="w-4 h-4 stroke-[1.5] text-gray-600" />
+        </button>
+      </div>
+
+      {/* Content - Clickable except for button */}
+      <div className="p-3">
+        <Link href={`/product/${product.id}`} className="block" aria-label={`View ${product.name}`}>
           {/* Vendor */}
           <div className="flex items-center gap-2 mb-1">
             {product.vendorLogo && (
@@ -136,9 +144,11 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
             ))}
             <span className="text-xs text-gray-600 ml-1">({product.rating})</span>
           </div>
+        </Link>
 
-          {/* Price and Add to Cart */}
-          <div className="flex items-center justify-between">
+        {/* Price and Add to Cart */}
+        <div className="flex items-center justify-between">
+          <Link href={`/product/${product.id}`} aria-label={`View ${product.name} details`}>
             <div>
               <span className="text-lg font-bold" style={{ color: '#478c0b' }}>
                 {product.price}
@@ -149,18 +159,20 @@ export default function MobileProductCard({ product }: MobileProductCardProps) {
                 </span>
               )}
             </div>
+          </Link>
 
-            {/* Add to Cart Button - Mobile Optimized */}
-            <button
-              onClick={handleAddToCart}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
-              style={{ backgroundColor: '#478c0b' }}
-            >
-              <Plus className="w-4 h-4 stroke-[1.5]" />
-            </button>
-          </div>
+          {/* Add to Cart Button - Mobile Optimized */}
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            aria-label={`Add ${product.name} to cart`}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform"
+            style={{ backgroundColor: '#478c0b' }}
+          >
+            <Plus className="w-4 h-4 stroke-[1.5]" />
+          </button>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

@@ -15,7 +15,7 @@ interface CustomerProfile {
   email: string;
   phone: string;
   description: string;
-  loyaltyTier: string;
+  loyaltyTier: 'bronze' | 'silver' | 'gold' | 'platinum';
   points: number;
   preferences: {
     dietary: string[];
@@ -53,7 +53,9 @@ export default function CustomerJourneyDemo() {
             email: c.email || '',
             phone: c.phone || '',
             description: `A valued KFAR marketplace ${c.loyalty_tier || 'bronze'} member`,
-            loyaltyTier: c.loyalty_tier || 'bronze',
+            loyaltyTier: (['bronze', 'silver', 'gold', 'platinum'].includes(c.loyalty_tier)
+              ? c.loyalty_tier
+              : 'bronze') as CustomerProfile['loyaltyTier'],
             points: c.points || 0,
             preferences: {
               dietary: c.preferences?.dietary || [],

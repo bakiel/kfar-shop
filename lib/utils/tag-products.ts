@@ -1,5 +1,5 @@
 // Utility to add tags to products based on their properties
-import { EnhancedProduct } from '../data/complete-catalog';
+import type { EnhancedProduct } from '@/lib/services/vendor-data-service';
 
 export function autoTagProduct(product: any): string[] {
   const tags: string[] = [];

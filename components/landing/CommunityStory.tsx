@@ -25,7 +25,7 @@ const communityPhotos = [
     span: '',
   },
   {
-    src: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_12.jpg',
+    src: '/images/community/village_of_peace_community_authentic_dimona_israel_african_hebrew_israelites_42.jpg',
     caption: 'Heritage traditions',
     captionHe: 'מסורות מורשת',
     span: '',

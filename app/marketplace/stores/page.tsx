@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, MapPin, Clock, Store, TrendingUp, Award, Users, Loader2 } from 'lucide-react';
 import VendorBrowseCard from '@/components/marketplace/VendorBrowseCard';
-import { vendorStores } from '@/lib/data/wordpress-style-data-layer';
 import Link from 'next/link';
 
 export default function MarketplaceStoresPage() {
@@ -15,30 +14,19 @@ export default function MarketplaceStoresPage() {
   const [vendors, setVendors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch vendors from API (includes both static and dynamic)
+  // Fetch vendors from the live DB-backed vendor feed.
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await fetch('/api/vendors');
-        if (response.ok) {
-          const data = await response.json();
-          setVendors(data.vendors);
-        } else {
-          // Fallback to static vendors if API fails
-          const staticVendors = Object.entries(vendorStores).map(([id, store]) => ({
-            id,
-            ...store
-          }));
-          setVendors(staticVendors);
+        const response = await fetch('/api/vendors', { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to load vendors');
         }
+        setVendors(data.vendors || []);
       } catch (error) {
         console.error('Error fetching vendors:', error);
-        // Fallback to static vendors
-        const staticVendors = Object.entries(vendorStores).map(([id, store]) => ({
-          id,
-          ...store
-        }));
-        setVendors(staticVendors);
+        setVendors([]);
       } finally {
         setLoading(false);
       }
@@ -51,7 +39,7 @@ export default function MarketplaceStoresPage() {
   const categories = useMemo(() => {
     const allCategories = new Set<string>();
     vendors.forEach(vendor => {
-      vendor.categories?.forEach(cat => allCategories.add(cat));
+      vendor.categories?.forEach((cat: string) => allCategories.add(cat));
     });
     return ['all', ...Array.from(allCategories)];
   }, [vendors]);
@@ -107,7 +95,7 @@ export default function MarketplaceStoresPage() {
       case 'popular':
       default:
         // Sort by product count as a proxy for popularity
-        filtered.sort((a, b) => (b.products?.length || 0) - (a.products?.length || 0));
+        filtered.sort((a, b) => (b.productCount || 0) - (a.productCount || 0));
         break;
     }
 

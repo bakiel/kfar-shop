@@ -1,4 +1,4 @@
-import { ElevenLabsApi, ElevenLabsConfig } from '@elevenlabs/elevenlabs-js';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 
 export interface VoiceSettings {
   stability: number;
@@ -25,7 +25,7 @@ export interface ConversationalAIRequest {
 }
 
 class ElevenLabsV3Service {
-  private client: ElevenLabsApi;
+  private client: any;
   private apiKey: string;
   
   // Voice IDs for different personas
@@ -44,11 +44,11 @@ class ElevenLabsV3Service {
       throw new Error('ElevenLabs API key not found');
     }
 
-    const config: ElevenLabsConfig = {
+    const config = {
       apiKey: this.apiKey,
     };
 
-    this.client = new ElevenLabsApi(config);
+    this.client = new ElevenLabsClient(config);
   }
 
   /**

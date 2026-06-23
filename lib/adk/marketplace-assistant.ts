@@ -55,7 +55,7 @@ Language: ${query.language || 'en'}`;
       const text = response.text();
       
       // Parse intent from response
-      const intent = await this.detectIntent(query.query);
+      const intent = await this.detectPrimaryIntent(query.query);
       
       // Extract product/vendor mentions if any
       const products = await this.extractProductMentions(text);
@@ -85,7 +85,7 @@ Language: ${query.language || 'en'}`;
     }
   }
   
-  private async detectIntent(query: string): Promise<string> {
+  private async detectPrimaryIntent(query: string): Promise<string> {
     const intents = {
       product_search: /looking for|need|want|where can i find|do you have/i,
       recipe: /recipe|cook|make|prepare|ingredients/i,

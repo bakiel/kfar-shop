@@ -41,7 +41,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 const tierColors: Record<string, string> = {
@@ -189,7 +189,7 @@ export default function CRMDashboard() {
                         className="h-full bg-[#2D5A27] rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${percentage}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                        transition={{ duration: 0.8, ease: 'easeOut' as const }}
                       />
                     </div>
                     <span className="text-sm text-gray-600 min-w-[60px] text-right">

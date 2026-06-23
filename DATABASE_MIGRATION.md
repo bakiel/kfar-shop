@@ -14,22 +14,22 @@ Host: 72.61.201.237
 Port: 5432
 Database: kfar_marketplace
 User: kfar
-Password: kfar_secure_2025
+Password: <password>
 ```
 
 ### Connection String
 ```
-postgresql://kfar:kfar_secure_2025@72.61.201.237:5432/kfar_marketplace
+postgresql://kfar:<password>@<vps-host>:5432/kfar_marketplace
 ```
 
 ### For Vercel Environment Variables
 ```env
-DATABASE_URL=postgresql://kfar:kfar_secure_2025@72.61.201.237:5432/kfar_marketplace
+DATABASE_URL=postgresql://kfar:<password>@<vps-host>:5432/kfar_marketplace
 POSTGRES_HOST=72.61.201.237
 POSTGRES_PORT=5432
 POSTGRES_DB=kfar_marketplace
 POSTGRES_USER=kfar
-POSTGRES_PASSWORD=kfar_secure_2025
+POSTGRES_PASSWORD=<password>
 ```
 
 ## Data Migrated
@@ -82,7 +82,7 @@ Replace Supabase Auth with JWT-based auth:
 
 ### Test Connection
 ```bash
-PGPASSWORD='kfar_secure_2025' psql -h 72.61.201.237 -U kfar -d kfar_marketplace -c "SELECT COUNT(*) FROM vendors"
+PGPASSWORD='<password>' psql -h <vps-host> -U kfar -d kfar_marketplace -c "SELECT COUNT(*) FROM vendors"
 ```
 
 ### SSH Access

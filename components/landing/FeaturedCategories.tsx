@@ -42,8 +42,7 @@ function CategoryCard({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{
           delay: 0.1 + index * 0.07,
-          duration: 0.5,
-          ease: [0.25, 0.46, 0.45, 0.94],
+          duration: 0.5, ease: 'easeOut' as const,
         }}
         whileHover={
           shouldReduceMotion
@@ -114,7 +113,7 @@ function SectionHeading({
       ref={ref}
       initial={shouldReduceMotion ? {} : { opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: 'easeOut' as const }}
       className="flex items-end justify-between mb-6"
     >
       <div>

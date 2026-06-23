@@ -138,6 +138,7 @@ export default function VendorOnboarding() {
       name: '',
       nameHe: '',
       description: '',
+      descriptionHe: '',
       price: 0,
       category: '',
       image: null,

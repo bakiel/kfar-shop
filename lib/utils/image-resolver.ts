@@ -1,12 +1,15 @@
-/**
- * Image path resolver for KFAR Marketplace
- * Ensures all image paths are correctly resolved
- */
+import imageManifest from './image-manifest.json';
+
+const manifest = imageManifest as Record<string, string>;
+const fallbackImage = '/images/placeholder-product.jpg';
+
+function warnMissingImage(path: string) {
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`[image-resolver] Missing image path: ${path}`);
+  }
+}
 
 export function resolveImagePath(path: string | undefined | null): string {
-  // Default fallback image
-  const fallbackImage = '/images/placeholder-product.jpg';
-  
   if (!path) {
     return fallbackImage;
   }
@@ -23,8 +26,18 @@ export function resolveImagePath(path: string | undefined | null): string {
   if (!cleanPath.startsWith('/')) {
     cleanPath = '/' + cleanPath;
   }
+
+  if (cleanPath.startsWith('/uploads/vendor-products/')) {
+    return cleanPath;
+  }
   
-  // Common image path corrections
+  const basename = cleanPath.split('/').pop() || cleanPath;
+  const manifestHit = manifest[cleanPath] || manifest[basename] || manifest[basename.toLowerCase()];
+  if (manifestHit) {
+    return manifestHit;
+  }
+
+  // Common image path corrections retained for legacy vendor logo rows.
   const pathCorrections: Record<string, string> = {
     // Teva Deli logo
     '/images/vendors/teva_deli_official_logo_master_brand_israeli_vegan_food_company.jpg': 
@@ -41,6 +54,18 @@ export function resolveImagePath(path: string | undefined | null): string {
     // Gahn Delight logo
     '/images/vendors/gahn_delight_official_logo_master_brand_ice_cream.jpg':
       '/images/gahn-delight/gahn_delight_official_logo_master_brand_ice_cream.jpg',
+
+    '/images/gahn-delight/gahn_delight_official_logo_master_brand_vegan_ice_cream.jpg':
+      '/images/gahn-delight/gahn_delight_official_logo_master_brand_ice_cream.jpg',
+
+    '/images/people-store/people_store_official_logo_master_brand_bulk_foods_grocery.jpg':
+      '/images/people-store/peoples_store_official_logo_master_brand_community_market.jpg',
+
+    '/images/queens-cuisine/queens_cuisine_official_logo_master_brand_vegan_gourmet_catering.jpg':
+      '/images/queens-cuisine/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg',
+
+    '/images/vop-shop/vop_shop_official_logo_master_brand_community_marketplace.jpg':
+      '/images/vop-shop/vop_shop_official_logo_master_brand_village_of_peace.jpg',
     
     // VOP Shop logo
     '/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg':
@@ -62,8 +87,9 @@ export function resolveImagePath(path: string | undefined | null): string {
       return correctedPath;
     }
   }
-  
-  return cleanPath;
+
+  warnMissingImage(cleanPath);
+  return fallbackImage;
 }
 
 /**

@@ -193,7 +193,7 @@ export default function CustomerProfilesDemo() {
                         <div className="flex items-start gap-4 mb-4">
                           <div className="relative w-16 h-16 rounded-full overflow-hidden border-3 border-gray-200">
                             <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-400 flex items-center justify-center text-white text-2xl font-bold">
-                              {customer.name.split(' ').map(n => n[0]).join('')}
+                              {customer.name.split(' ').map((n: string) => n[0]).join('')}
                             </div>
                           </div>
                           <div className="flex-1">
@@ -227,7 +227,7 @@ export default function CustomerProfilesDemo() {
                           <div className="pt-3 border-t">
                             <p className="text-xs text-gray-600 mb-1">Dietary Preferences:</p>
                             <div className="flex flex-wrap gap-1">
-                              {customer.preferences.dietaryRestrictions.map((diet, idx) => (
+                              {customer.preferences.dietaryRestrictions.map((diet: string, idx: number) => (
                                 <span 
                                   key={idx}
                                   className="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs"

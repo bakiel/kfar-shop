@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Lock, Globe, Eye, EyeOff, Loader2, AlertCircle, Mail } from 'lucide-react';
+import { ArrowLeft, Lock, Globe, Eye, EyeOff, Loader2, AlertCircle, Mail } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 
 export default function AdminLoginPage() {
   const { language, toggleLanguage, t, isRTL } = useLanguage();
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -29,6 +31,13 @@ export default function AdminLoginPage() {
         return;
       }
 
+      if (result.user?.role !== 'admin') {
+        await logout();
+        setError(isRTL ? 'חשבון זה אינו חשבון מנהל' : 'This account is not an admin account');
+        setLoading(false);
+        return;
+      }
+
       // Redirect to admin dashboard
       window.location.href = '/admin/dashboard';
     } catch {
@@ -42,6 +51,14 @@ export default function AdminLoginPage() {
       {/* Background decorative circles */}
       <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-white/5 blur-3xl pointer-events-none" />
       <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#C4A265]/10 blur-3xl pointer-events-none" />
+
+      <Link
+        href="/marketplace"
+        className="absolute top-6 left-6 hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 text-white/80 hover:bg-white/20 hover:text-white transition-all cursor-pointer text-sm"
+      >
+        <ArrowLeft className="w-4 h-4 stroke-[1.5]" />
+        {isRTL ? 'חזרה לשוק' : 'Back to Marketplace'}
+      </Link>
 
       {/* Language Toggle */}
       <motion.button
@@ -59,7 +76,7 @@ export default function AdminLoginPage() {
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: 'easeOut' as const }}
         className="w-full max-w-md mx-4"
         dir={isRTL ? 'rtl' : 'ltr'}
       >
@@ -70,9 +87,16 @@ export default function AdminLoginPage() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 15 }}
-              className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-[#2D5A27] to-[#478c0b] flex items-center justify-center shadow-lg"
+              className="mx-auto mb-5 inline-flex rounded-xl bg-white p-3 shadow-lg"
             >
-              <span className="text-white font-bold text-3xl">K</span>
+              <Image
+                src="/images/logos/kfar_logo_primary_horizontal.png"
+                alt="KFAR Marketplace"
+                width={168}
+                height={50}
+                className="h-12 w-auto"
+                priority
+              />
             </motion.div>
             <h1 className="text-2xl font-bold text-gray-900">
               {isRTL ? 'פורטל ניהול' : 'Admin Portal'}
@@ -119,8 +143,9 @@ export default function AdminLoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? (isRTL ? 'הסתר סיסמה' : 'Hide password') : (isRTL ? 'הצג סיסמה' : 'Show password')}
+                  aria-pressed={showPassword}
                   className={`absolute top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 cursor-pointer ${isRTL ? 'left-2' : 'right-2'}`}
-                  tabIndex={-1}
                 >
                   {showPassword
                     ? <EyeOff className="w-4 h-4 stroke-[1.5]" />
@@ -163,12 +188,17 @@ export default function AdminLoginPage() {
           </form>
 
           {/* Footer */}
-          <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+          <div className="mt-6 pt-6 border-t border-gray-100 text-center space-y-3">
             <p className="text-sm text-gray-500">
               {isRTL ? 'אתה ספק?' : 'Are you a vendor?'}{' '}
-              <a href="/vendor/login" className="text-[#2D5A27] hover:underline font-medium cursor-pointer">
+              <Link href="/vendor/login" className="text-[#2D5A27] hover:underline font-medium cursor-pointer">
                 {isRTL ? 'התחבר לפורטל ספקים' : 'Login to Vendor Portal'}
-              </a>
+              </Link>
+            </p>
+            <p className="text-sm text-gray-500">
+              <Link href="/login-portal" className="text-[#2D5A27] hover:underline font-medium cursor-pointer">
+                {isRTL ? 'כל אפשרויות הכניסה' : 'All account access options'}
+              </Link>
             </p>
           </div>
         </div>

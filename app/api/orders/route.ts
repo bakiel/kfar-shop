@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
 import { verifyAccessToken } from '@/lib/services/auth-service';
+import { resolveOrderQuote, totalsMatch } from '@/lib/services/order-cart-resolver.server';
 
 function getUser(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -78,6 +79,47 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
+    const paymentMethod = data.payment_method || data.paymentMethod || 'cash';
+    if (paymentMethod !== 'cash') {
+      return NextResponse.json(
+        { success: false, error: 'Only Cash on Delivery is enabled' },
+        { status: 400 }
+      );
+    }
+
+    let quote;
+    try {
+      quote = await resolveOrderQuote(data.items);
+    } catch (err) {
+      return NextResponse.json(
+        { success: false, error: err instanceof Error ? err.message : 'Invalid order items' },
+        { status: 400 }
+      );
+    }
+
+    if (!totalsMatch(data.total, quote.total)) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'ORDER_TOTAL_CHANGED',
+          error: 'Order total changed. Please review your cart and try again.',
+          quote,
+        },
+        { status: 409 }
+      );
+    }
+
+    const vendorIds = [...new Set(quote.items.map((item) => item.vendorId).filter(Boolean))];
+    if (vendorIds.length > 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'SINGLE_VENDOR_CHECKOUT_REQUIRED',
+          error: 'Cash on Delivery checkout supports one store per order. Please check out each store separately.',
+        },
+        { status: 400 }
+      );
+    }
 
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
@@ -99,13 +141,13 @@ export async function POST(request: NextRequest) {
       [
         orderNumber,
         customerId,
-        data.vendor_id || null,
-        JSON.stringify(data.items),
-        data.subtotal || data.total,
-        data.total,
-        data.delivery_fee || 0,
+        quote.items[0]?.vendorId || null,
+        JSON.stringify(quote.items),
+        quote.subtotal,
+        quote.total,
+        quote.deliveryFee,
         data.delivery_address ? JSON.stringify(data.delivery_address) : null,
-        data.payment_method || 'cash',
+        paymentMethod,
         'pending',
         data.notes || data.delivery_notes || null,
         data.customer_name || null,
@@ -131,6 +173,14 @@ export async function POST(request: NextRequest) {
 // PATCH - Update an order status (vendor or admin only)
 export async function PATCH(request: NextRequest) {
   try {
+    const user = getUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('id');
 
@@ -142,6 +192,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     const updates = await request.json();
+
+    if (user.role !== 'admin' && user.role !== 'vendor') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    if (user.role === 'vendor' && !user.vendorId) {
+      return NextResponse.json({ error: 'Vendor access required' }, { status: 403 });
+    }
 
     // Build dynamic update query
     const updateFields: string[] = [];
@@ -159,9 +216,14 @@ export async function PATCH(request: NextRequest) {
 
     updateFields.push(`updated_at = NOW()`);
     values.push(orderId);
+    if (user.role === 'vendor') {
+      values.push(user.vendorId);
+    }
 
     const { rows } = await query(
-      `UPDATE orders SET ${updateFields.join(', ')} WHERE id = $${paramCount} RETURNING *`,
+      `UPDATE orders SET ${updateFields.join(', ')}
+       WHERE id = $${paramCount}${user.role === 'vendor' ? ` AND vendor_id = $${paramCount + 1}` : ''}
+       RETURNING *`,
       values
     );
 

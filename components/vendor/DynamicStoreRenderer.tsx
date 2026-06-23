@@ -4,7 +4,7 @@ import React from 'react';
 import { StoreTemplate, StoreSection } from '@/lib/data/store-templates';
 import Image from 'next/image';
 import { Star, Clock, MapPin, Phone, Mail, ShoppingCart, Truck, CreditCard, Award } from 'lucide-react';
-import { Product } from '@/lib/data/products';
+import type { Product } from '@/lib/types/products';
 import { useCart } from '@/lib/context/CartContext';
 import ProductImage from '@/components/ui/ProductImage';
 
@@ -22,6 +22,19 @@ export default function DynamicStoreRenderer({
   customizations 
 }: DynamicStoreRendererProps) {
   const { addToCart, isInCart, getQuantity, updateQuantity } = useCart();
+  const addProductToCart = (product: Product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      vendorId: product.vendorId,
+      vendorName: vendorData.businessName || vendorData.name || product.vendor,
+      price: product.price,
+      quantity: 1,
+      image: product.image,
+      originalPrice: product.originalPrice,
+      bulkPricing: product.bulkPricing || undefined,
+    });
+  };
   
   // Merge template with customizations
   const finalTemplate = customizations ? {
@@ -238,7 +251,7 @@ export default function DynamicStoreRenderer({
 
                       {!inCart ? (
                         <button
-                          onClick={() => addToCart(product)}
+                          onClick={() => addProductToCart(product)}
                           className="w-full py-3 font-semibold text-white transition-all duration-300"
                           style={{ 
                             backgroundColor: finalTemplate.colorScheme.primary,

@@ -19,17 +19,20 @@ export default function VoiceButtonCustomizable({
     default: {
       background: 'linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%)',
       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(255, 255, 255, 0.2)',
-      hoverBackground: 'linear-gradient(135deg, #2563eb 0%, #9333ea 100%)'
+      hoverBackground: 'linear-gradient(135deg, #2563eb 0%, #9333ea 100%)',
+      iconColor: '#ffffff'
     },
     brand: {
       background: '#1a4d2e',
       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.4), 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(255, 255, 255, 0.9), 0 0 0 6px rgba(246, 175, 13, 0.5)',
-      hoverBackground: '#246b3a'
+      hoverBackground: '#246b3a',
+      iconColor: '#ffffff'
     },
     dark: {
       background: '#000000',
       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.5), 0 10px 20px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(255, 255, 255, 1)',
-      hoverBackground: '#1a1a1a'
+      hoverBackground: '#1a1a1a',
+      iconColor: '#ffffff'
     },
     light: {
       background: '#ffffff',

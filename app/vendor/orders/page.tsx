@@ -12,6 +12,7 @@ import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import { whatsAppService } from '@/lib/services/whatsapp-service';
+import { buildWhatsAppUrl } from '@/lib/utils/phone';
 
 // --- Types ---
 interface OrderItem {
@@ -58,13 +59,13 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' as const } },
 };
 
 export default function VendorOrders() {
   const router = useRouter();
   const { language, t, isRTL } = useLanguage();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, isLoading: authLoading } = useAuth();
 
   const [vendorId, setVendorId] = useState('');
   const [vendorName, setVendorName] = useState('');
@@ -93,7 +94,7 @@ export default function VendorOrders() {
               customerPhone: order.customer_phone || '',
               items: items.map((itm: any) => ({
                 id: itm.product_id || itm.id || '',
-                productName: itm.product_name || itm.productName || `Product`,
+                productName: itm.product_name || itm.productName || itm.name || `Product`,
                 quantity: itm.quantity || 1,
                 price: parseFloat(itm.price || '0'),
               })),
@@ -122,20 +123,10 @@ export default function VendorOrders() {
   }, []);
 
   useEffect(() => {
-    // Get vendor info from auth context or legacy localStorage
-    let id = user?.vendorId || '';
-    let name = user?.displayName || '';
+    if (authLoading) return;
 
-    if (!id) {
-      try {
-        const authStr = localStorage.getItem('vendorAuth');
-        if (authStr) {
-          const auth = JSON.parse(authStr);
-          id = auth.vendorId || '';
-          name = auth.vendorName || auth.name || '';
-        }
-      } catch { /* ignore */ }
-    }
+    const id = user?.vendorId || '';
+    const name = user?.displayName || '';
 
     setVendorId(id);
     setVendorName(name);
@@ -147,7 +138,7 @@ export default function VendorOrders() {
       setOrders([]);
       setLoading(false);
     }
-  }, [user, accessToken, fetchOrders]);
+  }, [accessToken, authLoading, fetchOrders, user?.displayName, user?.vendorId]);
 
   // --- Update order status (DB update + WhatsApp notification) ---
   const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
@@ -160,21 +151,24 @@ export default function VendorOrders() {
     );
 
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (accessToken) {
-        headers['Authorization'] = `Bearer ${accessToken}`;
+      if (!accessToken) {
+        throw new Error('Vendor session expired. Please log in again.');
       }
 
-      const response = await fetch(`/api/orders?id=${orderId}`, {
+      const response = await fetch(`/api/vendor/orders/${orderId}/status`, {
         method: 'PATCH',
-        headers,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (!response.ok) {
-        console.error('Failed to update order status in DB');
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to update order status');
       }
     } catch (error) {
       console.error('Error updating order status:', error);
+      setOrders(prev =>
+        prev.map(o => (o.id === orderId ? { ...o, status: order.status } : o))
+      );
     }
 
     // WhatsApp notification
@@ -416,9 +410,9 @@ export default function VendorOrders() {
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={() => {
-                                const cleanPhone = order.customerPhone.replace(/\D/g, '');
                                 const msg = `Hi ${order.customerName}, this is ${vendorName} regarding your order ${order.orderNumber}.`;
-                                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`);
+                                const url = buildWhatsAppUrl(order.customerPhone, msg);
+                                if (url) window.open(url, '_blank', 'noopener,noreferrer');
                               }}
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-gray-300 transition-colors cursor-pointer"
                             >

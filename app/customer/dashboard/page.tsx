@@ -4,13 +4,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-  ShoppingCart, Gift, DollarSign, Heart, Store, ArrowRight,
+  ShoppingCart, Gift, DollarSign, ClipboardList, Store, ArrowRight,
   ShoppingBag, Star, Package, Loader2
 } from 'lucide-react';
 import { StatCard, DataTable, PageHeader, StatusBadge } from '@/components/portal';
 import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
+import { useCart } from '@/lib/context/CartContext';
 
 const container = {
   hidden: { opacity: 0 },
@@ -22,7 +23,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 interface RecentOrder {
@@ -38,6 +39,7 @@ interface RecentOrder {
 export default function CustomerDashboard() {
   const { language, t, isRTL } = useLanguage();
   const { accessToken, user } = useAuth();
+  const { getCartCount } = useCart();
   const [customerName, setCustomerName] = useState('');
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [totalOrders, setTotalOrders] = useState(0);
@@ -101,6 +103,8 @@ export default function CustomerDashboard() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
+  const shoppingListCount = getCartCount();
+
   const columns: Column<RecentOrder>[] = [
     {
       key: 'id',
@@ -157,6 +161,14 @@ export default function CustomerDashboard() {
       icon: <ShoppingBag className="w-5 h-5 stroke-[1.5]" />,
       color: '#2D5A27',
       bgColor: '#2D5A27',
+    },
+    {
+      label: isRTL ? 'רשימת קניות' : 'Shopping List',
+      labelHe: 'רשימת קניות',
+      href: '/customer/shopping-list',
+      icon: <ClipboardList className="w-5 h-5 stroke-[1.5]" />,
+      color: '#0369a1',
+      bgColor: '#0369a1',
     },
     {
       label: isRTL ? 'עקוב אחרי הזמנה' : 'Track Order',
@@ -222,9 +234,9 @@ export default function CustomerDashboard() {
           color="emerald"
         />
         <StatCard
-          title={isRTL ? 'מועדפים' : 'Favorites'}
-          value={0}
-          icon={<Heart className="w-5 h-5 stroke-[1.5]" />}
+          title={isRTL ? 'רשימת קניות' : 'Shopping List'}
+          value={shoppingListCount}
+          icon={<ClipboardList className="w-5 h-5 stroke-[1.5]" />}
           color="purple"
         />
       </motion.div>
@@ -234,7 +246,7 @@ export default function CustomerDashboard() {
         <h2 className={`text-lg font-semibold text-gray-900 mb-4 ${isRTL ? 'text-right' : ''}`}>
           {isRTL ? 'פעולות מהירות' : 'Quick Actions'}
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           {quickActions.map((action, index) => (
             <Link key={action.href} href={action.href}>
               <motion.div

@@ -1,7 +1,7 @@
 // Teva Deli Vendor Export Index
 
 export { default as tevaDeliConfig } from './teva-deli-config';
-export { tevaDeliProducts } from '../teva-deli-catalog';
+export { tevaDeliCompleteProducts as tevaDeliProducts } from '../teva-deli-complete-catalog';
 export { tevaDeliCompleteProducts } from '../teva-deli-complete-catalog';
 
 // Quick stats

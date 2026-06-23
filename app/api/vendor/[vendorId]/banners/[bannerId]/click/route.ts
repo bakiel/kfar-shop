@@ -1,37 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ensureVendorBannersTable, normalizeVendorBanner } from '@/lib/services/vendor-banner-service';
+import { query } from '@/lib/db/postgres-client';
 
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ vendorId: string; bannerId: string }> }
 ) {
   try {
-    const params = await context.params;
-    const { vendorId, bannerId } = params;
-    
-    // In production, this would update click analytics in the database
-    console.log(`Banner click tracked - Vendor: ${vendorId}, Banner: ${bannerId}`);
-    
-    // Simulate analytics update
-    const updatedAnalytics = {
-      bannerId,
-      vendorId,
-      clickedAt: new Date().toISOString(),
-      // In production, also track:
-      // - User ID (if logged in)
-      // - Session ID
-      // - Device type
-      // - Referrer
-    };
+    const { vendorId, bannerId } = await context.params;
+
+    await ensureVendorBannersTable();
+    const { rows } = await query(
+      `UPDATE vendor_banners
+       SET clicks = clicks + 1, updated_at = NOW()
+       WHERE id = $1 AND vendor_id = $2
+       RETURNING *`,
+      [bannerId, vendorId]
+    );
+
+    if (!rows[0]) {
+      return NextResponse.json({ success: false, error: 'Banner not found' }, { status: 404 });
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Click tracked successfully',
-      analytics: updatedAnalytics
+      banner: normalizeVendorBanner(rows[0]),
     });
   } catch (error) {
     console.error('Error tracking banner click:', error);
     return NextResponse.json(
-      { error: 'Failed to track click' },
+      { success: false, error: 'Failed to track click' },
       { status: 500 }
     );
   }

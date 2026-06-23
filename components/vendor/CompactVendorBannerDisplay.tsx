@@ -75,21 +75,8 @@ export default function CompactVendorBannerDisplay({ vendorId }: { vendorId: str
       const data = await response.json();
       setBanners(data.banners || []);
     } catch (error) {
-      // Fallback to mock data for demonstration
-      setBanners([
-        {
-          id: '1',
-          template: 'sale',
-          content: {
-            title: 'Weekend Special',
-            description: 'Save on select items',
-            discount: 20,
-            ctaText: 'Shop Now',
-            endDate: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-          },
-          isActive: true
-        }
-      ]);
+      console.error('Error fetching active vendor banners:', error);
+      setBanners([]);
     }
   };
 
@@ -170,7 +157,7 @@ export default function CompactVendorBannerDisplay({ vendorId }: { vendorId: str
                 {banners.length > 1 && (
                   <div className="flex items-center gap-2 ml-4">
                     <button
-                      onClick={() => setCurrentBannerIndex((prev - 1 + banners.length) % banners.length)}
+                      onClick={() => setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length)}
                       className="p-1 hover:bg-white/20 rounded transition-colors"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -179,7 +166,7 @@ export default function CompactVendorBannerDisplay({ vendorId }: { vendorId: str
                       {currentBannerIndex + 1}/{banners.length}
                     </span>
                     <button
-                      onClick={() => setCurrentBannerIndex((prev + 1) % banners.length)}
+                      onClick={() => setCurrentBannerIndex((prev) => (prev + 1) % banners.length)}
                       className="p-1 hover:bg-white/20 rounded transition-colors"
                     >
                       <ChevronRight className="w-4 h-4" />

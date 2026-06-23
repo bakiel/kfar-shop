@@ -118,7 +118,7 @@ const LoadingAnimation = ({ language }: { language: string }) => (
           className="w-2 h-2 rounded-full"
           style={{ backgroundColor: BRAND.green }}
           animate={{ y: [0, -8, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.12, ease: 'easeInOut' }}
+          transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.12, ease: 'easeOut' as const }}
         />
       ))}
     </div>
@@ -140,7 +140,7 @@ const VoiceVisualizer = ({ isActive }: { isActive: boolean }) => (
           height: ['6px', '16px', '6px'],
           opacity: [0.6, 1, 0.6],
         } : { height: '6px', opacity: 0.4 }}
-        transition={{ duration: 0.45, repeat: Infinity, delay: i * 0.08, ease: 'easeInOut' }}
+        transition={{ duration: 0.45, repeat: Infinity, delay: i * 0.08, ease: 'easeOut' as const }}
       />
     ))}
   </div>
@@ -740,7 +740,7 @@ export default function ShoppingAssistant() {
               className="absolute inset-0 rounded-full"
               style={{ border: `2px solid ${BRAND.gold}` }}
               animate={{ scale: [1, 1.2, 1], opacity: [0.6, 0, 0.6] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeOut' }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeOut' as const }}
             />
           </motion.button>
         )}

@@ -4,12 +4,18 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CartItem {
   id: string;
+  productId?: string;
+  itemType?: 'product' | 'bundle';
+  bundleId?: string;
+  bundleName?: string;
+  bundleProductIds?: string[];
   name: string;
-  vendorId: string;
-  vendorName: string;
+  vendorId?: string;
+  vendorName?: string;
+  vendor?: string;
   price: number;
   quantity: number;
-  image: string;
+  image?: string;
   maxQuantity?: number;
   bulkPricing?: Array<{ quantity: number; price: number }>;
   originalPrice?: number;
@@ -17,6 +23,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
+  cart: CartItem[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -27,7 +34,7 @@ interface CartContextType {
   isInCart: (id: string) => boolean;
   getQuantity: (id: string) => number;
   // Persistent shopping list — authenticated customers only (Task #3)
-  loadFromServer: (accessToken: string) => Promise<void>;
+  loadFromServer: (accessToken: string, options?: { replaceEmpty?: boolean }) => Promise<void>;
   syncToServer: (accessToken: string) => Promise<void>;
   reorderFromOrder: (orderId: string, accessToken: string, mode?: 'replace' | 'merge') => Promise<number>;
 }
@@ -118,10 +125,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getItemsByVendor = () => {
     return items.reduce((acc, item) => {
-      if (!acc[item.vendorId]) {
-        acc[item.vendorId] = [];
+      const vendorKey = item.vendorId || item.vendor || item.vendorName || 'unknown';
+      if (!acc[vendorKey]) {
+        acc[vendorKey] = [];
       }
-      acc[item.vendorId].push(item);
+      acc[vendorKey].push(item);
       return acc;
     }, {} as Record<string, CartItem[]>);
   };
@@ -139,7 +147,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // For authenticated customers, the cart is persisted server-side so the list
   // survives device changes. Guest carts remain localStorage-only.
 
-  const loadFromServer = async (accessToken: string) => {
+  const loadFromServer = async (accessToken: string, options?: { replaceEmpty?: boolean }) => {
     if (!accessToken) return;
     try {
       const res = await fetch('/api/customer/cart', {
@@ -147,7 +155,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       if (!res.ok) return;
       const data = await res.json();
-      if (Array.isArray(data.items) && data.items.length > 0) {
+      if (Array.isArray(data.items) && (data.items.length > 0 || options?.replaceEmpty)) {
         setItems(data.items);
       }
     } catch (e) {
@@ -209,6 +217,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <CartContext.Provider value={{
       items,
+      cart: items,
       addToCart,
       removeFromCart,
       updateQuantity,
@@ -237,6 +246,7 @@ export const useCart = () => {
 
 const defaultCartContext: CartContextType = {
   items: [],
+  cart: [],
   addToCart: () => {},
   removeFromCart: () => {},
   updateQuantity: () => {},

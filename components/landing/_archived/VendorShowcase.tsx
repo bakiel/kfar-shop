@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Package, Star } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getVendors, getProductsByVendor, VendorStore } from '@/lib/data/wordpress-style-data-layer';
+import { getVendors, getProductsByVendor, VendorStore } from './archived-data';
 
 // Simple vendor card with enhanced animations
 const VendorCard = ({

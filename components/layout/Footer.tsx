@@ -145,36 +145,36 @@ const Footer = () => {
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: shouldReduceMotion ? 0 : 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
+      transition: { duration: shouldReduceMotion ? 0 : 0.5, ease: 'easeOut' as const }
     }
   };
 
   const footerLinks = {
     shop: [
       { href: '/marketplace', label: language === 'he' ? 'כל המוצרים' : 'All Products' },
-      { href: '/categories', label: language === 'he' ? 'קטגוריות' : 'Categories' },
-      { href: '/store/featured', label: language === 'he' ? 'מוצרים מומלצים' : 'Featured' },
-      { href: '/store/new', label: language === 'he' ? 'חדש באתר' : 'New Arrivals' },
-      { href: '/store/deals', label: language === 'he' ? 'מבצעים' : 'Special Offers' },
+      { href: '/marketplace', label: language === 'he' ? 'קטגוריות' : 'Categories' },
+      { href: '/marketplace', label: language === 'he' ? 'מוצרים מומלצים' : 'Featured' },
+      { href: '/marketplace', label: language === 'he' ? 'חדש באתר' : 'New Arrivals' },
+      { href: '/bundles', label: language === 'he' ? 'מבצעים' : 'Special Offers' },
     ],
     support: [
-      { href: '/help', label: language === 'he' ? 'מרכז עזרה' : 'Help Center' },
+      { href: '/support', label: language === 'he' ? 'מרכז עזרה' : 'Help Center' },
       { href: '/faq', label: language === 'he' ? 'שאלות נפוצות' : 'FAQs' },
       { href: '/contact', label: language === 'he' ? 'צור קשר' : 'Contact Us' },
       { href: '/shipping', label: language === 'he' ? 'משלוחים' : 'Shipping Info' },
-      { href: '/policies/returns', label: language === 'he' ? 'החזרות' : 'Returns' },
+      { href: '/returns', label: language === 'he' ? 'החזרות' : 'Returns' },
     ],
     vendors: [
       { href: '/vendors', label: language === 'he' ? 'הספקים שלנו' : 'Our Vendors' },
-      { href: '/vendor/join', label: language === 'he' ? 'הצטרף כספק' : 'Become a Vendor' },
+      { href: '/vendor/onboarding', label: language === 'he' ? 'הצטרף כספק' : 'Become a Vendor' },
       { href: '/vendor/dashboard', label: language === 'he' ? 'לוח בקרה' : 'Vendor Dashboard' },
-      { href: '/vendor/resources', label: language === 'he' ? 'משאבים' : 'Resources' },
+      { href: '/support', label: language === 'he' ? 'משאבים' : 'Resources' },
     ],
     legal: [
-      { href: '/policies/privacy', label: language === 'he' ? 'פרטיות' : 'Privacy Policy' },
-      { href: '/policies/terms', label: language === 'he' ? 'תנאי שימוש' : 'Terms of Service' },
-      { href: '/policies/cookies', label: language === 'he' ? 'עוגיות' : 'Cookie Policy' },
-      { href: '/policies/accessibility', label: language === 'he' ? 'נגישות' : 'Accessibility' },
+      { href: '/support#privacy', label: language === 'he' ? 'פרטיות' : 'Privacy Policy' },
+      { href: '/support#terms', label: language === 'he' ? 'תנאי שימוש' : 'Terms of Service' },
+      { href: '/support#cookies', label: language === 'he' ? 'עוגיות' : 'Cookie Policy' },
+      { href: '/support#accessibility', label: language === 'he' ? 'נגישות' : 'Accessibility' },
     ],
   };
 

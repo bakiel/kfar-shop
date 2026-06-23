@@ -3,14 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import Layout from '@/components/layout/Layout';
 import { toast } from '@/components/ui/use-toast';
 import { notificationService, type Notification, type NotificationPreferences } from '@/lib/services/notification-service';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 import { ArrowLeft, ShoppingBag, Star, Package, Store, Info, Tag, Bell, BellOff, CheckCircle } from 'lucide-react';
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [customerId, setCustomerId] = useState<string>('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
@@ -19,17 +20,17 @@ export default function NotificationsPage() {
   const [filter, setFilter] = useState<Notification['type'] | 'all'>('all');
 
   useEffect(() => {
-    // Check if customer is logged in
-    const token = localStorage.getItem('customerToken');
-    if (!token) {
+    if (isLoading) return;
+
+    if (!isAuthenticated || user?.role !== 'customer') {
       router.push('/customer/login');
       return;
     }
-    
-    // For demo, use a fixed customer ID
-    setCustomerId('demo-customer-001');
-    loadData('demo-customer-001');
-  }, []);
+
+    const accountId = user.customerId || user.id;
+    setCustomerId(accountId);
+    loadData(accountId);
+  }, [isAuthenticated, isLoading, router, user]);
 
   const loadData = async (customerId: string) => {
     try {
@@ -107,7 +108,9 @@ export default function NotificationsPage() {
 
   const notificationIcons: Record<string, React.ReactNode> = {
     order: <ShoppingBag className="w-5 h-5 stroke-[1.5]" />,
+    order_update: <ShoppingBag className="w-5 h-5 stroke-[1.5]" />,
     reward: <Star className="w-5 h-5 stroke-[1.5]" />,
+    points: <Star className="w-5 h-5 stroke-[1.5]" />,
     product: <Package className="w-5 h-5 stroke-[1.5]" />,
     vendor: <Store className="w-5 h-5 stroke-[1.5]" />,
     system: <Info className="w-5 h-5 stroke-[1.5]" />,
@@ -121,9 +124,11 @@ export default function NotificationsPage() {
       product: 'text-blue-600 bg-blue-50',
       vendor: 'text-purple-600 bg-purple-50',
       system: 'text-gray-600 bg-gray-50',
-      promotion: 'text-red-600 bg-red-50'
+      promotion: 'text-red-600 bg-red-50',
+      order_update: 'text-green-600 bg-green-50',
+      points: 'text-yellow-600 bg-yellow-50',
     };
-    return colors[type];
+    return colors[type] || colors.system;
   };
 
   const formatDate = (date: Date) => {
@@ -143,20 +148,17 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading notifications...</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading notifications...</p>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-8">
           <div className="container mx-auto px-4">
@@ -480,7 +482,6 @@ export default function NotificationsPage() {
             )}
           </AnimatePresence>
         </div>
-      </div>
-    </Layout>
+    </div>
   );
 }

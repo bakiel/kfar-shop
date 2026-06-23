@@ -231,7 +231,7 @@ export default function JoinKFARPage() {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
               {benefits.map((benefit, index) => {
-                const colorMap = {
+                const colorMap: Record<string, string> = {
                   'sun-gold': '#f6af0d',
                   'harvest-red': '#c23c09',
                   'leaf-green': '#478c0b',

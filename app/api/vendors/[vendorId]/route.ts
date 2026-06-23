@@ -1,64 +1,96 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { completeProductCatalog } from '@/lib/data/complete-catalog';
+import { getVendorById, invalidateVendorFeedCache } from '@/lib/services/live-vendor-feed';
+import { query } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
+import { invalidateProductFeedCache } from '@/lib/services/live-product-feed';
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
+};
 
 export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ vendorId: string }> }
+) {
+  const { vendorId } = await params;
+  const vendor = await getVendorById(vendorId, true);
+
+  if (!vendor) {
+    return NextResponse.json({ error: 'Vendor not found' }, { status: 404, headers: NO_STORE_HEADERS });
+  }
+
+  return NextResponse.json(vendor, { headers: NO_STORE_HEADERS });
+}
+
+export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ vendorId: string }> }
 ) {
   const { vendorId } = await params;
-  
-  // Get vendor data and products from catalog
-  const vendorData = completeProductCatalog[vendorId as keyof typeof completeProductCatalog];
-  
-  if (!vendorData) {
-    return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
+  const user = token ? verifyAccessToken(token) : null;
+
+  if (!user || (user.role !== 'admin' && user.vendorId !== vendorId)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE_HEADERS });
   }
-  
-  // Map vendor data to expected format
-  const vendor = {
-    id: vendorId,
-    name: vendorData.vendorName,
-    description: getVendorDescription(vendorId),
-    logo: getVendorLogo(vendorId),
-    rating: getVendorRating(vendorId),
-    products: vendorData.products
-  };
-  
-  return NextResponse.json(vendor);
-}
 
-function getVendorDescription(vendorId: string): string {
-  const descriptions: { [key: string]: string } = {
-    'teva-deli': 'Premium Israeli vegan deli since 1983',
-    'queens-cuisine': 'Artisan plant-based meat alternatives',
-    'gahn-delight': 'Handcrafted vegan ice cream & desserts',
-    'atur-avior': 'Organic superfood blends & wellness',
-    'people-store': 'Community marketplace for daily essentials',
-    'vop-shop': 'Village of Peace heritage & wellness products'
-  };
-  return descriptions[vendorId] || '';
-}
+  const body = await request.json();
 
-function getVendorLogo(vendorId: string): string {
-  const logos: { [key: string]: string } = {
-    'teva-deli': '/images/vendors/teva_deli_official_logo_master_brand_israeli_vegan_food_company.jpg',
-    'queens-cuisine': '/images/vendors/queens_cuisine_official_logo_master_brand_plant_based_catering.jpg',
-    'gahn-delight': '/images/vendors/gahn_delight_official_logo_master_brand_ice_cream.jpg',
-    'atur-avior': '/images/vendors/Garden of Light Logo.jpg',
-    'people-store': '/images/vendors/people_store_logo_community_retail.jpg',
-    'vop-shop': '/images/vendors/vop_shop_official_logo_master_brand_village_of_peace.jpg'
-  };
-  return logos[vendorId] || '';
-}
+  const { rows: columnRows } = await query<{ column_name: string }>(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name = 'vendors'`
+  );
+  const columns = new Set(columnRows.map(row => row.column_name));
 
-function getVendorRating(vendorId: string): number {
-  const ratings: { [key: string]: number } = {
-    'teva-deli': 4.8,
-    'queens-cuisine': 4.9,
-    'gahn-delight': 4.7,
-    'atur-avior': 4.9,
-    'people-store': 4.6,
-    'vop-shop': 4.8
+  const updateFields: string[] = [];
+  const values: any[] = [vendorId];
+  const seen = new Set<string>();
+  let hasWritableField = false;
+
+  const addUpdate = (column: string, value: unknown) => {
+    if (value === undefined || seen.has(column) || !columns.has(column)) return;
+    values.push(value);
+    updateFields.push(`${column} = $${values.length}`);
+    seen.add(column);
+    hasWritableField = true;
   };
-  return ratings[vendorId] || 4.5;
+
+  addUpdate('name', body.name);
+  addUpdate('business_name', body.name);
+  addUpdate('description', body.description);
+  addUpdate('category', body.category || body.metadata?.specialty);
+  addUpdate('address', body.metadata?.location || body.address);
+
+  if (columns.has('metadata') && body.metadata !== undefined) {
+    const { rows } = await query<{ metadata: Record<string, any> | null }>(
+      'SELECT metadata FROM vendors WHERE id = $1',
+      [vendorId]
+    );
+    const currentMetadata = rows[0]?.metadata && typeof rows[0].metadata === 'object' ? rows[0].metadata : {};
+    addUpdate('metadata', { ...currentMetadata, ...body.metadata });
+  }
+
+  if (columns.has('updated_at')) {
+    updateFields.push('updated_at = NOW()');
+  }
+
+  if (hasWritableField) {
+    await query(
+      `UPDATE vendors
+       SET ${updateFields.join(', ')}
+       WHERE id = $1`,
+      values
+    );
+    invalidateProductFeedCache();
+    invalidateVendorFeedCache();
+  }
+
+  const vendor = await getVendorById(vendorId, true);
+  if (!vendor) {
+    return NextResponse.json({ error: 'Vendor not found' }, { status: 404, headers: NO_STORE_HEADERS });
+  }
+
+  return NextResponse.json(vendor, { headers: NO_STORE_HEADERS });
 }

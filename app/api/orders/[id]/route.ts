@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/postgres-client';
+import { verifyAccessToken } from '@/lib/services/auth-service';
 
 // ---------------------------------------------------------------------------
 // GET /api/orders/[id]
@@ -13,6 +14,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '') || '';
+    const user = token ? verifyAccessToken(token) : null;
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -73,6 +83,16 @@ export async function GET(
     }
 
     const order = orderRows[0];
+    if (
+      user.role !== 'admin'
+      && !(user.role === 'vendor' && user.vendorId && order.vendor_id === user.vendorId)
+      && !(user.role === 'customer' && user.customerId && order.customer_id === user.customerId)
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Order does not belong to this account' },
+        { status: 403 }
+      );
+    }
 
     // Fetch order items
     let items: any[] = [];

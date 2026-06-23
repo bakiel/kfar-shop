@@ -155,7 +155,7 @@ export class UpstashService {
   static async getPopularProducts(limit: number = 10) {
     const key = 'popular:products';
     try {
-      const products = await redis.zrevrange(key, 0, limit - 1, { withScores: true });
+      const products = await (redis as any).zrevrange(key, 0, limit - 1, { withScores: true });
       return products;
     } catch (error) {
       console.error('Get popular error:', error);

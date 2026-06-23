@@ -8,18 +8,23 @@ import { notificationService, type Notification } from '@/lib/services/notificat
 import { X, BellOff, ShoppingBag, Star, Package, Store, Info, Tag, Bell, Check, Trash2 } from 'lucide-react';
 
 interface NotificationCenterProps {
-  customerId: string;
+  customerId?: string;
+  recipientId?: string;
+  notificationsHref?: string;
   isOpen: boolean;
   onClose: () => void;
-  anchorRef?: React.RefObject<HTMLElement>;
+  anchorRef?: React.RefObject<HTMLElement | null>;
 }
 
 export default function NotificationCenter({ 
   customerId, 
+  recipientId,
+  notificationsHref = '/customer/notifications',
   isOpen, 
   onClose,
   anchorRef 
 }: NotificationCenterProps) {
+  const accountId = recipientId || customerId || '';
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -30,7 +35,7 @@ export default function NotificationCenter({
     if (isOpen) {
       loadNotifications();
     }
-  }, [isOpen, customerId, filter]);
+  }, [isOpen, accountId, filter]);
 
   useEffect(() => {
     // Close on click outside
@@ -58,7 +63,7 @@ export default function NotificationCenter({
     try {
       setLoading(true);
       const { notifications, unreadCount } = await notificationService.getNotifications(
-        customerId,
+        accountId,
         { unreadOnly: filter === 'unread' }
       );
       setNotifications(notifications);
@@ -86,7 +91,7 @@ export default function NotificationCenter({
   };
 
   const handleMarkAllAsRead = async () => {
-    const success = await notificationService.markAllAsRead(customerId);
+    const success = await notificationService.markAllAsRead(accountId);
     if (success) {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
@@ -293,7 +298,7 @@ export default function NotificationCenter({
         {/* Footer */}
         <div className="border-t p-3 bg-gray-50">
           <Link
-            href="/customer/notifications"
+            href={notificationsHref}
             onClick={onClose}
             className="text-sm text-green-600 hover:text-green-700 font-medium text-center block"
           >

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Plus, Package, X, Percent, ShoppingBag, AlertTriangle, Star
+  Plus, Package, X, Percent, AlertTriangle, Star, Search
 } from 'lucide-react';
 import { PageHeader, DataTable, StatusBadge, FormField, ConfirmDialog, LoadingState } from '@/components/portal';
 import type { Column } from '@/components/portal';
@@ -20,9 +20,17 @@ interface Bundle {
   originalPrice: number;
   status: 'active' | 'draft';
   isPromoted?: boolean;
+  resolvedProducts?: ProductOption[];
   description?: string;
   image?: string;
   [key: string]: unknown;
+}
+
+interface ProductOption {
+  id: string;
+  name: string;
+  vendorName?: string;
+  price?: number;
 }
 
 const container = {
@@ -31,7 +39,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 // --- Mock fallback data (kept for reference) ---
@@ -73,6 +81,7 @@ function normalizeBundle(b: any): Bundle {
     nameHe: b.nameHe || b.name_he || '',
     productsCount: b.resolvedProducts?.length ?? (productIds.length > 0 ? productIds.length : (b.productsCount || 0)),
     products: productIds,
+    resolvedProducts: Array.isArray(b.resolvedProducts) ? b.resolvedProducts : [],
     price: b.price || b.bundle_price || 0,
     originalPrice: b.originalPrice || b.original_price || b.price || b.bundle_price || 0,
     status: b.status || (b.is_active ? 'active' : 'draft'),
@@ -101,9 +110,14 @@ export default function BundlesPage() {
   const [formImage, setFormImage] = useState('');
   const [formPrice, setFormPrice] = useState('');
   const [formOriginalPrice, setFormOriginalPrice] = useState('');
-  const [formProducts, setFormProducts] = useState(''); // comma-separated product IDs
+  const [formProducts, setFormProducts] = useState<ProductOption[]>([]);
+  const [productSearch, setProductSearch] = useState('');
+  const [productResults, setProductResults] = useState<ProductOption[]>([]);
+  const [productSearchLoading, setProductSearchLoading] = useState(false);
   const [formStatus, setFormStatus] = useState<'active' | 'draft'>('draft');
   const [formPromoted, setFormPromoted] = useState(false);
+  const [formShowInCatalog, setFormShowInCatalog] = useState(true);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const fetchBundles = useCallback(() => {
     setLoading(true);
@@ -140,9 +154,13 @@ export default function BundlesPage() {
     setFormImage('');
     setFormPrice('');
     setFormOriginalPrice('');
-    setFormProducts('');
-    setFormStatus('draft');
+    setFormProducts([]);
+    setProductSearch('');
+    setProductResults([]);
+    setFormStatus('active');
     setFormPromoted(false);
+    setFormShowInCatalog(true);
+    setShowAdvanced(false);
     setFormError(null);
     setShowForm(true);
   };
@@ -154,27 +172,29 @@ export default function BundlesPage() {
     // Description + image + products come back as raw fields from the API
     setFormDescription((bundle as any).description || '');
     setFormImage((bundle as any).image || '');
-    const products = (bundle as any).products;
-    setFormProducts(
-      Array.isArray(products) ? products.join(', ')
-        : (typeof products === 'string' ? products : '')
-    );
+    const products = normalizeProductIds((bundle as any).products);
+    const resolvedProducts = Array.isArray((bundle as any).resolvedProducts) ? (bundle as any).resolvedProducts : [];
+    setFormProducts(products.map((productId) => {
+      const resolved = resolvedProducts.find((product: any) => product.id === productId);
+      return {
+        id: productId,
+        name: resolved?.name || productId,
+        vendorName: resolved?.vendorName,
+        price: resolved?.price,
+      };
+    }));
     setFormPrice(String(bundle.price));
     setFormOriginalPrice(String(bundle.originalPrice));
     setFormStatus(bundle.status);
     setFormPromoted(!!bundle.isPromoted);
+    setFormShowInCatalog(bundle.status === 'active');
+    setShowAdvanced(false);
     setFormError(null);
     setShowForm(true);
   };
 
   const handleSave = () => {
-    // Parse comma-separated product IDs (trimmed, de-duped, empty filtered)
-    const productIds = Array.from(new Set(
-      formProducts
-        .split(/[,\n]/)
-        .map(s => s.trim())
-        .filter(Boolean)
-    ));
+    const productIds = formProducts.map(product => product.id);
 
     if (!formName.trim()) {
       setFormError(isRTL ? 'יש להזין שם חבילה.' : 'Bundle name is required.');
@@ -182,7 +202,7 @@ export default function BundlesPage() {
     }
 
     if (productIds.length === 0) {
-      setFormError(isRTL ? 'יש להזין לפחות מזהה מוצר אחד.' : 'Add at least one product ID.');
+      setFormError(isRTL ? 'יש לבחור לפחות מוצר אחד.' : 'Add at least one product.');
       return;
     }
 
@@ -196,14 +216,14 @@ export default function BundlesPage() {
 
     const payload = {
       name: formName,
-      nameHe: formNameHe,
+      nameHe: formNameHe || formName,
       description: formDescription,
-      image: formImage || undefined,
+      image: formImage || '/images/placeholder-product.jpg',
       price: Number(formPrice) || 0,
       originalPrice: Number(formOriginalPrice) || 0,
       products: productIds,
-      status: formStatus,
-      isPromoted: formPromoted,
+      status: formShowInCatalog ? formStatus : 'draft',
+      isPromoted: editingBundle ? formPromoted : false,
     };
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -270,6 +290,44 @@ export default function BundlesPage() {
       })
       .then(() => fetchBundles())
       .catch((err) => console.error('Bundle promotion toggle error:', err));
+  };
+
+  useEffect(() => {
+    if (!showForm) return;
+    const search = productSearch.trim();
+    if (search.length < 2) {
+      setProductResults([]);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      const headers: Record<string, string> = {};
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+      setProductSearchLoading(true);
+      fetch(`/api/admin/products?search=${encodeURIComponent(search)}&limit=12`, { headers })
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(data => setProductResults(data.products || []))
+        .catch(err => {
+          console.error('Product search error:', err);
+          setProductResults([]);
+        })
+        .finally(() => setProductSearchLoading(false));
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [accessToken, productSearch, showForm]);
+
+  const addProduct = (product: ProductOption) => {
+    setFormProducts(current => current.some(item => item.id === product.id) ? current : [...current, product]);
+    setProductSearch('');
+    setProductResults([]);
+  };
+
+  const removeProduct = (productId: string) => {
+    setFormProducts(current => current.filter(product => product.id !== productId));
   };
 
   const handleDelete = () => {
@@ -460,17 +518,6 @@ export default function BundlesPage() {
                     />
                   </FormField>
 
-                  <FormField label={isRTL ? 'שם (עברית)' : 'Name (Hebrew)'} required isRTL={isRTL}>
-                    <input
-                      type="text"
-                      value={formNameHe}
-                      onChange={(e) => setFormNameHe(e.target.value)}
-                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
-                      placeholder="e.g. חבילת מוצרי שבת"
-                      dir="rtl"
-                    />
-                  </FormField>
-
                   <div className="grid grid-cols-2 gap-4">
                     <FormField label={t('Bundle Price')} required isRTL={isRTL}>
                       <input
@@ -492,71 +539,125 @@ export default function BundlesPage() {
                     </FormField>
                   </div>
 
-                  <FormField label={isRTL ? 'תיאור (אופציונלי)' : 'Description (optional)'} isRTL={isRTL}>
-                    <textarea
-                      value={formDescription}
-                      onChange={(e) => setFormDescription(e.target.value)}
-                      rows={2}
-                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] resize-none"
-                      placeholder={isRTL ? 'תיאור קצר שיוצג בכרטיס החבילה' : 'Short description shown on the bundle card'}
-                    />
+                  <FormField label={isRTL ? 'מוצרים' : 'Products'} required isRTL={isRTL}>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 stroke-[1.5]" />
+                      <input
+                        type="search"
+                        value={productSearch}
+                        onChange={(e) => setProductSearch(e.target.value)}
+                        className="w-full py-2.5 pl-9 pr-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
+                        placeholder={isRTL ? 'חפש לפי מוצר או ספק' : 'Search products by name or vendor'}
+                      />
+                      {(productResults.length > 0 || productSearchLoading) && (
+                        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+                          {productSearchLoading && (
+                            <div className="px-3 py-2 text-sm text-gray-500">{isRTL ? 'מחפש...' : 'Searching...'}</div>
+                          )}
+                          {!productSearchLoading && productResults.map(product => (
+                            <button
+                              key={product.id}
+                              type="button"
+                              onClick={() => addProduct(product)}
+                              className="w-full px-3 py-2 text-left hover:bg-gray-50 border-b border-gray-50 last:border-0"
+                            >
+                              <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                              <div className="text-xs text-gray-500">{product.vendorName || product.id} · ₪{Number(product.price || 0).toFixed(2)}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formProducts.map(product => (
+                        <span key={product.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2D5A27]/10 text-[#1E3D1A] text-xs font-medium">
+                          {product.name}
+                          <button type="button" onClick={() => removeProduct(product.id)} className="text-[#1E3D1A]/70 hover:text-[#1E3D1A]">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
                   </FormField>
 
-                  <FormField label={isRTL ? 'תמונת חבילה (URL)' : 'Bundle image (URL)'} isRTL={isRTL}>
-                    <input
-                      type="text"
-                      value={formImage}
-                      onChange={(e) => setFormImage(e.target.value)}
-                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
-                      placeholder="/images/bundles/weekend-feast.jpg"
-                    />
-                  </FormField>
-
-                  <FormField
-                    label={isRTL ? 'מזהי מוצרים (מופרד בפסיקים)' : 'Product IDs (comma-separated)'}
-                    isRTL={isRTL}
-                  >
-                    <textarea
-                      value={formProducts}
-                      onChange={(e) => setFormProducts(e.target.value)}
-                      rows={2}
-                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] resize-none font-mono"
-                      placeholder="teva-deli-001, queens-003, gahn-07"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      {isRTL ? 'הכנס את המזהים המדויקים של המוצרים מהרשימה הקיימת.' : 'Paste the exact product IDs as they appear in the catalogue.'}
-                    </p>
-                  </FormField>
-
-                  <FormField label={t('Status')} isRTL={isRTL}>
-                    <select
-                      value={formStatus}
-                      onChange={(e) => setFormStatus(e.target.value as 'active' | 'draft')}
-                      className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] cursor-pointer"
-                    >
-                      <option value="draft">{isRTL ? 'טיוטה' : 'Draft'}</option>
-                      <option value="active">{isRTL ? 'פעיל' : 'Active'}</option>
-                    </select>
-                  </FormField>
-
-                  <label className="flex items-center gap-3 px-3 py-2.5 border border-[#E8B84D]/40 bg-[#E8B84D]/10 rounded-lg cursor-pointer">
+                  <label className="flex items-center gap-3 px-3 py-2.5 border border-gray-200 bg-gray-50 rounded-lg cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={formPromoted}
-                      onChange={(e) => setFormPromoted(e.target.checked)}
+                      checked={formShowInCatalog}
+                      onChange={(e) => {
+                        setFormShowInCatalog(e.target.checked);
+                        setFormStatus(e.target.checked ? 'active' : 'draft');
+                      }}
                       className="w-4 h-4 accent-[#2D5A27]"
                     />
                     <div className="flex-1">
                       <div className="text-sm font-medium text-[#1E3D1A]">
-                        {isRTL ? 'הצג בדף הבית' : 'Promote on home page'}
+                        {isRTL ? 'הצג בקטלוג' : 'Show in catalog'}
                       </div>
                       <div className="text-[11px] text-gray-500">
-                        {isRTL
-                          ? 'רק חבילה אחת יכולה להיות מקודמת בכל זמן. שמירה תחליף את הקידום הקיים.'
-                          : 'Only one bundle can be promoted at a time — saving will replace the current one.'}
+                        {isRTL ? 'חבילות חדשות פעילות כברירת מחדל.' : 'New bundles are active by default.'}
                       </div>
                     </div>
                   </label>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(value => !value)}
+                    className="text-sm font-medium text-[#2D5A27] hover:text-[#1E3D1A]"
+                  >
+                    {showAdvanced ? (isRTL ? 'הסתר מתקדם' : 'Hide advanced') : (isRTL ? 'אפשרויות מתקדמות' : 'Advanced')}
+                  </button>
+
+                  {showAdvanced && (
+                    <div className="space-y-4 pt-2 border-t border-gray-100">
+                      <FormField label={isRTL ? 'שם (עברית)' : 'Name (Hebrew)'} isRTL={isRTL}>
+                        <input
+                          type="text"
+                          value={formNameHe}
+                          onChange={(e) => setFormNameHe(e.target.value)}
+                          className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
+                          placeholder={formName || 'חבילת מוצרים'}
+                          dir="rtl"
+                        />
+                      </FormField>
+
+                      <FormField label={isRTL ? 'תיאור (אופציונלי)' : 'Description (optional)'} isRTL={isRTL}>
+                        <textarea
+                          value={formDescription}
+                          onChange={(e) => setFormDescription(e.target.value)}
+                          rows={2}
+                          className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27] resize-none"
+                          placeholder={isRTL ? 'תיאור קצר שיוצג בכרטיס החבילה' : 'Short description shown on the bundle card'}
+                        />
+                      </FormField>
+
+                      {editingBundle && (
+                        <>
+                          <FormField label={isRTL ? 'תמונת חבילה (URL)' : 'Bundle image (URL)'} isRTL={isRTL}>
+                            <input
+                              type="text"
+                              value={formImage}
+                              onChange={(e) => setFormImage(e.target.value)}
+                              className="w-full py-2.5 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A27]/20 focus:border-[#2D5A27]"
+                              placeholder="/images/bundles/weekend-feast.jpg"
+                            />
+                          </FormField>
+
+                          <label className="flex items-center gap-3 px-3 py-2.5 border border-[#E8B84D]/40 bg-[#E8B84D]/10 rounded-lg cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formPromoted}
+                              onChange={(e) => setFormPromoted(e.target.checked)}
+                              className="w-4 h-4 accent-[#2D5A27]"
+                            />
+                            <span className="text-sm font-medium text-[#1E3D1A]">
+                              {isRTL ? 'הצג בדף הבית' : 'Promote on home page'}
+                            </span>
+                          </label>
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   {formError && (
                     <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

@@ -9,7 +9,7 @@ import QRTrackingService from '@/lib/services/qr-tracking-mock';
 import { Package, Store, ShoppingCart, MapPin, Handshake, QrCode, AlertCircle, Download, Copy, Share2 } from 'lucide-react';
 
 interface SmartQRCompactFixedProps {
-  type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
+  type: SmartQRContent['type'];
   data: any;
   size?: number;
   hideActions?: boolean;
@@ -69,7 +69,7 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kfar.market';
       const qrUrl = `${baseUrl}/qr/${type}/${smartContent.metadata.security.signature.substring(0, 16)}`;
 
-      const dataUrl = await QRCode.toDataURL(qrUrl, qrOptions);
+      const dataUrl = await QRCode.toDataURL(qrUrl, qrOptions) as unknown as string;
       
       if (!mountedRef.current) return;
       
@@ -156,8 +156,8 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
   const typeInfo = getTypeInfo();
 
   return (
-    <div className="inline-block">
-      <div className="bg-white rounded-lg shadow-md p-4 relative">
+    <div className="inline-flex flex-col items-center">
+      <div className="bg-white rounded-lg shadow-md p-4">
         {/* QR Code Container */}
         <div className="relative" style={{ width: size, height: size }}>
           {loading ? (
@@ -176,22 +176,23 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
             />
           ) : null}
         </div>
+      </div>
 
-        {/* Type Badge - Bottom Center */}
-        <div 
-          className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium text-white shadow-md"
-          style={{ backgroundColor: typeInfo.color }}
-        >
-          <span className="mr-1">{typeInfo.icon}</span>
-          {typeInfo.label}
-        </div>
+      <div
+        className="mt-3 mx-auto flex w-fit items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-white shadow-md"
+        style={{ backgroundColor: typeInfo.color }}
+      >
+        {typeInfo.icon}
+        <span>{typeInfo.label}</span>
       </div>
 
       {/* Action Buttons - Below QR Container */}
       {!hideActions && !loading && !error && (
-        <div className="flex justify-center gap-2 mt-6">
+        <div className="flex justify-center gap-2 mt-4">
           <button
+            type="button"
             onClick={downloadQR}
+            aria-label={`Download ${typeInfo.label}`}
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
             title="Download"
           >
@@ -199,7 +200,9 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
           </button>
           
           <button
+            type="button"
             onClick={copyQRLink}
+            aria-label={`Copy ${typeInfo.label} link`}
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors relative"
             title="Copy Link"
           >
@@ -211,9 +214,11 @@ export const SmartQRCompactFixed: React.FC<SmartQRCompactFixedProps> = ({
             )}
           </button>
           
-          {typeof window !== 'undefined' && navigator.share && (
+          {typeof window !== 'undefined' && typeof navigator.share === 'function' && (
             <button
+              type="button"
               onClick={shareQR}
+              aria-label={`Share ${typeInfo.label}`}
               className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
               title="Share"
             >

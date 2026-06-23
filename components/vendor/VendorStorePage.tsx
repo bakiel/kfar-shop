@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Filter, Star, Clock, MapPin, Phone, Mail, Facebook, Instagram, ShoppingCart, Info, Truck, CreditCard, Award } from 'lucide-react';
-import { Product } from '@/lib/data/products';
+import type { Product } from '@/lib/types/products';
 import { useCart } from '@/lib/context/CartContext';
 import ProductImage from '@/components/ui/ProductImage';
 import { SmartQRCompactFixed } from '@/components/qr/SmartQRCompactFixed';
@@ -176,7 +176,17 @@ export default function VendorStorePage({ vendorId, vendorData, products, theme 
   const categories = ['all', ...new Set(products.map(p => p.category))];
 
   const handleAddToCart = (product: Product) => {
-    addToCart(product);
+    addToCart({
+      id: product.id,
+      name: product.name,
+      vendorId: product.vendorId,
+      vendorName: vendorData.businessName || vendorData.name || product.vendor,
+      price: product.price,
+      quantity: 1,
+      image: product.image,
+      originalPrice: product.originalPrice,
+      bulkPricing: product.bulkPricing || undefined,
+    });
   };
 
   const handleQuantityChange = (productId: string, quantity: number) => {

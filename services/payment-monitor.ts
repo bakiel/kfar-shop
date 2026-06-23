@@ -98,7 +98,7 @@ export class PaymentMonitor {
       }
 
       // Check for expired orders (older than 2 hours)
-      const expiredOrders = pendingOrders.filter(order => {
+      const expiredOrders = pendingOrders.filter((order: any) => {
         const orderAge = Date.now() - order.createdAt.getTime();
         return orderAge > 2 * 60 * 60 * 1000; // 2 hours
       });

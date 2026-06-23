@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -44,8 +44,20 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientDashboardError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error || '');
+  return message.includes('Database unavailable')
+    || message.includes('HTTP 503')
+    || message.includes('NetworkError')
+    || message.includes('Failed to fetch');
+}
 
 export default function AdminDashboard() {
   const { language, t, isRTL } = useLanguage();
@@ -54,26 +66,55 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<DashboardData | null>(null);
 
-  useEffect(() => {
+  const fetchDashboard = useCallback(async (showPageLoading = true) => {
     if (!accessToken) return;
-    const headers: Record<string, string> = {};
-    headers['Authorization'] = `Bearer ${accessToken}`;
 
-    fetch('/api/admin/dashboard', { headers })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Dashboard fetch error:', err);
-        setError(err.message);
-        setLoading(false);
-      });
+    if (showPageLoading) setLoading(true);
+    setError(null);
+
+    try {
+      let payload: DashboardData | null = null;
+      let lastError: unknown = null;
+
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const response = await fetch('/api/admin/dashboard', {
+            headers: { Authorization: `Bearer ${accessToken}` },
+            cache: 'no-store',
+          });
+          const json = await response.json();
+          if (!response.ok) {
+            throw new Error(json.error || `HTTP ${response.status}`);
+          }
+          payload = json;
+          break;
+        } catch (err) {
+          lastError = err;
+          if (attempt < 2 && isTransientDashboardError(err)) {
+            await sleep(1200 * (attempt + 1));
+            continue;
+          }
+          throw err;
+        }
+      }
+
+      if (!payload) {
+        throw lastError instanceof Error ? lastError : new Error('Failed to load dashboard');
+      }
+
+      setData(payload);
+    } catch (err) {
+      console.error('Dashboard fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard');
+      if (showPageLoading) setData(null);
+    } finally {
+      setLoading(false);
+    }
   }, [accessToken]);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
 
   if (loading) {
     return <LoadingState type="page" />;
@@ -88,7 +129,7 @@ export default function AdminDashboard() {
         </h2>
         <p className="text-sm text-gray-500 mb-4">{error}</p>
         <button
-          onClick={() => { setLoading(true); setError(null); location.reload(); }}
+          onClick={() => fetchDashboard()}
           className="px-4 py-2 text-sm font-medium text-white bg-[#2D5A27] rounded-lg hover:bg-[#234A1F] transition-colors cursor-pointer"
         >
           {isRTL ? 'נסה שוב' : 'Retry'}
@@ -258,7 +299,7 @@ export default function AdminDashboard() {
               <motion.div
                 whileHover={{ y: -4, boxShadow: '0 20px 40px -12px rgba(0,0,0,0.08)' }}
                 whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ duration: 0.2, ease: 'easeOut' as const }}
                 className="bg-white rounded-xl border border-gray-100 p-5 cursor-pointer group"
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 ${action.color} transition-transform group-hover:scale-110`}>

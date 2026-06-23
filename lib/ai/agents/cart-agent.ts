@@ -3,18 +3,18 @@
  * Handles cart operations with context integration
  */
 
-import { getProductById } from '@/lib/data/wordpress-style-data-layer';
+import { getProductById } from '@/lib/services/live-product-feed';
 import type { CartSummary, CartItemSummary } from '../events/shopping-events';
 
 // Cart item interface (matches CartContext)
 export interface CartItem {
   id: string;
   name: string;
-  vendorId: string;
-  vendorName: string;
+  vendorId?: string;
+  vendorName?: string;
   price: number;
   quantity: number;
-  image: string;
+  image?: string;
   maxQuantity?: number;
   bulkPricing?: Array<{ quantity: number; price: number }>;
   originalPrice?: number;
@@ -36,8 +36,7 @@ export class CartAgent {
    * Returns the item to add (client-side will update context)
    */
   async addToCart(productId: string, quantity: number = 1, currentCart: CartItem[] = []): Promise<CartResult> {
-    // Get product details from data layer
-    const product = getProductById(productId);
+    const product = await getProductById(productId);
 
     if (!product) {
       return {
@@ -64,7 +63,7 @@ export class CartAgent {
       price: product.price,
       quantity,
       image: product.image || '/images/placeholder-product.jpg',
-      originalPrice: product.originalPrice,
+      originalPrice: product.originalPrice ?? undefined,
     };
 
     // Check if already in cart
@@ -233,11 +232,12 @@ export class CartAgent {
    */
   getVendorBreakdown(cart: CartItem[]): Record<string, { items: CartItem[]; subtotal: number }> {
     return cart.reduce((acc, item) => {
-      if (!acc[item.vendorId]) {
-        acc[item.vendorId] = { items: [], subtotal: 0 };
+      const vendorKey = item.vendorId || item.vendorName || 'unknown';
+      if (!acc[vendorKey]) {
+        acc[vendorKey] = { items: [], subtotal: 0 };
       }
-      acc[item.vendorId].items.push(item);
-      acc[item.vendorId].subtotal += item.price * item.quantity;
+      acc[vendorKey].items.push(item);
+      acc[vendorKey].subtotal += item.price * item.quantity;
       return acc;
     }, {} as Record<string, { items: CartItem[]; subtotal: number }>);
   }

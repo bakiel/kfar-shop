@@ -31,7 +31,7 @@ interface Promotion {
 export default function AdminPromotionsPage() {
   const { accessToken } = useAuth();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending_approval' | 'approved' | 'active'>('pending_approval');
+  const [filter, setFilter] = useState<'all' | 'pending_approval' | 'approved' | 'rejected' | 'active'>('all');
   const [loading, setLoading] = useState(true);
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
 
@@ -207,7 +207,7 @@ export default function AdminPromotionsPage() {
         {/* Filter Tabs */}
         <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
           <div className="flex gap-2">
-            {(['all', 'pending_approval', 'approved', 'active'] as const).map((status) => (
+            {(['all', 'pending_approval', 'approved', 'rejected', 'active'] as const).map((status) => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}

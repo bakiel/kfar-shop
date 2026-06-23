@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   ShoppingCart, Eye, RefreshCw, AlertTriangle
@@ -54,7 +55,7 @@ const container = {
 };
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 function normalizeOrder(o: Order): NormalizedOrder {
@@ -77,6 +78,7 @@ function normalizeOrder(o: Order): NormalizedOrder {
 type FilterStatus = 'all' | OrderStatus;
 
 export default function OrdersPage() {
+  const router = useRouter();
   const { language, t, isRTL } = useLanguage();
   const { accessToken } = useAuth();
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all');
@@ -126,10 +128,13 @@ export default function OrdersPage() {
     setUpdating(orderId);
     const patchHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
     if (accessToken) patchHeaders['Authorization'] = `Bearer ${accessToken}`;
-    fetch('/api/admin/orders', {
+    // Use the shared order status endpoint (same one the order detail page uses) so admin
+    // status changes from the list and detail views go through one code path that supports
+    // the full status set and sends the customer email + in-app notifications.
+    fetch(`/api/orders/${encodeURIComponent(orderId)}/status`, {
       method: 'PATCH',
       headers: patchHeaders,
-      body: JSON.stringify({ orderId, status: newStatus }),
+      body: JSON.stringify({ status: newStatus }),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -271,7 +276,7 @@ export default function OrdersPage() {
           emptyIcon="cart"
           isRTL={isRTL}
           rowActions={(row) => [
-            { label: t('View Details'), onClick: () => {} },
+            { label: t('View Details'), onClick: () => router.push(`/admin/orders/${row.id}`) },
             {
               label: isRTL ? 'סמן כבעיבוד' : 'Mark Processing',
               onClick: () => handleStatusUpdate(row.id, 'processing'),

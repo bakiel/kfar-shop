@@ -161,7 +161,7 @@ export default function SpecialFeedSection() {
   const [error, setError] = useState(false);
   const { addToCart } = useCart();
   const { t } = useLanguage();
-  const autoScrollRef = useRef<NodeJS.Timeout>();
+  const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch real data from landing API
   useEffect(() => {
@@ -190,7 +190,9 @@ export default function SpecialFeedSection() {
         setActiveIndex((prev) => (prev + 1) % feedItems.length);
       }, 5000);
     }
-    return () => clearInterval(autoScrollRef.current);
+    return () => {
+      if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+    };
   }, [isPaused, feedItems.length]);
 
   const handleQuickAdd = (item: FeedItem) => {

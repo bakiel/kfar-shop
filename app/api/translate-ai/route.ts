@@ -86,7 +86,7 @@ async function tryTranslation(
       system: systemPrompt,
       prompt: text,
       temperature: 0.3, // Low temperature for consistent translations
-      maxTokens: 500,
+      maxOutputTokens: 500,
     });
 
     return translatedText.trim();

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingCart, Tag,
-  QrCode, Megaphone, Settings
+  QrCode, Megaphone, Settings, Bell
 } from 'lucide-react';
 import { PortalLayout, ConfirmDialog } from '@/components/portal';
 import type { MenuItem } from '@/components/portal';
@@ -20,7 +20,7 @@ function isPublicRoute(pathname: string): boolean {
   if (
     segments.length === 2 &&
     segments[0] === 'vendor' &&
-    !['dashboard', 'orders', 'promotions', 'qr-codes', 'marketing', 'settings', 'products', 'admin'].includes(segments[1])
+    !['dashboard', 'orders', 'promotions', 'qr-codes', 'marketing', 'settings', 'products', 'admin', 'notifications'].includes(segments[1])
   ) {
     return true;
   }
@@ -35,6 +35,7 @@ const MENU_ITEMS: MenuItem[] = [
   { id: 'promotions', path: '/vendor/promotions', label: 'Promotions', labelHe: 'מבצעים', icon: <Tag className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'qr-codes', path: '/vendor/qr-codes', label: 'QR Codes', labelHe: 'קודי QR', icon: <QrCode className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'marketing', path: '/vendor/marketing', label: 'Marketing', labelHe: 'שיווק', icon: <Megaphone className="w-5 h-5 stroke-[1.5]" /> },
+  { id: 'notifications', path: '/vendor/notifications', label: 'Notifications', labelHe: 'התראות', icon: <Bell className="w-5 h-5 stroke-[1.5]" /> },
   { id: 'settings', path: '/vendor/settings', label: 'Settings', labelHe: 'הגדרות', icon: <Settings className="w-5 h-5 stroke-[1.5]" /> },
 ];
 

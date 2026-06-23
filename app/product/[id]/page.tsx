@@ -16,8 +16,6 @@ import {
 import Layout from '@/components/layout/Layout';
 import { useCart } from '@/lib/context/CartContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { completeProductCatalog } from '@/lib/data/complete-catalog';
-import { getProductImage, getProductImages, getVendorLogo } from '@/lib/utils/image-manager';
 import { SmartQRCompactFixed } from '@/components/qr/SmartQRCompactFixed';
 import ProductReviews from '@/components/product/ProductReviews';
 import MobileFilterSheet from '@/components/mobile/MobileFilterSheet';
@@ -41,12 +39,6 @@ import {
   imageFade
 } from '@/lib/animations/motion-variants';
 
-// Helper function to get products by vendor
-function getProductsByVendor(vendorId: string) {
-  const vendorData = completeProductCatalog[vendorId];
-  return vendorData ? vendorData.products : [];
-}
-
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -63,6 +55,8 @@ export default function ProductDetailPage() {
 
   // State
   const [product, setProduct] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showMobileCart, setShowMobileCart] = useState(false);
@@ -120,109 +114,83 @@ export default function ProductDetailPage() {
   const fetchProduct = async () => {
     setLoading(true);
       
-      // First, try to fetch from our API
       try {
         const response = await fetch(`/api/products/${productId}`);
         if (response.ok) {
           const data = await response.json();
-            
-            // Find vendor info from catalog if needed
-            let vendorInfo = null;
-            for (const [vendorId, vendorData] of Object.entries(completeProductCatalog)) {
-              if (vendorData.vendorName === data.vendor_name) {
-                vendorInfo = vendorData;
-                break;
-              }
-            }
-            
-            // Transform API data to match our product structure
-            const transformedProduct = {
-              ...data,
-              id: data.id,
-              image: data.image || data.primary_image || '/images/placeholder.jpg',
-              images: data.images || [data.image || '/images/placeholder.jpg'],
-              name: data.name,
-              description: data.description,
-              rating: data.rating || 4.5,
-              reviewCount: data.reviewCount || 0,
-              vendor: data.vendorName || data.vendor_name,
-              vendorId: data.vendorId || data.vendor_id,
-              vendorLogo: vendorInfo?.logo || '/images/placeholder.jpg',
-              longDescription: data.longDescription || data.description,
-              specifications: data.extendedData?.specifications ? [
-                { label: 'Weight', value: data.extendedData.specifications.weight },
-                { label: 'Servings', value: data.extendedData.specifications.servings },
-                { label: 'Shelf Life', value: data.extendedData.specifications.shelf_life },
-                { label: 'Ingredients', value: data.extendedData.specifications.ingredients?.join(', ') }
-              ].filter(spec => spec.value) : [],
-              culturalSignificance: data.culturalSignificance || null,
-              shippingInfo: data.extendedData?.shipping_info || {
-                localPickup: true,
-                delivery: true,
-                international: false
-              },
-              inStock: data.inStock !== false,
-              vegan: data.isVegan || data.vegan,
-              kosher: data.isKosher || data.kosher,
-              organic: data.organic || false,
-              kashrut: (data.isKosher || data.kosher) ? 'Kosher Certified' : null,
-              glutenFree: data.glutenFree || false,
-              price: data.price,
-              originalPrice: data.originalPrice,
-              category: data.category,
-              unit: data.unit || 'piece',
-              minimumOrder: data.minimumOrder || 1
-            };
-            
-            setProduct(transformedProduct);
-            setLoading(false);
-            setTimeout(() => setPageLoaded(true), 100);
-            return;
-          }
-      } catch (error) {
-        console.error('Error fetching from API:', error);
-      }
-      
-      // If not found in API or not numeric, check the catalog
-      let foundProduct = null;
-      let foundVendorInfo = null;
-      
-      for (const [vendorId, vendorData] of Object.entries(completeProductCatalog)) {
-        const found = vendorData.products.find(p => p.id === productId);
-        if (found) {
-          foundVendorInfo = vendorData;
-          const productImage = getProductImage(vendorId, productId);
-          const productImages = getProductImages(vendorId, productId);
-          
-          foundProduct = {
-            ...found,
-            image: productImage,
-            images: productImages,
-            rating: found.rating || 4.5,
-            reviewCount: found.reviewCount || 127,
-            vendor: vendorData.vendorName,
-            vendorId: vendorId,
-            vendorLogo: getVendorLogo(vendorId),
-            longDescription: found.longDescription || found.description,
-            specifications: found.specifications || [],
-            culturalSignificance: found.culturalSignificance || null,
-            shippingInfo: found.shippingInfo || {
+          const transformedProduct = {
+            ...data,
+            id: data.id,
+            image: data.image || '/images/placeholder.jpg',
+            images: data.images?.length ? data.images : [data.image || '/images/placeholder.jpg'],
+            name: data.name,
+            description: data.description,
+            rating: data.rating || 4.5,
+            reviewCount: data.reviewCount || 0,
+            vendor: data.vendorName || data.vendor_name,
+            vendorId: data.vendorId || data.vendor_id,
+            vendorLogo: data.vendorLogo || '/images/placeholder.jpg',
+            longDescription: data.longDescription || data.description,
+            specifications: data.specifications || [],
+            culturalSignificance: data.culturalSignificance || null,
+            shippingInfo: data.extendedData?.shipping_info || {
               localPickup: true,
               delivery: true,
               international: false
-            }
+            },
+            inStock: data.inStock !== false,
+            vegan: data.isVegan || data.vegan,
+            kosher: data.isKosher || data.kosher || Boolean(data.kashrut),
+            organic: data.organic || false,
+            kashrut: data.kashrut || ((data.isKosher || data.kosher) ? 'Kosher Certified' : null),
+            glutenFree: data.glutenFree || false,
+            price: data.price,
+            originalPrice: data.originalPrice,
+            category: data.category,
+            unit: data.unit || 'piece',
+            minimumOrder: data.minimumOrder || 1
           };
-          break;
+
+          setProduct(transformedProduct);
+
+          const [vendorProductsResponse, recentProductsResponse] = await Promise.all([
+            transformedProduct.vendorId
+              ? fetch(`/api/products-db?vendor=${encodeURIComponent(transformedProduct.vendorId)}&limit=8`, { cache: 'no-store' })
+              : Promise.resolve(null),
+            fetch('/api/products-db?limit=8', { cache: 'no-store' }),
+          ]);
+
+          if (vendorProductsResponse?.ok) {
+            const vendorProductsData = await vendorProductsResponse.json();
+            setRelatedProducts((vendorProductsData.products || [])
+              .filter((p: any) => p.id !== transformedProduct.id)
+              .slice(0, 4)
+              .map((p: any) => ({
+                ...p,
+                vendorName: transformedProduct.vendor
+              })));
+          }
+
+          if (recentProductsResponse.ok) {
+            const recentProductsData = await recentProductsResponse.json();
+            setRecentlyViewed((recentProductsData.products || [])
+              .filter((p: any) => p.id !== transformedProduct.id)
+              .slice(0, 6));
+          }
+
+          setLoading(false);
+          setTimeout(() => setPageLoaded(true), 100);
+          return;
         }
+      } catch (error) {
+        console.error('Error fetching from API:', error);
       }
-      
-      setProduct(foundProduct);
+
+      setProduct(null);
       setLoading(false);
       setTimeout(() => setPageLoaded(true), 100);
 
-      if (!foundProduct) {
-        router.push('/marketplace');
-      }
+      router.push('/marketplace');
     };
 
     useEffect(() => {
@@ -256,39 +224,6 @@ export default function ProductDetailPage() {
     EUR: '€',
     GBP: '£'
   };
-
-  // Get related products
-  const relatedProducts = product ? (
-    product.vendorId && typeof product.vendorId === 'string' 
-      ? getProductsByVendor(product.vendorId)
-          .filter(p => p.id !== product.id)
-          .map(p => {
-            const productImage = getProductImage(product.vendorId, p.id);
-            return {
-              ...p,
-              image: productImage,
-              rating: p.rating || 4.5,
-              reviewCount: p.reviewCount || Math.floor(Math.random() * 200) + 50,
-              vendorName: product.vendor
-            };
-          })
-          .slice(0, 3)
-      : []
-  ) : [];
-
-  // Recently viewed products (mock data)
-  const allProducts: any[] = [];
-  Object.entries(completeProductCatalog).forEach(([vendorId, vendor]) => {
-    vendor.products.forEach(p => {
-      const productImage = getProductImage(vendorId, p.id);
-      allProducts.push({
-        ...p,
-        image: productImage,
-        vendorId: vendorId
-      });
-    });
-  });
-  const recentlyViewed = allProducts.slice(0, 6);
 
   if (loading) {
     return (
@@ -465,13 +400,15 @@ export default function ProductDetailPage() {
             className="bg-white shadow-sm sticky top-0 z-30"
           >
             <div className="flex items-center justify-between px-4 py-3">
-              <Link href="/marketplace" className="p-2">
+              <Link href="/marketplace" className="p-2" aria-label={language === 'he' ? 'חזרה לשוק' : 'Back to marketplace'}>
                 <ArrowLeft className="w-5 h-5 text-gray-600 stroke-[1.5]" />
               </Link>
               <h1 className="text-lg font-semibold truncate flex-1 mx-3" style={{ color: '#3a3a1d' }}>
                 {product.name}
               </h1>
               <motion.button
+                type="button"
+                aria-label={language === 'he' ? 'שתף מוצר' : 'Share product'}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="p-2 cursor-pointer"
@@ -506,7 +443,7 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        <div className={`${isMobile ? '' : 'container mx-auto px-4'} pb-8`}>
+        <div className={isMobile ? 'pb-56' : 'container mx-auto px-4 pb-8'}>
           <div className={`${isMobile ? '' : 'grid lg:grid-cols-3 gap-8'}`}>
             {/* Main Content */}
             <div className={`${isMobile ? '' : 'lg:col-span-2'}`}>
@@ -599,7 +536,10 @@ export default function ProductDetailPage() {
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1">
                           {product.images.map((_: string, idx: number) => (
                             <button
+                              type="button"
                               key={idx}
+                              aria-label={`Show product image ${idx + 1}`}
+                              aria-current={selectedImage === idx ? 'true' : undefined}
                               className={`w-2 h-2 rounded-full transition-all ${
                                 selectedImage === idx 
                                   ? 'bg-white w-6' 
@@ -637,7 +577,10 @@ export default function ProductDetailPage() {
                 {isMobile && (
                   <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                      <button 
+                      <button
+                        type="button"
+                        aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                        aria-pressed={isWishlisted}
                         className="text-gray-400 hover:text-red-500 transition-colors"
                         onClick={() => {
                           setIsWishlisted(!isWishlisted);
@@ -649,7 +592,9 @@ export default function ProductDetailPage() {
                       >
                         <Heart className={`w-6 h-6 stroke-[1.5] ${isWishlisted ? 'fill-red-500 text-red-500' : ''}`} />
                       </button>
-                      <button 
+                      <button
+                        type="button"
+                        aria-label={language === 'he' ? 'שתף מוצר' : 'Share product'}
                         className="text-gray-400 hover:text-blue-500 transition-colors"
                         onClick={() => {
                           if (navigator.share) {
@@ -704,7 +649,10 @@ export default function ProductDetailPage() {
                       )}
                     </div>
                   </div>
-                  <button 
+                  <button
+                    type="button"
+                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    aria-pressed={isWishlisted}
                     className={`text-gray-400 hover:text-red-500 ${isMobile ? 'text-lg' : 'text-xl'} transition-colors`}
                     onClick={() => setIsWishlisted(!isWishlisted)}
                   >
@@ -923,7 +871,9 @@ export default function ProductDetailPage() {
                         </div>
                       </div>
                       <Link href={`/store/${product.vendorId}`}>
-                        <button 
+                        <button
+                          type="button"
+                          aria-label={`Visit ${product.vendor} store`}
                           className="w-10 h-10 bg-[#478c0b] text-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
                           onClick={(e) => {
                             // Haptic feedback
@@ -1190,16 +1140,16 @@ export default function ProductDetailPage() {
                         {/* Helpful Actions */}
                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                           <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
                               <ThumbsUp className="w-4 h-4 stroke-[1.5]" />
                               <span>Helpful (12)</span>
                             </button>
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
                               <ThumbsDown className="w-4 h-4 stroke-[1.5]" />
                               <span>Not Helpful</span>
                             </button>
                           </div>
-                          <button className="text-xs text-gray-500">
+                          <button type="button" aria-label="Report review" className="text-xs text-gray-500">
                             <Flag className="w-4 h-4 stroke-[1.5]" />
                           </button>
                         </div>
@@ -1253,16 +1203,16 @@ export default function ProductDetailPage() {
                         {/* Helpful Actions */}
                         <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-3">
                           <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#478c0b]">
                               <ThumbsUp className="w-4 h-4 stroke-[1.5]" />
                               <span>Helpful (8)</span>
                             </button>
-                            <button className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
+                            <button type="button" className="flex items-center gap-1 text-xs text-gray-600 hover:text-[#c23c09]">
                               <ThumbsDown className="w-4 h-4 stroke-[1.5]" />
                               <span>Not Helpful</span>
                             </button>
                           </div>
-                          <button className="text-xs text-gray-500">
+                          <button type="button" aria-label="Report review" className="text-xs text-gray-500">
                             <Flag className="w-4 h-4 stroke-[1.5]" />
                           </button>
                         </div>
@@ -1284,7 +1234,9 @@ export default function ProductDetailPage() {
                         <div className="flex gap-2">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
+                              type="button"
                               key={star}
+                              aria-label={`Rate ${star} out of 5`}
                               className="text-2xl"
                               style={{ color: star <= 4 ? '#f6af0d' : '#e5e7eb' }}
                             >
@@ -1371,6 +1323,8 @@ export default function ProductDetailPage() {
               {!showSidebar && (
                 <div className="fixed right-4 top-24 z-40">
                   <button
+                    type="button"
+                    aria-label="Show purchase options"
                     onClick={() => setShowSidebar(true)}
                     className="group relative"
                     title="Show purchase options"
@@ -1393,6 +1347,8 @@ export default function ProductDetailPage() {
                   {/* Header */}
                   <div className="relative p-5 pb-4 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, rgba(71, 140, 11, 0.04) 0%, rgba(196, 162, 101, 0.04) 100%)' }}>
                     <button
+                      type="button"
+                      aria-label="Hide purchase panel"
                       onClick={() => setShowSidebar(false)}
                       className="absolute top-4 right-4 w-7 h-7 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex items-center justify-center group cursor-pointer"
                       title="Hide panel"
@@ -1427,7 +1383,8 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div className="mb-4">
-                    <select 
+                    <select
+                      aria-label="Select currency"
                       className="w-full px-3 py-2 border rounded-lg text-sm"
                       value={selectedCurrency}
                       onChange={(e) => setSelectedCurrency(e.target.value)}
@@ -1452,19 +1409,26 @@ export default function ProductDetailPage() {
                   <div className="mb-4">
                     <label className="block text-sm font-semibold mb-2">Quantity:</label>
                     <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden mb-3">
-                      <button 
+                      <button
+                        type="button"
+                        aria-label="Decrease quantity"
                         className="px-3 py-2 bg-gray-100 hover:bg-[#cfe7c1] transition-colors font-semibold"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       >
                         -
                       </button>
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
+                        name="quantity"
+                        aria-label="Quantity"
+                        inputMode="numeric"
                         className="w-16 px-3 py-2 text-center border-none outline-none"
                         value={quantity}
                         onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                       />
-                      <button 
+                      <button
+                        type="button"
+                        aria-label="Increase quantity"
                         className="px-3 py-2 bg-gray-100 hover:bg-[#cfe7c1] transition-colors font-semibold"
                         onClick={() => setQuantity(quantity + 1)}
                       >
@@ -1657,7 +1621,7 @@ export default function ProductDetailPage() {
                 </motion.div>
 
                 {/* QR Code Section */}
-                <div className="border-t pt-4 mt-4">
+                <div className={`border-t pt-4 mt-4 ${isMobile ? 'pb-6' : ''}`}>
                   <h4 className="font-semibold mb-3 text-center">Quick Access QR Code</h4>
                   <div className="flex justify-center">
                     <SmartQRCompactFixed
@@ -1671,7 +1635,7 @@ export default function ProductDetailPage() {
                         category: product.category,
                         description: product.description
                       }}
-                      size={180}
+                      size={isMobile ? 140 : 180}
                       hideActions={true}
                     />
                   </div>
@@ -1712,6 +1676,8 @@ export default function ProductDetailPage() {
                           From {product.vendor}
                         </span>
                         <button
+                          type="button"
+                          aria-label="Hide suggestions"
                           onClick={() => setShowSuggestions(false)}
                           className="w-7 h-7 bg-white/70 hover:bg-white rounded-full flex items-center justify-center transition-all group"
                           title="Hide suggestions"
@@ -1879,6 +1845,8 @@ export default function ProductDetailPage() {
                               ₪{recentProduct.price}
                             </span>
                             <button
+                              type="button"
+                              aria-label={`Add ${recentProduct.name} to cart`}
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -1985,7 +1953,7 @@ export default function ProductDetailPage() {
             ref={relatedRef}
             initial={shouldReduceMotion ? {} : { opacity: 0, y: 50 }}
             animate={isRelatedInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            transition={{ duration: 0.6, ease: 'easeOut' as const }}
             className={`${isMobile ? 'bg-gray-50' : 'bg-white'} ${isMobile ? 'py-6' : 'py-12'}`}
           >
             <div className={`${isMobile ? '' : 'container mx-auto'} px-4`}>
@@ -2050,6 +2018,8 @@ export default function ProductDetailPage() {
                               {/* Quick Actions Overlay */}
                               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity">
                                 <button
+                                  type="button"
+                                  aria-label={`Add ${relProduct.name} to cart`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -2117,6 +2087,8 @@ export default function ProductDetailPage() {
                                   )}
                                 </div>
                                 <button
+                                  type="button"
+                                  aria-label={`Add ${relProduct.name} to cart`}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -2282,6 +2254,8 @@ export default function ProductDetailPage() {
                   className="object-contain"
                 />
                 <motion.button
+                  type="button"
+                  aria-label="Close product image preview"
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors"
@@ -2320,6 +2294,8 @@ export default function ProductDetailPage() {
                 {/* Quantity Selector */}
                 <div className="flex items-center gap-2 ml-3">
                   <motion.button
+                    type="button"
+                    aria-label="Decrease quantity"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className="w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-[#478c0b] transition-colors cursor-pointer"
@@ -2336,6 +2312,8 @@ export default function ProductDetailPage() {
                     {quantity}
                   </motion.span>
                   <motion.button
+                    type="button"
+                    aria-label="Increase quantity"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     className="w-8 h-8 rounded-full border-2 border-gray-200 flex items-center justify-center hover:border-[#478c0b] transition-colors cursor-pointer"
@@ -2434,20 +2412,18 @@ export default function ProductDetailPage() {
           <MobileFilterSheet 
             isOpen={showMobileFilters}
             onClose={() => setShowMobileFilters(false)}
-            selectedCategories={[]}
-            setSelectedCategories={() => {}}
-            selectedVendors={[]}
-            setSelectedVendors={() => {}}
-            priceRange={[0, 100]}
-            setPriceRange={() => {}}
-            selectedSpecialFilters={[]}
-            setSelectedSpecialFilters={() => {}}
-            selectedCertifications={[]}
-            setSelectedCertifications={() => {}}
-            selectedOrigins={[]}
-            setSelectedOrigins={() => {}}
-            onApply={() => setShowMobileFilters(false)}
-            onReset={() => {}}
+            filters={{
+              priceRange: [0, 100],
+              vendors: [],
+              categories: [],
+              dietary: [],
+              ratings: null,
+              sort: 'trending',
+            }}
+            onApplyFilters={() => setShowMobileFilters(false)}
+            vendors={[]}
+            categories={[]}
+            maxPrice={100}
           />
         )}
 

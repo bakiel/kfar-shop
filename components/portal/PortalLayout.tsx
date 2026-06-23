@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Menu, X, ChevronLeft, ChevronRight, Home, LogOut, Globe
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useAuth } from '@/lib/context/AuthContext';
+import NotificationBell from '@/components/customer/NotificationBell';
 
 export interface MenuItem {
   id: string;
@@ -29,6 +32,7 @@ interface PortalLayoutProps {
 export default function PortalLayout({ role, menuItems, user, onLogout, children }: PortalLayoutProps) {
   const pathname = usePathname();
   const { language, toggleLanguage, t, isRTL } = useLanguage();
+  const { user: authUser } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -58,16 +62,34 @@ export default function PortalLayout({ role, menuItems, user, onLogout, children
   };
 
   const config = roleConfig[role];
+  const notificationRecipientId = authUser?.customerId || authUser?.id;
+  const notificationsHref = role === 'customer'
+    ? '/customer/notifications'
+    : role === 'vendor'
+      ? '/vendor/notifications'
+      : '/admin/dashboard';
 
   const SidebarContent = () => (
     <div className={cn('h-full flex flex-col', collapsed ? 'px-3 py-6' : 'p-5')} dir="ltr">
       {/* Brand */}
       <div className={cn('mb-6', collapsed ? 'text-center' : '')}>
         <div className={cn(
-          'rounded-xl bg-white/10 flex items-center',
-          collapsed ? 'w-11 h-11 justify-center mx-auto' : 'gap-3 px-3 py-2.5'
+          'flex items-center',
+          collapsed ? 'justify-center' : 'gap-3'
         )}>
-          <span className="text-white font-bold text-lg">K</span>
+          <div className={cn(
+            'rounded-lg bg-white shadow-sm flex items-center justify-center',
+            collapsed ? 'w-11 h-11 p-2 mx-auto' : 'h-12 w-28 px-2'
+          )}>
+            <Image
+              src={collapsed ? '/images/logos/kfar_icon_leaf_green.png' : '/images/logos/kfar_logo_primary_horizontal.png'}
+              alt="KFAR Marketplace"
+              width={collapsed ? 28 : 104}
+              height={collapsed ? 28 : 32}
+              className="max-h-full w-auto object-contain"
+              priority={role === 'admin'}
+            />
+          </div>
           {!collapsed && (
             <div className="min-w-0">
               <h1 className="text-sm font-bold text-white truncate">
@@ -125,6 +147,19 @@ export default function PortalLayout({ role, menuItems, user, onLogout, children
 
       {/* Bottom Actions */}
       <div className="mt-auto space-y-1 pt-4 border-t border-white/10">
+        {notificationRecipientId && (
+          <div className={cn(
+            'flex items-center gap-3 px-1 py-1.5 rounded-lg text-white/70 hover:bg-white/8 hover:text-white transition-all',
+            collapsed && 'justify-center'
+          )}>
+            <NotificationBell
+              userId={notificationRecipientId}
+              notificationsHref={notificationsHref}
+            />
+            {!collapsed && <span className="text-sm">{language === 'he' ? 'התראות' : 'Notifications'}</span>}
+          </div>
+        )}
+
         {/* Language Toggle */}
         <button
           onClick={toggleLanguage}
@@ -197,14 +232,25 @@ export default function PortalLayout({ role, menuItems, user, onLogout, children
         <button onClick={() => setMobileOpen(true)} className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
           <Menu className="w-5 h-5 text-gray-700 stroke-[1.5]" />
         </button>
-        <div className="flex items-center gap-2">
-          <div className={cn('w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center', config.gradient)}>
-            <span className="text-white font-bold text-sm">K</span>
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="h-9 w-20 rounded-lg bg-white flex items-center justify-center">
+            <Image
+              src="/images/logos/kfar_logo_primary_horizontal.png"
+              alt="KFAR Marketplace"
+              width={80}
+              height={24}
+              className="h-7 w-auto object-contain"
+            />
           </div>
-          <span className="font-semibold text-gray-900 text-sm">
+          <span className="font-semibold text-gray-900 text-sm truncate">
             {isRTL ? config.titleHe : config.title}
           </span>
         </div>
+        {notificationRecipientId && (
+          <div className="ml-auto">
+            <NotificationBell userId={notificationRecipientId} notificationsHref={notificationsHref} />
+          </div>
+        )}
       </div>
 
       {/* Mobile Drawer */}

@@ -68,6 +68,7 @@ export default function TrafficLightMenu({
               exit={{ scale: 0 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsExpanded(true)}
+              aria-label="Open KFAR menu"
               className="w-16 h-16 bg-white rounded-full shadow-2xl flex items-center justify-center relative border-2 border-[#478c0b]"
             >
               <Image

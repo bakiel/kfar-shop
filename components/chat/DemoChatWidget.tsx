@@ -295,7 +295,7 @@ export default function DemoChatWidget() {
               {isLoading && (
                 <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                    <FaRobot className="text-green-600 text-sm" />
+                    <Bot className="w-3.5 h-3.5 stroke-[1.5] text-green-600" />
                   </div>
                   <div className="bg-gray-100 rounded-lg p-3">
                     <div className="flex space-x-1">

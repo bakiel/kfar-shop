@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Html5QrcodeScanner, Html5QrcodeScanType, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { useToast } from '@/components/ui/use-toast';
 import { QrCode, Camera, AlertTriangle, X } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
 interface CustomerData {
   type: string;
@@ -25,6 +26,22 @@ interface ScanResult {
   transactionId: string;
 }
 
+function normalizeCustomerData(data: any): CustomerData {
+  const preferences = data?.preferences || {};
+  return {
+    type: data?.type || 'customer',
+    id: String(data?.id || ''),
+    name: data?.name || 'Customer',
+    tier: data?.tier || 'bronze',
+    points: Number(data?.points) || 0,
+    preferences: {
+      dietary: Array.isArray(preferences.dietary) ? preferences.dietary : [],
+      allergies: Array.isArray(preferences.allergies) ? preferences.allergies : [],
+      favoriteCategories: Array.isArray(preferences.favoriteCategories) ? preferences.favoriteCategories : [],
+    },
+  };
+}
+
 export default function CustomerQRScanner({ 
   onScanSuccess,
   vendorId 
@@ -32,6 +49,7 @@ export default function CustomerQRScanner({
   onScanSuccess?: (result: ScanResult) => void;
   vendorId: string;
 }) {
+  const { accessToken } = useAuth();
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [manualCustomerId, setManualCustomerId] = useState('');
@@ -80,7 +98,7 @@ export default function CustomerQRScanner({
   const handleScanSuccess = async (decodedText: string) => {
     try {
       // Parse QR data
-      const customerData = JSON.parse(decodedText) as CustomerData;
+      const customerData = normalizeCustomerData(JSON.parse(decodedText));
       
       // Validate it's a customer QR
       if (customerData.type !== 'customer') {
@@ -122,9 +140,10 @@ export default function CustomerQRScanner({
 
   const logCustomerScan = async (customerId: string) => {
     try {
+      if (!accessToken) return;
       await fetch('/api/customer/scan-log', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           customerId,
           vendorId,
@@ -141,10 +160,12 @@ export default function CustomerQRScanner({
 
     try {
       // Fetch customer data by ID
-      const response = await fetch(`/api/customer/${manualCustomerId}`);
+      const response = await fetch(`/api/customer/${encodeURIComponent(manualCustomerId.trim())}`, {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
       if (!response.ok) throw new Error('Customer not found');
       
-      const customerData = await response.json();
+      const customerData = normalizeCustomerData(await response.json());
       
       const result: ScanResult = {
         customer: customerData,

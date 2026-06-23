@@ -2,14 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/services/auth-service';
 import { query } from '@/lib/db/postgres-client';
 import { sendTransactional } from '@/lib/services/email/email-service';
+import { notifyCustomerAccount } from '@/lib/services/account-notification-events.server';
 
 function getUser(request: NextRequest) {
   const token = request.headers.get('authorization')?.replace('Bearer ', '');
   return token ? verifyAccessToken(token) : null;
 }
 
-const VALID_STATUSES = ['processing', 'ready', 'completed', 'cancelled'] as const;
+const VALID_STATUSES = ['pending', 'accepted', 'preparing', 'processing', 'ready', 'completed', 'cancelled'] as const;
 type OrderStatus = typeof VALID_STATUSES[number];
+
+function hasDeliverableCustomerEmail(email: string | null | undefined): email is string {
+  return Boolean(email && !email.toLowerCase().startsWith('cod+'));
+}
 
 // PATCH - Update order status
 export async function PATCH(
@@ -45,7 +50,7 @@ export async function PATCH(
 
     // Verify order belongs to this vendor
     const { rows: existingOrders } = await query(
-      'SELECT id, status, vendor_id FROM orders WHERE id = $1',
+      'SELECT id, status, vendor_id, customer_id, order_number, customer_name FROM orders WHERE id = $1',
       [orderId]
     );
 
@@ -74,19 +79,45 @@ export async function PATCH(
       order.items = JSON.parse(order.items);
     }
 
+    const statusLabels: Record<string, string> = {
+      accepted: 'Accepted',
+      preparing: 'Being Prepared',
+      processing: 'Being Prepared',
+      ready: 'Ready for Pickup',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+    };
+
     // Send order status update email to customer (fire-and-forget)
-    if (order.customer_email) {
-      const statusLabels: Record<string, string> = {
-        processing: 'Being Prepared',
-        ready: 'Ready for Pickup',
-        completed: 'Completed',
-        cancelled: 'Cancelled',
-      };
+    if (hasDeliverableCustomerEmail(order.customer_email)) {
       sendTransactional(order.customer_email, 'order_status_update', {
         customer_name: order.customer_name || 'Customer',
         order_number: order.order_number,
         status: statusLabels[status] || status,
+        status_he: statusLabels[status] || status,
+        status_message: '',
+        status_message_he: '',
+        tracking_url: `${(process.env.NEXT_PUBLIC_APP_URL || "https://kfarapp.com").replace(/\/$/, '')}/customer/orders/${order.id}`,
       }).catch(err => console.error('Failed to send vendor status email:', err));
+    }
+
+    if (existingOrders[0].status !== status && order.customer_id) {
+      notifyCustomerAccount(order.customer_id, {
+        type: 'order_update',
+        channel: 'in_app',
+        title: `Order ${order.order_number} updated`,
+        titleHe: `הזמנה ${order.order_number} עודכנה`,
+        message: `Your order is now ${statusLabels[status] || status}.`,
+        messageHe: `ההזמנה שלך כעת בסטטוס ${statusLabels[status] || status}.`,
+        data: {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          previousStatus: existingOrders[0].status,
+          status,
+          actionUrl: `/customer/orders/${order.id}`,
+          actionLabel: 'View order',
+        },
+      }).catch(err => console.error('Failed to create customer order notification:', err));
     }
 
     return NextResponse.json({

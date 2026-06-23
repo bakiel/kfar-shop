@@ -41,8 +41,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
           <div className="grid grid-cols-4 gap-2 p-3 bg-gray-50">
             {images.map((image, index) => (
               <button
+                type="button"
                 key={index}
                 onClick={() => setSelectedImage(index)}
+                aria-label={`View ${productName} image ${index + 1}`}
+                aria-current={index === selectedImage ? 'true' : undefined}
                 className={`relative h-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
                   index === selectedImage 
                     ? 'border-leaf-green shadow-md' 
@@ -76,7 +79,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
               className="object-contain max-h-[90vh] w-auto"
             />
             <button
+              type="button"
               onClick={() => setShowZoom(false)}
+              aria-label="Close image preview"
               className="absolute top-4 right-4 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
             >
               <X className="w-5 h-5 stroke-[1.5] text-gray-700" />

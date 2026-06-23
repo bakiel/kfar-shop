@@ -68,8 +68,8 @@ POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=kfar_marketplace
 POSTGRES_USER=kfar
-POSTGRES_PASSWORD=kfar_secure_2025
-DATABASE_URL=postgresql://kfar:kfar_secure_2025@localhost:5432/kfar_marketplace
+POSTGRES_PASSWORD=<password>
+DATABASE_URL=postgresql://kfar:<password>@localhost:5432/kfar_marketplace
 
 # AI (Required for Shopping Assistant)
 GEMINI_API_KEY=your_gemini_key_here
@@ -91,8 +91,8 @@ npm run build
 ssh root@72.61.201.237 "cd /opt/kfar && git pull && npm run build && pm2 restart kfar"
 
 # Check live site
-https://kfar.sproutsapp.cloud (temporary domain)
-https://kfar.village-of-peace.com (when client renews domain)
+https://kfarapp.com (FINAL / permanent domain - live)
+https://kfar.sproutsapp.cloud (legacy mirror, still resolves)
 ```
 
 ## Common Tasks
@@ -140,8 +140,8 @@ const { language, t } = useLanguage();
 - **Port**: 3006
 - **PM2 Process**: `kfar`
 - **Repository**: https://github.com/bakiel/kfar-shop
-- **Live URL (Temporary)**: https://kfar.sproutsapp.cloud
-- **Live URL (Permanent)**: https://kfar.village-of-peace.com (needs client to renew domain)
+- **Live URL (FINAL / permanent)**: https://kfarapp.com
+- **Live URL (legacy mirror)**: https://kfar.sproutsapp.cloud (still resolves)
 - **SSL**: Let's Encrypt auto-renewal via Certbot
 
 ## Database (PostgreSQL on VPS)
@@ -150,7 +150,7 @@ Host: localhost (from VPS) / 72.61.201.237 (external - blocked for security)
 Port: 5432
 Database: kfar_marketplace
 User: kfar
-Password: kfar_secure_2025
+Password: <password>
 ```
 
 ### Database Files

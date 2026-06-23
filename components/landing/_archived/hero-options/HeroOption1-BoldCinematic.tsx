@@ -22,7 +22,7 @@ import {
   Leaf, Shield, Truck, Clock
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getFeaturedProducts, TOTAL_PRODUCTS, VENDOR_COUNT } from '@/lib/data/wordpress-style-data-layer';
+import { getFeaturedProducts, TOTAL_PRODUCTS, VENDOR_COUNT } from '../archived-data';
 
 const heroImages = [
   '/images/hero/13.jpg',
@@ -58,7 +58,7 @@ const HeroOption1BoldCinematic = () => {
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
+            transition={{ duration: 1.5, ease: 'easeOut' as const }}
             className="absolute inset-0"
           >
             <Image

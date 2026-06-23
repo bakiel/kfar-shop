@@ -35,6 +35,7 @@ export interface Product {
   vendor?: string;
   vendorLogo?: string;
   tags?: string[];
+  features?: string[];
   isKosher?: boolean;
   ingredients?: string[];
   nutritionInfo?: {
@@ -54,6 +55,8 @@ export interface Product {
   isRaw?: boolean;
   isSeasonal?: boolean;
   seasonalMonths?: number[];
+  visionEnhanced?: boolean;
+  visionConfidence?: number;
   bulkPricing?: {
     quantity: number;
     price: number;

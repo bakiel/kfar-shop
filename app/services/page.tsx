@@ -333,7 +333,7 @@ const ServicesPage = () => {
     filteredServices = [...eventServices, ...filteredServices];
   }
 
-  // Use live events if available, fallback to static data
+  // Use live events when available; otherwise show the curated service schedule.
   const upcomingEvents = liveEvents.length > 0 ? liveEvents : getUpcomingEvents().slice(0, 3);
 
   return (
@@ -683,7 +683,11 @@ const ServicesPage = () => {
                                 <div className="flex items-center gap-3 text-sm">
                                   <Clock className="w-5 h-5 stroke-[1.5] flex-shrink-0" style={{ color: '#478c0b' }} />
                                   <span className="text-gray-600">
-                                    {service.operatingHours.sunday || 'Hours vary - contact for details'}
+                                    {Array.isArray(service.operatingHours)
+                                      ? service.operatingHours[0]
+                                        ? `${service.operatingHours[0].day}: ${service.operatingHours[0].open}${service.operatingHours[0].close ? ` - ${service.operatingHours[0].close}` : ''}`
+                                        : 'Hours vary - contact for details'
+                                      : 'Hours vary - contact for details'}
                                   </span>
                                 </div>
                               )}
@@ -821,12 +825,21 @@ const ServicesPage = () => {
             isOpen={showFilters}
             onClose={() => setShowFilters(false)}
             filters={{
+              priceRange: [0, 0],
+              vendors: [],
+              categories: [],
+              dietary: [],
+              ratings: null,
+              sort: 'trending',
               activeOnly: showOnlyActive
             }}
             onApplyFilters={(filters) => {
-              setShowOnlyActive(filters.activeOnly || false);
+              setShowOnlyActive(!!filters.activeOnly);
               setShowFilters(false);
             }}
+            vendors={[]}
+            categories={[]}
+            maxPrice={0}
           />
         )}
 

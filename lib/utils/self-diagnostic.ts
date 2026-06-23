@@ -114,7 +114,7 @@ export class SelfDiagnostic {
         status: 'critical',
         category: 'API',
         message: 'API is not responding',
-        details: { error: error.message },
+        details: { error: error instanceof Error ? error.message : String(error) },
         recommendation: 'Verify API server is running and accessible'
       };
     }
@@ -160,7 +160,7 @@ export class SelfDiagnostic {
         status: 'warning',
         category: 'AI Service',
         message: 'AI service check failed',
-        details: { error: error.message },
+        details: { error: error instanceof Error ? error.message : String(error) },
         recommendation: 'System will fall back to basic pattern matching'
       };
     }

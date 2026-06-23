@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/lib/context/LanguageContext';
-import { getTopCategories, getProductsByCategory, EnhancedProduct } from '@/lib/data/wordpress-style-data-layer';
+import { getTopCategories, getProductsByCategory, EnhancedProduct } from './archived-data';
 
 // Category card with product images and enhanced animations
 const CategoryCard = ({

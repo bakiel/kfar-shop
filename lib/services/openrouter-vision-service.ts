@@ -135,4 +135,9 @@ Format your response as JSON:
       return null;
     }
   }
+
+  async analyzeImage(imageDataUrl: string, _prompt?: string): Promise<string> {
+    const analysis = await OpenRouterVisionService.analyzeProductImage(imageDataUrl);
+    return JSON.stringify(analysis || {});
+  }
 }

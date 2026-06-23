@@ -108,7 +108,7 @@ const MenuDropdown: React.FC<MenuDropdownProps> = ({ isOpen, onClose, anchorEl }
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-[9999] overflow-hidden flex flex-col"
+            className="fixed right-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl z-[9999] overflow-hidden flex flex-col"
           >
             {/* Menu Header */}
             <div className="p-6 text-white" style={{ background: 'linear-gradient(to right, #478c0b, #f6af0d)' }}>

@@ -365,7 +365,7 @@ const InvoiceDocument = ({ data, invoiceNumber, qrCodeDataUrl, isHebrew }: any) 
                   <Text style={styles.vendorHeaderText}>📦 {vendor}</Text>
                 </View>
                 {items.map((item: any, index: number) => (
-                  <View key={index} style={[styles.tableRow, index % 2 === 0 && styles.tableRowAlt]}>
+                  <View key={index} style={[styles.tableRow, ...(index % 2 === 0 ? [styles.tableRowAlt] : [])]}>
                     <Text style={styles.itemName}>{item.name}</Text>
                     <Text style={styles.itemQty}>{item.quantity}</Text>
                     <Text style={styles.itemPrice}>₪{item.price.toFixed(2)}</Text>
@@ -376,7 +376,7 @@ const InvoiceDocument = ({ data, invoiceNumber, qrCodeDataUrl, isHebrew }: any) 
             ))
           ) : (
             data.items.map((item: any, index: number) => (
-              <View key={index} style={[styles.tableRow, index % 2 === 0 && styles.tableRowAlt]}>
+              <View key={index} style={[styles.tableRow, ...(index % 2 === 0 ? [styles.tableRowAlt] : [])]}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemQty}>{item.quantity}</Text>
                 <Text style={styles.itemPrice}>₪{item.price.toFixed(2)}</Text>

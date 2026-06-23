@@ -1,10 +1,18 @@
 // Data Integration Service - Central hub for all data threading
 // Connects products, vendors, customers, tags, QR codes, and analytics
 
-import { completeProductCatalog, EnhancedProduct, VendorCatalog } from '../data/complete-catalog';
+import type { EnhancedProduct } from './vendor-data-service';
+import { getVendorFeed } from './live-vendor-feed';
 import { tagManager, Tag } from './tag-manager';
 import { qrService, QRCodeData } from './qr-service';
 import { customerAnalytics, Customer, ProductInteraction } from './customer-analytics';
+
+interface VendorCatalog {
+  vendorId: string;
+  vendorName: string;
+  vendorTags?: string[];
+  products: EnhancedProduct[];
+}
 
 export interface IntegratedProduct extends EnhancedProduct {
   qrData?: QRCodeData;
@@ -70,11 +78,28 @@ export class DataIntegrationService {
   private async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    // Initialize all products with enhanced data
-    for (const [vendorId, vendorData] of Object.entries(completeProductCatalog)) {
+    const vendorFeed = await getVendorFeed({ includeProducts: true });
+
+    for (const vendor of vendorFeed.vendors) {
+      const vendorData: VendorCatalog = {
+        vendorId: vendor.id,
+        vendorName: vendor.name,
+        vendorTags: vendor.categories || [],
+        products: (vendor.products || []).map(product => ({
+          ...product,
+          tags: product.tags || [],
+          vendor_id: product.vendorId,
+          in_stock: product.inStock,
+          isVegan: product.vegan,
+          isKosher: Boolean(product.kashrut),
+          isOrganic: product.organic,
+          isGlutenFree: product.glutenFree,
+        })),
+      };
+
       // Tag the vendor
       const vendorTags = vendorData.vendorTags || [];
-      tagManager.tagEntity(vendorId, 'vendor', vendorTags);
+      tagManager.tagEntity(vendor.id, 'vendor', vendorTags);
 
       // Process each product
       for (const product of vendorData.products) {
@@ -95,14 +120,14 @@ export class DataIntegrationService {
       vendorId: product.vendorId,
       name: product.name,
       price: product.price,
-      tags: product.tags
+      tags: product.tags || []
     });
 
     // Tag the product
-    tagManager.tagEntity(product.id, 'product', product.tags);
+    tagManager.tagEntity(product.id, 'product', product.tags || []);
 
     // Get related tags
-    const relatedTags = product.tags
+    const relatedTags = (product.tags || [])
       .map(tagSlug => tagManager.getTagBySlug(tagSlug))
       .filter(tag => tag !== undefined) as Tag[];
 
@@ -126,7 +151,7 @@ export class DataIntegrationService {
     // Create data thread
     this.createDataThread(product.id, 'product', {
       vendor: vendorData.vendorId,
-      tags: product.tags,
+      tags: product.tags || [],
       qrCode: qrData.id
     });
 
@@ -149,7 +174,7 @@ export class DataIntegrationService {
   async getProductsByTags(tags: string[]): Promise<IntegratedProduct[]> {
     if (!this.initialized) await this.initialize();
     return Array.from(this.productCache.values()).filter(
-      product => tags.some(tag => product.tags.includes(tag))
+      product => tags.some(tag => (product.tags || []).includes(tag))
     );
   }
 
@@ -191,7 +216,7 @@ export class DataIntegrationService {
       const suggestedTags = tagManager.suggestTags('customer', {
         viewedProduct: product,
         categories: [product.category],
-        tags: product.tags
+        tags: product.tags || []
       });
 
       if (suggestedTags.length > 0) {
@@ -291,7 +316,7 @@ export class DataIntegrationService {
     for (const item of items) {
       const product = await this.getProduct(item.productId);
       if (product) {
-        product.tags.forEach(tag => purchasedTags.add(tag));
+        (product.tags || []).forEach(tag => purchasedTags.add(tag));
       }
     }
 
@@ -431,7 +456,7 @@ export class DataIntegrationService {
     let score = 0;
 
     // Tag matching
-    const matchingTags = product.tags.filter(tag => customerTags.includes(tag));
+    const matchingTags = (product.tags || []).filter(tag => customerTags.includes(tag));
     score += matchingTags.length * 10;
 
     // Price range matching

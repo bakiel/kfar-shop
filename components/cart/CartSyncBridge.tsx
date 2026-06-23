@@ -18,7 +18,7 @@ const DEBOUNCE_MS = 800;
 
 export default function CartSyncBridge() {
   const { items, loadFromServer, syncToServer } = useCart();
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const [readyToken, setReadyToken] = useState<string | null>(null);
   const loadRequestRef = useRef(0);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -30,7 +30,7 @@ export default function CartSyncBridge() {
       saveTimerRef.current = null;
     }
 
-    if (!accessToken) {
+    if (!accessToken || user?.role !== 'customer') {
       loadRequestRef.current += 1;
       setReadyToken(null);
       return;
@@ -50,11 +50,11 @@ export default function CartSyncBridge() {
         }
       }
     })();
-  }, [accessToken, loadFromServer, readyToken]);
+  }, [accessToken, loadFromServer, readyToken, user?.role]);
 
   // Debounced save on any cart mutation while logged in
   useEffect(() => {
-    if (!accessToken) return;
+    if (!accessToken || user?.role !== 'customer') return;
     // Only start persisting AFTER the initial load has completed.
     if (readyToken !== accessToken) return;
 

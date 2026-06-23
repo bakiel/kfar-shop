@@ -20,7 +20,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } }
 };
 
 interface FAQItem {
@@ -318,7 +318,7 @@ export default function FAQPage() {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                            transition={{ duration: 0.3, ease: 'easeOut' as const }}
                             className="overflow-hidden"
                           >
                             <div className="px-5 md:px-6 pb-6" style={{ paddingLeft: isRTL ? '1.5rem' : '5rem', paddingRight: isRTL ? '5rem' : '1.5rem' }}>

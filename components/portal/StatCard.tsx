@@ -30,8 +30,7 @@ export default function StatCard({ title, value, prefix = '', suffix = '', trend
 
   useEffect(() => {
     const controls = animate(0, value, {
-      duration: 1.2,
-      ease: [0.25, 0.46, 0.45, 0.94],
+      duration: 1.2, ease: 'easeOut' as const,
       onUpdate: (v) => setDisplayValue(Math.round(v)),
     });
     return () => controls.stop();
@@ -46,7 +45,7 @@ export default function StatCard({ title, value, prefix = '', suffix = '', trend
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4, boxShadow: '0 20px 40px -12px rgba(0,0,0,0.08)' }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
+      transition={{ duration: 0.2, ease: 'easeOut' as const }}
       className={cn(
         'bg-white rounded-xl border border-gray-100 p-6 cursor-pointer transition-colors',
         className

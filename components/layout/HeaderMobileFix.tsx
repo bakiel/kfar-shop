@@ -104,7 +104,7 @@ const HeaderMobileFix = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-10">
-              <Link href="/categories" className="relative group py-2">
+              <Link href="/marketplace" className="relative group py-2">
                 <span className="relative">
                   <span className="text-soil-brown font-medium transition-all duration-500 inline-block group-hover:text-leaf-green transform group-hover:-translate-y-1 group-hover:scale-105">
                     Categories
@@ -132,7 +132,7 @@ const HeaderMobileFix = () => {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-leaf-green to-sun-gold transition-all duration-500 group-hover:w-full" />
               </Link>
 
-              <Link href="/directory" className="relative group ml-2">
+              <Link href="/marketplace" className="relative group ml-2">
                 <button className="px-4 py-2 rounded-lg text-white font-medium text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-1.5" style={{ backgroundColor: '#f6af0d' }}>
                   <Store className="w-4 h-4 stroke-[1.5]" />
                   <span>Marketplace</span>
@@ -217,7 +217,7 @@ const HeaderMobileFix = () => {
             {/* Main Navigation */}
             <nav className="px-4 space-y-2">
               <Link
-                href="/directory"
+                href="/marketplace"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block"
               >
@@ -229,7 +229,7 @@ const HeaderMobileFix = () => {
               </Link>
 
               <Link
-                href="/categories"
+                href="/marketplace"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-4 rounded-xl hover:bg-gray-50 transition-all flex items-center gap-3"
               >
@@ -387,11 +387,11 @@ const HeaderMobileFix = () => {
             <Home className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
           </Link>
 
-          <Link href="/directory" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item animate-pulse" style={{ backgroundColor: '#f6af0d', animationDuration: '2s' }}>
+          <Link href="/marketplace" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item animate-pulse" style={{ backgroundColor: '#f6af0d', animationDuration: '2s' }}>
             <Store className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
           </Link>
 
-          <Link href="/categories" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item" style={{ backgroundColor: '#f6af0d' }}>
+          <Link href="/marketplace" className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-white hover:shadow-lg transition-all relative group/item" style={{ backgroundColor: '#f6af0d' }}>
             <LayoutGrid className="w-4 h-4 md:w-5 md:h-5 stroke-[1.5]" />
           </Link>
 

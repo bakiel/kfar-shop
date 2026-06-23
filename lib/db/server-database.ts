@@ -33,7 +33,7 @@ export async function query<T = any>(
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
     console.log('Executed query', { text, duration, rows: res.rowCount });
-    return res;
+    return { rows: res.rows as T[], rowCount: res.rowCount ?? 0 };
   } catch (error) {
     console.error('Database query error:', error);
     throw error;

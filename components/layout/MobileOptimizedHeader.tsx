@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/lib/context/CartContext';
 import { useHeaderConfig } from '@/hooks/useHeaderConfig';
-import { completeProductCatalog } from '@/lib/data/complete-catalog';
 
 export default function MobileOptimizedHeader() {
   const router = useRouter();
@@ -45,42 +44,8 @@ export default function MobileOptimizedHeader() {
   // Generate search suggestions
   useEffect(() => {
     if (searchQuery.length > 1) {
+      const controller = new AbortController();
       const query = searchQuery.toLowerCase();
-      
-      // Product suggestions
-      const products = completeProductCatalog.flatMap(vendor => 
-        vendor.products
-          .filter(p => 
-            p.name.toLowerCase().includes(query) ||
-            p.description.toLowerCase().includes(query) ||
-            p.tags?.some(tag => tag.toLowerCase().includes(query))
-          )
-          .map(p => ({
-            type: 'product',
-            id: p.id,
-            title: p.name,
-            subtitle: `${vendor.name} • ₪${p.price}`,
-            image: p.image,
-            link: `/product/${p.id}`
-          }))
-      ).slice(0, 4);
-
-      // Vendor suggestions
-      const vendors = completeProductCatalog
-        .filter(v => 
-          v.name.toLowerCase().includes(query) ||
-          v.description.toLowerCase().includes(query)
-        )
-        .map(v => ({
-          type: 'vendor',
-          id: v.id,
-          title: v.name,
-          subtitle: `${v.products.length} products`,
-          image: v.logo,
-          link: `/store/${v.id}`,
-          icon: Store
-        }))
-        .slice(0, 2);
 
       // Category suggestions
       const categories = [
@@ -101,7 +66,49 @@ export default function MobileOptimizedHeader() {
         }))
         .slice(0, 2);
 
-      setSuggestions([...products, ...vendors, ...categoryMatches]);
+      Promise.all([
+        fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&limit=4`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        }).then(res => res.ok ? res.json() : { results: [] }),
+        fetch('/api/vendors', {
+          cache: 'no-store',
+          signal: controller.signal,
+        }).then(res => res.ok ? res.json() : { vendors: [] }),
+      ]).then(([productData, vendorData]) => {
+        const products = (productData.results || []).map((p: any) => ({
+          type: 'product',
+          id: p.id,
+          title: p.name,
+          subtitle: `${p.vendorName} • ₪${p.price}`,
+          image: p.image,
+          link: `/product/${p.id}`
+        }));
+
+        const vendors = (vendorData.vendors || [])
+          .filter((v: any) =>
+            v.name?.toLowerCase().includes(query) ||
+            v.description?.toLowerCase().includes(query)
+          )
+          .slice(0, 2)
+          .map((v: any) => ({
+            type: 'vendor',
+            id: v.id,
+            title: v.name,
+            subtitle: `${v.productCount || 0} products`,
+            image: v.logo,
+            link: `/store/${v.id}`,
+            icon: Store
+          }));
+
+        setSuggestions([...products, ...vendors, ...categoryMatches]);
+      }).catch((error) => {
+        if ((error as any)?.name !== 'AbortError') {
+          setSuggestions(categoryMatches);
+        }
+      });
+
+      return () => controller.abort();
     } else {
       setSuggestions([]);
     }

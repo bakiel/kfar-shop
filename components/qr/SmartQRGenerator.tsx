@@ -7,7 +7,7 @@ import { SmartQRContent } from '@/lib/services/ai/types';
 import { QrCode, Download, Copy, Share2, Package, Store, ShoppingCart, MapPin, Handshake, ChevronUp, ChevronDown, AlertCircle, ShieldCheck, Brain } from 'lucide-react';
 
 interface SmartQRGeneratorProps {
-  type: 'product' | 'vendor' | 'order' | 'collection' | 'p2p';
+  type: SmartQRContent['type'];
   data: any;
   size?: number;
   logo?: string;
@@ -74,7 +74,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kfar.market';
       const qrUrl = `${baseUrl}/qr/${type}/${smartContent.metadata.security.signature.substring(0, 16)}`;
 
-      const dataUrl = await QRCode.toDataURL(qrUrl, qrOptions);
+      const dataUrl = await QRCode.toDataURL(qrUrl, qrOptions) as unknown as string;
       
       // Add logo if provided
       if (logo) {
@@ -290,7 +290,7 @@ export const SmartQRGenerator: React.FC<SmartQRGeneratorProps> = ({
           Copy Link
         </button>
         
-        {navigator.share && (
+        {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
           <button
             onClick={shareQR}
             disabled={loading || !!error}

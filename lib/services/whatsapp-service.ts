@@ -1,6 +1,8 @@
 // WhatsApp Notification Service for KFAR Marketplace
 // This service handles order notifications to vendors and customers
 
+import { buildWhatsAppUrl } from '@/lib/utils/phone';
+
 interface WhatsAppMessage {
   to: string;
   message: string;
@@ -135,13 +137,11 @@ We'll notify you when your order is ready for pickup.`;
     return statusMessages[status] || `Order #${orderNumber} status: ${status}`;
   }
 
-  // Generate WhatsApp URL for click-to-chat
+  // Generate WhatsApp URL for click-to-chat.
+  // Normalizes Israeli local numbers (e.g. 0501234567) to international format so the
+  // wa.me link is valid — see lib/utils/phone.ts.
   private generateWhatsAppUrl(phone: string, message: string): string {
-    // Remove any non-digit characters and ensure proper format
-    const cleanPhone = phone.replace(/\D/g, '');
-    const encodedMessage = encodeURIComponent(message);
-    
-    return `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+    return buildWhatsAppUrl(phone, message);
   }
 
   // Send bulk notifications (for marketing)
