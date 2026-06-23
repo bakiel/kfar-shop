@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Rubik, Space_Grotesk, Fraunces } from "next/font/google";
 import "./globals.css";
 import "../styles/voice-button.css";
@@ -71,6 +71,15 @@ export const metadata: Metadata = {
     description: "Authentic vegan products & services from the Village of Peace community in Dimona, Israel",
     images: ['https://kfarapp.com/og-share.jpg'],
   },
+};
+
+// Without this, mobile browsers fall back to a ~980px desktop viewport — usable in
+// landscape but broken in portrait. viewportFit: 'cover' also activates the safe-area
+// CSS vars already defined in globals.css / styles/mobile-responsive.css.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Package, Truck, CheckCircle, Clock, XCircle,
-  MapPin, CreditCard, Phone, Mail, ShoppingBag,
+  MapPin, CreditCard, Phone, Mail, ShoppingBag, RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useLanguage } from '@/lib/context/LanguageContext';
@@ -14,11 +14,18 @@ import { useLanguage } from '@/lib/context/LanguageContext';
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
   pending:    { label: 'Pending',    icon: Clock,        color: '#B45309', bg: '#FEF3C7' },
   confirmed:  { label: 'Confirmed',  icon: CheckCircle,  color: '#1D4ED8', bg: '#DBEAFE' },
+  accepted:   { label: 'Accepted',   icon: CheckCircle,  color: '#1D4ED8', bg: '#DBEAFE' },
   processing: { label: 'Processing', icon: Package,      color: '#6D28D9', bg: '#EDE9FE' },
+  preparing:  { label: 'Preparing',  icon: Package,      color: '#6D28D9', bg: '#EDE9FE' },
+  ready:      { label: 'Ready',      icon: Package,      color: '#0369A1', bg: '#E0F2FE' },
   shipped:    { label: 'Shipped',    icon: Truck,        color: '#0369A1', bg: '#E0F2FE' },
   delivered:  { label: 'Delivered',  icon: CheckCircle,  color: '#15803D', bg: '#DCFCE7' },
+  completed:  { label: 'Completed',  icon: CheckCircle,  color: '#15803D', bg: '#DCFCE7' },
   cancelled:  { label: 'Cancelled',  icon: XCircle,      color: '#B91C1C', bg: '#FEE2E2' },
+  refunded:   { label: 'Refunded',   icon: XCircle,      color: '#B91C1C', bg: '#FEE2E2' },
 };
+
+const TERMINAL_STATUSES = ['delivered', 'completed', 'cancelled', 'refunded'];
 
 function StatusBadge({ status }: { status: string }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
@@ -40,38 +47,92 @@ export default function OrderDetailPage() {
   const { isRTL } = useLanguage();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchOrder = useCallback(async () => {
-    setLoading(true);
+  // `silent` refreshes (polling / the refresh button) update the data without flipping
+  // the full-page loading spinner. Only SILENT polls skip when a request is already
+  // running — an explicit load (initial mount, token arrival, navigation) must never be
+  // dropped, or the page can get stuck with order=null and polling never starts. A
+  // request-sequence ref makes the latest request win, so a slow unauthenticated request
+  // can't clobber a newer authenticated one.
+  const inFlight = useRef(false);
+  const reqSeq = useRef(0);
+  const [pollStopped, setPollStopped] = useState(false);
+  const fetchOrder = useCallback(async (silent = false) => {
+    if (silent && inFlight.current) return;
+    const seq = ++reqSeq.current;
+    inFlight.current = true;
+    if (silent) setRefreshing(true);
+    else setLoading(true);
     try {
       const headers: Record<string, string> = {};
       if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
-      const res = await fetch(`/api/orders/${id}`, { headers });
+      const res = await fetch(`/api/orders/${id}`, { headers, cache: 'no-store' });
+      if (seq !== reqSeq.current) return; // superseded by a newer request
+      if (res.status === 401 || res.status === 403) {
+        setPollStopped(true); // session invalid — stop polling instead of hammering
+        if (!silent) setError('Please sign in to view this order.');
+        return;
+      }
       const data = await res.json();
+      if (seq !== reqSeq.current) return;
       if (data.success && data.order) {
         setOrder(data.order);
-      } else {
+        setError('');
+      } else if (!silent) {
         setError(data.error || 'Order not found');
       }
     } catch {
-      setError('Failed to load order');
+      if (!silent) setError('Failed to load order');
     } finally {
-      setLoading(false);
+      if (seq === reqSeq.current) {
+        inFlight.current = false;
+        if (silent) setRefreshing(false);
+        else setLoading(false);
+      }
     }
   }, [id, accessToken]);
 
   useEffect(() => { fetchOrder(); }, [fetchOrder]);
 
-  const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-IL', {
-      year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+  // Light polling so a buyer sees status changes without reloading. Only runs while an
+  // order is loaded, not terminal, and the session is still valid — so failed/404/401
+  // pages don't poll forever. The interval calls the latest fetchOrder via a ref, so a
+  // token refresh (which changes fetchOrder's identity) doesn't restart/starve the timer.
+  const fetchOrderRef = useRef(fetchOrder);
+  useEffect(() => { fetchOrderRef.current = fetchOrder; }, [fetchOrder]);
+  const terminal = TERMINAL_STATUSES.includes(order?.status);
+  const hasOrder = !!order;
+  useEffect(() => {
+    if (!hasOrder || terminal || pollStopped) return;
+    const interval = setInterval(() => fetchOrderRef.current(true), 30000);
+    return () => clearInterval(interval);
+    // id intentionally omitted: App Router remounts this page on id change, so it's
+    // constant per lifetime; the effect body reads only fetchOrderRef.
+  }, [hasOrder, terminal, pollStopped]);
 
-  const items: any[] = Array.isArray(order?.items)
-    ? order.items
-    : (typeof order?.items === 'string' ? JSON.parse(order.items) : []);
+  const formatDate = (d?: string) => {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return isNaN(dt.getTime())
+      ? '—'
+      : dt.toLocaleDateString('en-IL', {
+          year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+        });
+  };
+
+  // order.items may arrive as an array or a JSON string; never let a malformed string
+  // throw during render (that would blank the whole page via the error boundary).
+  const items: any[] = (() => {
+    const raw = order?.items;
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+      try { return JSON.parse(raw); } catch { return []; }
+    }
+    return [];
+  })();
 
   return (
     <div className="min-h-screen bg-gray-50" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -115,14 +176,40 @@ export default function OrderDetailPage() {
                     Placed {formatDate(order.createdAt || order.created_at)}
                   </p>
                 </div>
-                <StatusBadge status={order.status} />
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={order.status} />
+                  <button
+                    onClick={() => fetchOrder(true)}
+                    disabled={refreshing}
+                    title="Refresh status"
+                    className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 stroke-[1.5] ${refreshing ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
               </div>
 
-              {/* Status timeline */}
+              {/* A cancelled/refunded order has no forward progress, so show a banner
+                  instead of the step timeline. */}
+              {(order.status === 'cancelled' || order.status === 'refunded') ? (
+                <div className="mt-6 flex items-center gap-2 rounded-lg bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-700">
+                  <XCircle className="w-4 h-4 stroke-[1.5] flex-shrink-0" />
+                  {order.status === 'refunded' ? 'This order was refunded.' : 'This order was cancelled.'}
+                </div>
+              ) : (
+              /* Status timeline */
               <div className="mt-6 flex items-center gap-0">
                 {['pending', 'confirmed', 'processing', 'shipped', 'delivered'].map((s, idx, arr) => {
                   const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
-                  const currentIdx = statuses.indexOf(order.status);
+                  // Map statuses that aren't literal timeline steps onto a step:
+                  // 'ready' (for pickup) ~ prepared; 'completed' ~ fully delivered.
+                  const progressStatus =
+                    order.status === 'completed' ? 'delivered'
+                    : order.status === 'ready' ? 'processing'
+                    : order.status === 'accepted' ? 'confirmed'
+                    : order.status === 'preparing' ? 'processing'
+                    : order.status;
+                  const currentIdx = statuses.indexOf(progressStatus);
                   const done = idx <= currentIdx;
                   const cfg = STATUS_CONFIG[s];
                   const Icon = cfg.icon;
@@ -150,6 +237,7 @@ export default function OrderDetailPage() {
                   );
                 })}
               </div>
+              )}
             </div>
 
             {/* Items */}
@@ -233,7 +321,7 @@ export default function OrderDetailPage() {
                 <div className="flex items-center gap-3">
                   <CreditCard className="w-4 h-4 stroke-[1.5] text-gray-400 flex-shrink-0" />
                   <p className="text-sm text-gray-700 capitalize">
-                    {(order.paymentMethod || order.payment_method || 'cash').replace(/_/g, ' ')}
+                    {String(order.paymentMethod || order.payment_method || 'cash').replace(/_/g, ' ')}
                   </p>
                 </div>
               </div>

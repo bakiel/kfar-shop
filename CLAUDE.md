@@ -91,8 +91,8 @@ npm run build
 ssh root@72.61.201.237 "cd /opt/kfar && git pull && npm run build && pm2 restart kfar"
 
 # Check live site
-https://kfar.sproutsapp.cloud (temporary domain)
-https://kfar.village-of-peace.com (when client renews domain)
+https://kfarapp.com (FINAL / permanent domain - live)
+https://kfar.sproutsapp.cloud (legacy mirror, still resolves)
 ```
 
 ## Common Tasks
@@ -140,8 +140,8 @@ const { language, t } = useLanguage();
 - **Port**: 3006
 - **PM2 Process**: `kfar`
 - **Repository**: https://github.com/bakiel/kfar-shop
-- **Live URL (Temporary)**: https://kfar.sproutsapp.cloud
-- **Live URL (Permanent)**: https://kfar.village-of-peace.com (needs client to renew domain)
+- **Live URL (FINAL / permanent)**: https://kfarapp.com
+- **Live URL (legacy mirror)**: https://kfar.sproutsapp.cloud (still resolves)
 - **SSL**: Let's Encrypt auto-renewal via Certbot
 
 ## Database (PostgreSQL on VPS)

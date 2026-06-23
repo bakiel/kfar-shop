@@ -12,6 +12,7 @@ import type { Column } from '@/components/portal';
 import { useLanguage } from '@/lib/context/LanguageContext';
 import { useAuth } from '@/lib/context/AuthContext';
 import { whatsAppService } from '@/lib/services/whatsapp-service';
+import { buildWhatsAppUrl } from '@/lib/utils/phone';
 
 // --- Types ---
 interface OrderItem {
@@ -409,9 +410,9 @@ export default function VendorOrders() {
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={() => {
-                                const cleanPhone = order.customerPhone.replace(/\D/g, '');
                                 const msg = `Hi ${order.customerName}, this is ${vendorName} regarding your order ${order.orderNumber}.`;
-                                window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`);
+                                const url = buildWhatsAppUrl(order.customerPhone, msg);
+                                if (url) window.open(url, '_blank', 'noopener,noreferrer');
                               }}
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:border-gray-300 transition-colors cursor-pointer"
                             >

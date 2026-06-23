@@ -128,10 +128,13 @@ export default function OrdersPage() {
     setUpdating(orderId);
     const patchHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
     if (accessToken) patchHeaders['Authorization'] = `Bearer ${accessToken}`;
-    fetch('/api/admin/orders', {
+    // Use the shared order status endpoint (same one the order detail page uses) so admin
+    // status changes from the list and detail views go through one code path that supports
+    // the full status set and sends the customer email + in-app notifications.
+    fetch(`/api/orders/${encodeURIComponent(orderId)}/status`, {
       method: 'PATCH',
       headers: patchHeaders,
-      body: JSON.stringify({ orderId, status: newStatus }),
+      body: JSON.stringify({ status: newStatus }),
     })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

@@ -277,3 +277,9 @@ CREATE TRIGGER update_vendors_updated_at BEFORE UPDATE ON vendors
 
 CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON products
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- NOTE: email_templates and email_log (with UUID ids) are defined and seeded in
+-- scripts/migration-001-production.sql, which is the production baseline. They are
+-- intentionally NOT redefined here to avoid a conflicting (TEXT-id) definition.
+-- scripts/migration-007-email-templates.sql only adds the order-tracking link to the
+-- existing customer templates.
